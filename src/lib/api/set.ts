@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useAxiosWithAuth } from "./_core";
-import type { MetricsTokenResponse } from "./get";
+import type { FirmwareSources, MetricsTokenResponse } from "./get";
 
 interface APIResponse<T> {
   response: {
@@ -251,6 +251,66 @@ export function useRotateMetricsTokenMutation() {
         }
       );
       return response.data.response[0].result;
+    },
+  });
+}
+
+/** Replaces the configured firmware sources. */
+export function useSetFirmwareSourcesMutation() {
+  const api = useAxiosWithAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["setFirmwareSources"],
+    mutationFn: async (sources: FirmwareSources) => {
+      const response = await api.get<APIResponse<FirmwareSources>>("/bmc", {
+        params: {
+          opt: "set",
+          type: "firmware_sources",
+          sources: JSON.stringify(sources),
+        },
+      });
+      return response.data.response[0].result;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["firmwareSources"] });
+      // The catalogue is derived from the sources, so it is now stale.
+      await queryClient.invalidateQueries({ queryKey: ["firmwareAvailable"] });
+    },
+  });
+}
+
+/**
+ * Stages a chosen version.
+ *
+ * The daemon delegates to the same updater the command line uses, so the
+ * interface cannot install something `tpi-selfupdate` would refuse.
+ */
+export function useInstallFirmwareMutation() {
+  const api = useAxiosWithAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["installFirmware"],
+    mutationFn: async (variables: {
+      source: string;
+      version: string;
+      allowDowngrade?: boolean;
+    }) => {
+      const response = await api.get<APIResponse<unknown>>("/bmc", {
+        params: {
+          opt: "set",
+          type: "firmware_install",
+          source: variables.source,
+          version: variables.version,
+          ...(variables.allowDowngrade ? { allow_downgrade: 1 } : {}),
+        },
+      });
+      return response.data.response[0].result;
+    },
+    onSuccess: async () => {
+      // The slot panel now has something staged to report.
+      await queryClient.invalidateQueries({ queryKey: ["firmwareSlots"] });
     },
   });
 }

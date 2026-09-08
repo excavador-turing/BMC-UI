@@ -251,6 +251,54 @@ const translations = {
       "Der nächste Neustart startet {{version}}. Bis dahin läuft auf dem Board die unten aufgeführte Firmware.",
     slotStagedVersion: "Bereitgestellte Version",
     slotStagedUnnamed: "ohne Namen aufgezeichnet",
+    availableTitle: "Available firmware",
+    checkNow: "Check now",
+    checkedAt: "checked {{at}}",
+    runningIs: "running {{version}}",
+    availableError: "The available firmware could not be read from this board.",
+    sourceUnreadable: "This source returned nothing usable: {{reason}}",
+    sourceEmpty: "This source offers nothing.",
+    showOlder: "show {{count}} older or unrelated version(s)",
+    install: "Install",
+    installLocalHint: "Install a local image with the upload form below.",
+    installFailed: "The install was refused. Nothing has been staged.",
+    installStaged:
+      "Staged. Reboot when you are ready; the board checks the image before keeping it.",
+    relationCurrent: "running now",
+    relationNewer: "newer",
+    relationOlder: "older",
+    relationUnknown: "cannot be compared",
+    prerelease: "pre-release",
+    trustVerified: "checksum verified",
+    trustTls: "no checksum published \u2014 TLS only",
+    trustUnverified: "unverified",
+    confirmTitle: "Install {{version}}?",
+    confirmUpgrade:
+      "It is written to the spare slot and taken on the next reboot. Nothing changes until you reboot.",
+    confirmDowngrade:
+      "This is OLDER than what is running. Installing it goes backwards.",
+    confirmUnknown:
+      "This cannot be compared with the running version, so it may be older.",
+    confirmUnverified:
+      "This image has no publisher checksum to verify it against.",
+    sourcesTitle: "Firmware sources",
+    sourcesSave: "Save sources",
+    sourcesDescription:
+      "Where this board looks for firmware. Stored on the overlay, so the list survives an upgrade.",
+    sourcesRejected:
+      "The sources were refused. Check the location format for each kind.",
+    sourceLabel: "Name",
+    sourceKind: "Kind",
+    sourceLocation: "Location",
+    sourceEnabled: "enabled",
+    sourceAdd: "Add a source",
+    sourceRemove: "Remove this source",
+    sourceHelpGithub:
+      "owner/repo. Releases are listed from GitHub and checked against the publisher's SHA256SUMS.",
+    sourceHelpHttp:
+      "The DIRECTORY holding version folders \u2014 <prefix>/<version>/<image>.tpu \u2014 not a link to an image. Checksums are used when the publisher ships them; some publish none.",
+    sourceHelpLocal:
+      "An absolute path scanned for .tpu files. Uploads land here. The filename supplies the version.",
     updateStable: "Stabiler Kanal",
     updateEdge: "Edge-Kanal",
     updateCheck: "Update-Prüfung",

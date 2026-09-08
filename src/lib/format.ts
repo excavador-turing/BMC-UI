@@ -22,7 +22,13 @@ export const EMPTY_VALUE = "—";
  */
 export function versionLabel(value: string | undefined | null): string {
   if (value === null || value === undefined || value === "") return EMPTY_VALUE;
-  return value.startsWith("v") ? value : `v${value}`;
+  // Only version-SHAPED values get the prefix. A board built from a working
+  // tree reports VERSION=local, and the old rule rendered that as "vlocal" --
+  // the doubled-v bug this helper exists to fix, in the other direction. An
+  // unversioned build is now a state the firmware page reasons about
+  // explicitly, so the label has to stop inventing a version for it.
+  if (value.startsWith("v")) return value;
+  return /^\d/.test(value) ? `v${value}` : value;
 }
 
 /**

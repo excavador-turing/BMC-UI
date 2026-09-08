@@ -3,7 +3,9 @@ import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import ConfirmationModal from "@/components/ConfirmationModal";
+import FirmwareCandidates from "@/components/FirmwareCandidates";
 import FirmwareSlots from "@/components/FirmwareSlots";
+import FirmwareSources from "@/components/FirmwareSources";
 import TabView from "@/components/TabView";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,6 +53,8 @@ export function FirmwareUpgrade() {
   return (
     <TabView title={t("firmwareUpgrade.header")}>
       <FirmwareSlots />
+      <FirmwareCandidates />
+      <FirmwareSources />
 
       <form ref={formRef} onSubmit={handleSubmit}>
         <div className="mb-4">

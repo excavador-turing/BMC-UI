@@ -85,6 +85,64 @@ export interface MetricsTokenResponse {
   path?: string;
 }
 
+/** Where the board looks for firmware. */
+export interface FirmwareSource {
+  id: string;
+  kind: "github" | "http" | "local";
+  label: string;
+  /** owner/repo, a URL prefix, or an absolute path. */
+  location: string;
+  enabled: boolean;
+}
+
+export interface FirmwareSources {
+  sources: FirmwareSource[];
+}
+
+/**
+ * How much is known about an image's integrity. Three genuinely different
+ * things, which must not render alike: a checksum published by the release
+ * and verified on download; TLS only, because the publisher ships none;
+ * and a local file whose provenance is whatever put it there.
+ */
+export type FirmwareTrust = "verified" | "tls" | "unverified";
+
+/**
+ * How a candidate relates to what is running. `unknown` is not a failure --
+ * a board running a locally built image has no version to order against, and
+ * saying so beats inventing an order.
+ */
+export type FirmwareRelation = "current" | "newer" | "older" | "unknown";
+
+export interface FirmwareCandidate {
+  version: string;
+  relation: FirmwareRelation;
+  prerelease?: boolean;
+  trust: FirmwareTrust;
+  file?: string | null;
+  size_bytes?: number | null;
+}
+
+export interface FirmwareSourceCatalog {
+  id: string;
+  label: string;
+  kind: FirmwareSource["kind"];
+  location: string;
+  candidates: FirmwareCandidate[];
+  /**
+   * Why this source produced nothing, when it produced nothing for a reason.
+   * An empty list WITHOUT an error means the source genuinely offers nothing;
+   * an empty list WITH one means it could not be read. Never collapse the two.
+   */
+  error?: string | null;
+}
+
+export interface FirmwareCatalog {
+  checked_at: string;
+  running: string;
+  sources: FirmwareSourceCatalog[];
+}
+
 export interface FlashStatus {
   Transferring?: {
     id: number;
@@ -415,6 +473,45 @@ export function usePowerTabData() {
  * holds up the firmware page: the slot panel renders from `firmware_slots`
  * regardless of what this does.
  */
+export function useFirmwareSourcesQuery() {
+  const api = useAxiosWithAuth();
+
+  return useQuery({
+    queryKey: ["firmwareSources"],
+    queryFn: async () => {
+      const response = await api.get<APIResponse<FirmwareSources>>("/bmc", {
+        params: { opt: "get", type: "firmware_sources" },
+      });
+      return response.data.response[0].result;
+    },
+    retry: false,
+  });
+}
+
+/**
+ * What every enabled source offers.
+ *
+ * Not polled: each refresh spends GitHub's unauthenticated budget, and the
+ * daemon caches for half an hour anyway. `refresh` is what the "check now"
+ * control passes, because a page that can only report what it thought half an
+ * hour ago cannot confirm a release published since.
+ */
+export function useFirmwareAvailableQuery() {
+  const api = useAxiosWithAuth();
+
+  return useQuery({
+    queryKey: ["firmwareAvailable"],
+    queryFn: async () => {
+      const response = await api.get<APIResponse<FirmwareCatalog>>("/bmc", {
+        params: { opt: "get", type: "firmware_available" },
+      });
+      return response.data.response[0].result;
+    },
+    refetchInterval: false,
+    retry: false,
+  });
+}
+
 export function useUpdateCheckQuery() {
   const api = useAxiosWithAuth();
 
