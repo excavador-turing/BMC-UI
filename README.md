@@ -13,74 +13,52 @@
 > Branched from upstream **v3.3.7** (2025-08-15), which at the time of writing
 > is also upstream's newest release and its `main`.
 
-## Nothing here has run on the board
+## Running now: `v3.6.0`
 
-Every number below comes from a build on a workstation. No image containing
-this UI has been flashed, so nothing in this fork is verified in a browser
-against a real bmcd. Read the tables as "what was changed and how it was
-checked", not as "what the board does".
+**This is on the board.** Firmware
+[`v2.5.0`](https://github.com/excavador/tp2-bmc-firmware/releases) ships this
+UI against bmcd v2.6.0, and every page below has been opened in a browser
+against a real daemon.
 
-The display bugs behind it *were* observed on hardware — the first three on
-firmware `v2.2.0-unstable-hive.5`, the rest on `v2.2.0-unstable-hive.7` — and
-that is where they came from. None of the fixes has been. Neither have the two
-pieces here that display something no version of this interface has shown
-before: the switch panel, written against the documented shape of bmcd's
-`type=network` response, and the board temperature, written against
-`type=thermal` while that endpoint is still being implemented. Both are
-written to a described response shape and a description of what the board
-reports, not against a response this code has parsed.
+This section used to read "Nothing here has run on the board -- no image
+containing this UI has been flashed". That was true when it was written and
+stopped being true at the sixth release; it then stayed on the page through
+five more. It is worth recording rather than quietly deleting, because it is
+the failure mode a fork's README has: nothing breaks when it is wrong, so
+nothing tells you.
 
-The fan card is a third case and worth separating out, because the facts it
-rests on **were** measured on the board, on firmware
-`v2.2.0-unstable-hive.8` — the SoC reading about 52 °C, the fan sitting at
-step 4 of 6, `cooling-levels = <0 16 32 64 102 170 254>` in the device tree,
-and a manual set to maximum that returned `{"result":"ok"}`, read back as 6 of
-6, and was back at 4 of 6 eight seconds later. Those are hardware
-observations, and they are why the card was rewritten. The card that reports
-them has still never run on the board.
+What was checked in a browser, logged in, against the running board:
 
-The serial console is the fourth case, and the furthest from the board of
-any of them. **It has never been connected to a live board** -- not to a
-Turing Pi, not to any running bmcd, not to any recorded session. It has never
-received a byte of UART output and no module has ever received a keystroke
-from it. One part of it *was* exercised: the WebSocket handshake, against a
-throwaway server on `127.0.0.1` that implements the documented subprotocol
-selection, because that handshake is what a first attempt at this page died
-on. Everything from the first byte onwards is written to a description.
+| page | verified |
+| -- | -- |
+| Info | load, memory and NAND match the board's own numbers; the fan reads as a step out of six, not a percentage; the metrics-token card shows, reveals, copies and rotates |
+| Network | per-port link state, with `ge1` shown down -- the first time this fork could render a port that was not up |
+| Nodes | module vendor and serial; power-on shown as the duration the API returns, not as `now` minus a timestamp |
+| Console | a serial console per module, authenticated through the websocket subprotocol |
+| Firmware Upgrade | running and rollback slots, the staged version by name, the last promotion verdict, and the upgrade candidate per channel |
+| About | daemon, firmware, Buildroot, board identity and the Linux kernel release |
+| USB, Flash Node | render and their controls are present |
 
-The four board panels added on 2026-09-07 — the firmware slots, board health,
-node liveness and the fan duty — are a fifth case, and the weakest one. The
-four response shapes they parse were given as exact and are merged in the
-daemon, so they are not guesses at an endpoint still being written the way the
-switch and thermal panels were. But **no code in this repository has parsed a
-single one of those responses**, live or recorded. Two of the hardware facts
-they exist to show *were* observed on the board — 116 MB of RAM with a
-firmware upload that failed for want of it, five free NAND eraseblocks out of
-2040, and three of four `power_on_time` stamps left stale by a firmware bug —
-and those are why the panels were written. The panels themselves have never
-run.
+Zero console errors and zero non-2xx responses across the whole walk.
 
-The Network tab is a sixth case and a different kind of one: it reads
-nothing new. It is the Info page's second half — the addresses and the switch
-panel — moved to a tab of its own, so every response it parses is a response
-this fork was already parsing. One thing here *was* rendered, for the first
-time in this fork: the switch panel, to a string, by `react-dom/server` under
-node with its query hook stubbed, on unprobed ports, an empty port list, a
-healthy board, a port with errors, an unknown port kind, and in each of the
-six locales. Its output is byte-identical before and after the move. That is
-the strongest check anything in this fork has had, and it is still not a
-browser and still not a board.
-
-That the doubled `v` needed fixing twice is the argument for reading this
-section literally. The first pass fixed it where it had been noticed, four
-rows on one page, and left the header printing `daemon vv2.2.0-unstable-hive.7`
-on every page for another two firmware builds. "Checked by a clean build" is
-a real check and it is not the same as having looked.
 
 ## What is changed
 
+> **The "how it was checked" column below is a historical record, not the
+> current state.** Most rows end in some form of "never run against a board"
+> or "not yet seen in a browser", which was true when each row was written
+> and has been false since the sixth release. Every panel described here has
+> since been opened in a browser against a real bmcd -- see
+> [Running now](#running-now-v360) for what was actually verified. The
+> columns are left as written because the reasoning in them is still the
+> reasoning, and rewriting the evidence after the fact would destroy the one
+> useful property of a record like this: that it says what was known at the
+> time.
+
 | change | why | how it was checked |
 |---|---|---|
+| **A metrics token, and a card to manage it** | `/metrics` used to share an authenticator with `/api/bmc`, and that authenticator checks `/etc/shadow` with no per-route authorization behind it -- so the only credential that could scrape the board could also power four modules off and flash it, and it lived in a Prometheus config. The interface had no way to hand out anything narrower | A card on Info: show, reveal, copy, rotate. **Nothing is fetched on mount** -- reading the token creates one on a board that has never had it, and opening a page should not mint a credential nobody asked for. Rotation asks first and says that every scrape using the old token will start failing. Verified on the board: the token returns 200 on `/metrics` and **401 on `/api/bmc`** |
+| **The upgrade candidate is on the Firmware Upgrade page** | The page could say an update was staged but never that one was *available*. `tpi-selfupdate --check` knew, from a command line only, and the interface's own update check pointed at a mirror that stops at v2.0.5 -- following it would have downgraded the board | Rows for the stable channel and, when it differs, edge. Its own query, so a slow check never holds up the slot panel. A channel that could not be resolved renders as **could not be checked**, never as "no update" -- which is what a board with no route to GitHub would otherwise claim |
 | **The daemon version prints one `v`** | The About page wrapped every version in an unconditional `` `v${...}` ``. Our firmware's `VERSION` already starts with one, so the board showed `vv2.2.0-unstable-hive.5`. Stripping the `v` in the firmware was the wrong end to fix it: `tpi info` prints the same string and our flash scripts verify against it | A helper prefixes `v` only when the value lacks one. It now lives in `src/lib/format.ts` and every render site goes through it — the first pass put it inside `about.lazy.tsx`, where the header could not reach it, and the header went on doubling the `v` until this one. `grep` for a literal `v` in front of a value finds nothing left. `tsc -b` and `eslint` clean; not yet seen in a browser |
 | **A missing value renders as `—`, not `vundefined`** | The board showed `Build version: vundefined` because bmcd never populated `build_version`. That is [fixed in our bmcd fork](https://github.com/excavador/bmcd), and the page already reads exactly that field. The dash is so the next missing field looks missing instead of looking like a string | Same helper. The UI side needed no field rename: `data.build_version` goes straight from the API response to the page |
 | **The board model has no trailing padding** | `board_model` is a fixed-width EEPROM field and bmcd forwards it byte for byte, so `TuringPi2` arrives with seven NULs after it and the About row read `TuringPi2␀␀␀␀␀␀␀ (v2.5.2)` with the revision pushed out of line. Not a daemon fix: those bytes have been identical for years and `tpi` parses the same JSON, so a trailing-NUL change there is a compatibility risk taken to move whitespace | Stripped for display only, NUL and U+FFFD both. The helper was exercised on the padded, replacement-character, all-padding, null and interior-space cases; not yet seen in a browser |
