@@ -79,6 +79,23 @@ const translations = {
     healthClockOffsetSeconds: "afwijking {{value}} s",
     healthClockOffsetMillis: "afwijking {{value}} ms",
     healthClockOffsetMicros: "afwijking {{value}} µs",
+    metricsTokenTitle: "Metrics-token",
+    metricsTokenDescription:
+      "Een credential dat alleen /metrics leest. Het is niet het root-wachtwoord: roteren sluit niemand buiten deze interface, en een nieuw root-wachtwoord breekt geen scrape.",
+    metricsTokenShow: "Toon het token",
+    metricsTokenUsername: "Gebruikersnaam",
+    metricsTokenValue: "Token",
+    metricsTokenCreated: "Aangemaakt",
+    metricsTokenReveal: "Token tonen",
+    metricsTokenCopy: "Token kopiëren",
+    metricsTokenRotate: "Roteren",
+    metricsTokenRotateConfirmTitle: "Metrics-token roteren?",
+    metricsTokenRotateConfirmBody:
+      "Het huidige token werkt onmiddellijk niet meer. Elke scrape die het gebruikt zal falen tot deze is bijgewerkt.",
+    metricsTokenRotated:
+      "Geroteerd. Werk elke scrape bij die het oude token gebruikte.",
+    metricsTokenError:
+      "Het token kon niet worden gelezen. Dit board heeft mogelijk geen overlay gemount.",
     healthClockMeasuredBy: "gemeten met {{tool}}",
     healthAbsent: "niet gedetecteerd",
     healthUnavailable: "Deze BMC-daemon meldt geen boardconditie.",
@@ -231,6 +248,13 @@ const translations = {
       "De volgende herstart start {{version}}. Tot dan blijft het board de hieronder vermelde firmware draaien.",
     slotStagedVersion: "Voorbereide versie",
     slotStagedUnnamed: "vastgelegd zonder naam",
+    updateStable: "Stabiel kanaal",
+    updateEdge: "Edge-kanaal",
+    updateCheck: "Updatecontrole",
+    updateAvailable: "er is een update beschikbaar",
+    updateCurrent: "dit board is up-to-date",
+    updateUnavailable:
+      "kon niet worden gecontroleerd — het board heeft mogelijk geen route naar GitHub",
     slotPromotion: "Laatste promotie",
     slotsUnavailable: "Deze BMC-daemon meldt geen firmwareslots.",
     slotsAbsent:

@@ -3,7 +3,11 @@ import { TriangleAlert } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import TableItem from "@/components/TableItem";
-import { type FirmwareSlot, useFirmwareSlotsQuery } from "@/lib/api/get";
+import {
+  type FirmwareSlot,
+  useFirmwareSlotsQuery,
+  useUpdateCheckQuery,
+} from "@/lib/api/get";
 import { versionLabel } from "@/lib/format";
 
 const human = (bytes: number) => filesize(bytes, { standard: "jedec" });
@@ -99,6 +103,7 @@ function SlotsSkeleton() {
 export default function FirmwareSlots() {
   const { t } = useTranslation();
   const { data, isPending, isError } = useFirmwareSlotsQuery();
+  const update = useUpdateCheckQuery();
 
   const promotion = data?.last_promotion ?? null;
 
@@ -193,6 +198,45 @@ export default function FirmwareSlots() {
                     </span>
                   )}
                 </div>
+              </TableItem>
+            )}
+            {/* The upgrade candidate. Its own query, so a slow or failing
+                check never holds up the slot panel above -- and a channel that
+                could not be resolved says so, rather than rendering as "no
+                update", which is a different claim. */}
+            {update.data?.stable && (
+              <TableItem term={t("firmwareUpgrade.updateStable")}>
+                <div className="flex flex-col items-end gap-0.5 lg:items-start">
+                  <span
+                    className={
+                      update.data.stable.update_available
+                        ? "font-semibold text-amber-600 dark:text-amber-500"
+                        : "font-semibold"
+                    }
+                  >
+                    {update.data.stable.target}
+                  </span>
+                  <span className="text-sm opacity-60">
+                    {update.data.stable.update_available
+                      ? t("firmwareUpgrade.updateAvailable")
+                      : t("firmwareUpgrade.updateCurrent")}
+                  </span>
+                </div>
+              </TableItem>
+            )}
+            {update.data?.edge &&
+              update.data.edge.target !== update.data.stable?.target && (
+                <TableItem term={t("firmwareUpgrade.updateEdge")}>
+                  <span className="font-semibold">
+                    {update.data.edge.target}
+                  </span>
+                </TableItem>
+              )}
+            {update.data?.error && (
+              <TableItem term={t("firmwareUpgrade.updateCheck")}>
+                <span className="text-sm opacity-60">
+                  {t("firmwareUpgrade.updateUnavailable")}
+                </span>
               </TableItem>
             )}
             {promotion && (

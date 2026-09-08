@@ -54,6 +54,37 @@ export interface StagedImage {
   file?: string | null;
 }
 
+/** One channel's answer from the board's own updater. */
+export interface UpdateChannel {
+  channel: string;
+  repo: string;
+  running: string;
+  target: string;
+  update_available: boolean;
+}
+
+/**
+ * Whether a newer firmware release exists.
+ *
+ * `error` is present when a channel could not be resolved -- usually a board
+ * with no route out -- and may be present ALONGSIDE a channel when only one
+ * of the two resolved. A missing channel is not the same as "no update".
+ */
+export interface UpdateCheckResponse {
+  checked_at: string;
+  stable: UpdateChannel | null;
+  edge: UpdateChannel | null;
+  error: string | null;
+}
+
+/** The credential that reads /metrics and can do nothing else. */
+export interface MetricsTokenResponse {
+  username: string;
+  token: string;
+  created_at: string;
+  path?: string;
+}
+
 export interface FlashStatus {
   Transferring?: {
     id: number;
@@ -376,6 +407,57 @@ export function usePowerTabData() {
       });
       return response.data.response[0].result;
     },
+  });
+}
+
+/**
+ * The upgrade candidate. Its own query, so a slow or failing check never
+ * holds up the firmware page: the slot panel renders from `firmware_slots`
+ * regardless of what this does.
+ */
+export function useUpdateCheckQuery() {
+  const api = useAxiosWithAuth();
+
+  return useQuery({
+    queryKey: ["updateCheck"],
+    queryFn: async () => {
+      const response = await api.get<APIResponse<UpdateCheckResponse>>("/bmc", {
+        params: { opt: "get", type: "update_check" },
+      });
+      return response.data.response[0].result;
+    },
+    // The daemon caches this for an hour; asking more often only spends the
+    // board's cores. Never retried: a board with no route out answers the
+    // same way in ten seconds, and it reports the reason in `error`.
+    staleTime: 1000 * 60 * 30,
+    refetchInterval: false,
+    retry: false,
+  });
+}
+
+/**
+ * The metrics token. Not fetched on mount -- reading it CREATES one on a
+ * board that has never had it, and a page load should not mint a credential
+ * nobody asked for. `enabled: false` until something calls `refetch`.
+ */
+export function useMetricsTokenQuery() {
+  const api = useAxiosWithAuth();
+
+  return useQuery({
+    queryKey: ["metricsToken"],
+    queryFn: async () => {
+      const response = await api.get<APIResponse<MetricsTokenResponse>>(
+        "/bmc",
+        {
+          params: { opt: "get", type: "metrics_token" },
+        }
+      );
+      return response.data.response[0].result;
+    },
+    enabled: false,
+    gcTime: 0,
+    staleTime: 0,
+    retry: false,
   });
 }
 

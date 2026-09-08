@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import BoardHealth from "@/components/BoardHealth";
 import FanControl from "@/components/FanControl";
+import MetricsToken from "@/components/MetricsToken";
 import RebootModal from "@/components/RebootModal";
 import InfoSkeleton from "@/components/skeletons/info";
 import TabView from "@/components/TabView";
@@ -161,6 +162,7 @@ export function Info() {
       </div>
 
       <BoardHealth />
+      <MetricsToken />
 
       <FanControl />
 
