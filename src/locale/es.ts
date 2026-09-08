@@ -228,6 +228,10 @@ const translations = {
     slotStagedTitle: "Hay una actualización preparada",
     slotStagedDescription:
       "El próximo reinicio arrancará la otra ranura. Hasta entonces la placa sigue ejecutando el firmware que aparece abajo.",
+    slotStagedDescriptionNamed:
+      "El próximo reinicio iniciará {{version}}. Hasta entonces, la placa sigue ejecutando el firmware indicado abajo.",
+    slotStagedVersion: "Versión preparada",
+    slotStagedUnnamed: "registrada sin nombre",
     slotPromotion: "Última promoción",
     slotsUnavailable: "Este demonio BMC no informa de las ranuras de firmware.",
     slotsAbsent:
@@ -281,6 +285,7 @@ const translations = {
     buildTime: "Fecha de compilación",
     buildVersion: "Versión de compilación",
     buildrootRelease: "Versión de Buildroot",
+    kernel: "Núcleo de Linux",
     apiVersion: "Versión de API",
     bmcUI: "BMC UI",
   },

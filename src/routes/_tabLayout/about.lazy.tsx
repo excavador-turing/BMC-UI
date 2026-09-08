@@ -13,7 +13,7 @@ import AboutSkeleton from "@/components/skeletons/about";
 import TableItem from "@/components/TableItem";
 import TabView from "@/components/TabView";
 import { useAboutTabData } from "@/lib/api/get";
-import { eepromLabel, versionLabel } from "@/lib/format";
+import { eepromLabel, EMPTY_VALUE, versionLabel } from "@/lib/format";
 
 import { version as packageVersion } from "../../../package.json";
 
@@ -66,6 +66,12 @@ export function About() {
         </TableItem>
         <TableItem term={t("about.buildrootRelease")}>
           {data.buildroot}
+        </TableItem>
+        {/* The one field an operator wants after a kernel bump. Older daemons
+            never sent it, so an absent value renders as absent rather than
+            as an empty row. */}
+        <TableItem term={t("about.kernel")}>
+          {data.kernel ?? EMPTY_VALUE}
         </TableItem>
         <TableItem term={t("about.apiVersion")}>
           {versionLabel(data.api)}

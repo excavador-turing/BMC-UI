@@ -224,6 +224,10 @@ const translations = {
     slotStagedTitle: "An update is staged",
     slotStagedDescription:
       "The next reboot will start the other slot. Until then the board keeps running the firmware listed below.",
+    slotStagedDescriptionNamed:
+      "The next reboot will start {{version}}. Until then the board keeps running the firmware listed below.",
+    slotStagedVersion: "Staged version",
+    slotStagedUnnamed: "recorded without a name",
     slotPromotion: "Last promotion",
     slotsUnavailable: "This BMC daemon does not report firmware slots.",
     slotsAbsent:
@@ -277,6 +281,7 @@ const translations = {
     buildTime: "Build time",
     buildVersion: "Build version",
     buildrootRelease: "Buildroot release",
+    kernel: "Linux kernel",
     apiVersion: "API version",
     bmcUI: "BMC UI",
   },

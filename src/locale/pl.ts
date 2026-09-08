@@ -227,6 +227,10 @@ const translations = {
     slotStagedTitle: "Aktualizacja jest przygotowana",
     slotStagedDescription:
       "Następny restart uruchomi drugi slot. Do tego czasu płyta pracuje na firmwarze wymienionym poniżej.",
+    slotStagedDescriptionNamed:
+      "Następny restart uruchomi {{version}}. Do tego czasu płyta działa na oprogramowaniu wymienionym poniżej.",
+    slotStagedVersion: "Przygotowana wersja",
+    slotStagedUnnamed: "zapisana bez nazwy",
     slotPromotion: "Ostatnia promocja",
     slotsUnavailable: "Ten demon BMC nie zgłasza slotów firmware.",
     slotsAbsent:
@@ -279,6 +283,7 @@ const translations = {
     buildTime: "Czas kompilacji",
     buildVersion: "Wersja kompilacji",
     buildrootRelease: "Wydanie Buildroot",
+    kernel: "Jądro Linux",
     apiVersion: "Wersja API",
     bmcUI: "BMC UI",
   },

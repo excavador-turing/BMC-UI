@@ -220,6 +220,10 @@ const translations = {
     slotStagedTitle: "已暂存一次更新",
     slotStagedDescription:
       "下次重启将启动另一个槽位。在此之前，主板仍运行下方列出的固件。",
+    slotStagedDescriptionNamed:
+      "下次重启将启动 {{version}}。在此之前，主板继续运行下方列出的固件。",
+    slotStagedVersion: "已暂存的版本",
+    slotStagedUnnamed: "记录时未附名称",
     slotPromotion: "上次提升",
     slotsUnavailable: "此 BMC 守护进程不报告固件槽位。",
     slotsAbsent:
@@ -271,6 +275,7 @@ const translations = {
     buildTime: "构建时间",
     buildVersion: "构建版本",
     buildrootRelease: "Buildroot 发行版",
+    kernel: "Linux 内核",
     apiVersion: "API 版本",
     bmcUI: "BMC UI",
   },

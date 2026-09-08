@@ -33,6 +33,25 @@ interface AboutTabResponse {
   buildtime: Date;
   buildroot: string;
   build_version: string;
+  /** Absent on any bmcd older than ours, which never reported it. */
+  kernel?: string;
+}
+
+/**
+ * What is waiting in the staging volume, as recorded by whatever put it there.
+ *
+ * Every field is optional because the note is written by something else --
+ * `tpi-selfupdate`, or the daemon's upgrade worker -- and one written by an
+ * older writer should degrade to "less is known", never to a wrong answer.
+ * `version` is absent for an image whose filename does not follow the release
+ * naming; `file` is what there is to show then.
+ */
+export interface StagedImage {
+  version?: string | null;
+  sha256?: string | null;
+  staged_at?: string | null;
+  source?: string | null;
+  file?: string | null;
 }
 
 export interface FlashStatus {
@@ -89,6 +108,7 @@ interface FirmwareSlotsWire {
   nextboot?: string | null;
   present?: boolean | null;
   last_promotion?: FirmwarePromotion | null;
+  staged?: StagedImage | null;
 }
 
 /**
@@ -107,6 +127,12 @@ export interface FirmwareSlotsResponse {
   nextboot: string | null;
   present: boolean;
   last_promotion: FirmwarePromotion | null;
+  /**
+   * Which image is staged, when whatever staged it left a note. `null` with
+   * `update_staged` true means an image is pending that was armed by
+   * something which writes no note -- not that nothing is pending.
+   */
+  staged: StagedImage | null;
 }
 
 interface InfoTabResponse {
@@ -489,6 +515,7 @@ export function useFirmwareSlotsQuery() {
         nextboot: result.nextboot ?? null,
         present: result.present ?? Boolean(result.running),
         last_promotion: result.last_promotion ?? null,
+        staged: result.staged ?? null,
       } satisfies FirmwareSlotsResponse;
     },
     // Stop polling once it has failed: an older daemon answers the same way

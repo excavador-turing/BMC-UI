@@ -134,7 +134,11 @@ export default function FirmwareSlots() {
                   {t("firmwareUpgrade.slotStagedTitle")}
                 </p>
                 <p className="mt-1">
-                  {t("firmwareUpgrade.slotStagedDescription")}
+                  {data.staged?.version
+                    ? t("firmwareUpgrade.slotStagedDescriptionNamed", {
+                        version: data.staged.version,
+                      })
+                    : t("firmwareUpgrade.slotStagedDescription")}
                 </p>
               </div>
             </div>
@@ -169,6 +173,28 @@ export default function FirmwareSlots() {
                 </span>
               )}
             </TableItem>
+            {/* Only when something was actually recorded. `update_staged`
+                true with no note means an image was armed by something that
+                writes none -- an older tpi-selfupdate, or a hand-run
+                osupdate -- and an empty row would read as "nothing is
+                staged", which is the opposite of the truth. */}
+            {data.staged && (
+              <TableItem term={t("firmwareUpgrade.slotStagedVersion")}>
+                <div className="flex flex-col items-end gap-0.5 lg:items-start">
+                  <span className="font-semibold">
+                    {data.staged.version ??
+                      data.staged.file ??
+                      t("firmwareUpgrade.slotStagedUnnamed")}
+                  </span>
+                  {data.staged.staged_at && (
+                    <span className="text-sm opacity-60">
+                      {data.staged.staged_at}
+                      {data.staged.source ? ` · ${data.staged.source}` : ""}
+                    </span>
+                  )}
+                </div>
+              </TableItem>
+            )}
             {promotion && (
               <TableItem term={t("firmwareUpgrade.slotPromotion")}>
                 <div className="flex flex-col items-end gap-0.5 lg:items-start">

@@ -230,6 +230,10 @@ const translations = {
     slotStagedTitle: "Ein Update ist vorgemerkt",
     slotStagedDescription:
       "Der nächste Neustart startet den anderen Slot. Bis dahin läuft auf dem Board weiterhin die unten aufgeführte Firmware.",
+    slotStagedDescriptionNamed:
+      "Der nächste Neustart startet {{version}}. Bis dahin läuft auf dem Board die unten aufgeführte Firmware.",
+    slotStagedVersion: "Bereitgestellte Version",
+    slotStagedUnnamed: "ohne Namen aufgezeichnet",
     slotPromotion: "Letzte Übernahme",
     slotsUnavailable: "Dieser BMC-Daemon meldet keine Firmware-Slots.",
     slotsAbsent:
@@ -285,6 +289,7 @@ const translations = {
     buildTime: "Build-Zeit",
     buildVersion: "Build-Version",
     buildrootRelease: "Buildroot-Release",
+    kernel: "Linux-Kernel",
     apiVersion: "API-Version",
     bmcUI: "BMC UI",
   },

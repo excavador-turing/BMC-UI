@@ -227,6 +227,10 @@ const translations = {
     slotStagedTitle: "Er staat een update klaar",
     slotStagedDescription:
       "De volgende herstart start het andere slot. Tot dan draait het board verder op de firmware hieronder.",
+    slotStagedDescriptionNamed:
+      "De volgende herstart start {{version}}. Tot dan blijft het board de hieronder vermelde firmware draaien.",
+    slotStagedVersion: "Voorbereide versie",
+    slotStagedUnnamed: "vastgelegd zonder naam",
     slotPromotion: "Laatste promotie",
     slotsUnavailable: "Deze BMC-daemon meldt geen firmwareslots.",
     slotsAbsent:
@@ -280,6 +284,7 @@ const translations = {
     buildTime: "Buildtijd",
     buildVersion: "Buildversie",
     buildrootRelease: "Buildroot-release",
+    kernel: "Linux-kernel",
     apiVersion: "API-versie",
     bmcUI: "BMC UI",
   },
