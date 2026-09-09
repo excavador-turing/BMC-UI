@@ -5,6 +5,20 @@ import {
 } from "@tanstack/react-query";
 
 import { useAxiosWithAuth } from "./_core";
+import type { components } from "./schema";
+
+/**
+ * The daemon's own description of what it sends, generated from the OpenAPI
+ * document that bmcd release publishes. Regenerate with `npm run api:refresh`
+ * after moving the pin in `bmcd-release.txt`; CI fails if the committed file
+ * and the pinned release disagree.
+ *
+ * Types only. The hooks below stay hand-written, because which endpoint uses
+ * a suspense query and which must not is a decision with a reason behind it --
+ * a suspense query that throws takes the whole route to its error component,
+ * which is how one failed `about` used to blank the interface.
+ */
+type Schemas = components["schemas"];
 
 interface APIResponse<T> {
   response: {
@@ -26,30 +40,7 @@ interface PowerTabResponse {
   node4: "0" | "1";
 }
 
-interface AboutTabResponse {
-  board_model: string;
-  board_revision: string;
-  /** Absent on an unprogrammed board, and on any bmcd older than ours. */
-  board_serial: string | null;
-  hostname: string;
-  api: string;
-  /** The FIRMWARE release, e.g. `v2.8.1`. Not the daemon -- see below. */
-  version: string;
-  buildtime: Date;
-  buildroot: string;
-  /**
-   * The daemon's own version, e.g. `2.12.0`.
-   *
-   * Absent on any bmcd older than the one that started reporting it. The
-   * header and the About page named `version` "daemon" for a long time, which
-   * meant the firmware release was shown under the daemon's name and the
-   * daemon's version was not shown anywhere.
-   */
-  bmcd_version?: string;
-  build_version: string;
-  /** Absent on any bmcd older than ours, which never reported it. */
-  kernel?: string;
-}
+type AboutTabResponse = Schemas["About"];
 
 /**
  * What is waiting in the staging volume, as recorded by whatever put it there.
@@ -60,22 +51,10 @@ interface AboutTabResponse {
  * `version` is absent for an image whose filename does not follow the release
  * naming; `file` is what there is to show then.
  */
-export interface StagedImage {
-  version?: string | null;
-  sha256?: string | null;
-  staged_at?: string | null;
-  source?: string | null;
-  file?: string | null;
-}
+export type StagedImage = Schemas["StagedImage"];
 
 /** One channel's answer from the board's own updater. */
-export interface UpdateChannel {
-  channel: string;
-  repo: string;
-  running: string;
-  target: string;
-  update_available: boolean;
-}
+export type UpdateChannel = Schemas["ChannelState"];
 
 /**
  * Whether a newer firmware release exists.
@@ -84,26 +63,12 @@ export interface UpdateChannel {
  * with no route out -- and may be present ALONGSIDE a channel when only one
  * of the two resolved. A missing channel is not the same as "no update".
  */
-export interface UpdateCheckResponse {
-  checked_at: string;
-  stable: UpdateChannel | null;
-  edge: UpdateChannel | null;
-  error: string | null;
-}
+export type UpdateCheckResponse = Schemas["UpdateCheck"];
 
 /** Where the board looks for firmware. */
-export interface FirmwareSource {
-  id: string;
-  kind: "github" | "http" | "local";
-  label: string;
-  /** owner/repo, a URL prefix, or an absolute path. */
-  location: string;
-  enabled: boolean;
-}
+export type FirmwareSource = Schemas["Source"];
 
-export interface FirmwareSources {
-  sources: FirmwareSource[];
-}
+export type FirmwareSources = Schemas["Sources"];
 
 /**
  * How much is known about an image's integrity. Three genuinely different
@@ -120,42 +85,11 @@ export type FirmwareTrust = "verified" | "tls" | "unverified";
  */
 export type FirmwareRelation = "current" | "newer" | "older" | "unknown";
 
-export interface FirmwareCandidate {
-  version: string;
-  relation: FirmwareRelation;
-  prerelease?: boolean;
-  trust: FirmwareTrust;
-  file?: string | null;
-  size_bytes?: number | null;
-}
+export type FirmwareCandidate = Schemas["Candidate"];
 
-export interface FirmwareSourceCatalog {
-  id: string;
-  label: string;
-  kind: FirmwareSource["kind"];
-  location: string;
-  candidates: FirmwareCandidate[];
-  /**
-   * Why this source produced nothing, when it produced nothing for a reason.
-   * An empty list WITHOUT an error means the source genuinely offers nothing;
-   * an empty list WITH one means it could not be read. Never collapse the two.
-   */
-  error?: string | null;
-}
+export type FirmwareSourceCatalog = Schemas["SourceCatalog"];
 
-export interface FirmwareCatalog {
-  /**
-   * These are the previous answers and the daemon is re-polling the sources.
-   * Absent when it is not -- the daemon omits the field rather than sending
-   * false, so an older bmcd simply never sets it.
-   */
-  refreshing?: boolean;
-  /** How old the answers are, in seconds. Absent on an older bmcd. */
-  age_seconds?: number;
-  checked_at: string;
-  running: string;
-  sources: FirmwareSourceCatalog[];
-}
+export type FirmwareCatalog = Schemas["Catalog"];
 
 export interface FlashStatus {
   Transferring?: {
@@ -180,14 +114,7 @@ export interface FlashStatus {
  * rendered -- a guessed version on the slot a rollback would land on is the
  * one number in this panel that must never be invented.
  */
-export interface FirmwareSlot {
-  /** The UBI volume name, e.g. "rootfs" or "rootfs_prev". */
-  volume: string;
-  volume_id: number;
-  /** Null when the volume could not be read, not when it is blank. */
-  version: string | null;
-  size_bytes: number;
-}
+export type FirmwareSlot = Schemas["Slot"];
 
 /**
  * The verdict the board's boot-time health gate reached the last time it
@@ -198,10 +125,7 @@ export interface FirmwareSlot {
  * would print "Invalid Date" on any engine that parses it differently, and
  * the board's own words are more use here than a reformatting of them.
  */
-export interface FirmwarePromotion {
-  timestamp: string;
-  message: string;
-}
+export type FirmwarePromotion = Schemas["Promotion"];
 
 /** What the daemon sends. Every key is allowed to be missing. */
 interface FirmwareSlotsWire {
@@ -238,10 +162,7 @@ export interface FirmwareSlotsResponse {
   staged: StagedImage | null;
 }
 
-interface InfoTabResponse {
-  ip: { device: string; ip: string; mac: string }[];
-  storage: { name: string; total_bytes: number; bytes_free: number }[];
-}
+type InfoTabResponse = Schemas["BoardInfo"];
 
 /**
  * One port of the on-board switch, as `type=network` reports it.
@@ -251,49 +172,13 @@ interface InfoTabResponse {
  * is false when the driver never came up, which is a different and much worse
  * condition than a port that probed and has no link.
  */
-export interface SwitchPort {
-  name: string;
-  kind: "node" | "uplink";
-  present: boolean;
-  link: boolean;
-  /** The kernel operstate, e.g. "up", "down", "lowerlayerdown". */
-  operstate: string;
-  /** Null whenever the port is not linked; there is no speed to report. */
-  speed_mbps: number | null;
-  duplex: string | null;
-  rx_bytes: number;
-  tx_bytes: number;
-  rx_errors: number;
-  tx_errors: number;
-}
+export type SwitchPort = Schemas["SwitchPort"];
 
 interface NetworkTabResponse {
   ports: SwitchPort[];
 }
 
-interface CoolingDevice {
-  device: string;
-  max_speed: number;
-  speed: number;
-  /**
-   * The thermal zone whose governor drives this fan, or null when none does.
-   *
-   * Null means there is no governor to pause, so the fan cannot be held at a
-   * step whatever else the daemon says -- which is a different state from a
-   * daemon that does not report this field at all.
-   */
-  zone?: string | null;
-  /**
-   * Whether that zone's governor is currently paused.
-   *
-   * Optional because bmcd before 2.21 does not send it, and the difference
-   * carries weight: `undefined` is "this daemon cannot hold the fan", and the
-   * Override switch is not offered at all. A control that cannot hold is
-   * worse than no control, because the person operating it has no way to
-   * tell which of the two they are looking at.
-   */
-  overridden?: boolean;
-}
+type CoolingDevice = Schemas["CoolingDevice"];
 
 /**
  * One thermal sensor, as `type=thermal` reports it.
@@ -309,29 +194,9 @@ interface CoolingDevice {
  * ever formatted. A board that cannot measure must not be shown as 0 degrees.
  */
 /** A trip point: a temperature, and what crossing it means. */
-export interface ThermalTrip {
-  index: number;
-  /**
-   * `active` drives a cooling device; `hot` and `critical` are the kernel's
-   * own escalations. Passed through as the kernel spells it, so an
-   * unfamiliar type is shown rather than swallowed.
-   */
-  kind: string | null;
-  temperature_c: number | null;
-}
+export type ThermalTrip = Schemas["Trip"];
 
-export interface ThermalSensor {
-  name: string;
-  /** Degrees Celsius, one decimal. Meaningless unless `present`. */
-  temperature_c: number;
-  present: boolean;
-  /**
-   * The zone's trip points. Absent on any bmcd older than the one that began
-   * reporting them, which is why the fan's step is explained only when they
-   * are there rather than guessed at from a table.
-   */
-  trips?: ThermalTrip[];
-}
+export type ThermalSensor = Schemas["ThermalSensor"];
 
 /**
  * One cooling device as the kernel's thermal layer sees it.
@@ -354,16 +219,7 @@ export interface ThermalSensor {
  * device tree does not declare one, and the step alone is what gets shown --
  * never a duty computed from a guessed table.
  */
-export interface ThermalCooling {
-  name: string;
-  cur_state: number;
-  max_state: number;
-  present: boolean;
-  /** One PWM level per step, `max_state + 1` of them. Null when unreadable. */
-  levels: number[] | null;
-  /** The level that means full duty, e.g. 254. Null when unreadable. */
-  max_level: number | null;
-}
+export type ThermalCooling = Schemas["Cooler"];
 
 /**
  * Both lists are allowed to be empty, and empty is not an error: it is the
@@ -371,10 +227,7 @@ export interface ThermalCooling {
  * sensor. It means "cannot measure", which the interface has to render as
  * unavailable rather than as a reading of zero.
  */
-export interface ThermalResponse {
-  sensors: ThermalSensor[];
-  cooling: ThermalCooling[];
-}
+export type ThermalResponse = Schemas["Thermal"];
 
 /**
  * The kernel load average, as `type=health` reports it.
@@ -383,12 +236,7 @@ export interface ThermalResponse {
  * claim about the numbers. A board that could not read it must not render as
  * an idle one.
  */
-export interface HealthLoad {
-  one_minute: number;
-  five_minutes: number;
-  fifteen_minutes: number;
-  present: boolean;
-}
+export type HealthLoad = Schemas["Load"];
 
 /**
  * The BMC's own RAM.
@@ -401,12 +249,7 @@ export interface HealthLoad {
  * number the bar draws. `free` is the smaller, less useful figure and is
  * shown beside it rather than instead of it.
  */
-export interface HealthMemory {
-  total_bytes: number;
-  free_bytes: number;
-  available_bytes: number;
-  present: boolean;
-}
+export type HealthMemory = Schemas["Memory"];
 
 /**
  * The NAND the firmware lives on, in the eraseblocks UBI counts it in.
@@ -415,21 +258,10 @@ export interface HealthMemory {
  * eraseblocks are the ones that never come back; reserved ones are the pool
  * held aside to replace them.
  */
-export interface HealthNand {
-  total_eraseblocks: number;
-  available_eraseblocks: number;
-  bad_eraseblocks: number;
-  reserved_eraseblocks: number;
-  eraseblock_size_bytes: number;
-  available_bytes: number;
-  present: boolean;
-}
+export type HealthNand = Schemas["Nand"];
 
 /** One real-time clock device the board carries. */
-export interface HealthRtc {
-  device: string;
-  name: string;
-}
+export type HealthRtc = Schemas["Rtc"];
 
 /**
  * The board's clock, and what is keeping it.
@@ -442,15 +274,7 @@ export interface HealthRtc {
  * `offset_seconds` arrives from serde in exponent form for small values; see
  * `offsetReading` in `src/lib/format.ts`.
  */
-export interface HealthClock {
-  synchronised: boolean | null;
-  source: string | null;
-  stratum: number | null;
-  offset_seconds: number | null;
-  /** How the offset was obtained, e.g. "chronyc tracking". */
-  measured_by: string | null;
-  rtc: HealthRtc[];
-}
+export type HealthClock = Schemas["Clock"];
 
 /** What the daemon sends. Every key, and every sub-key, may be missing. */
 interface HealthWire {

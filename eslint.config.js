@@ -7,7 +7,14 @@ import tseslint from "typescript-eslint";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 
 export default tseslint.config(
-  { ignores: ["dist", ".devbox", ".direnv"] },
+  // schema.d.ts is generated from the daemon's own OpenAPI document by
+  // `npm run api:refresh`, and its own header says not to edit it. Linting it
+  // would report style the generator chose and that we would have to re-fix
+  // after every regeneration; the refresh script runs prettier over it so the
+  // committed file is still stable and diffable.
+  {
+    ignores: ["dist", ".devbox", ".direnv", "src/lib/api/schema.d.ts"],
+  },
   prettierConfigRecommended,
   {
     extends: [

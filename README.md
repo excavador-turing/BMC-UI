@@ -42,6 +42,36 @@ What was checked in a browser, logged in, against the running board:
 Zero console errors and zero non-2xx responses across the whole walk.
 
 
+## The API types are generated, the hooks are not
+
+`src/lib/api/schema.d.ts` is generated from the OpenAPI document a bmcd
+release publishes. Do not edit it; regenerate it:
+
+```console
+$ npm run api:refresh
+```
+
+It reads `bmcd-release.txt` for the version, downloads that release's
+`openapi.json`, runs `openapi-typescript`, and formats the result with the
+project's own prettier. CI regenerates and fails if the committed file differs,
+which catches both a hand edit and a pin moved without regenerating.
+
+**The pin must be the release the firmware pins.** Keeping those in step is
+part of every firmware pin bump; they are two files in two repositories and
+nothing but that habit connects them.
+
+**The hooks in `get.ts` and `set.ts` stay hand-written.** Which endpoint uses a
+suspense query and which must not is a decision with a reason behind it — a
+suspense query that throws takes the whole route to its error component, which
+is how one failed `about` request used to blank the interface. A generated
+client would discard that. Only the types come from the daemon.
+
+The generator is run through `npx` at a pinned version rather than kept as a
+devDependency: `openapi-typescript` peers on `typescript@^5.x` and this project
+is on TypeScript 6. It emits a `.d.ts` and compiles nothing here, so its peer
+range is not this project's problem — and the output does compile under TS 6,
+which is what matters and is what `npm run build` checks.
+
 ## What is changed
 
 > **The "how it was checked" column below is a historical record, not the

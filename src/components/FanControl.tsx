@@ -12,7 +12,7 @@ import {
   useThermalQuery,
 } from "@/lib/api/get";
 import { useCoolingDeviceMutation } from "@/lib/api/set";
-import { fanDutyPercent } from "@/lib/format";
+import { fanDutyPercent, isReading } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 /**
@@ -122,7 +122,7 @@ function StepBar({
 function SensorReading({ sensor }: { sensor: ThermalSensor }) {
   const { t } = useTranslation();
 
-  if (!sensor.present || !Number.isFinite(sensor.temperature_c)) {
+  if (!sensor.present || !isReading(sensor.temperature_c)) {
     return (
       <span className="font-semibold text-amber-600 dark:text-amber-500">
         {t("info.thermalAbsent")}
@@ -191,7 +191,7 @@ function overrideCeiling(sensors: ThermalSensor[]): number | null {
   let hottest: number | null = null;
   for (const sensor of sensors) {
     for (const trip of sensor.trips ?? []) {
-      if (trip.kind !== "active" || trip.temperature_c === null) continue;
+      if (trip.kind !== "active" || !isReading(trip.temperature_c)) continue;
       if (hottest === null || trip.temperature_c > hottest) {
         hottest = trip.temperature_c;
       }
@@ -205,7 +205,8 @@ function governorReason(sensors: ThermalSensor[]): number | null {
   for (const sensor of sensors) {
     if (!sensor.present || !sensor.trips) continue;
     for (const trip of sensor.trips) {
-      if (trip.kind !== "active" || trip.temperature_c === null) continue;
+      if (trip.kind !== "active" || !isReading(trip.temperature_c)) continue;
+      if (!isReading(sensor.temperature_c)) continue;
       if (sensor.temperature_c < trip.temperature_c) continue;
       if (highest === null || trip.temperature_c > highest) {
         highest = trip.temperature_c;
@@ -266,7 +267,7 @@ export default function FanControl() {
     return {
       name: device.device,
       max: device.max_speed,
-      live: reported?.present ? reported.cur_state : null,
+      live: reported?.present ? (reported.cur_state ?? null) : null,
       setpoint: device.speed,
       controllable: true,
       present: reported ? reported.present : true,
@@ -290,13 +291,13 @@ export default function FanControl() {
     if (!alreadyShown) {
       rows.push({
         name: fan.name,
-        max: fan.max_state,
-        live: fan.present ? fan.cur_state : null,
+        max: fan.max_state ?? 0,
+        live: fan.present ? (fan.cur_state ?? null) : null,
         setpoint: null,
         controllable: false,
         present: fan.present,
-        levels: fan.levels,
-        maxLevel: fan.max_level,
+        levels: fan.levels ?? null,
+        maxLevel: fan.max_level ?? null,
         // Nothing to command, so nothing to hold.
         canHold: false,
         overridden: false,
@@ -307,7 +308,7 @@ export default function FanControl() {
   const sensors = thermal?.sensors ?? [];
   const ceiling = overrideCeiling(sensors);
   const measuring = sensors.some(
-    (sensor) => sensor.present && Number.isFinite(sensor.temperature_c)
+    (sensor) => sensor.present && isReading(sensor.temperature_c)
   );
 
   // "The kernel is driving this" is an inference, not a reading: a sensor the

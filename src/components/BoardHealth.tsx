@@ -12,7 +12,12 @@ import {
   type HealthNand,
   useHealthQuery,
 } from "@/lib/api/get";
-import { EMPTY_VALUE, offsetReading, type OffsetUnit } from "@/lib/format";
+import {
+  EMPTY_VALUE,
+  isReading,
+  offsetReading,
+  type OffsetUnit,
+} from "@/lib/format";
 
 const human = (bytes: number) => filesize(bytes, { standard: "jedec" });
 
@@ -45,14 +50,17 @@ function LoadReading({ load }: { load: HealthLoad }) {
   const { t } = useTranslation();
 
   const values = [load.one_minute, load.five_minutes, load.fifteen_minutes];
-  if (!load.present || values.some((value) => !Number.isFinite(value))) {
+  // `filter` rather than `some`, so the readings are narrowed to numbers for
+  // the render below instead of merely checked here.
+  const readings = values.filter(isReading);
+  if (!load.present || readings.length !== values.length) {
     return <Absent />;
   }
 
   return (
     <div className="flex flex-wrap justify-end gap-x-3 lg:justify-start">
       <span className="font-semibold">
-        {values.map((value) => value.toFixed(2)).join(" · ")}
+        {readings.map((value) => value.toFixed(2)).join(" · ")}
       </span>
       <span className="opacity-60">{t("info.healthLoadWindows")}</span>
     </div>
@@ -80,9 +88,9 @@ function MemoryReading({ memory }: { memory: HealthMemory }) {
   const available = memory.available_bytes;
   if (
     !memory.present ||
-    !Number.isFinite(total) ||
+    !isReading(total) ||
     total <= 0 ||
-    !Number.isFinite(available)
+    !isReading(available)
   ) {
     return <Absent />;
   }
@@ -99,7 +107,7 @@ function MemoryReading({ memory }: { memory: HealthMemory }) {
       />
       <div className="text-sm opacity-60">
         {t("info.healthMemoryDetail", {
-          free: Number.isFinite(memory.free_bytes)
+          free: isReading(memory.free_bytes)
             ? human(memory.free_bytes)
             : EMPTY_VALUE,
           available: human(available),
@@ -126,8 +134,8 @@ function NandReading({ nand }: { nand: HealthNand }) {
 
   if (
     !nand.present ||
-    !Number.isFinite(nand.total_eraseblocks) ||
-    !Number.isFinite(nand.available_eraseblocks)
+    !isReading(nand.total_eraseblocks) ||
+    !isReading(nand.available_eraseblocks)
   ) {
     return <Absent />;
   }
@@ -140,10 +148,10 @@ function NandReading({ nand }: { nand: HealthNand }) {
           total: nand.total_eraseblocks,
         })}
       </span>
-      {Number.isFinite(nand.available_bytes) && (
+      {isReading(nand.available_bytes) && (
         <span className="opacity-60">{human(nand.available_bytes)}</span>
       )}
-      {Number.isFinite(nand.bad_eraseblocks) && (
+      {isReading(nand.bad_eraseblocks) && (
         <span
           className={
             nand.bad_eraseblocks > 0
@@ -154,7 +162,7 @@ function NandReading({ nand }: { nand: HealthNand }) {
           {t("info.healthNandBad", { blocks: nand.bad_eraseblocks })}
         </span>
       )}
-      {Number.isFinite(nand.reserved_eraseblocks) && (
+      {isReading(nand.reserved_eraseblocks) && (
         <span className="opacity-60">
           {t("info.healthNandReserved", {
             blocks: nand.reserved_eraseblocks,
@@ -182,14 +190,15 @@ function NandReading({ nand }: { nand: HealthNand }) {
 function ClockReading({ clock }: { clock: HealthClock }) {
   const { t } = useTranslation();
 
-  const offset =
-    clock.offset_seconds === null ? null : offsetReading(clock.offset_seconds);
+  const offset = isReading(clock.offset_seconds)
+    ? offsetReading(clock.offset_seconds)
+    : null;
 
   const detail = [
     clock.source === null || clock.source === ""
       ? null
       : t("info.healthClockSource", { source: clock.source }),
-    Number.isFinite(clock.stratum)
+    isReading(clock.stratum)
       ? t("info.healthClockStratum", { stratum: clock.stratum })
       : null,
     offset === null

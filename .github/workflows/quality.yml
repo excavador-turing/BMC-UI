@@ -1,6 +1,16 @@
 name: Quality
 
-on: pull_request
+# Pull requests AND pushes to `hive`.
+#
+# It was pull_request only, inherited from upstream, and this fork pushes
+# straight to `hive` -- so lint, build and tests had not run in CI here at all.
+# `Tag and Build` looks like a safety net and is not: it is fenced to
+# `github.repository == 'turing-machines/BMC-UI'` and triggers on `main`. Only
+# `Release` ran, on tags, and by then the release is already public.
+on:
+  pull_request:
+  push:
+    branches: [hive]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
@@ -63,3 +73,39 @@ jobs:
 
       - name: Run test suite
         run: npm test
+
+  api-types:
+    name: Generated API types match the pinned release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Regenerate from the bmcd release named in bmcd-release.txt and require
+      # the result to be byte-identical to what is committed.
+      #
+      # This catches the two ways the interface and the daemon drift apart: a
+      # hand edit to a generated file, and a pin moved without regenerating.
+      # Neither would fail `tsc` -- the types would simply describe an API the
+      # board no longer serves, which is the failure this whole line of work
+      # exists to prevent.
+      - name: Regenerate and compare
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          npm run api:refresh
+          if ! git diff --exit-code -- src/lib/api/schema.d.ts; then
+            echo "::error::src/lib/api/schema.d.ts is not what bmcd $(cat bmcd-release.txt) publishes. Run 'npm run api:refresh' and commit the result."
+            exit 1
+          fi
+          echo "generated types match bmcd $(cat bmcd-release.txt)"

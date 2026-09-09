@@ -52,7 +52,10 @@ function PortStatus({ port }: { port: SwitchPort }) {
     .filter(Boolean)
     .join(" · ");
 
-  const errors = port.rx_errors + port.tx_errors;
+  // A counter the daemon did not report is not zero errors, but for the
+  // purpose of "is this cable bad" an unreported counter and a zero one lead
+  // to the same place: nothing to show.
+  const errors = (port.rx_errors ?? 0) + (port.tx_errors ?? 0);
 
   return (
     <div className="flex flex-wrap justify-end gap-x-3 lg:justify-start">
@@ -69,8 +72,8 @@ function PortStatus({ port }: { port: SwitchPort }) {
       )}
       <span className="opacity-60">
         {t("network.switchPortTraffic", {
-          rx: human(port.rx_bytes),
-          tx: human(port.tx_bytes),
+          rx: human(port.rx_bytes ?? 0),
+          tx: human(port.tx_bytes ?? 0),
         })}
       </span>
       {errors > 0 && (

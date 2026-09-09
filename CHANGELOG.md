@@ -10,6 +10,48 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.18.0] — 2026-09-09
+
+### Changed
+
+- **The API types are generated from the daemon's own document** (SQU-179).
+  Twenty-three hand-written interfaces became aliases onto
+  `src/lib/api/schema.d.ts`, produced by `openapi-typescript` from the
+  `openapi.json` that bmcd 2.28.0 publishes. `npm run api:refresh` regenerates
+  it from the release named in `bmcd-release.txt`.
+
+  Proven load-bearing rather than decorative: renaming one field in the
+  generated file fails the build in twelve places across two components.
+
+- **The hooks stay hand-written**, deliberately. Which endpoint uses a suspense
+  query and which must not is a decision with a reason — a suspense query that
+  throws takes the whole route to its error component, which is how a single
+  failed `about` used to blank the interface. Only the types changed.
+
+- **Numeric readings are now handled as absent-or-null, not merely null.** The
+  generated types are stricter than the hand-written ones were, because
+  `schemars` cannot distinguish a field always sent as `null` from one omitted
+  when empty: both are `Option<T>` in Rust. Rather than assert a guarantee the
+  document does not make, the interface treats both as "no reading" — which is
+  what it already did at runtime, through `Number.isFinite`. That is not a type
+  guard, so the compiler could not see it; `isReading` is.
+
+### Added
+
+- **CI regenerates the types and fails on any difference**, catching both a
+  hand edit to a generated file and a pin moved without regenerating. Neither
+  would fail `tsc`; the types would simply describe an API the board no longer
+  serves.
+
+### Fixed
+
+- **`quality.yml` now runs on pushes to `hive`, not only on pull requests.**
+  This fork pushes straight to the branch, so lint, build and tests had not
+  been running in CI here at all. `Tag and Build` looks like a safety net and
+  is not: it is fenced to `github.repository == 'turing-machines/BMC-UI'` and
+  triggers on `main`. Only `Release` ran, on tags, by which point the release
+  is already public.
+
 ## [3.17.0] — 2026-09-09
 
 ### Removed

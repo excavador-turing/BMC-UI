@@ -11,6 +11,23 @@
 export const EMPTY_VALUE = "—";
 
 /**
+ * `Number.isFinite`, in a form TypeScript narrows through.
+ *
+ * The daemon's generated types say a numeric field may be absent *or* null,
+ * because `schemars` cannot tell a field that is always sent as `null` from
+ * one that is omitted when empty -- both are `Option<T>` in Rust. Treating
+ * both as "no reading" is correct for either, and is what this interface
+ * already did at runtime; `Number.isFinite` just is not a type guard, so the
+ * compiler could not see it.
+ *
+ * Written as a guard rather than a cast: a cast would assert the value is
+ * there, and the whole point is that sometimes it is not.
+ */
+export function isReading(value: number | null | undefined): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+/**
  * Render a version string with exactly one leading "v".
  *
  * Our firmware's VERSION already carries one, so the unconditional `v${...}`

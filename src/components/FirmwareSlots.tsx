@@ -13,7 +13,7 @@ import {
   useUpdateCheckQuery,
 } from "@/lib/api/get";
 import { useRebootBMCMutation } from "@/lib/api/set";
-import { versionLabel } from "@/lib/format";
+import { isReading, versionLabel } from "@/lib/format";
 
 const human = (bytes: number) => filesize(bytes, { standard: "jedec" });
 import InfoNote from "@/components/InfoNote";
@@ -43,10 +43,10 @@ function SlotBody({ slot }: { slot: FirmwareSlot | null }) {
 
   const detail = [
     slot.volume,
-    Number.isFinite(slot.volume_id)
+    isReading(slot.volume_id)
       ? t("firmwareUpgrade.slotVolumeId", { id: slot.volume_id })
       : null,
-    Number.isFinite(slot.size_bytes) ? human(slot.size_bytes) : null,
+    isReading(slot.size_bytes) ? human(slot.size_bytes) : null,
   ]
     .filter(Boolean)
     .join(" · ");

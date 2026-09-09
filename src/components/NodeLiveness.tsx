@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import InfoNote from "@/components/InfoNote";
 import { useDurationLabel } from "@/hooks/use-duration";
 import { type NodeInfoResponse, useSwitchPortsQuery } from "@/lib/api/get";
+import { isReading } from "@/lib/format";
 
 /**
  * One node's line of evidence that something is actually there.
@@ -67,7 +68,7 @@ export default function NodeLiveness({
       {port?.present && port.link && (
         <span className="flex flex-wrap gap-x-2">
           <span>{t("nodes.linkUp")}</span>
-          {port.speed_mbps !== null && Number.isFinite(port.speed_mbps) && (
+          {port.speed_mbps !== null && isReading(port.speed_mbps) && (
             <span className="opacity-60">
               {t("nodes.linkSpeed", { speed: port.speed_mbps })}
             </span>
