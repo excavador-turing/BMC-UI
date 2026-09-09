@@ -28,9 +28,10 @@ import { cn } from "@/lib/utils";
  * be read. Collapsing those into "up to date" is how a board with no route to
  * GitHub quietly claims to be current.
  *
- * Older versions are hidden until asked for. This board's SD card has carried
- * a dozen images from deleted releases; offering them beside real upgrades is
- * how somebody installs one by accident.
+ * Each source shows its newest three, whatever their relation to the running
+ * version; the rest are behind "show more". This board's SD card has carried a
+ * dozen images from deleted releases, and a list that starts with the newest
+ * keeps them out of the way without pretending they are not there.
  *
  * Trust is shown per candidate, because a publisher-verified checksum and a
  * file of unknown provenance are different acts and the page is the only place
@@ -154,9 +155,21 @@ function CandidateRow({
   );
 }
 
+/** How many of a source's newest candidates are shown before "show more". */
+const VISIBLE_PER_SOURCE = 3;
+
 export default function FirmwareCandidates() {
   const { t } = useTranslation();
-  const [showOlder, setShowOlder] = useState(false);
+  // Per source, not per page: opening the long list on the mirror should not
+  // also unfold the fork's three releases.
+  const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
+  const toggle = (id: string) =>
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   const [confirming, setConfirming] = useState<{
     source: FirmwareSourceCatalog;
     candidate: FirmwareCandidate;
@@ -252,9 +265,16 @@ export default function FirmwareCandidates() {
       )}
 
       {catalog.data?.sources.map((source) => {
-        const shown = source.candidates.filter(
-          (c) => showOlder || c.relation === "newer" || c.relation === "current"
-        );
+        // The newest three, always. Filtering to "newer or current" left a
+        // card with nothing in it but a "show 3 older" link the moment a
+        // board ran something no source offered yet -- which is exactly the
+        // state right after a release is cut and before it is published. The
+        // relation badge on each row still says what it is; hiding the row
+        // said nothing.
+        const isOpen = expanded.has(source.id);
+        const shown = isOpen
+          ? source.candidates
+          : source.candidates.slice(0, VISIBLE_PER_SOURCE);
         const hidden = source.candidates.length - shown.length;
         return (
           <div key={source.id} className="rounded-md border p-4">
@@ -291,13 +311,15 @@ export default function FirmwareCandidates() {
               />
             ))}
 
-            {hidden > 0 && !showOlder && (
+            {(hidden > 0 || isOpen) && (
               <button
                 type="button"
-                className="mt-2 text-sm underline opacity-70"
-                onClick={() => setShowOlder(true)}
+                className="mt-2 text-sm underline opacity-60 hover:opacity-100"
+                onClick={() => toggle(source.id)}
               >
-                {t("firmwareUpgrade.showOlder", { count: hidden })}
+                {isOpen
+                  ? t("firmwareUpgrade.showFewer")
+                  : t("firmwareUpgrade.showMore", { count: hidden })}
               </button>
             )}
           </div>

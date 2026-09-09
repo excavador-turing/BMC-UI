@@ -243,6 +243,8 @@ const translations = {
     },
   },
   firmwareUpgrade: {
+    showMore: "{{count}} weitere anzeigen",
+    showFewer: "weniger anzeigen",
     releaseNotes: "Hinweise",
     parkButton: "Auf die SD-Karte hochladen",
     parkModalTitle: "Dieses Image auf die Karte laden?",
@@ -277,7 +279,6 @@ const translations = {
     availableError: "The available firmware could not be read from this board.",
     sourceUnreadable: "This source returned nothing usable: {{reason}}",
     sourceEmpty: "This source offers nothing.",
-    showOlder: "show {{count}} older or unrelated version(s)",
     install: "Install",
     installLocalHint: "Install a local image with the upload form below.",
     installFailed: "The install was refused. Nothing has been staged.",

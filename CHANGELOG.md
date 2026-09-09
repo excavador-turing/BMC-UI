@@ -10,6 +10,19 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.9.2] — 2026-09-09
+
+### Changed
+
+- **Each source lists its newest three versions, always; the rest sit behind
+  "show N more".** The list used to show only versions newer than or equal to
+  the running one, which left a card with nothing in it but a "show 3 older"
+  link the moment the board ran something no source offered yet — exactly the
+  state right after a release is cut and before it is published. The relation
+  badge on each row already says what it is; hiding the row said nothing.
+  Expanding is per source, so opening the mirror's long list does not unfold
+  the fork's three.
+
 ## [3.9.1] — 2026-09-09
 
 ### Fixed
@@ -140,7 +153,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Node 24, TypeScript 6, Vite 8, ESLint 10, and all twenty advisories cleared.
 - The release is a tarball with `SHA256SUMS`; upstream's auto-release is inert.
 
-[Unreleased]: https://github.com/excavador-turing/BMC-UI/compare/v3.9.1...hive
+[Unreleased]: https://github.com/excavador-turing/BMC-UI/compare/v3.9.2...hive
+[3.9.2]: https://github.com/excavador-turing/BMC-UI/releases/tag/v3.9.2
 [3.9.1]: https://github.com/excavador-turing/BMC-UI/releases/tag/v3.9.1
 [3.9.0]: https://github.com/excavador-turing/BMC-UI/releases/tag/v3.9.0
 [3.8.0]: https://github.com/excavador-turing/BMC-UI/releases/tag/v3.8.0

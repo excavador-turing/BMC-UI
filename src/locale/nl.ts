@@ -240,6 +240,8 @@ const translations = {
     },
   },
   firmwareUpgrade: {
+    showMore: "{{count}} meer tonen",
+    showFewer: "minder tonen",
     releaseNotes: "Notities",
     parkButton: "Uploaden naar de SD-kaart",
     parkModalTitle: "Dit image naar de kaart uploaden?",
@@ -274,7 +276,6 @@ const translations = {
     availableError: "The available firmware could not be read from this board.",
     sourceUnreadable: "This source returned nothing usable: {{reason}}",
     sourceEmpty: "This source offers nothing.",
-    showOlder: "show {{count}} older or unrelated version(s)",
     install: "Install",
     installLocalHint: "Install a local image with the upload form below.",
     installFailed: "The install was refused. Nothing has been staged.",

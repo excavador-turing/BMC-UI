@@ -231,6 +231,8 @@ const translations = {
     },
   },
   firmwareUpgrade: {
+    showMore: "显示另外 {{count}} 个",
+    showFewer: "收起",
     releaseNotes: "说明",
     parkButton: "上传到 SD 卡",
     parkModalTitle: "将该镜像上传到卡上？",
@@ -265,7 +267,6 @@ const translations = {
     availableError: "The available firmware could not be read from this board.",
     sourceUnreadable: "This source returned nothing usable: {{reason}}",
     sourceEmpty: "This source offers nothing.",
-    showOlder: "show {{count}} older or unrelated version(s)",
     install: "Install",
     installLocalHint: "Install a local image with the upload form below.",
     installFailed: "The install was refused. Nothing has been staged.",
