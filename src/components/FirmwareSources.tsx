@@ -70,14 +70,31 @@ export default function FirmwareSources() {
 
       {sources.map((source, index) => (
         <div key={index} className="flex flex-col gap-2 rounded-md border p-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <input
-              className="h-9 w-40 rounded-md border bg-transparent px-2 text-sm"
-              aria-label={t("firmwareUpgrade.sourceLabel")}
-              placeholder={t("firmwareUpgrade.sourceLabel")}
-              value={source.label}
-              onChange={(e) => update(index, { label: e.target.value })}
-            />
+          {/* At 390 px this row used to break: the location field's 16rem
+              minimum forced it onto its own line, and the delete button
+              orphaned below it. So stack deliberately on small screens -- one
+              field per row, with delete as a trailing icon on the label's row
+              -- and let `sm:contents` dissolve the wrapper above that width so
+              the desktop layout is exactly the single flex row it always was. */}
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+            <div className="flex items-center gap-2 sm:contents">
+              <input
+                className="h-9 min-w-0 flex-1 rounded-md border bg-transparent px-2 text-sm sm:w-40 sm:flex-none"
+                aria-label={t("firmwareUpgrade.sourceLabel")}
+                placeholder={t("firmwareUpgrade.sourceLabel")}
+                value={source.label}
+                onChange={(e) => update(index, { label: e.target.value })}
+              />
+              <Button
+                variant="bwSquare"
+                size="icon"
+                className="shrink-0 sm:order-last"
+                aria-label={t("firmwareUpgrade.sourceRemove")}
+                onClick={() => setDraft(sources.filter((_, i) => i !== index))}
+              >
+                <Trash2 className="size-4" />
+              </Button>
+            </div>
             <select
               className="h-9 rounded-md border bg-transparent px-2 text-sm"
               aria-label={t("firmwareUpgrade.sourceKind")}
@@ -93,7 +110,7 @@ export default function FirmwareSources() {
               <option value="local">local</option>
             </select>
             <input
-              className="h-9 min-w-64 flex-1 rounded-md border bg-transparent px-2 font-mono text-sm"
+              className="h-9 w-full min-w-0 rounded-md border bg-transparent px-2 font-mono text-sm sm:w-auto sm:min-w-64 sm:flex-1"
               aria-label={t("firmwareUpgrade.sourceLocation")}
               placeholder={KIND_PLACEHOLDER[source.kind]}
               value={source.location}
@@ -107,14 +124,6 @@ export default function FirmwareSources() {
               />
               {t("firmwareUpgrade.sourceEnabled")}
             </label>
-            <Button
-              variant="bwSquare"
-              size="icon"
-              aria-label={t("firmwareUpgrade.sourceRemove")}
-              onClick={() => setDraft(sources.filter((_, i) => i !== index))}
-            >
-              <Trash2 className="size-4" />
-            </Button>
           </div>
           {/* The layout this kind expects, spelled out. */}
           <p className="text-xs opacity-60">{t(KIND_HELP[source.kind])}</p>

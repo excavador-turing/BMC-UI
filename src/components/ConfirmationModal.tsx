@@ -60,7 +60,12 @@ export default function ConfirmationModal({
             <Button type="button" variant="bw" onClick={onClose}>
               {t("ui.cancel")}
             </Button>
-            <Button type="button" onClick={onConfirm}>
+            {/* Red at the point of commitment, like the reboot modal's. Every
+                caller of this modal is confirming something consequential --
+                flashing a module, resetting the network, restoring a config,
+                renaming the board -- which is why they ask at all. A lime
+                Continue is the colour this interface uses for Save. */}
+            <Button type="button" variant="destructive" onClick={onConfirm}>
               {t("ui.continue")}
             </Button>
           </DialogFooter>
@@ -88,7 +93,12 @@ export default function ConfirmationModal({
               {t("ui.cancel")}
             </Button>
           </DrawerClose>
-          <Button type="button" size="lg" onClick={onConfirm}>
+          <Button
+            type="button"
+            variant="destructive"
+            size="lg"
+            onClick={onConfirm}
+          >
             {t("ui.continue")}
           </Button>
         </DrawerFooter>

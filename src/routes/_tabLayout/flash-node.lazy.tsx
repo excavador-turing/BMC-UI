@@ -116,8 +116,14 @@ export function FlashNode() {
         </div>
 
         <div className="mb-4 flex flex-wrap items-center">
+          {/* Red, by the one colour rule this interface follows: lime means
+              safe to press, red means consequential and confirm first. Writing
+              an OS image overwrites whatever that module was booting from, and
+              it is the single most destructive thing here. It was lime, which
+              in this interface is the colour of Save. */}
           <Button
             type="button"
+            variant="destructive"
             onClick={() => setConfirmFlashModal(true)}
             disabled={nodeUpdateMutation.isPending || isFlashing}
             isLoading={

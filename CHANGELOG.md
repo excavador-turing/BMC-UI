@@ -10,6 +10,31 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.14.0] — 2026-09-09
+
+### Changed
+
+- **Install OS is red** (SQU-161's colour rule). Writing an OS image overwrites
+  whatever the module was booting from and is the most destructive action in
+  this interface. It was lime, which here is the colour of Save.
+
+- **The confirmation dialog commits in red**, matching the reboot dialog it
+  sat beside. Every caller of it is confirming something consequential —
+  flashing a module, resetting the network, restoring a config, renaming the
+  board — which is why they ask at all, so a lime Continue was the wrong
+  colour at the moment of commitment. Both the desktop dialog and the mobile
+  drawer.
+
+### Fixed
+
+- **The firmware sources editor no longer breaks at 390 px** (SQU-161). The
+  location field's 16 rem minimum forced it onto its own line and left the
+  delete button orphaned below. Small screens now stack one field per row with
+  delete as a trailing icon on the label's row, and `sm:contents` dissolves
+  that wrapper above `sm` so the desktop layout is the single flex row it
+  always was.
+
+
 ## [3.13.0] — 2026-09-09
 
 ### Fixed
