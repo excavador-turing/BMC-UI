@@ -110,6 +110,8 @@ const translations = {
       "Wypełnienie to wartość PWM, którą własna tablica cooling-levels płyty przypisuje temu stopniowi, tak jak zgłasza ją demon. Stopień to uczciwy odczyt; wypełnienie to to, co on wysterowuje. Płyta, która nie zgłasza tablicy, pokazuje sam stopień.",
   },
   network: {
+    resetNetworkConfirm:
+      "Spowoduje to usunięcie konfiguracji sieciowej płyty i przywrócenie ustawień domyślnych. Jeśli łączysz się z płytą przez tę sieć, utracisz tę sesję i możesz potrzebować dostępu fizycznego.",
     header: "Adresy BMC i wbudowany przełącznik",
     networkInterfaces: "Interfejsy sieciowe",
     resetNetworkButton: "Resetuj sieć",

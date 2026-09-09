@@ -10,6 +10,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.10.1] — 2026-09-09
+
+### Changed
+
+- **Reset network is red and confirms first** (SQU-161's colour rule). It was
+  lime, which in this interface means *safe to press* — and on a headless
+  board reached over that same network it is the control most able to end the
+  session using it. The confirmation says exactly that, rather than asking
+  "are you sure".
+
+  One rule everywhere: lime is safe, red is consequential and confirms.
+
 ## [3.10.0] — 2026-09-09
 
 ### Added
@@ -185,7 +197,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Node 24, TypeScript 6, Vite 8, ESLint 10, and all twenty advisories cleared.
 - The release is a tarball with `SHA256SUMS`; upstream's auto-release is inert.
 
-[Unreleased]: https://github.com/excavador-turing/BMC-UI/compare/v3.10.0...hive
+[Unreleased]: https://github.com/excavador-turing/BMC-UI/compare/v3.10.1...hive
+[3.10.1]: https://github.com/excavador-turing/BMC-UI/releases/tag/v3.10.1
 [3.10.0]: https://github.com/excavador-turing/BMC-UI/releases/tag/v3.10.0
 [3.9.3]: https://github.com/excavador-turing/BMC-UI/releases/tag/v3.9.3
 [3.9.2]: https://github.com/excavador-turing/BMC-UI/releases/tag/v3.9.2

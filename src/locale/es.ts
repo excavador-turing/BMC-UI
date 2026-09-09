@@ -110,6 +110,8 @@ const translations = {
       "El ciclo de trabajo es el valor PWM que la propia tabla cooling-levels de la placa asigna a este paso, tal como el demonio informa de esa tabla. El paso es la lectura honesta; el ciclo es lo que ordena. Una placa que no informa de ninguna tabla muestra solo el paso.",
   },
   network: {
+    resetNetworkConfirm:
+      "Esto descarta la configuración de red de la placa y aplica los valores por defecto. Si accede a la placa por esa red, perderá esta sesión y puede necesitar acceso físico.",
     header: "Las direcciones del BMC y el switch integrado",
     networkInterfaces: "Interfaces de Red",
     resetNetworkButton: "Restablecer Red",

@@ -1,6 +1,8 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import ConfirmationModal from "@/components/ConfirmationModal";
 import NetworkSkeleton from "@/components/skeletons/network";
 import SwitchPorts from "@/components/SwitchPorts";
 import TableItem from "@/components/TableItem";
@@ -36,6 +38,7 @@ export function Network() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { data } = useInfoTabData();
+  const [confirmReset, setConfirmReset] = useState(false);
   const { mutate: mutateResetNetwork, isPending: resetNetworkPending } =
     useNetworkResetMutation();
 
@@ -73,9 +76,15 @@ export function Network() {
           ))}
         </div>
         <div className="mt-4">
+          {/* Red, not lime. One rule across the interface: lime is safe to
+              press, red is consequential and confirms first. This drops the
+              board's network configuration -- on a headless board reached
+              over that network, it is the control most able to end the
+              session that is using it. */}
           <Button
             type="button"
-            onClick={() => handleResetNetwork()}
+            variant="destructive"
+            onClick={() => setConfirmReset(true)}
             isLoading={resetNetworkPending}
             disabled={resetNetworkPending}
           >
@@ -83,6 +92,17 @@ export function Network() {
           </Button>
         </div>
       </div>
+
+      <ConfirmationModal
+        isOpen={confirmReset}
+        onClose={() => setConfirmReset(false)}
+        onConfirm={() => {
+          setConfirmReset(false);
+          handleResetNetwork();
+        }}
+        title={t("network.resetNetworkButton")}
+        message={t("network.resetNetworkConfirm")}
+      />
 
       <SwitchPorts />
     </TabView>

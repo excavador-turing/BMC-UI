@@ -110,6 +110,8 @@ const translations = {
       "Der Tastgrad ist der PWM-Wert, den die bordeigene cooling-levels-Tabelle dieser Stufe zuordnet, so wie der Daemon diese Tabelle meldet. Die Stufe ist der ehrliche Messwert, der Tastgrad das, was sie ansteuert. Ein Board, das keine Tabelle meldet, zeigt nur die Stufe.",
   },
   network: {
+    resetNetworkConfirm:
+      "Dies verwirft die Netzwerkkonfiguration des Boards und setzt die Standardwerte. Wenn Sie das Board über dieses Netzwerk erreichen, verlieren Sie diese Sitzung und brauchen womöglich physischen Zugriff.",
     header: "Die Adressen des BMC und der integrierte Switch",
     networkInterfaces: "Netzwerkschnittstellen",
     resetNetworkButton: "Netzwerk zurücksetzen",

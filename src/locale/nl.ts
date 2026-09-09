@@ -109,6 +109,8 @@ const translations = {
       "De duty cycle is de PWM-waarde die de eigen cooling-levels-tabel van het board aan deze stap koppelt, zoals de daemon die tabel meldt. De stap is de eerlijke aflezing; de duty is wat hij aanstuurt. Een board dat geen tabel meldt, toont alleen de stap.",
   },
   network: {
+    resetNetworkConfirm:
+      "Dit verwijdert de netwerkconfiguratie van het board en zet de standaardwaarden terug. Bereikt u het board via dat netwerk, dan verliest u deze sessie en heeft u mogelijk fysieke toegang nodig.",
     header: "De adressen van de BMC en de ingebouwde switch",
     networkInterfaces: "Netwerkinterfaces",
     resetNetworkButton: "Netwerk resetten",

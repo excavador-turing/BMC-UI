@@ -106,6 +106,8 @@ const translations = {
       "占空比是主板自身的 cooling-levels 表为该档位映射出的 PWM 值，取自守护进程报告的这张表。档位是诚实的读数，占空比是它实际下达的指令。未报告该表的主板只显示档位。",
   },
   network: {
+    resetNetworkConfirm:
+      "这会清除主板的网络配置并恢复默认值。如果你正通过该网络访问主板，将失去本次会话，可能需要物理接触才能恢复。",
     header: "BMC 的地址与板载交换机",
     networkInterfaces: "网络接口",
     resetNetworkButton: "重置网络",

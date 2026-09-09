@@ -112,6 +112,8 @@ const translations = {
     header: "The BMC's addresses and the on-board switch",
     networkInterfaces: "Network Interfaces",
     resetNetworkButton: "Reset Network",
+    resetNetworkConfirm:
+      "This drops the board's network configuration and re-applies the defaults. If you are reaching the board over that network, you will lose this session and may need physical access to get it back.",
     resetNetworkSuccess: "Network reset successful.",
     switchPorts: "Switch Ports",
     switchNodePorts: "Node ports",
