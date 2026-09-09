@@ -56,7 +56,14 @@ const translations = {
     fanStep: "{{cur}} / {{max}}",
     fanRequested: "设定 {{value}}",
     fanGovernorNote:
-      "内核根据主板温度调节此风扇。这里的设置只是临时覆盖，调节器会在几秒后的下一次轮询时将其撤销。",
+      "内核根据主板温度调节此风扇。此守护进程无法暂停调节器，因此这里的设置会在几秒后的下一次轮询时被撤销。",
+    fanHeld: "调节器已暂停",
+    fanOverride: "手动接管",
+    fanOverrideOn:
+      "调节器已暂停。此风扇将保持在这里设定的档位，直到关闭手动接管或主板重启。",
+    fanOverrideCeiling:
+      "若主板超过 {{celsius}} °C，守护进程会自行把风扇交还给调节器。",
+    ariaFanOverride: "暂停风扇 {{device}} 的调节器",
     fanReverted:
       "在将 {{device}} 设为 {{requested}} 后，主板已将其重置为 {{cur}} / {{max}}。",
     ariaFanStep: "风扇 {{device}} 的散热档位",

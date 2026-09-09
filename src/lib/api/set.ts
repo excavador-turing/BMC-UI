@@ -190,13 +190,27 @@ export function useCoolingDeviceMutation() {
 
   return useMutation({
     mutationKey: ["coolingDeviceMutation"],
-    mutationFn: async (variables: { device: string; speed: number }) => {
+    mutationFn: async (variables: {
+      device: string;
+      speed: number;
+      /**
+       * Whether the step is a request or a hold.
+       *
+       * `manual` pauses the zone's governor first, so the step stays put.
+       * `auto` hands the fan back and ignores `speed`. Omitted, the daemon
+       * writes the step and leaves the governor running -- which is what
+       * this control did before holds existed, and what makes the plain
+       * slider a control that lies.
+       */
+      mode?: "auto" | "manual";
+    }) => {
       const response = await api.get<APIResponse<string>>("/bmc", {
         params: {
           opt: "set",
           type: "cooling",
           device: variables.device,
           speed: variables.speed,
+          ...(variables.mode ? { mode: variables.mode } : {}),
         },
       });
       return response.data.response[0].result;

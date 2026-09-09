@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import TableItem from "@/components/TableItem";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import {
   type ThermalSensor,
   useCoolingDevicesQuery,
@@ -36,6 +37,17 @@ interface FanRow {
   levels: number[] | null;
   /** The level that means full duty. Null when the table is unreadable. */
   maxLevel: number | null;
+  /**
+   * Whether a step written to this fan would actually hold.
+   *
+   * True only when the daemon reports both a governor it can pause and the
+   * state of that governor. A daemon that reports neither is one whose
+   * slider the kernel overrules within a poll, and offering an Override
+   * switch there would be offering a control that does not do what it says.
+   */
+  canHold: boolean;
+  /** Whether the governor is paused for this fan right now. */
+  overridden: boolean;
 }
 
 /**
@@ -166,6 +178,27 @@ function ThermalSkeleton() {
  * when the board is below every trip -- in which case there is nothing to
  * explain.
  */
+/**
+ * The hottest `active` trip any sensor declares, or null.
+ *
+ * This is the temperature at which the daemon takes a held fan back on its
+ * own, so it is read from the same trips the daemon reads rather than
+ * written down here as a number. Above it the governor would be asking for
+ * the top step anyway, and a hold is no longer a preference worth keeping.
+ */
+function overrideCeiling(sensors: ThermalSensor[]): number | null {
+  let hottest: number | null = null;
+  for (const sensor of sensors) {
+    for (const trip of sensor.trips ?? []) {
+      if (trip.kind !== "active" || trip.temperature_c === null) continue;
+      if (hottest === null || trip.temperature_c > hottest) {
+        hottest = trip.temperature_c;
+      }
+    }
+  }
+  return hottest;
+}
+
 function governorReason(sensors: ThermalSensor[]): number | null {
   let highest: number | null = null;
   for (const sensor of sensors) {
@@ -241,6 +274,8 @@ export default function FanControl() {
       // which is correct: nothing here has the table for it.
       levels: reported?.levels ?? null,
       maxLevel: reported?.max_level ?? null,
+      canHold: device.overridden !== undefined && device.zone != null,
+      overridden: device.overridden ?? false,
     };
   });
 
@@ -261,11 +296,15 @@ export default function FanControl() {
         present: fan.present,
         levels: fan.levels,
         maxLevel: fan.max_level,
+        // Nothing to command, so nothing to hold.
+        canHold: false,
+        overridden: false,
       });
     }
   }
 
   const sensors = thermal?.sensors ?? [];
+  const ceiling = overrideCeiling(sensors);
   const measuring = sensors.some(
     (sensor) => sensor.present && Number.isFinite(sensor.temperature_c)
   );
@@ -281,7 +320,8 @@ export default function FanControl() {
   // it. dataUpdatedAt is the timestamp of the last successful thermal fetch,
   // so this needs no timer and cannot fire on the read-back that still shows
   // the new value.
-  const showGovernorNote = governed && rows.some((row) => row.controllable);
+  const showGovernorNote =
+    governed && rows.some((row) => row.controllable && !row.canHold);
   // The provenance note earns its space only where a duty is actually drawn.
   const showDutyNote = rows.some((row) => row.levels !== null);
 
@@ -301,7 +341,9 @@ export default function FanControl() {
         <span className="text-lg font-bold">{t("info.fanControl")}</span>
         {governed && (
           <span className="text-sm font-semibold lowercase opacity-60">
-            {t("info.fanAutomatic")}
+            {rows.some((row) => row.overridden)
+              ? t("info.fanHeld")
+              : t("info.fanAutomatic")}
           </span>
         )}
       </div>
@@ -382,10 +424,57 @@ export default function FanControl() {
                   )}
                 </div>
 
-                {row.controllable && (
+                {row.controllable && row.canHold && (
+                  <div className="mt-4 flex items-center gap-3">
+                    <Switch
+                      id={`fan-override-${row.name}`}
+                      checked={row.overridden}
+                      onCheckedChange={(on) => {
+                        // Turning the switch on must not move the fan. The
+                        // step it is on now becomes the step it is held at,
+                        // so the only thing that changes is who decides it.
+                        const hold = row.live ?? row.setpoint ?? 0;
+                        if (on) {
+                          setRequested((previous) => ({
+                            ...previous,
+                            [row.name]: hold,
+                          }));
+                        } else {
+                          // The governor is about to choose a step. Forget
+                          // what was committed here, or the notice below
+                          // would report the governor's own choice as the
+                          // board overruling this page.
+                          setCommitted((previous) => {
+                            const next = { ...previous };
+                            delete next[row.name];
+                            return next;
+                          });
+                        }
+                        mutateCoolingDevices({
+                          device: row.name,
+                          speed: hold,
+                          mode: on ? "manual" : "auto",
+                        });
+                      }}
+                      aria-label={t("info.ariaFanOverride", {
+                        device: row.name,
+                      })}
+                    />
+                    <label
+                      htmlFor={`fan-override-${row.name}`}
+                      className="text-sm font-semibold"
+                    >
+                      {t("info.fanOverride")}
+                    </label>
+                  </div>
+                )}
+
+                {/* The slider is the default only on a daemon that cannot
+                    hold a step; where it can, it appears with the switch. */}
+                {row.controllable && (!row.canHold || row.overridden) && (
                   <div className="mt-4 flex items-center gap-4">
                     <Slider
-                      defaultValue={[row.setpoint ?? 0]}
+                      defaultValue={[row.live ?? row.setpoint ?? 0]}
                       min={0}
                       max={row.max}
                       onValueChange={(value) =>
@@ -402,6 +491,7 @@ export default function FanControl() {
                         mutateCoolingDevices({
                           device: row.name,
                           speed: value[0],
+                          mode: row.canHold ? "manual" : undefined,
                         });
                       }}
                     />
@@ -411,6 +501,15 @@ export default function FanControl() {
                       })}
                     </span>
                   </div>
+                )}
+
+                {row.controllable && row.canHold && row.overridden && (
+                  <p className="mt-3 text-sm text-amber-600 dark:text-amber-500">
+                    {t("info.fanOverrideOn")}
+                    {ceiling !== null
+                      ? ` ${t("info.fanOverrideCeiling", { celsius: ceiling })}`
+                      : ""}
+                  </p>
                 )}
               </div>
             </div>

@@ -55,7 +55,14 @@ const translations = {
     fanStep: "{{cur}} of {{max}}",
     fanRequested: "set {{value}}",
     fanGovernorNote:
-      "The kernel regulates this fan from the board temperature. A setting here is an override that the governor undoes at its next poll, a few seconds later.",
+      "The kernel regulates this fan from the board temperature. This daemon cannot pause it, so a setting here is undone at the governor's next poll, a few seconds later.",
+    fanHeld: "governor paused",
+    fanOverride: "Override",
+    fanOverrideOn:
+      "The governor is paused. This fan will hold the step set here until Override is switched off or the board reboots.",
+    fanOverrideCeiling:
+      "If the board passes {{celsius}} °C the daemon hands the fan back on its own.",
+    ariaFanOverride: "Pause the governor for fan {{device}}",
     fanReverted:
       "The board reset {{device}} to {{cur}} of {{max}} after it was set to {{requested}}.",
     ariaFanStep: "Fan {{device}} cooling step",

@@ -57,7 +57,14 @@ const translations = {
     fanStep: "{{cur}} von {{max}}",
     fanRequested: "gesetzt {{value}}",
     fanGovernorNote:
-      "Der Kernel regelt diesen Lüfter anhand der Board-Temperatur. Eine Einstellung hier ist eine Übersteuerung, die der Regler bei seiner nächsten Abfrage wenige Sekunden später wieder aufhebt.",
+      "Der Kernel regelt diesen Lüfter anhand der Board-Temperatur. Dieser Daemon kann ihn nicht anhalten, daher wird eine Einstellung hier bei der nächsten Abfrage des Reglers wenige Sekunden später wieder aufgehoben.",
+    fanHeld: "Regler angehalten",
+    fanOverride: "Übersteuern",
+    fanOverrideOn:
+      "Der Regler ist angehalten. Dieser Lüfter hält die hier gesetzte Stufe, bis Übersteuern ausgeschaltet wird oder das Board neu startet.",
+    fanOverrideCeiling:
+      "Übersteigt das Board {{celsius}} °C, gibt der Daemon den Lüfter von sich aus wieder frei.",
+    ariaFanOverride: "Regler für Lüfter {{device}} anhalten",
     fanReverted:
       "Das Board hat {{device}} auf {{cur}} von {{max}} zurückgesetzt, nachdem es auf {{requested}} gestellt wurde.",
     ariaFanStep: "Kühlstufe des Lüfters {{device}}",

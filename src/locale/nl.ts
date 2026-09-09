@@ -56,7 +56,14 @@ const translations = {
     fanStep: "{{cur}} van {{max}}",
     fanRequested: "ingesteld {{value}}",
     fanGovernorNote:
-      "De kernel regelt deze ventilator op basis van de boardtemperatuur. Een instelling hier is een overschrijving die de regelaar bij zijn volgende peiling, enkele seconden later, ongedaan maakt.",
+      "De kernel regelt deze ventilator op basis van de boardtemperatuur. Deze daemon kan hem niet pauzeren, dus een instelling hier wordt bij de volgende peiling van de regelaar, enkele seconden later, ongedaan gemaakt.",
+    fanHeld: "regelaar gepauzeerd",
+    fanOverride: "Overschrijven",
+    fanOverrideOn:
+      "De regelaar is gepauzeerd. Deze ventilator houdt de hier ingestelde stand vast tot Overschrijven wordt uitgeschakeld of het board opnieuw opstart.",
+    fanOverrideCeiling:
+      "Komt het board boven {{celsius}} °C, dan geeft de daemon de ventilator uit zichzelf terug.",
+    ariaFanOverride: "Regelaar voor ventilator {{device}} pauzeren",
     fanReverted:
       "Het board heeft {{device}} teruggezet naar {{cur}} van {{max}} nadat het op {{requested}} was gezet.",
     ariaFanStep: "Koelstand van ventilator {{device}}",

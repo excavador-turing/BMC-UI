@@ -57,7 +57,14 @@ const translations = {
     fanStep: "{{cur}} de {{max}}",
     fanRequested: "ajustado {{value}}",
     fanGovernorNote:
-      "El kernel regula este ventilador según la temperatura de la placa. Un ajuste aquí es una anulación que el regulador deshace en su siguiente sondeo, unos segundos después.",
+      "El kernel regula este ventilador según la temperatura de la placa. Este daemon no puede pausarlo, así que un ajuste aquí se deshace en el siguiente sondeo del regulador, unos segundos después.",
+    fanHeld: "regulador en pausa",
+    fanOverride: "Anular",
+    fanOverrideOn:
+      "El regulador está en pausa. Este ventilador mantendrá el nivel fijado aquí hasta que se desactive Anular o se reinicie la placa.",
+    fanOverrideCeiling:
+      "Si la placa supera los {{celsius}} °C, el daemon devuelve el ventilador al regulador por su cuenta.",
+    ariaFanOverride: "Pausar el regulador del ventilador {{device}}",
     fanReverted:
       "La placa restableció {{device}} a {{cur}} de {{max}} después de ajustarlo a {{requested}}.",
     ariaFanStep: "Nivel de refrigeración del ventilador {{device}}",

@@ -283,6 +283,24 @@ interface CoolingDevice {
   device: string;
   max_speed: number;
   speed: number;
+  /**
+   * The thermal zone whose governor drives this fan, or null when none does.
+   *
+   * Null means there is no governor to pause, so the fan cannot be held at a
+   * step whatever else the daemon says -- which is a different state from a
+   * daemon that does not report this field at all.
+   */
+  zone?: string | null;
+  /**
+   * Whether that zone's governor is currently paused.
+   *
+   * Optional because bmcd before 2.21 does not send it, and the difference
+   * carries weight: `undefined` is "this daemon cannot hold the fan", and the
+   * Override switch is not offered at all. A control that cannot hold is
+   * worse than no control, because the person operating it has no way to
+   * tell which of the two they are looking at.
+   */
+  overridden?: boolean;
 }
 
 /**

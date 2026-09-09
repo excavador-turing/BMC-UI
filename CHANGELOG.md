@@ -10,6 +10,31 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.15.0] — 2026-09-09
+
+### Changed
+
+- **The fan slider now sits behind an explicit Override switch** (SQU-170).
+  The step, the duty and the governing trip are the read-only default. Turning
+  Override on pauses the kernel's governor, and the card says so in plain
+  words, including that the daemon will hand the fan back on its own above the
+  board's hottest active trip.
+
+  The slider was a control that lied. The governor is `step_wise` and took the
+  fan back within a poll of any change, so a person dragged it to 6, watched it
+  return to 4, and filed the report that opened SQU-135. Turning the switch on
+  does not move the fan: the step it is on becomes the step it is held at, so
+  the only thing that changes is who decides it.
+
+- **The switch appears only where a step would actually hold** — where the
+  daemon reports both a governor it can pause and the state of that governor.
+  On an older daemon the plain slider and its note stay exactly as they were.
+  A switch that did not hold would be worse than the slider, because the
+  slider at least sits under a note admitting the governor undoes it.
+
+- **The header says `governor paused` while a fan is held**, where it
+  otherwise says `automatic`.
+
 ## [3.14.0] — 2026-09-09
 
 ### Changed
