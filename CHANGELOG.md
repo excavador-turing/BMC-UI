@@ -10,6 +10,19 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.9.3] — 2026-09-09
+
+### Fixed
+
+- **The Firmware page's two-second poll is bounded.** While the daemon reports
+  `refreshing`, the page re-reads the catalogue every two seconds — and if that
+  flag ever stuck, the page polled a 116 MB board for as long as the tab stayed
+  open. A tab left on this page overnight became a load generator, which is
+  one of the plausible contributors to the board wedging on 2026-09-09
+  (SQU-172). Sixty polls now, two minutes, comfortably longer than the slowest
+  refresh measured (16 s); after that the page stops asking and shows what it
+  has. bmcd 2.18.0 fixes the sticking flag itself; this is the other half.
+
 ## [3.9.2] — 2026-09-09
 
 ### Changed
@@ -153,7 +166,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Node 24, TypeScript 6, Vite 8, ESLint 10, and all twenty advisories cleared.
 - The release is a tarball with `SHA256SUMS`; upstream's auto-release is inert.
 
-[Unreleased]: https://github.com/excavador-turing/BMC-UI/compare/v3.9.2...hive
+[Unreleased]: https://github.com/excavador-turing/BMC-UI/compare/v3.9.3...hive
+[3.9.3]: https://github.com/excavador-turing/BMC-UI/releases/tag/v3.9.3
 [3.9.2]: https://github.com/excavador-turing/BMC-UI/releases/tag/v3.9.2
 [3.9.1]: https://github.com/excavador-turing/BMC-UI/releases/tag/v3.9.1
 [3.9.0]: https://github.com/excavador-turing/BMC-UI/releases/tag/v3.9.0

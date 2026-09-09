@@ -188,7 +188,22 @@ export default function FirmwareCandidates() {
    */
   useEffect(() => {
     if (!catalog.data?.refreshing) return;
-    const timer = setInterval(() => void catalog.refetch(), 2000);
+    // Bounded, and that bound is not a nicety.
+    //
+    // A daemon that dies mid-fan-out, or any bug that leaves its `refreshing`
+    // flag set, used to leave this page polling a 116 MB board every two
+    // seconds for as long as a tab stayed open -- which is how a browser left
+    // on this page overnight becomes a load generator. Sixty polls is two
+    // minutes, longer than any healthy refresh (the slowest measured was 16
+    // seconds), after which the page stops asking and shows what it has.
+    let polls = 0;
+    const timer = setInterval(() => {
+      if (++polls > 60) {
+        clearInterval(timer);
+        return;
+      }
+      void catalog.refetch();
+    }, 2000);
     return () => clearInterval(timer);
   }, [catalog.data?.refreshing, catalog]);
 
