@@ -133,6 +133,12 @@ const translations = {
       "This BMC daemon does not report switch port status.",
   },
   nodes: {
+    openConsole: "Console",
+    flashNode: "Flash\u2026",
+    usbRouteLabel: "USB route for node {{nodeId}}",
+    usbNotRouted: "not routed here",
+    usbHeldBy: "the bus is on node {{nodeId}}",
+    usbRouted: "the USB bus is now on node {{nodeId}}",
     header: "Control the power supply of connected nodes",
     restartButton: "Restart",
     editButton: "Edit",

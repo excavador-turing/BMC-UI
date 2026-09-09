@@ -133,6 +133,12 @@ const translations = {
       "Deze BMC-daemon rapporteert geen status van switchpoorten.",
   },
   nodes: {
+    openConsole: "Console",
+    flashNode: "Flashen…",
+    usbRouteLabel: "USB-route voor node {{nodeId}}",
+    usbNotRouted: "niet hierheen gerouteerd",
+    usbHeldBy: "de bus ligt op node {{nodeId}}",
+    usbRouted: "de USB-bus ligt nu op node {{nodeId}}",
     header: "Stroomtoevoer van aangesloten nodes regelen",
     restartButton: "Herstarten",
     editButton: "Bewerken",

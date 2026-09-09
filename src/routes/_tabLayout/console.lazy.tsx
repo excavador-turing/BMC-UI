@@ -69,7 +69,13 @@ function ReaderState({ state }: { state: SerialReaderState }) {
  */
 export function SerialConsoleTab() {
   const { t } = useTranslation();
-  const [selectedNode, setSelectedNode] = useState<string>("0");
+  // `?node=2`, so a node card on the Nodes tab can open that node's console
+  // rather than dropping you on node 1 to choose again. The search is
+  // validated in console.tsx and is absent for a plain visit.
+  const { node: fromLink } = Route.useSearch();
+  const [selectedNode, setSelectedNode] = useState<string>(
+    fromLink ? String(fromLink - 1) : "0"
+  );
   const { data: readerStates, isError } = useSerialStatusQuery();
 
   const node = Number.parseInt(selectedNode);

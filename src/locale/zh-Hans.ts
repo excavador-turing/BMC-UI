@@ -129,6 +129,12 @@ const translations = {
     switchPortsUnavailable: "此 BMC 守护进程不报告交换机端口状态。",
   },
   nodes: {
+    openConsole: "控制台",
+    flashNode: "烧录…",
+    usbRouteLabel: "节点 {{nodeId}} 的 USB 路由",
+    usbNotRouted: "未路由到此处",
+    usbHeldBy: "总线在节点 {{nodeId}}",
+    usbRouted: "USB 总线现已切换到节点 {{nodeId}}",
     header: "控制连接节点的电源",
     restartButton: "重新启动",
     editButton: "编辑",

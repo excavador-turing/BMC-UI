@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import ConfirmationModal from "@/components/ConfirmationModal";
+import NodeActions from "@/components/NodeActions";
 import NodeLiveness, { NodeLivenessNotes } from "@/components/NodeLiveness";
 import NodesSkeleton from "@/components/skeletons/nodes";
 import TabView from "@/components/TabView";
@@ -195,6 +196,7 @@ const NodeRow = (
         </div>
 
         <NodeLiveness nodeId={props.nodeId} powerOnTime={props.power_on_time} />
+        <NodeActions nodeId={props.nodeId} />
       </div>
 
       <ConfirmationModal

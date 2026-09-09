@@ -134,6 +134,12 @@ const translations = {
       "Ten demon BMC nie zgłasza stanu portów przełącznika.",
   },
   nodes: {
+    openConsole: "Konsola",
+    flashNode: "Wgraj…",
+    usbRouteLabel: "Trasa USB dla węzła {{nodeId}}",
+    usbNotRouted: "nie skierowane tutaj",
+    usbHeldBy: "magistrala jest na węźle {{nodeId}}",
+    usbRouted: "magistrala USB jest teraz na węźle {{nodeId}}",
     header: "Kontroluj zasilanie podłączonych węzłów",
     restartButton: "Uruchom ponownie",
     editButton: "Edytuj",

@@ -134,6 +134,12 @@ const translations = {
       "Dieser BMC-Daemon meldet keinen Status der Switch-Ports.",
   },
   nodes: {
+    openConsole: "Konsole",
+    flashNode: "Flashen…",
+    usbRouteLabel: "USB-Route für Knoten {{nodeId}}",
+    usbNotRouted: "nicht hierher geroutet",
+    usbHeldBy: "der Bus liegt auf Knoten {{nodeId}}",
+    usbRouted: "der USB-Bus liegt jetzt auf Knoten {{nodeId}}",
     header: "Stromversorgung der verbundenen Knoten steuern",
     restartButton: "Neu starten",
     editButton: "Bearbeiten",

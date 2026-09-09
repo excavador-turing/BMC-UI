@@ -34,6 +34,7 @@ const nodeOptions: SelectOption[] = [
 ];
 
 export function FlashNode() {
+  const { node: fromLink } = Route.useSearch();
   const { t } = useTranslation();
   const formRef = useRef<HTMLFormElement>(null);
   const [confirmFlashModal, setConfirmFlashModal] = useState(false);
@@ -78,7 +79,12 @@ export function FlashNode() {
     <TabView title={t("flashNode.header")}>
       <form ref={formRef}>
         <div className="mb-4">
-          <Select name="node">
+          {/* Preselected from `?node=2` when the Nodes tab sent you here, so
+              the node you were looking at is the node this flashes. */}
+          <Select
+            name="node"
+            defaultValue={fromLink ? String(fromLink - 1) : undefined}
+          >
             <SelectTrigger label={t("flashNode.nodeSelect")}>
               <SelectValue placeholder={t("ui.selectPlaceholder")} />
             </SelectTrigger>

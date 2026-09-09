@@ -13,15 +13,13 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TabLayoutRouteImport } from './routes/_tabLayout'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as TabLayoutConsoleRouteImport } from './routes/_tabLayout/console'
+import { Route as TabLayoutFlashNodeRouteImport } from './routes/_tabLayout/flash-node'
 
 const IndexLazyRouteImport = createFileRoute('/')()
 const TabLayoutAboutLazyRouteImport = createFileRoute('/_tabLayout/about')()
-const TabLayoutConsoleLazyRouteImport = createFileRoute('/_tabLayout/console')()
 const TabLayoutFirmwareUpgradeLazyRouteImport = createFileRoute(
   '/_tabLayout/firmware-upgrade',
-)()
-const TabLayoutFlashNodeLazyRouteImport = createFileRoute(
-  '/_tabLayout/flash-node',
 )()
 const TabLayoutInfoLazyRouteImport = createFileRoute('/_tabLayout/info')()
 const TabLayoutNetworkLazyRouteImport = createFileRoute('/_tabLayout/network')()
@@ -52,7 +50,7 @@ const TabLayoutAboutLazyRoute = TabLayoutAboutLazyRouteImport.update({
 } as any).lazy(() =>
   import('./routes/_tabLayout/about.lazy').then((d) => d.Route),
 )
-const TabLayoutConsoleLazyRoute = TabLayoutConsoleLazyRouteImport.update({
+const TabLayoutConsoleRoute = TabLayoutConsoleRouteImport.update({
   id: '/console',
   path: '/console',
   getParentRoute: () => TabLayoutRoute,
@@ -67,7 +65,7 @@ const TabLayoutFirmwareUpgradeLazyRoute =
   } as any).lazy(() =>
     import('./routes/_tabLayout/firmware-upgrade.lazy').then((d) => d.Route),
   )
-const TabLayoutFlashNodeLazyRoute = TabLayoutFlashNodeLazyRouteImport.update({
+const TabLayoutFlashNodeRoute = TabLayoutFlashNodeRouteImport.update({
   id: '/flash-node',
   path: '/flash-node',
   getParentRoute: () => TabLayoutRoute,
@@ -113,10 +111,10 @@ const TabLayoutUsbLazyRoute = TabLayoutUsbLazyRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
   '/login': typeof LoginRoute
+  '/console': typeof TabLayoutConsoleRoute
+  '/flash-node': typeof TabLayoutFlashNodeRoute
   '/about': typeof TabLayoutAboutLazyRoute
-  '/console': typeof TabLayoutConsoleLazyRoute
   '/firmware-upgrade': typeof TabLayoutFirmwareUpgradeLazyRoute
-  '/flash-node': typeof TabLayoutFlashNodeLazyRoute
   '/info': typeof TabLayoutInfoLazyRoute
   '/network': typeof TabLayoutNetworkLazyRoute
   '/nodes': typeof TabLayoutNodesLazyRoute
@@ -126,10 +124,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
   '/login': typeof LoginRoute
+  '/console': typeof TabLayoutConsoleRoute
+  '/flash-node': typeof TabLayoutFlashNodeRoute
   '/about': typeof TabLayoutAboutLazyRoute
-  '/console': typeof TabLayoutConsoleLazyRoute
   '/firmware-upgrade': typeof TabLayoutFirmwareUpgradeLazyRoute
-  '/flash-node': typeof TabLayoutFlashNodeLazyRoute
   '/info': typeof TabLayoutInfoLazyRoute
   '/network': typeof TabLayoutNetworkLazyRoute
   '/nodes': typeof TabLayoutNodesLazyRoute
@@ -141,10 +139,10 @@ export interface FileRoutesById {
   '/': typeof IndexLazyRoute
   '/_tabLayout': typeof TabLayoutRouteWithChildren
   '/login': typeof LoginRoute
+  '/_tabLayout/console': typeof TabLayoutConsoleRoute
+  '/_tabLayout/flash-node': typeof TabLayoutFlashNodeRoute
   '/_tabLayout/about': typeof TabLayoutAboutLazyRoute
-  '/_tabLayout/console': typeof TabLayoutConsoleLazyRoute
   '/_tabLayout/firmware-upgrade': typeof TabLayoutFirmwareUpgradeLazyRoute
-  '/_tabLayout/flash-node': typeof TabLayoutFlashNodeLazyRoute
   '/_tabLayout/info': typeof TabLayoutInfoLazyRoute
   '/_tabLayout/network': typeof TabLayoutNetworkLazyRoute
   '/_tabLayout/nodes': typeof TabLayoutNodesLazyRoute
@@ -156,10 +154,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
-    | '/about'
     | '/console'
-    | '/firmware-upgrade'
     | '/flash-node'
+    | '/about'
+    | '/firmware-upgrade'
     | '/info'
     | '/network'
     | '/nodes'
@@ -169,10 +167,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
-    | '/about'
     | '/console'
-    | '/firmware-upgrade'
     | '/flash-node'
+    | '/about'
+    | '/firmware-upgrade'
     | '/info'
     | '/network'
     | '/nodes'
@@ -183,10 +181,10 @@ export interface FileRouteTypes {
     | '/'
     | '/_tabLayout'
     | '/login'
-    | '/_tabLayout/about'
     | '/_tabLayout/console'
-    | '/_tabLayout/firmware-upgrade'
     | '/_tabLayout/flash-node'
+    | '/_tabLayout/about'
+    | '/_tabLayout/firmware-upgrade'
     | '/_tabLayout/info'
     | '/_tabLayout/network'
     | '/_tabLayout/nodes'
@@ -234,7 +232,7 @@ declare module '@tanstack/react-router' {
       id: '/_tabLayout/console'
       path: '/console'
       fullPath: '/console'
-      preLoaderRoute: typeof TabLayoutConsoleLazyRouteImport
+      preLoaderRoute: typeof TabLayoutConsoleRouteImport
       parentRoute: typeof TabLayoutRoute
     }
     '/_tabLayout/firmware-upgrade': {
@@ -248,7 +246,7 @@ declare module '@tanstack/react-router' {
       id: '/_tabLayout/flash-node'
       path: '/flash-node'
       fullPath: '/flash-node'
-      preLoaderRoute: typeof TabLayoutFlashNodeLazyRouteImport
+      preLoaderRoute: typeof TabLayoutFlashNodeRouteImport
       parentRoute: typeof TabLayoutRoute
     }
     '/_tabLayout/info': {
@@ -290,10 +288,10 @@ declare module '@tanstack/react-router' {
 }
 
 interface TabLayoutRouteChildren {
+  TabLayoutConsoleRoute: typeof TabLayoutConsoleRoute
+  TabLayoutFlashNodeRoute: typeof TabLayoutFlashNodeRoute
   TabLayoutAboutLazyRoute: typeof TabLayoutAboutLazyRoute
-  TabLayoutConsoleLazyRoute: typeof TabLayoutConsoleLazyRoute
   TabLayoutFirmwareUpgradeLazyRoute: typeof TabLayoutFirmwareUpgradeLazyRoute
-  TabLayoutFlashNodeLazyRoute: typeof TabLayoutFlashNodeLazyRoute
   TabLayoutInfoLazyRoute: typeof TabLayoutInfoLazyRoute
   TabLayoutNetworkLazyRoute: typeof TabLayoutNetworkLazyRoute
   TabLayoutNodesLazyRoute: typeof TabLayoutNodesLazyRoute
@@ -302,10 +300,10 @@ interface TabLayoutRouteChildren {
 }
 
 const TabLayoutRouteChildren: TabLayoutRouteChildren = {
+  TabLayoutConsoleRoute: TabLayoutConsoleRoute,
+  TabLayoutFlashNodeRoute: TabLayoutFlashNodeRoute,
   TabLayoutAboutLazyRoute: TabLayoutAboutLazyRoute,
-  TabLayoutConsoleLazyRoute: TabLayoutConsoleLazyRoute,
   TabLayoutFirmwareUpgradeLazyRoute: TabLayoutFirmwareUpgradeLazyRoute,
-  TabLayoutFlashNodeLazyRoute: TabLayoutFlashNodeLazyRoute,
   TabLayoutInfoLazyRoute: TabLayoutInfoLazyRoute,
   TabLayoutNetworkLazyRoute: TabLayoutNetworkLazyRoute,
   TabLayoutNodesLazyRoute: TabLayoutNodesLazyRoute,
