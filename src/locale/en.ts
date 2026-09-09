@@ -141,6 +141,7 @@ const translations = {
       "This BMC daemon does not report switch port status.",
   },
   nodes: {
+    powerOnTimeTerm: "Power-on time",
     openConsole: "Console",
     flashNode: "Flash\u2026",
     usbRouteLabel: "USB route for node {{nodeId}}",
@@ -182,6 +183,7 @@ const translations = {
       "Power-on time is a stamp the BMC writes when it switches a node on, not a probe of the running module, and it is measured against this browser's clock.",
   },
   console: {
+    inputTerm: "Typing here",
     header: "Serial console for a compute module",
     nodeSelect: "Module",
     readerTask: "Reader task",
@@ -438,6 +440,8 @@ const translations = {
     bmcUI: "BMC UI",
   },
   ui: {
+    aboutThis: "About {{subject}}",
+    readMore: "Read more",
     save: "Save",
     cancel: "Cancel",
     continue: "Continue",

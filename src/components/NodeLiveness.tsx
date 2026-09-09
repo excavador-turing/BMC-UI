@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 
+import InfoNote from "@/components/InfoNote";
 import { useDurationLabel } from "@/hooks/use-duration";
 import { type NodeInfoResponse, useSwitchPortsQuery } from "@/lib/api/get";
 
@@ -111,8 +112,13 @@ export function NodeLivenessNotes({ nodes }: { nodes: NodeInfoResponse[] }) {
   if (!nodes.some((node) => node.power_on_time !== null)) return null;
 
   return (
-    <div className="mt-6 space-y-2 text-sm opacity-60">
-      <p>{t("nodes.powerOnTimeNote")}</p>
+    <div className="mt-6 flex items-center gap-1 text-sm opacity-60">
+      <span>{t("nodes.powerOnTimeTerm")}</span>
+      <InfoNote
+        text={t("nodes.powerOnTimeNote")}
+        path="/reference/metrics/#compute-modules"
+        label={t("nodes.powerOnTimeTerm")}
+      />
     </div>
   );
 }

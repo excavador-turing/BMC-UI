@@ -141,6 +141,7 @@ const translations = {
       "Deze BMC-daemon rapporteert geen status van switchpoorten.",
   },
   nodes: {
+    powerOnTimeTerm: "Inschakeltijd",
     openConsole: "Console",
     flashNode: "Flashen…",
     usbRouteLabel: "USB-route voor node {{nodeId}}",
@@ -182,6 +183,7 @@ const translations = {
       "De inschakeltijd is een tijdstempel die het BMC schrijft wanneer het een node inschakelt, geen meting aan de draaiende module, en hij wordt afgezet tegen de klok van deze browser.",
   },
   console: {
+    inputTerm: "Hier typen",
     header: "Seriële console voor een compute-module",
     nodeSelect: "Module",
     readerTask: "Leestaak",
@@ -395,6 +397,8 @@ const translations = {
     bmcUI: "BMC UI",
   },
   ui: {
+    aboutThis: "Over {{subject}}",
+    readMore: "Meer lezen",
     save: "Opslaan",
     cancel: "Annuleren",
     continue: "Doorgaan",

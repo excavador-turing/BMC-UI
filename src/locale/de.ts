@@ -142,6 +142,7 @@ const translations = {
       "Dieser BMC-Daemon meldet keinen Status der Switch-Ports.",
   },
   nodes: {
+    powerOnTimeTerm: "Einschaltzeit",
     openConsole: "Konsole",
     flashNode: "Flashen…",
     usbRouteLabel: "USB-Route für Knoten {{nodeId}}",
@@ -183,6 +184,7 @@ const translations = {
       "Die Einschaltzeit ist ein Zeitstempel, den das BMC beim Einschalten eines Knotens schreibt, keine Abfrage des laufenden Moduls, und sie wird gegen die Uhr dieses Browsers gemessen.",
   },
   console: {
+    inputTerm: "Eingabe hier",
     header: "Serielle Konsole für ein Compute-Modul",
     nodeSelect: "Modul",
     readerTask: "Lese-Task",
@@ -401,6 +403,8 @@ const translations = {
     bmcUI: "BMC UI",
   },
   ui: {
+    aboutThis: "Über {{subject}}",
+    readMore: "Mehr dazu",
     save: "Speichern",
     cancel: "Abbrechen",
     continue: "Fortfahren",

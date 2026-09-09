@@ -142,6 +142,7 @@ const translations = {
       "Este daemon del BMC no informa el estado de los puertos del switch.",
   },
   nodes: {
+    powerOnTimeTerm: "Hora de encendido",
     openConsole: "Consola",
     flashNode: "Flashear…",
     usbRouteLabel: "Ruta USB del nodo {{nodeId}}",
@@ -183,6 +184,7 @@ const translations = {
       "La hora de encendido es una marca que el BMC escribe al encender un nodo, no una comprobación del módulo en marcha, y se mide contra el reloj de este navegador.",
   },
   console: {
+    inputTerm: "Escribir aquí",
     header: "Consola serie de un módulo de cómputo",
     nodeSelect: "Módulo",
     readerTask: "Tarea de lectura",
@@ -396,6 +398,8 @@ const translations = {
     bmcUI: "BMC UI",
   },
   ui: {
+    aboutThis: "Acerca de {{subject}}",
+    readMore: "Más información",
     save: "Guardar",
     cancel: "Cancelar",
     continue: "Continuar",

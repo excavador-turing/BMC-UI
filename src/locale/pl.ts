@@ -142,6 +142,7 @@ const translations = {
       "Ten demon BMC nie zgłasza stanu portów przełącznika.",
   },
   nodes: {
+    powerOnTimeTerm: "Czas włączenia",
     openConsole: "Konsola",
     flashNode: "Wgraj…",
     usbRouteLabel: "Trasa USB dla węzła {{nodeId}}",
@@ -183,6 +184,7 @@ const translations = {
       "Czas włączenia to znacznik, który BMC zapisuje przy włączaniu węzła, a nie odpytanie działającego modułu, i jest mierzony względem zegara tej przeglądarki.",
   },
   console: {
+    inputTerm: "Pisanie tutaj",
     header: "Konsola szeregowa modułu obliczeniowego",
     nodeSelect: "Moduł",
     readerTask: "Zadanie odczytu",
@@ -394,6 +396,8 @@ const translations = {
     bmcUI: "BMC UI",
   },
   ui: {
+    aboutThis: "O: {{subject}}",
+    readMore: "Więcej",
     save: "Zapisz",
     cancel: "Anuluj",
     continue: "Kontynuuj",

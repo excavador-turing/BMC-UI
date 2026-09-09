@@ -6,6 +6,7 @@ import { useTheme } from "next-themes";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import InfoNote from "@/components/InfoNote";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
@@ -418,7 +419,14 @@ export default function SerialConsole({ node }: { node: number }) {
         className="h-96 w-full overflow-hidden rounded-md border border-neutral-200 bg-white p-2 dark:border-neutral-700 dark:bg-neutral-900"
       />
 
-      <p className="mt-2 text-sm opacity-60">{t("console.inputNote")}</p>
+      <p className="mt-2 flex items-center gap-1 text-sm opacity-60">
+        {t("console.inputTerm")}
+        <InfoNote
+          text={t("console.inputNote")}
+          path="/features/a-console-to-every-module/#two-ways-to-type-and-they-are-not-the-same"
+          label={t("console.inputTerm")}
+        />
+      </p>
     </div>
   );
 }

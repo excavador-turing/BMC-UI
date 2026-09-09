@@ -138,6 +138,7 @@ const translations = {
     switchPortsUnavailable: "此 BMC 守护进程不报告交换机端口状态。",
   },
   nodes: {
+    powerOnTimeTerm: "开机时间",
     openConsole: "控制台",
     flashNode: "烧录…",
     usbRouteLabel: "节点 {{nodeId}} 的 USB 路由",
@@ -179,6 +180,7 @@ const translations = {
       "上电时间是 BMC 在给节点上电时写入的时间戳，并非对运行中模块的探测，而且它是相对本浏览器的时钟计算的。",
   },
   console: {
+    inputTerm: "在此输入",
     header: "计算模块串口控制台",
     nodeSelect: "模块",
     readerTask: "读取任务",
@@ -383,6 +385,8 @@ const translations = {
     bmcUI: "BMC UI",
   },
   ui: {
+    aboutThis: "关于{{subject}}",
+    readMore: "了解更多",
     save: "保存",
     cancel: "取消",
     continue: "继续",

@@ -2,6 +2,7 @@ import { Check, Copy, Eye, EyeOff, KeyRound, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import InfoNote from "@/components/InfoNote";
 import TableItem from "@/components/TableItem";
 import { Button } from "@/components/ui/button";
 import { type MetricsTokenResponse, useMetricsTokenQuery } from "@/lib/api/get";
@@ -59,8 +60,12 @@ export default function MetricsToken() {
       <h2 className="flex items-center gap-2 text-lg font-semibold">
         <KeyRound className="size-5" />
         {t("info.metricsTokenTitle")}
+        <InfoNote
+          text={t("info.metricsTokenDescription")}
+          path="/reference/metrics/#the-credential"
+          label={t("info.metricsTokenTitle")}
+        />
       </h2>
-      <p className="text-sm opacity-70">{t("info.metricsTokenDescription")}</p>
 
       {!token && (
         <div>

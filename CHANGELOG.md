@@ -10,6 +10,39 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.16.0] — 2026-09-09
+
+### Changed
+
+- **The standing explanations move behind an (i)** (SQU-161). Every page
+  carried paragraph-length notes between its controls — what an eraseblock is,
+  why the fan's duty table is not linear, why the console's reader state is
+  about the BMC rather than the module, why the REST writer cannot send a
+  Ctrl-C. They were true, and an operator on the Firmware page at two in the
+  morning is not there to learn about UBI.
+
+  Each is now one sentence in a popover beside the reading it explains, with a
+  link to the full version on the docs site. Seven notes in total, across board
+  health, the fan, node liveness, the firmware slots, the scrape credential and
+  both console pages.
+
+- **Warnings and confirmations deliberately did not move.** A maskrom warning,
+  a "this cuts power to the modules" dialog and a reset-network confirmation
+  are information needed at the moment of deciding, and putting them behind a
+  click would be hiding them rather than tidying them. The rule is: standing
+  explanation beside a reading becomes an (i); consequence of a button stays
+  where it is.
+
+  The fan's governor note also stays inline, because it now renders only on a
+  daemon that cannot hold a step — where it is a live caveat about the slider
+  directly beneath it, not a standing fact.
+
+### Added
+
+- A small popover of our own rather than a new Radix dependency. The firmware
+  image size is a CI gate, and this is one pattern: a button, a panel, Escape
+  and outside-pointerdown to dismiss, focus returned to the trigger.
+
 ## [3.15.0] — 2026-09-09
 
 ### Changed

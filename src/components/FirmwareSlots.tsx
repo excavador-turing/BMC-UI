@@ -16,6 +16,7 @@ import { useRebootBMCMutation } from "@/lib/api/set";
 import { versionLabel } from "@/lib/format";
 
 const human = (bytes: number) => filesize(bytes, { standard: "jedec" });
+import InfoNote from "@/components/InfoNote";
 
 /**
  * One slot's cell: the version if it can be read, and the volume behind it.
@@ -292,9 +293,25 @@ export default function FirmwareSlots() {
             )}
           </dl>
 
-          <div className="mt-4 space-y-2 text-sm opacity-60">
-            <p>{t("firmwareUpgrade.slotRollbackNote")}</p>
-            {promotion && <p>{t("firmwareUpgrade.slotPromotionNote")}</p>}
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm opacity-60">
+            <span className="inline-flex items-center gap-1">
+              {t("firmwareUpgrade.slotRollback")}
+              <InfoNote
+                text={t("firmwareUpgrade.slotRollbackNote")}
+                path="/features/updates-that-undo-themselves/"
+                label={t("firmwareUpgrade.slotRollback")}
+              />
+            </span>
+            {promotion && (
+              <span className="inline-flex items-center gap-1">
+                {t("firmwareUpgrade.slotPromotion")}
+                <InfoNote
+                  text={t("firmwareUpgrade.slotPromotionNote")}
+                  path="/reference/gate-history/"
+                  label={t("firmwareUpgrade.slotPromotion")}
+                />
+              </span>
+            )}
           </div>
         </>
       )}

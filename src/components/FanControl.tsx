@@ -2,6 +2,7 @@ import { TriangleAlert } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import InfoNote from "@/components/InfoNote";
 import TableItem from "@/components/TableItem";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
@@ -339,6 +340,13 @@ export default function FanControl() {
     <div>
       <div className="mb-6 flex items-baseline gap-3">
         <span className="text-lg font-bold">{t("info.fanControl")}</span>
+        {showDutyNote && (
+          <InfoNote
+            text={t("info.fanDutyNote")}
+            path="/features/see-what-the-board-sees/"
+            label={t("info.fanControl")}
+          />
+        )}
         {governed && (
           <span className="text-sm font-semibold lowercase opacity-60">
             {rows.some((row) => row.overridden)
@@ -517,11 +525,8 @@ export default function FanControl() {
         })}
       </div>
 
-      {(showGovernorNote || showDutyNote) && (
-        <div className="mt-6 space-y-2 text-sm opacity-60">
-          {showGovernorNote && <p>{t("info.fanGovernorNote")}</p>}
-          {showDutyNote && <p>{t("info.fanDutyNote")}</p>}
-        </div>
+      {showGovernorNote && (
+        <p className="mt-6 text-sm opacity-60">{t("info.fanGovernorNote")}</p>
       )}
 
       {reverted.length > 0 && (

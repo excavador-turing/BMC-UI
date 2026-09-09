@@ -1,6 +1,7 @@
 import { filesize } from "filesize";
 import { useTranslation } from "react-i18next";
 
+import InfoNote from "@/components/InfoNote";
 import TableItem from "@/components/TableItem";
 import { Progress } from "@/components/ui/progress";
 import { useDurationLabel } from "@/hooks/use-duration";
@@ -322,7 +323,14 @@ export default function BoardHealth() {
               {data.nand === null ? (
                 <Absent />
               ) : (
-                <NandReading nand={data.nand} />
+                <span className="inline-flex items-center gap-1">
+                  <NandReading nand={data.nand} />
+                  <InfoNote
+                    text={t("info.healthNandNote")}
+                    path="/reference/metrics/#nand"
+                    label={t("info.healthNand")}
+                  />
+                </span>
               )}
             </TableItem>
             <TableItem term={t("info.healthClock")}>
@@ -333,12 +341,6 @@ export default function BoardHealth() {
               )}
             </TableItem>
           </dl>
-
-          {data.nand !== null && data.nand.present && (
-            <p className="mt-4 text-sm opacity-60">
-              {t("info.healthNandNote")}
-            </p>
-          )}
         </>
       )}
     </div>

@@ -2,6 +2,7 @@ import { createLazyFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import InfoNote from "@/components/InfoNote";
 import SerialConsole from "@/components/SerialConsole";
 import TabView from "@/components/TabView";
 import {
@@ -102,8 +103,13 @@ export function SerialConsoleTab() {
         </Select>
 
         <div className="flex flex-wrap items-baseline gap-3">
-          <span className="text-sm font-semibold opacity-60">
+          <span className="inline-flex items-center gap-1 text-sm font-semibold opacity-60">
             {t("console.readerTask")}
+            <InfoNote
+              text={t("console.readerNote")}
+              path="/features/a-console-to-every-module/#reader-running-is-about-the-bmc-not-the-module"
+              label={t("console.readerTask")}
+            />
           </span>
           {isError ? (
             <span className="text-sm opacity-60">
@@ -117,16 +123,19 @@ export function SerialConsoleTab() {
             <ReaderState state={readerState} />
           )}
         </div>
-
-        {!isError && readerState !== undefined && (
-          <p className="text-sm opacity-60">{t("console.readerNote")}</p>
-        )}
       </div>
 
       <SerialConsole key={node} node={node} />
 
       <div>
-        <div className="mb-6 text-lg font-bold">{t("console.restTitle")}</div>
+        <div className="mb-6 flex items-center gap-2 text-lg font-bold">
+          {t("console.restTitle")}
+          <InfoNote
+            text={t("console.restCrlf")}
+            path="/features/a-console-to-every-module/#two-ways-to-type-and-they-are-not-the-same"
+            label={t("console.restTitle")}
+          />
+        </div>
         <div className="space-y-2 text-sm">
           <p>{t("console.restIntro")}</p>
           <ul className="space-y-1">
@@ -144,7 +153,6 @@ export function SerialConsoleTab() {
               — {t("console.restWrite")}
             </li>
           </ul>
-          <p>{t("console.restCrlf")}</p>
         </div>
       </div>
     </TabView>
