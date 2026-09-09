@@ -10,6 +10,25 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.10.0] — 2026-09-09
+
+### Added
+
+- **A red warning on the flash page for v2.5 boards** (SQU-157). The page
+  offers a node picker and an Install button; on v2.5 the daemon **ignores the
+  picker** when more than one module is in maskrom — it writes to whichever
+  enumerates first and reports success (SQU-105). The board this fork is
+  developed on is a v2.5.2.
+
+  This is the one operation on the whole backlog that destroys data, so the
+  warning **fails open**: if the query that reads the board revision fails, a
+  general caution is shown rather than nothing. It appears only on v2.5, since
+  a warning that is always on is one nobody reads, and it goes in the same
+  change that closes SQU-105.
+- The rollback slot shows the version a reboot would land on, when bmcd 2.19.0
+  reports one. Older daemons still say "not readable", which is what the board
+  actually knows.
+
 ## [3.9.3] — 2026-09-09
 
 ### Fixed
@@ -166,7 +185,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Node 24, TypeScript 6, Vite 8, ESLint 10, and all twenty advisories cleared.
 - The release is a tarball with `SHA256SUMS`; upstream's auto-release is inert.
 
-[Unreleased]: https://github.com/excavador-turing/BMC-UI/compare/v3.9.3...hive
+[Unreleased]: https://github.com/excavador-turing/BMC-UI/compare/v3.10.0...hive
+[3.10.0]: https://github.com/excavador-turing/BMC-UI/releases/tag/v3.10.0
 [3.9.3]: https://github.com/excavador-turing/BMC-UI/releases/tag/v3.9.3
 [3.9.2]: https://github.com/excavador-turing/BMC-UI/releases/tag/v3.9.2
 [3.9.1]: https://github.com/excavador-turing/BMC-UI/releases/tag/v3.9.1

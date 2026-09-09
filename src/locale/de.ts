@@ -354,6 +354,12 @@ const translations = {
       "<0>Um die Aktualisierung abzuschließen, ist ein Systemneustart erforderlich.</0><1>Möchten Sie jetzt mit dem Neustart fortfahren?</1><2>Die Knoten verlieren vorübergehend die Stromversorgung, bis der Neustart abgeschlossen ist.</2>",
   },
   flashNode: {
+    maskromWarningTitle:
+      "Das Flashen trifft womöglich nicht den gewählten Knoten",
+    maskromWarning:
+      "Auf {{revision}}-Boards schreibt der Daemon in das Modul, das zuerst im Maskrom erscheint, und meldet Erfolg – unabhängig von der Auswahl hier. Bringen Sie vor dem Installieren nur das Zielmodul in den Maskrom-Modus.",
+    maskromWarningUnknown:
+      "Die Revision dieses Boards ist nicht lesbar. Auf v2.5-Boards schreibt das Flashen in das zuerst im Maskrom erscheinende Modul, unabhängig von der Auswahl. Bringen Sie vor dem Installieren nur das Zielmodul in den Maskrom-Modus.",
     header:
       "Installieren Sie ein Betriebssystemabbild auf einem ausgewählten Knoten",
     nodeSelect: "Ausgewählter Knoten:",

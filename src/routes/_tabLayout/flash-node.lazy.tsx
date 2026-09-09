@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import ConfirmationModal from "@/components/ConfirmationModal";
+import MaskromWarning from "@/components/MaskromWarning";
 import TabView from "@/components/TabView";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -77,6 +78,7 @@ export function FlashNode() {
 
   return (
     <TabView title={t("flashNode.header")}>
+      <MaskromWarning />
       <form ref={formRef}>
         <div className="mb-4">
           {/* Preselected from `?node=2` when the Nodes tab sent you here, so

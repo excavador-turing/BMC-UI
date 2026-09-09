@@ -351,6 +351,11 @@ const translations = {
       "<0>Om de upgrade af te ronden, is een herstart van het systeem nodig.</0><1>Wilt u nu doorgaan met de herstart?</1><2>De nodes verliezen tijdelijk de stroom totdat het herstartsproces is voltooid.</2>",
   },
   flashNode: {
+    maskromWarningTitle: "Flashen raakt mogelijk niet de gekozen node",
+    maskromWarning:
+      "Op {{revision}}-boards schrijft de daemon naar de module die als eerste in maskrom verschijnt en meldt succes, ongeacht de keuze hier. Zet vóór het installeren alleen de doelmodule in maskrom.",
+    maskromWarningUnknown:
+      "De revisie van dit board kon niet worden gelezen. Op v2.5-boards schrijft het flashen naar de module die als eerste in maskrom verschijnt, ongeacht de keuze. Zet vóór het installeren alleen de doelmodule in maskrom.",
     header: "Installeer een besturingssysteemimage op een geselecteerde node",
     nodeSelect: "Geselecteerde node:",
     fileInput: "Bestand (extern of lokaal):",

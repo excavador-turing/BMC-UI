@@ -352,6 +352,11 @@ const translations = {
       "<0>Para finalizar la actualización, es necesario reiniciar el sistema.</0><1>¿Desea proceder con el reinicio ahora?</1><2>Los nodos perderán energía temporalmente hasta que se complete el proceso de reinicio.</2>",
   },
   flashNode: {
+    maskromWarningTitle: "El flasheo puede no ir al nodo elegido",
+    maskromWarning:
+      "En placas {{revision}} el demonio escribe en el módulo que aparezca primero en maskrom e informa éxito, sea cual sea la selección. Deje solo el módulo de destino en maskrom antes de instalar.",
+    maskromWarningUnknown:
+      "No se pudo leer la revisión de esta placa. En placas v2.5 el flasheo escribe en el módulo que aparezca primero en maskrom, sea cual sea la selección. Deje solo el módulo de destino en maskrom antes de instalar.",
     header: "Instalar una imagen de SO en un nodo seleccionado",
     nodeSelect: "Nodo seleccionado:",
     fileInput: "Archivo (remoto o local):",
