@@ -198,6 +198,7 @@ const translations = {
     closeCodeReason: "Schließcode {{code}}: {{reason}}",
     reconnectButton: "Neu verbinden",
     clearButton: "Leeren",
+    redrawButton: "Neu zeichnen",
     noSession:
       "Es gibt kein Sitzungstoken, mit dem sich die Konsole authentifizieren könnte. Melden Sie sich ab und wieder an.",
     failedHint:

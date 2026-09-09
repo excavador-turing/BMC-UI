@@ -198,6 +198,7 @@ const translations = {
     closeCodeReason: "kod zamknięcia {{code}}: {{reason}}",
     reconnectButton: "Połącz ponownie",
     clearButton: "Wyczyść",
+    redrawButton: "Odśwież ekran",
     noSession:
       "Brak tokenu sesji, którym można uwierzytelnić konsolę. Wyloguj się i zaloguj ponownie.",
     failedHint:

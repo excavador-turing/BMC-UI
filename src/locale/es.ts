@@ -198,6 +198,7 @@ const translations = {
     closeCodeReason: "código de cierre {{code}}: {{reason}}",
     reconnectButton: "Reconectar",
     clearButton: "Limpiar",
+    redrawButton: "Redibujar",
     noSession:
       "No hay ningún token de sesión con el que autenticar la consola. Cierre la sesión y vuelva a iniciarla.",
     failedHint:

@@ -192,6 +192,7 @@ const translations = {
     closeCodeReason: "关闭代码 {{code}}：{{reason}}",
     reconnectButton: "重新连接",
     clearButton: "清屏",
+    redrawButton: "重绘",
     noSession: "没有可用于认证控制台的会话令牌。请退出后重新登录。",
     failedHint:
       "浏览器不会说明 WebSocket 握手为何失败。被拒绝的会话令牌，以及过旧、不支持该端点的守护进程，在这里都表现为一次没有原因的关闭。",

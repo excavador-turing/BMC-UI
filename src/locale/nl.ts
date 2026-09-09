@@ -197,6 +197,7 @@ const translations = {
     closeCodeReason: "sluitcode {{code}}: {{reason}}",
     reconnectButton: "Opnieuw verbinden",
     clearButton: "Wissen",
+    redrawButton: "Opnieuw tekenen",
     noSession:
       "Er is geen sessietoken om de console mee te authenticeren. Log uit en weer in.",
     failedHint:

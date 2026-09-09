@@ -10,6 +10,35 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.11.0] — 2026-09-09
+
+### Added
+
+- **The console replays the module's scrollback when you open it** (SQU-156).
+  It used to open blank however long the module had been running: the daemon
+  forwards only bytes that arrive *after* a subscriber joins, and the panel
+  asked for nothing on connect. Meanwhile bmcd held the last 16 KiB the whole
+  time and already served it.
+
+  The panel now reads that buffer and writes it into the terminal *before*
+  attaching the websocket, so history sits above live output rather than
+  below it. Reading is free: the daemon copies the buffer rather than draining
+  it, checked against a board, so this takes nothing away from the socket.
+
+- **A Redraw button.** Clears the terminal and writes the daemon's buffer back,
+  which is the answer to "how do I redraw the screen". Clear and Reconnect keep
+  their old meanings, so the three buttons now do three different things:
+  wipe it, show what the module's screen says, open a new socket.
+
+  Redraw costs local scrollback beyond the daemon's 16 KiB. That is the trade a
+  redraw is, and the alternative -- appending a second copy below the first --
+  is not what the word means.
+
+  Two details of that endpoint are unlike every other one here and are noted in
+  the code: it answers under the key `uart` rather than `result`, and its
+  `node` parameter is 0-based, matching the websocket's.
+
+
 ## [3.10.1] — 2026-09-09
 
 ### Changed

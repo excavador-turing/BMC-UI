@@ -196,6 +196,7 @@ const translations = {
     closeCodeReason: "close code {{code}}: {{reason}}",
     reconnectButton: "Reconnect",
     clearButton: "Clear",
+    redrawButton: "Redraw",
     noSession:
       "There is no session token to authenticate the console with. Log out and back in.",
     failedHint:

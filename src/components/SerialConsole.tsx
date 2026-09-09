@@ -3,7 +3,7 @@ import "@xterm/xterm/css/xterm.css";
 import { FitAddon } from "@xterm/addon-fit";
 import { Terminal } from "@xterm/xterm";
 import { useTheme } from "next-themes";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -65,6 +65,22 @@ const DARK_THEME = {
   selectionBackground: "#404040",
 };
 
+/**
+ * The daemon's UART ring buffer, as the REST endpoint returns it.
+ *
+ * Two things about this endpoint are unlike every other one here. It answers
+ * under the key `uart` rather than `result`, and reading is idempotent -- the
+ * handler copies the buffer (`Bytes::copy_from_slice`) rather than draining
+ * it, so asking twice is free and asking does not rob the websocket of
+ * anything. Both were checked against a board before this was written.
+ *
+ * `node` is 0-based here, the same as the websocket's query parameter, so the
+ * two cannot drift apart.
+ */
+interface UartResponse {
+  response: [{ uart: string }];
+}
+
 /** How a close event arrived, kept unrendered so it survives a language switch. */
 interface CloseInfo {
   code: number;
@@ -123,6 +139,37 @@ export default function SerialConsole({ node }: { node: number }) {
   // where a state change belongs.
   const shown: ConnectionState = usable ? state : "failed";
 
+  /**
+   * Write the daemon's UART ring buffer into the terminal.
+   *
+   * `fetch` rather than the shared axios hook, for the same reason the socket
+   * below builds its own URL: the hook returns a fresh instance on every
+   * render, and a replay that changed identity every render would rebuild the
+   * socket with it. The cost is the hook's 401-to-logout interceptor, which
+   * this path does not need -- a token the daemon rejects fails the websocket
+   * too, and that is the failure the panel already renders.
+   *
+   * Best-effort on purpose. A module whose reader has not started answers with
+   * an error, and a console that refused to open because there was no
+   * scrollback to show would be worse than one that opens empty.
+   */
+  const replay = useCallback(async () => {
+    if (!usable) return;
+    try {
+      const response = await fetch(`/api/bmc?opt=get&type=uart&node=${node}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) return;
+      const body = (await response.json()) as UartResponse;
+      const text = body.response[0]?.uart ?? "";
+      // Re-read the ref: the await is long enough for the node to have changed
+      // under us, which unmounts this terminal.
+      if (text !== "") terminalRef.current?.write(text);
+    } catch {
+      // Nothing to show is not an error worth surfacing.
+    }
+  }, [node, token, usable]);
+
   // The terminal, created once and disposed on unmount. Deliberately not
   // keyed on the node: this component is what gets replaced when the node
   // changes, so a terminal that outlived a node switch would be a bug.
@@ -179,76 +226,103 @@ export default function SerialConsole({ node }: { node: number }) {
     const terminal = terminalRef.current;
     if (!terminal || !usable) return;
 
-    // Same origin as the page, so the scheme follows the page's: the BMC
-    // serves this over TLS, a `vite dev` proxy does not.
-    const scheme = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const socket = new WebSocket(
-      `${scheme}//${window.location.host}/api/bmc/serial/ws?node=${node}`,
-      // Credential last. The daemon selects the first entry that is not a
-      // `bmcd.bearer.` one, so the plain name has to be offered and has to
-      // come first.
-      ["bmcd.serial.v1", `bmcd.bearer.${token}`]
-    );
-    // Binary frames as ArrayBuffers rather than Blobs: a Blob would have to
-    // be read asynchronously, which reorders UART output.
-    socket.binaryType = "arraybuffer";
+    // The socket is built after an await, so cleanup can run before it exists.
+    // `cancelled` covers that window -- the effect was torn down mid-replay
+    // and no socket should be opened at all -- while the `socket` null check
+    // in the cleanup covers the other order.
+    let cancelled = false;
+    let socket: WebSocket | null = null;
+    let input: { dispose: () => void } | null = null;
 
-    let opened = false;
-    let errored = false;
+    const attach = () => {
+      // Same origin as the page, so the scheme follows the page's: the BMC
+      // serves this over TLS, a `vite dev` proxy does not.
+      const scheme = window.location.protocol === "https:" ? "wss:" : "ws:";
+      socket = new WebSocket(
+        `${scheme}//${window.location.host}/api/bmc/serial/ws?node=${node}`,
+        // Credential last. The daemon selects the first entry that is not a
+        // `bmcd.bearer.` one, so the plain name has to be offered and has to
+        // come first.
+        ["bmcd.serial.v1", `bmcd.bearer.${token}`]
+      );
+      // Binary frames as ArrayBuffers rather than Blobs: a Blob would have to
+      // be read asynchronously, which reorders UART output.
+      socket.binaryType = "arraybuffer";
 
-    socket.onopen = () => {
-      opened = true;
-      setState("open");
-      setProtocol(socket.protocol === "" ? null : socket.protocol);
-      fitRef.current?.fit();
+      // Narrowed once: every handler below closes over `live` rather than the
+      // outer `let`, which the compiler cannot prove stays non-null.
+      const live = socket;
+
+      let opened = false;
+      let errored = false;
+
+      live.onopen = () => {
+        opened = true;
+        setState("open");
+        setProtocol(live.protocol === "" ? null : live.protocol);
+        fitRef.current?.fit();
+      };
+
+      live.onmessage = (event: MessageEvent<unknown>) => {
+        const target = terminalRef.current;
+        if (!target) return;
+
+        // Bytes go to the terminal as bytes. Decoding them here would break
+        // any multi-byte sequence a frame happens to split, and the terminal
+        // has a decoder that carries state across writes.
+        if (event.data instanceof ArrayBuffer) {
+          target.write(new Uint8Array(event.data));
+        } else if (typeof event.data === "string") {
+          target.write(event.data);
+        }
+      };
+
+      // The event carries nothing a browser is willing to expose. All it is
+      // good for is telling a close that follows a failure apart from a clean
+      // one, which is the difference between "it ended" and "it never started".
+      live.onerror = () => {
+        errored = true;
+      };
+
+      live.onclose = (event) => {
+        setState(opened && !errored ? "closed" : "failed");
+        setCloseInfo({ code: event.code, reason: event.reason });
+      };
+
+      // Keystrokes go to this socket and no other: registered with the socket
+      // and disposed with it, so input cannot reach a socket that is closing.
+      input = terminal.onData((data) => {
+        if (live.readyState === WebSocket.OPEN) {
+          live.send(data);
+        }
+      });
     };
 
-    socket.onmessage = (event: MessageEvent<unknown>) => {
-      const target = terminalRef.current;
-      if (!target) return;
-
-      // Bytes go to the terminal as bytes. Decoding them here would break
-      // any multi-byte sequence a frame happens to split, and the terminal
-      // has a decoder that carries state across writes.
-      if (event.data instanceof ArrayBuffer) {
-        target.write(new Uint8Array(event.data));
-      } else if (typeof event.data === "string") {
-        target.write(event.data);
-      }
-    };
-
-    // The event carries nothing a browser is willing to expose. All it is
-    // good for is telling a close that follows a failure apart from a clean
-    // one, which is the difference between "it ended" and "it never started".
-    socket.onerror = () => {
-      errored = true;
-    };
-
-    socket.onclose = (event) => {
-      setState(opened && !errored ? "closed" : "failed");
-      setCloseInfo({ code: event.code, reason: event.reason });
-    };
-
-    // Keystrokes go to this socket and no other: registered with the socket
-    // and disposed with it, so input cannot reach a socket that is closing.
-    const input = terminal.onData((data) => {
-      if (socket.readyState === WebSocket.OPEN) {
-        socket.send(data);
-      }
+    // The ring buffer first, then the socket. The daemon forwards only what
+    // arrives after a subscriber joins, so without this a console opened on a
+    // module that has been up for hours shows nothing at all. Ordering it this
+    // way means the scrollback is already in the terminal before live bytes
+    // land on top of it; the alternative -- attach first, replay after --
+    // would put old output below new.
+    void replay().then(() => {
+      if (!cancelled) attach();
     });
 
     return () => {
-      input.dispose();
-      // Detached before the close so the teardown does not set state on a
-      // component that is unmounting, or overwrite the state the next
-      // connection attempt has already set.
-      socket.onopen = null;
-      socket.onmessage = null;
-      socket.onerror = null;
-      socket.onclose = null;
-      socket.close();
+      cancelled = true;
+      input?.dispose();
+      if (socket) {
+        // Detached before the close so the teardown does not set state on a
+        // component that is unmounting, or overwrite the state the next
+        // connection attempt has already set.
+        socket.onopen = null;
+        socket.onmessage = null;
+        socket.onerror = null;
+        socket.onclose = null;
+        socket.close();
+      }
     };
-  }, [node, token, usable, generation]);
+  }, [node, token, usable, generation, replay]);
 
   const stateLabel: Record<ConnectionState, string> = {
     connecting: t("console.stateConnecting"),
@@ -297,6 +371,21 @@ export default function SerialConsole({ node }: { node: number }) {
             onClick={() => terminalRef.current?.clear()}
           >
             {t("console.clearButton")}
+          </Button>
+          <Button
+            type="button"
+            variant="bw"
+            onClick={() => {
+              // Clear, then write the daemon's buffer back. Redraw means "show
+              // me what the module's screen actually says", so it replaces the
+              // terminal's contents with the daemon's rather than appending a
+              // second copy below the first. It costs local scrollback beyond
+              // the daemon's 16 KiB, which is the trade a redraw is.
+              terminalRef.current?.clear();
+              void replay();
+            }}
+          >
+            {t("console.redrawButton")}
           </Button>
           <Button
             type="button"
