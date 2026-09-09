@@ -1,4 +1,8 @@
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  useQuery,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 
 import { useAxiosWithAuth } from "./_core";
 
@@ -29,9 +33,19 @@ interface AboutTabResponse {
   board_serial: string | null;
   hostname: string;
   api: string;
+  /** The FIRMWARE release, e.g. `v2.8.1`. Not the daemon -- see below. */
   version: string;
   buildtime: Date;
   buildroot: string;
+  /**
+   * The daemon's own version, e.g. `2.12.0`.
+   *
+   * Absent on any bmcd older than the one that started reporting it. The
+   * header and the About page named `version` "daemon" for a long time, which
+   * meant the firmware release was shown under the daemon's name and the
+   * daemon's version was not shown anywhere.
+   */
+  bmcd_version?: string;
   build_version: string;
   /** Absent on any bmcd older than ours, which never reported it. */
   kernel?: string;
@@ -138,6 +152,14 @@ export interface FirmwareSourceCatalog {
 }
 
 export interface FirmwareCatalog {
+  /**
+   * These are the previous answers and the daemon is re-polling the sources.
+   * Absent when it is not -- the daemon omits the field rather than sending
+   * false, so an older bmcd simply never sets it.
+   */
+  refreshing?: boolean;
+  /** How old the answers are, in seconds. Absent on an older bmcd. */
+  age_seconds?: number;
   checked_at: string;
   running: string;
   sources: FirmwareSourceCatalog[];
@@ -498,8 +520,9 @@ export function useFirmwareSourcesQuery() {
  */
 export function useFirmwareAvailableQuery() {
   const api = useAxiosWithAuth();
+  const queryClient = useQueryClient();
 
-  return useQuery({
+  const query = useQuery({
     queryKey: ["firmwareAvailable"],
     queryFn: async () => {
       const response = await api.get<APIResponse<FirmwareCatalog>>("/bmc", {
@@ -510,6 +533,30 @@ export function useFirmwareAvailableQuery() {
     refetchInterval: false,
     retry: false,
   });
+
+  /**
+   * What "check now" calls.
+   *
+   * `refetch()` alone replays the query above, which sends no `refresh` and so
+   * gets the daemon's cached answer back -- the one control whose purpose is
+   * to bypass that cache was the one control that did not.
+   *
+   * The daemon returns at once and refreshes behind itself (bmcd 2.11.0), so
+   * this resolves quickly and the answer arrives in a later poll. While
+   * `catalog.refreshing` is set the page polls every two seconds to pick it
+   * up, and stops when it clears.
+   */
+  const checkNow = async () => {
+    const response = await api.get<APIResponse<FirmwareCatalog>>("/bmc", {
+      params: { opt: "get", type: "firmware_available", refresh: 1 },
+    });
+    queryClient.setQueryData(
+      ["firmwareAvailable"],
+      response.data.response[0].result
+    );
+  };
+
+  return { ...query, checkNow };
 }
 
 export function useUpdateCheckQuery() {

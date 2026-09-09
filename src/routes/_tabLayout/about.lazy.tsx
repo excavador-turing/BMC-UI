@@ -25,6 +25,12 @@ const version = __BMC_UI_VERSION__ ?? packageVersion;
 
 export const Route = createLazyFileRoute("/_tabLayout/about")({
   component: About,
+  // Every page on this route reads through a suspense query. `pendingComponent`
+  // covers a request that is still in flight; a request that FAILS throws
+  // during render and passes straight through Suspense, so without this it
+  // unwound to the root -- which has no boundary either -- and blanked the
+  // application. Info and Network already had one; these three did not.
+  errorComponent: () => <div>Error loading About</div>,
   pendingComponent: AboutSkeleton,
 });
 
@@ -54,16 +60,26 @@ export function About() {
           {eepromLabel(data.board_serial)}
         </TableItem>
         <TableItem term={t("about.hostname")}>{data.hostname}</TableItem>
-        <TableItem term={t("about.daemonVersion")}>
+        {/* Two different things, and until now the first was shown under the
+            second's name while the second was not shown at all. */}
+        <TableItem term={t("about.firmwareVersion")}>
           {versionLabel(data.version)}
+        </TableItem>
+        <TableItem term={t("about.daemonVersion")}>
+          {data.bmcd_version ? versionLabel(data.bmcd_version) : EMPTY_VALUE}
         </TableItem>
         <TableItem term={t("about.buildTime")}>
           {data.buildtime.toLocaleString()} (
           {timeAgo.format(new Date(data.buildtime))})
         </TableItem>
-        <TableItem term={t("about.buildVersion")}>
-          {versionLabel(data.build_version)}
-        </TableItem>
+        {/* Ordinarily the same string as the daemon version, and a row that
+            repeats the one above it teaches nothing. Shown when they differ,
+            which is what a hand-built daemon looks like. */}
+        {data.build_version !== data.bmcd_version && (
+          <TableItem term={t("about.buildVersion")}>
+            {versionLabel(data.build_version)}
+          </TableItem>
+        )}
         <TableItem term={t("about.buildrootRelease")}>
           {data.buildroot}
         </TableItem>

@@ -25,6 +25,12 @@ import { useUSBModeMutation, useUSBNode1Mutation } from "@/lib/api/set";
 
 export const Route = createLazyFileRoute("/_tabLayout/usb")({
   component: USB,
+  // Every page on this route reads through a suspense query. `pendingComponent`
+  // covers a request that is still in flight; a request that FAILS throws
+  // during render and passes straight through Suspense, so without this it
+  // unwound to the root -- which has no boundary either -- and blanked the
+  // application. Info and Network already had one; these three did not.
+  errorComponent: () => <div>Error loading USB</div>,
   pendingComponent: USBSkeleton,
 });
 

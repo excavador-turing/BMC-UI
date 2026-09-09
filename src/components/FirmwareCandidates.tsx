@@ -4,7 +4,7 @@ import {
   ShieldCheck,
   ShieldQuestion,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
   useFirmwareAvailableQuery,
 } from "@/lib/api/get";
 import { useInstallFirmwareMutation } from "@/lib/api/set";
+import { cn } from "@/lib/utils";
 
 /**
  * What each configured source is offering, and a way to install one.
@@ -130,6 +131,29 @@ export default function FirmwareCandidates() {
 
   const catalog = useFirmwareAvailableQuery();
   const install = useInstallFirmwareMutation();
+  const [checking, setChecking] = useState(false);
+
+  /**
+   * The daemon answers a `refresh` at once and re-polls the sources behind
+   * itself, so the new answers arrive after this request has already
+   * returned. Poll for them while it says it is still working, and stop when
+   * it stops -- rather than leaving the page showing the previous list with
+   * no sign that anything is happening.
+   */
+  useEffect(() => {
+    if (!catalog.data?.refreshing) return;
+    const timer = setInterval(() => void catalog.refetch(), 2000);
+    return () => clearInterval(timer);
+  }, [catalog.data?.refreshing, catalog]);
+
+  const checkNow = async () => {
+    setChecking(true);
+    try {
+      await catalog.checkNow();
+    } finally {
+      setChecking(false);
+    }
+  };
 
   const doInstall = async () => {
     if (!confirming) return;
@@ -150,13 +174,22 @@ export default function FirmwareCandidates() {
         <h2 className="text-lg font-semibold">
           {t("firmwareUpgrade.availableTitle")}
         </h2>
+        {/* The spinner belongs on this control, not over the page: the list
+            below stays readable and stays scrollable while the sources are
+            re-polled. `refreshing` is the daemon still working after it
+            answered; `checking` is our own request in flight. */}
         <Button
           variant="bw"
           size="sm"
-          disabled={catalog.isFetching}
-          onClick={() => void catalog.refetch()}
+          disabled={checking || catalog.data?.refreshing}
+          onClick={() => void checkNow()}
         >
-          <RefreshCw className="mr-2 size-4" />
+          <RefreshCw
+            className={cn(
+              "mr-2 size-4",
+              (checking || catalog.data?.refreshing) && "animate-spin"
+            )}
+          />
           {t("firmwareUpgrade.checkNow")}
         </Button>
       </div>
@@ -166,8 +199,12 @@ export default function FirmwareCandidates() {
           tense made from the past. */}
       {catalog.data && (
         <p className="text-sm opacity-60">
-          {t("firmwareUpgrade.checkedAt", { at: catalog.data.checked_at })} ·{" "}
-          {t("firmwareUpgrade.runningIs", { version: catalog.data.running })}
+          {catalog.data.refreshing
+            ? t("firmwareUpgrade.checking")
+            : t("firmwareUpgrade.checkedAt", {
+                at: catalog.data.checked_at,
+              })}{" "}
+          · {t("firmwareUpgrade.runningIs", { version: catalog.data.running })}
         </p>
       )}
 

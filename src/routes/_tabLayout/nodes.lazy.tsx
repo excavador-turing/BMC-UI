@@ -21,6 +21,12 @@ import {
 
 export const Route = createLazyFileRoute("/_tabLayout/nodes")({
   component: NodesTab,
+  // Every page on this route reads through a suspense query. `pendingComponent`
+  // covers a request that is still in flight; a request that FAILS throws
+  // during render and passes straight through Suspense, so without this it
+  // unwound to the root -- which has no boundary either -- and blanked the
+  // application. Info and Network already had one; these three did not.
+  errorComponent: () => <div>Error loading Nodes</div>,
   pendingComponent: NodesSkeleton,
 });
 
