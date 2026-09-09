@@ -345,14 +345,12 @@ const translations = {
       "Ein Neustart ist erforderlich, um den Aktualisierungsvorgang abzuschließen.",
     uploading: "BMC-Firmware wird hochgeladen...",
     writing: "Firmware wird auf das BMC geschrieben...",
-    success: "Firmware-Aktualisierung erfolgreich",
-    successMessage: "Firmware-Aktualisierung erfolgreich abgeschlossen.",
+    success: "Image auf der SD-Karte abgelegt",
+    successMessage:
+      "Es steht jetzt unter SD-Karte in der Versionsliste unten, wo Sie es installieren können.",
     uploadFailed: "Hochladen der BMC-Firmware fehlgeschlagen",
     writtenData: "{{written}} geschrieben",
     error: "Ein Fehler ist aufgetreten",
-    finishModalTitle: "Aktualisierung abgeschlossen!",
-    finishModalDescription:
-      "<0>Um die Aktualisierung abzuschließen, ist ein Systemneustart erforderlich.</0><1>Möchten Sie jetzt mit dem Neustart fortfahren?</1><2>Die Compute-Module laufen weiter. Nur diese Oberfläche, die API und die Konsolen fehlen etwa eine halbe Minute.</2>",
   },
   flashNode: {
     maskromWarningTitle:

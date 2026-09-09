@@ -343,14 +343,12 @@ const translations = {
       "Se requiere un reinicio para finalizar el proceso de actualización.",
     uploading: "Subiendo firmware BMC...",
     writing: "Escribiendo firmware en BMC...",
-    success: "Actualización de firmware exitosa",
-    successMessage: "Actualización de firmware completada con éxito.",
+    success: "Imagen guardada en la tarjeta SD",
+    successMessage:
+      "Ahora aparece bajo Tarjeta SD en la lista de versiones, donde puede instalarla.",
     uploadFailed: "Error al subir el firmware BMC",
     writtenData: "{{written}} escritos",
     error: "Ha ocurrido un error",
-    finishModalTitle: "¡Actualización finalizada!",
-    finishModalDescription:
-      "<0>Para finalizar la actualización, es necesario reiniciar el sistema.</0><1>¿Desea proceder con el reinicio ahora?</1><2>Los módulos de cómputo siguen funcionando. Solo esta interfaz, la API y las consolas desaparecen durante medio minuto.</2>",
   },
   flashNode: {
     maskromWarningTitle: "El flasheo puede no ir al nodo elegido",

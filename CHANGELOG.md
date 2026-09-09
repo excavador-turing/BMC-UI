@@ -10,6 +10,26 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.13.0] — 2026-09-09
+
+### Fixed
+
+- **After an upload the interface offered a reboot that would have done
+  nothing** (SQU-134). The browser's upload was changed to *park* the image on
+  the SD card rather than install it, but the completion path still spoke the
+  language of the old upload-and-stage flow: it opened a modal saying "to
+  finalize the upgrade, a system reboot is necessary" and offered to do it.
+
+  Nothing is staged after a park, so that reboot applied nothing. Worse, it
+  taught the operator that parking and installing were one step when the whole
+  point of the change was to separate them.
+
+  The modal is gone, along with the reboot mutation and the two strings behind
+  it in all six locales. The success message now says what happened: the image
+  is on the SD card and listed in the version list, where installing it is a
+  separate choice.
+
+
 ## [3.12.0] — 2026-09-09
 
 ### Fixed

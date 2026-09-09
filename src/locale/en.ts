@@ -341,14 +341,12 @@ const translations = {
       "A reboot is required to finalise the upgrade process.",
     uploading: "Uploading BMC firmware...",
     writing: "Writing firmware to BMC...",
-    success: "Firmware upgrade successful",
-    successMessage: "Firmware upgrade completed successfully.",
+    success: "Image parked on the SD card",
+    successMessage:
+      "It is now listed under SD card in the version list below, where you can install it.",
     uploadFailed: "Failed to upload the BMC firmware",
     writtenData: "{{written}} written",
     error: "An error has occurred",
-    finishModalTitle: "Upgrade Finished!",
-    finishModalDescription:
-      "<0>To finalize the upgrade, a system reboot is necessary.</0><1>Would you like to proceed with the reboot now?</1><2>The compute modules keep running throughout. Only this interface, the API and the consoles go away, for about half a minute.</2>",
   },
   flashNode: {
     maskromWarningTitle: "Flashing may not target the node you choose",

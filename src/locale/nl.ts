@@ -342,14 +342,12 @@ const translations = {
       "Een herstart is vereist om het upgradeproces te voltooien.",
     uploading: "BMC-firmware uploaden...",
     writing: "Firmware schrijven naar BMC...",
-    success: "Firmware-upgrade geslaagd",
-    successMessage: "Firmware-upgrade succesvol voltooid.",
+    success: "Image geparkeerd op de SD-kaart",
+    successMessage:
+      "Hij staat nu onder SD-kaart in de versielijst hieronder, waar je hem kunt installeren.",
     uploadFailed: "Uploaden van BMC-firmware mislukt",
     writtenData: "{{written}} geschreven",
     error: "Er is een fout opgetreden",
-    finishModalTitle: "Upgrade voltooid!",
-    finishModalDescription:
-      "<0>Om de upgrade af te ronden, is een herstart van het systeem nodig.</0><1>Wilt u nu doorgaan met de herstart?</1><2>De compute-modules blijven draaien. Alleen deze interface, de API en de consoles zijn ongeveer een halve minuut weg.</2>",
   },
   flashNode: {
     maskromWarningTitle: "Flashen raakt mogelijk niet de gekozen node",

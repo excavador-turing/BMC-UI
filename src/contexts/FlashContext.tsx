@@ -7,9 +7,8 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { Trans, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
-import RebootModal from "@/components/RebootModal";
 import { toast } from "@/hooks/use-toast";
 import {
   useFirmwareUpdateMutation,
@@ -20,7 +19,6 @@ import {
   useFirmwareStatusQuery,
   useFlashStatusQuery,
 } from "@/lib/api/get";
-import { useRebootBMCMutation } from "@/lib/api/set";
 
 type FlashType = "firmware" | "node" | null;
 
@@ -61,8 +59,6 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [isFlashing, setIsFlashing] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string>("");
-  const [rebootModalOpened, setRebootModalOpened] = useState(false);
-  const { mutate: mutateRebootBMC } = useRebootBMCMutation();
   const [uploadProgress, setUploadProgress] =
     useState<FlashContextValue["uploadProgress"]>();
 
@@ -89,25 +85,6 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
     flashType === "firmware" && isFlashing
   );
   const flashStatus = useFlashStatusQuery(flashType === "node" && isFlashing);
-
-  const handleRebootBMC = () => {
-    setRebootModalOpened(false);
-    mutateRebootBMC(undefined, {
-      onSuccess: () => {
-        toast({
-          title: t("info.rebootButton"),
-          description: t("info.rebootSuccess"),
-        });
-      },
-      onError: (error) => {
-        toast({
-          title: t("info.rebootFailed"),
-          description: error.message,
-          variant: "destructive",
-        });
-      },
-    });
-  };
 
   const handleFirmwareUpload = async (variables: {
     file?: File;
@@ -235,11 +212,15 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
         } else if (firmwareStatus.data?.Transferring) {
           handleTransferProgress(firmwareStatus.data);
         } else if (firmwareStatus.data?.Done) {
+          // No reboot offered, because an upload from the browser parks the
+          // image on the SD card and stops (SQU-134): nothing is staged, so a
+          // reboot here would do nothing at all. The image is now a candidate
+          // in the version list like any other, and installing it is a
+          // separate, deliberate choice made there.
           handleSuccess(
             t("firmwareUpgrade.success"),
             t("firmwareUpgrade.successMessage")
           );
-          setRebootModalOpened(true);
         }
       }
     }
@@ -273,28 +254,7 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
         handleNodeUpdate,
       }}
     >
-      <>
-        {children}
-        <RebootModal
-          isOpen={rebootModalOpened}
-          onClose={() => setRebootModalOpened(false)}
-          onReboot={handleRebootBMC}
-          title={t("firmwareUpgrade.finishModalTitle")}
-          message={
-            <div className="text-neutral-900 opacity-60 dark:text-neutral-100">
-              <Trans i18nKey="firmwareUpgrade.finishModalDescription">
-                <p>To finalize the upgrade, a system reboot is necessary.</p>
-                <p>Would you like to proceed with the reboot now?</p>
-                <p className="mt-4 text-xs italic">
-                  The compute modules keep running throughout. Only this
-                  interface, the API and the consoles go away, for about half a
-                  minute.
-                </p>
-              </Trans>
-            </div>
-          }
-        />
-      </>
+      <>{children}</>
     </FlashContext.Provider>
   );
 };

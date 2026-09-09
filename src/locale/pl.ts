@@ -342,14 +342,12 @@ const translations = {
       "Wymagany jest restart, aby sfinalizować proces aktualizacji.",
     uploading: "Przesyłanie oprogramowania BMC...",
     writing: "Zapisywanie oprogramowania do BMC...",
-    success: "Aktualizacja oprogramowania powiodła się",
-    successMessage: "Aktualizacja oprogramowania została pomyślnie ukończona.",
+    success: "Obraz zapisany na karcie SD",
+    successMessage:
+      "Znajduje się teraz w sekcji Karta SD na liście wersji poniżej, skąd można go zainstalować.",
     uploadFailed: "Nie udało się przesłać oprogramowania BMC",
     writtenData: "Zapisano {{written}}",
     error: "Wystąpił błąd",
-    finishModalTitle: "Aktualizacja zakończona!",
-    finishModalDescription:
-      "<0>Aby sfinalizować aktualizację, wymagany jest restart systemu.</0><1>Czy chcesz teraz przejść do restartu?</1><2>Moduły obliczeniowe działają dalej. Znika tylko ten interfejs, API i konsole, na około pół minuty.</2>",
   },
   flashNode: {
     maskromWarningTitle: "Wgrywanie może trafić w inny węzeł",

@@ -332,14 +332,11 @@ const translations = {
     flashModalDescription: "需要重启以完成升级过程。",
     uploading: "正在上传 BMC 固件...",
     writing: "正在将固件写入 BMC...",
-    success: "固件升级成功",
-    successMessage: "固件升级已成功完成。",
+    success: "镜像已存放到 SD 卡",
+    successMessage: "它现在列在下方版本列表的 SD 卡来源中，可从那里安装。",
     uploadFailed: "上传 BMC 固件失败",
     writtenData: "已写入 {{written}}",
     error: "发生错误",
-    finishModalTitle: "升级完成！",
-    finishModalDescription:
-      "<0>要完成升级，需要重启系统。</0><1>是否要立即重启？</1><2>计算模块继续运行。只有此界面、API 和控制台会中断约半分钟。</2>",
   },
   flashNode: {
     maskromWarningTitle: "烧录可能不会写入所选节点",
