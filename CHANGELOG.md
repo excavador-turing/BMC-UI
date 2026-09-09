@@ -10,6 +10,62 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.9.0] — 2026-09-09
+
+### Changed
+
+- **Seven tabs, ordered by what a person is doing** (SQU-139): Overview, Nodes,
+  Console, Network, Firmware, Settings, About. The old eight mixed what you
+  *look at* with what you *do*, and four of them — Nodes, Console, USB, Flash
+  Node — were about the same four objects with no path between them.
+- **Info becomes Overview and changes nothing.** Storage, board health, and
+  that is all. The metrics token, the fan and a REBOOT button moved to
+  Settings; a destructive reboot at the foot of an information page is the
+  wrong neighbourhood.
+- **The upload form parks the image instead of installing it** (SQU-134). It
+  used to *be* the install, which made it a second path that bypassed the
+  version list — someone could upload one image and install another with the
+  page never showing which. It now writes to the SD card and the image appears
+  in the list like every other candidate.
+- **A parked image can be installed from the list.** The row was disabled with
+  a hint explaining why; the daemon takes a local image through the transfer
+  endpoint, so it is live now. Only the running version is still not
+  installable, because there is nothing to do.
+
+### Added
+
+- **A Settings tab** (SQU-159), in the order identity, behaviour, credentials
+  and sources, then the two things that touch the whole board.
+- **Hostname** as a control (SQU-138), behind a confirmation that says what it
+  costs: the name is the metrics `instance` label, so a Prometheus history does
+  not follow the board across a rename, and renaming back does not undo it.
+- **Time** (SQU-167): the server list with the clock's state live underneath,
+  polling, so a server that does not answer shows up in seconds rather than at
+  the next page load. It says outright when the firmware is too old to accept a
+  list — a setting saved and never read is the one failure showing the servers
+  cannot reveal.
+- **Configuration backup** (SQU-142). Including the metrics token is an
+  explicit choice with the consequence beside it, because it makes the file a
+  credential. An import reports per field, never as one verdict: it is not
+  transactional, and a single "done" would hide a hostname that took and
+  sources that did not.
+- **Console, Flash and USB route on every node card** (SQU-160). The first two
+  carry `?node=N`, validated in a non-lazy route file because a lazy route
+  holds only its component. The USB selector sits on a node's card but is not
+  per-node — the board has one bus — so every card that does not hold it says
+  which one does, instead of showing a control that looks broken.
+- **Reboot to apply, on the staged notice** (SQU-133). The notice named the one
+  action it implied and made you go to another page to take it.
+- **Why the fan is on the step it is on** (SQU-135). The governor is
+  `step_wise`, so the step follows the highest `active` trip the board is
+  above, and the display now says which. Shown only when the daemon reports the
+  trips; nothing here is a table of assumed temperatures.
+- **The footer identifies the fork.** Upstream's notice stays — BMC-UI is
+  GPL-2.0 and the attribution is required — with the fork's beside it and links
+  to the organisation and the documentation. Nothing in the interface said
+  which one it was, so a screenshot in a bug report was indistinguishable from
+  upstream's.
+
 ## [3.8.0] — 2026-09-09
 
 ### Fixed
@@ -65,6 +121,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Node 24, TypeScript 6, Vite 8, ESLint 10, and all twenty advisories cleared.
 - The release is a tarball with `SHA256SUMS`; upstream's auto-release is inert.
 
-[Unreleased]: https://github.com/excavador-turing/BMC-UI/compare/v3.8.0...hive
+[Unreleased]: https://github.com/excavador-turing/BMC-UI/compare/v3.9.0...hive
+[3.9.0]: https://github.com/excavador-turing/BMC-UI/releases/tag/v3.9.0
 [3.8.0]: https://github.com/excavador-turing/BMC-UI/releases/tag/v3.8.0
 [3.7.0]: https://github.com/excavador-turing/BMC-UI/releases/tag/v3.7.0

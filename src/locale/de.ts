@@ -33,6 +33,7 @@ const translations = {
       "Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.",
   },
   info: {
+    fanAboveTrip: "über {{celsius}} °C",
     userStorage: "Benutzerspeicher",
     ariaStorageUtilization: "Speicherauslastung",
     backupButton: "Benutzerdaten sichern",

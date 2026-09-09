@@ -32,6 +32,7 @@ const translations = {
     errorUnknown: "Ha ocurrido un error. Intenta nuevamente más tarde.",
   },
   info: {
+    fanAboveTrip: "por encima de {{celsius}} °C",
     userStorage: "Almacenamiento de Usuario",
     ariaStorageUtilization: "Utilización de almacenamiento",
     backupButton: "Respaldar Datos de Usuario",

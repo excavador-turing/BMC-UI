@@ -298,11 +298,29 @@ interface CoolingDevice {
  * nothing in that case -- which is why it is checked before the number is
  * ever formatted. A board that cannot measure must not be shown as 0 degrees.
  */
+/** A trip point: a temperature, and what crossing it means. */
+export interface ThermalTrip {
+  index: number;
+  /**
+   * `active` drives a cooling device; `hot` and `critical` are the kernel's
+   * own escalations. Passed through as the kernel spells it, so an
+   * unfamiliar type is shown rather than swallowed.
+   */
+  kind: string | null;
+  temperature_c: number | null;
+}
+
 export interface ThermalSensor {
   name: string;
   /** Degrees Celsius, one decimal. Meaningless unless `present`. */
   temperature_c: number;
   present: boolean;
+  /**
+   * The zone's trip points. Absent on any bmcd older than the one that began
+   * reporting them, which is why the fan's step is explained only when they
+   * are there rather than guessed at from a table.
+   */
+  trips?: ThermalTrip[];
 }
 
 /**

@@ -32,6 +32,7 @@ const translations = {
     errorUnknown: "Er is een fout opgetreden. Probeer het later opnieuw.",
   },
   info: {
+    fanAboveTrip: "boven {{celsius}} °C",
     userStorage: "Gebruikersopslag",
     ariaStorageUtilization: "Opslaggebruik",
     backupButton: "Back-up gebruikersgegevens",

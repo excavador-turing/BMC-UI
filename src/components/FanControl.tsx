@@ -158,6 +158,29 @@ function ThermalSkeleton() {
  * When those last two disagree the reader is watching the governor take the
  * fan back, which is the truth about this machine and used to be invisible.
  */
+/**
+ * The highest `active` trip the board is above, or null.
+ *
+ * That is the one the step_wise governor is responding to. Returns null when
+ * the daemon reports no trips (an older bmcd), when nothing can be read, or
+ * when the board is below every trip -- in which case there is nothing to
+ * explain.
+ */
+function governorReason(sensors: ThermalSensor[]): number | null {
+  let highest: number | null = null;
+  for (const sensor of sensors) {
+    if (!sensor.present || !sensor.trips) continue;
+    for (const trip of sensor.trips) {
+      if (trip.kind !== "active" || trip.temperature_c === null) continue;
+      if (sensor.temperature_c < trip.temperature_c) continue;
+      if (highest === null || trip.temperature_c > highest) {
+        highest = trip.temperature_c;
+      }
+    }
+  }
+  return highest;
+}
+
 export default function FanControl() {
   const { t } = useTranslation();
   const { data: coolingDevices } = useCoolingDevicesQuery();
@@ -313,6 +336,13 @@ export default function FanControl() {
           const step = row.live ?? row.setpoint ?? 0;
           const duty = fanDutyPercent(row.levels, row.maxLevel, step);
           const stepLabel = t("info.fanStep", { cur: step, max: row.max });
+          // Why the fan is where it is. The governor is step_wise, so the
+          // step is a consequence of the highest `active` trip the board has
+          // crossed -- and a step with no reason attached is exactly the
+          // question this display was asked to answer. Only shown when the
+          // daemon reports the trips; nothing here is a table of assumed
+          // temperatures.
+          const reason = governorReason(thermal?.sensors ?? []);
 
           return (
             <div key={row.name} className="flex items-start justify-between">
@@ -331,11 +361,16 @@ export default function FanControl() {
                             : `${stepLabel} · ${t("info.fanDuty", { value: duty })}`
                         }
                       />
-                      <div className="w-20 shrink-0 text-right">
+                      <div className="w-28 shrink-0 text-right">
                         <div className="font-semibold">{stepLabel}</div>
                         {duty !== null && (
                           <div className="text-sm opacity-60">
                             {t("info.fanDuty", { value: duty })}
+                          </div>
+                        )}
+                        {reason !== null && (
+                          <div className="text-sm opacity-60">
+                            {t("info.fanAboveTrip", { celsius: reason })}
                           </div>
                         )}
                       </div>
