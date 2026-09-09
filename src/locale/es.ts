@@ -89,23 +89,6 @@ const translations = {
     healthClockOffsetSeconds: "desfase {{value}} s",
     healthClockOffsetMillis: "desfase {{value}} ms",
     healthClockOffsetMicros: "desfase {{value}} µs",
-    metricsTokenTitle: "Token de métricas",
-    metricsTokenDescription:
-      "Una credencial que solo lee /metrics. No es la contraseña de root: rotarla no bloquea el acceso a esta interfaz, y cambiar la contraseña de root no rompe el scraping.",
-    metricsTokenShow: "Mostrar el token",
-    metricsTokenUsername: "Usuario",
-    metricsTokenValue: "Token",
-    metricsTokenCreated: "Creado",
-    metricsTokenReveal: "Revelar el token",
-    metricsTokenCopy: "Copiar el token",
-    metricsTokenRotate: "Rotar",
-    metricsTokenRotateConfirmTitle: "¿Rotar el token de métricas?",
-    metricsTokenRotateConfirmBody:
-      "El token actual deja de funcionar de inmediato. Cualquier scraping configurado con él fallará hasta que se actualice.",
-    metricsTokenRotated:
-      "Rotado. Actualice todo scraping que usara el token anterior.",
-    metricsTokenError:
-      "No se pudo leer el token. Puede que esta placa no tenga overlay montado.",
     healthClockMeasuredBy: "medido con {{tool}}",
     healthAbsent: "no detectado",
     healthUnavailable: "Este demonio BMC no informa del estado de la placa.",

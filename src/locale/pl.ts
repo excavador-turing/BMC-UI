@@ -89,23 +89,6 @@ const translations = {
     healthClockOffsetSeconds: "odchylenie {{value}} s",
     healthClockOffsetMillis: "odchylenie {{value}} ms",
     healthClockOffsetMicros: "odchylenie {{value}} µs",
-    metricsTokenTitle: "Token metryk",
-    metricsTokenDescription:
-      "Poświadczenie, które czyta wyłącznie /metrics. To nie jest hasło roota: jego rotacja nie zablokuje nikomu dostępu do tego interfejsu, a zmiana hasła roota nie zepsuje zbierania metryk.",
-    metricsTokenShow: "Pokaż token",
-    metricsTokenUsername: "Nazwa użytkownika",
-    metricsTokenValue: "Token",
-    metricsTokenCreated: "Utworzono",
-    metricsTokenReveal: "Odsłoń token",
-    metricsTokenCopy: "Kopiuj token",
-    metricsTokenRotate: "Rotuj",
-    metricsTokenRotateConfirmTitle: "Rotować token metryk?",
-    metricsTokenRotateConfirmBody:
-      "Bieżący token przestaje działać natychmiast. Każde zbieranie metryk skonfigurowane z nim zacznie zawodzić, dopóki nie zostanie zaktualizowane.",
-    metricsTokenRotated:
-      "Rotacja wykonana. Zaktualizuj każde zbieranie metryk używające starego tokenu.",
-    metricsTokenError:
-      "Nie udało się odczytać tokenu. Ta płyta może nie mieć zamontowanej nakładki.",
     healthClockMeasuredBy: "zmierzone przez {{tool}}",
     healthAbsent: "nie wykryto",
     healthUnavailable: "Ten demon BMC nie zgłasza kondycji płyty.",

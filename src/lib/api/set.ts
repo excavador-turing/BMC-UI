@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useAxiosWithAuth } from "./_core";
-import type { FirmwareSources, MetricsTokenResponse } from "./get";
+import type { FirmwareSources } from "./get";
 
 interface APIResponse<T> {
   response: {
@@ -239,32 +239,6 @@ export function useUSBNode1Mutation() {
     },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: ["usbNode1"] });
-    },
-  });
-}
-
-/**
- * Replaces the metrics token. The previous one stops working immediately,
- * which is the point -- so any scrape configured with it must be updated.
- *
- * Deliberately does NOT invalidate the metrics-token query: that query
- * creates a token when none exists, and re-running it here would be
- * indistinguishable from a second rotation. The mutation returns the new
- * value, which is what the caller shows.
- */
-export function useRotateMetricsTokenMutation() {
-  const api = useAxiosWithAuth();
-
-  return useMutation({
-    mutationKey: ["rotateMetricsToken"],
-    mutationFn: async () => {
-      const response = await api.get<APIResponse<MetricsTokenResponse>>(
-        "/bmc",
-        {
-          params: { opt: "set", type: "metrics_token" },
-        }
-      );
-      return response.data.response[0].result;
     },
   });
 }

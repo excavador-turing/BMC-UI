@@ -88,23 +88,6 @@ const translations = {
     healthClockOffsetSeconds: "afwijking {{value}} s",
     healthClockOffsetMillis: "afwijking {{value}} ms",
     healthClockOffsetMicros: "afwijking {{value}} µs",
-    metricsTokenTitle: "Metrics-token",
-    metricsTokenDescription:
-      "Een credential dat alleen /metrics leest. Het is niet het root-wachtwoord: roteren sluit niemand buiten deze interface, en een nieuw root-wachtwoord breekt geen scrape.",
-    metricsTokenShow: "Toon het token",
-    metricsTokenUsername: "Gebruikersnaam",
-    metricsTokenValue: "Token",
-    metricsTokenCreated: "Aangemaakt",
-    metricsTokenReveal: "Token tonen",
-    metricsTokenCopy: "Token kopiëren",
-    metricsTokenRotate: "Roteren",
-    metricsTokenRotateConfirmTitle: "Metrics-token roteren?",
-    metricsTokenRotateConfirmBody:
-      "Het huidige token werkt onmiddellijk niet meer. Elke scrape die het gebruikt zal falen tot deze is bijgewerkt.",
-    metricsTokenRotated:
-      "Geroteerd. Werk elke scrape bij die het oude token gebruikte.",
-    metricsTokenError:
-      "Het token kon niet worden gelezen. Dit board heeft mogelijk geen overlay gemount.",
     healthClockMeasuredBy: "gemeten met {{tool}}",
     healthAbsent: "niet gedetecteerd",
     healthUnavailable: "Deze BMC-daemon meldt geen boardconditie.",

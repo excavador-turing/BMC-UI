@@ -10,6 +10,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.17.0] — 2026-09-09
+
+### Removed
+
+- **The Metrics token card** from Settings, with its query, its rotate
+  mutation and its strings in all six languages (SQU-178). `/metrics` moved
+  to its own listener on port 9110 and takes no credential, so there is no
+  token to show, reveal, copy or rotate.
+
+  A card offering to rotate a credential that no longer guards anything would
+  be worse than no card: it would imply a protection that is not there.
+
 ## [3.16.0] — 2026-09-09
 
 ### Changed

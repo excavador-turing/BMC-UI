@@ -91,14 +91,6 @@ export interface UpdateCheckResponse {
   error: string | null;
 }
 
-/** The credential that reads /metrics and can do nothing else. */
-export interface MetricsTokenResponse {
-  username: string;
-  token: string;
-  created_at: string;
-  path?: string;
-}
-
 /** Where the board looks for firmware. */
 export interface FirmwareSource {
   id: string;
@@ -611,32 +603,6 @@ export function useUpdateCheckQuery() {
     // same way in ten seconds, and it reports the reason in `error`.
     staleTime: 1000 * 60 * 30,
     refetchInterval: false,
-    retry: false,
-  });
-}
-
-/**
- * The metrics token. Not fetched on mount -- reading it CREATES one on a
- * board that has never had it, and a page load should not mint a credential
- * nobody asked for. `enabled: false` until something calls `refetch`.
- */
-export function useMetricsTokenQuery() {
-  const api = useAxiosWithAuth();
-
-  return useQuery({
-    queryKey: ["metricsToken"],
-    queryFn: async () => {
-      const response = await api.get<APIResponse<MetricsTokenResponse>>(
-        "/bmc",
-        {
-          params: { opt: "get", type: "metrics_token" },
-        }
-      );
-      return response.data.response[0].result;
-    },
-    enabled: false,
-    gcTime: 0,
-    staleTime: 0,
     retry: false,
   });
 }

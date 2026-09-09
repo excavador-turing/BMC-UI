@@ -87,23 +87,6 @@ const translations = {
     healthClockOffsetSeconds: "offset {{value}} s",
     healthClockOffsetMillis: "offset {{value}} ms",
     healthClockOffsetMicros: "offset {{value}} µs",
-    metricsTokenTitle: "Metrics token",
-    metricsTokenDescription:
-      "A credential that reads /metrics and nothing else. It is not the root password: rotating it cannot lock anyone out of this interface, and changing the root password cannot break a scrape.",
-    metricsTokenShow: "Show the token",
-    metricsTokenUsername: "Username",
-    metricsTokenValue: "Token",
-    metricsTokenCreated: "Created",
-    metricsTokenReveal: "Reveal the token",
-    metricsTokenCopy: "Copy the token",
-    metricsTokenRotate: "Rotate",
-    metricsTokenRotateConfirmTitle: "Rotate the metrics token?",
-    metricsTokenRotateConfirmBody:
-      "The current token stops working immediately. Any scrape configured with it will start failing until it is updated.",
-    metricsTokenRotated:
-      "Rotated. Update every scrape that used the old token.",
-    metricsTokenError:
-      "The token could not be read. This board may have no overlay mounted.",
     healthClockMeasuredBy: "measured by {{tool}}",
     healthAbsent: "not detected",
     healthUnavailable: "This BMC daemon does not report board health.",

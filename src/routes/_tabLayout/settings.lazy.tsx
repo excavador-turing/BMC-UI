@@ -6,7 +6,6 @@ import ConfigBackup from "@/components/ConfigBackup";
 import FanControl from "@/components/FanControl";
 import FirmwareSources from "@/components/FirmwareSources";
 import HostnameCard from "@/components/HostnameCard";
-import MetricsToken from "@/components/MetricsToken";
 import RebootModal from "@/components/RebootModal";
 import InfoSkeleton from "@/components/skeletons/info";
 import TabView from "@/components/TabView";
@@ -91,7 +90,6 @@ export function Settings() {
       <HostnameCard />
       <TimeCard />
       <FanControl />
-      <MetricsToken />
       <FirmwareSources />
       <ConfigBackup />
 

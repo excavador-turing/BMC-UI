@@ -89,23 +89,6 @@ const translations = {
     healthClockOffsetSeconds: "Abweichung {{value}} s",
     healthClockOffsetMillis: "Abweichung {{value}} ms",
     healthClockOffsetMicros: "Abweichung {{value}} µs",
-    metricsTokenTitle: "Metrik-Token",
-    metricsTokenDescription:
-      "Ein Zugangsschlüssel, der nur /metrics liest. Es ist nicht das Root-Passwort: sein Wechsel sperrt niemanden aus dieser Oberfläche aus, und ein neues Root-Passwort unterbricht kein Scraping.",
-    metricsTokenShow: "Token anzeigen",
-    metricsTokenUsername: "Benutzername",
-    metricsTokenValue: "Token",
-    metricsTokenCreated: "Erstellt",
-    metricsTokenReveal: "Token aufdecken",
-    metricsTokenCopy: "Token kopieren",
-    metricsTokenRotate: "Erneuern",
-    metricsTokenRotateConfirmTitle: "Metrik-Token erneuern?",
-    metricsTokenRotateConfirmBody:
-      "Das aktuelle Token wird sofort ungültig. Jedes damit konfigurierte Scraping schlägt fehl, bis es aktualisiert wird.",
-    metricsTokenRotated:
-      "Erneuert. Aktualisieren Sie jedes Scraping, das das alte Token verwendet hat.",
-    metricsTokenError:
-      "Das Token konnte nicht gelesen werden. Auf diesem Board ist möglicherweise kein Overlay eingehängt.",
     healthClockMeasuredBy: "gemessen mit {{tool}}",
     healthAbsent: "nicht erkannt",
     healthUnavailable: "Dieser BMC-Daemon meldet keinen Board-Zustand.",
