@@ -10,6 +10,7 @@ const handleParams = (variables: {
   sha256?: string;
   skipCRC?: boolean;
   node?: number;
+  park?: boolean;
 }) => {
   const params: Record<string, unknown> = {
     opt: "set",
@@ -33,6 +34,14 @@ const handleParams = (variables: {
 
   if (variables.node !== undefined) {
     params.node = variables.node;
+  }
+
+  // Park the image on the SD card instead of installing it. The daemon writes
+  // it and stops, so the catalogue lists it and installing stays a separate,
+  // visible choice -- rather than an upload that arms the board the moment it
+  // lands.
+  if (variables.park) {
+    params.park = 1;
   }
 
   return params;
@@ -70,6 +79,7 @@ export function useFirmwareUpdateMutation(
       file?: File;
       url?: string;
       sha256?: string;
+      park?: boolean;
     }) => {
       if (!variables.file && !variables.url)
         throw new Error("No file or URL provided");
@@ -83,6 +93,7 @@ export function useFirmwareUpdateMutation(
           file: variables.file,
           url: variables.url,
           sha256: variables.sha256,
+          park: variables.park,
         }),
       });
 

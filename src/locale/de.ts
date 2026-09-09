@@ -242,6 +242,13 @@ const translations = {
     },
   },
   firmwareUpgrade: {
+    parkButton: "Auf die SD-Karte hochladen",
+    parkModalTitle: "Dieses Image auf die Karte laden?",
+    parkModalDescription:
+      "Das Image wird auf die SD-Karte geschrieben, mehr nicht: kein Neustart, nichts bereitgestellt. Es erscheint dann in der Liste oben und lässt sich wie jede andere Version installieren.",
+    rebootToApply: "Zum Anwenden neu starten",
+    rebootToApplyConfirm:
+      "Der BMC startet neu und bootet das bereitgestellte Image. Die Compute-Module laufen dabei weiter. Kommt das neue Image nicht sauber hoch, bootet das Board zurück auf das jetzige.",
     firmwareSlots: "Firmware-Slots",
     slotRunning: "Laufend",
     slotRollback: "Rollback",

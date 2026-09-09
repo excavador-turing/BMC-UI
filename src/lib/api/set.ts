@@ -296,16 +296,29 @@ export function useInstallFirmwareMutation() {
       source: string;
       version: string;
       allowDowngrade?: boolean;
+      /**
+       * Set for a candidate the board already holds. An image on the SD card
+       * is not fetched, so it does not go through `firmware_install` -- the
+       * daemon refuses that pair by design, and posting it was a 400 at the
+       * end of a selection that otherwise worked.
+       */
+      localFile?: string;
     }) => {
-      const response = await api.get<APIResponse<unknown>>("/bmc", {
-        params: {
-          opt: "set",
-          type: "firmware_install",
-          source: variables.source,
-          version: variables.version,
-          ...(variables.allowDowngrade ? { allow_downgrade: 1 } : {}),
-        },
-      });
+      const params = variables.localFile
+        ? {
+            opt: "set",
+            type: "firmware",
+            local: 1,
+            file: variables.localFile,
+          }
+        : {
+            opt: "set",
+            type: "firmware_install",
+            source: variables.source,
+            version: variables.version,
+            ...(variables.allowDowngrade ? { allow_downgrade: 1 } : {}),
+          };
+      const response = await api.get<APIResponse<unknown>>("/bmc", { params });
       return response.data.response[0].result;
     },
     onSuccess: async () => {

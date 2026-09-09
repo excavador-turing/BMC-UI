@@ -38,6 +38,7 @@ export interface FlashContextValue {
     file?: File;
     url?: string;
     sha256?: string;
+    park?: boolean;
   }) => Promise<void>;
   handleNodeUpdate: (variables: {
     nodeId: number;
@@ -112,6 +113,7 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
     file?: File;
     url?: string;
     sha256?: string;
+    park?: boolean;
   }) => {
     setFlashType("firmware");
     setIsUploading(true);

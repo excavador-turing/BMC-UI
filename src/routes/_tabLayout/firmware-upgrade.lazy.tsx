@@ -46,7 +46,12 @@ export function FirmwareUpgrade() {
       const sha256 = (form.elements.namedItem("sha256") as HTMLInputElement)
         .value;
 
-      void handleFirmwareUpload({ file, url, sha256 });
+      // Parked, not installed. The upload used to BE the install, which made
+      // this form a second way to install that bypassed the list above --
+      // someone could upload one image and install another with the page
+      // never showing which. Now it lands on the SD card and appears in the
+      // list like every other candidate.
+      void handleFirmwareUpload({ file, url, sha256, park: true });
     }
   };
 
@@ -81,7 +86,7 @@ export function FirmwareUpgrade() {
               (isFlashing && flashType === "firmware")
             }
           >
-            {t("firmwareUpgrade.submitButton")}
+            {t("firmwareUpgrade.parkButton")}
           </Button>
         </div>
         {uploadProgress && flashType === "firmware" && (
@@ -103,8 +108,8 @@ export function FirmwareUpgrade() {
         isOpen={confirmFlashModal}
         onClose={() => setConfirmFlashModal(false)}
         onConfirm={handleUpload}
-        title={t("firmwareUpgrade.flashModalTitle")}
-        message={t("firmwareUpgrade.flashModalDescription")}
+        title={t("firmwareUpgrade.parkModalTitle")}
+        message={t("firmwareUpgrade.parkModalDescription")}
       />
     </TabView>
   );

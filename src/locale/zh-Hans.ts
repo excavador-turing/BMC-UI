@@ -230,6 +230,13 @@ const translations = {
     },
   },
   firmwareUpgrade: {
+    parkButton: "上传到 SD 卡",
+    parkModalTitle: "将该镜像上传到卡上？",
+    parkModalDescription:
+      "镜像会被写入 SD 卡，仅此而已：不重启，也不暂存。随后它会出现在上面的列表中，可以像其他版本一样安装。",
+    rebootToApply: "重启以应用",
+    rebootToApplyConfirm:
+      "BMC 将重启并启动已暂存的镜像。计算模块全程保持运行。如果新镜像未能正常启动，主板会回退到当前镜像。",
     firmwareSlots: "固件槽位",
     slotRunning: "运行中",
     slotRollback: "回滚",

@@ -62,18 +62,15 @@ function TrustBadge({ trust }: { trust: FirmwareTrust }) {
 }
 
 function CandidateRow({
-  source,
   candidate,
   onInstall,
   busy,
 }: {
-  source: FirmwareSourceCatalog;
   candidate: FirmwareCandidate;
   onInstall: (c: FirmwareCandidate) => void;
   busy: boolean;
 }) {
   const { t } = useTranslation();
-  const isLocal = source.kind === "local";
 
   return (
     <div className="flex items-center justify-between gap-4 border-b py-2 last:border-b-0">
@@ -108,11 +105,14 @@ function CandidateRow({
         </div>
         <TrustBadge trust={candidate.trust} />
       </div>
+      {/* A parked image can be installed now: the daemon takes it through the
+          transfer endpoint rather than the updater, which is why this used to
+          be refused. Only the running version is still not installable, and
+          that is because there is nothing to do. */}
       <Button
         variant="bw"
         size="sm"
-        disabled={busy || candidate.relation === "current" || isLocal}
-        title={isLocal ? t("firmwareUpgrade.installLocalHint") : undefined}
+        disabled={busy || candidate.relation === "current"}
         onClick={() => onInstall(candidate)}
       >
         {t("firmwareUpgrade.install")}
@@ -164,6 +164,10 @@ export default function FirmwareCandidates() {
       version: candidate.version,
       // Anything not strictly newer needs the updater's explicit consent.
       allowDowngrade: candidate.relation !== "newer",
+      // The catalogue reports the path for a local candidate; that is what
+      // decides which endpoint this goes to.
+      localFile:
+        source.kind === "local" ? (candidate.file ?? undefined) : undefined,
     });
     await catalog.refetch();
   };
@@ -247,7 +251,6 @@ export default function FirmwareCandidates() {
             {shown.map((c) => (
               <CandidateRow
                 key={`${source.id}-${c.version}`}
-                source={source}
                 candidate={c}
                 busy={install.isPending}
                 onInstall={(candidate) => setConfirming({ source, candidate })}

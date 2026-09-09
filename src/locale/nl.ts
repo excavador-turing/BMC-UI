@@ -239,6 +239,13 @@ const translations = {
     },
   },
   firmwareUpgrade: {
+    parkButton: "Uploaden naar de SD-kaart",
+    parkModalTitle: "Dit image naar de kaart uploaden?",
+    parkModalDescription:
+      "Het image wordt naar de SD-kaart geschreven en verder niets: geen herstart, niets klaargezet. Het verschijnt daarna in de lijst hierboven en is als elke andere versie te installeren.",
+    rebootToApply: "Herstarten om toe te passen",
+    rebootToApplyConfirm:
+      "De BMC herstart en start het klaargezette image. De compute-modules blijven draaien. Komt het nieuwe image niet gezond op, dan start het board terug op het huidige.",
     firmwareSlots: "Firmwareslots",
     slotRunning: "Actief",
     slotRollback: "Terugval",

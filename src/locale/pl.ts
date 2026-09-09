@@ -239,6 +239,13 @@ const translations = {
     },
   },
   firmwareUpgrade: {
+    parkButton: "Wyślij na kartę SD",
+    parkModalTitle: "Wysłać ten obraz na kartę?",
+    parkModalDescription:
+      "Obraz zostanie zapisany na karcie SD i nic więcej: bez restartu i bez przygotowywania. Pojawi się na liście powyżej i można go zainstalować jak każdą inną wersję.",
+    rebootToApply: "Uruchom ponownie, aby zastosować",
+    rebootToApplyConfirm:
+      "BMC uruchomi się ponownie i wystartuje przygotowany obraz. Moduły obliczeniowe działają dalej. Jeśli nowy obraz nie wstanie poprawnie, płyta wróci do obecnego.",
     firmwareSlots: "Sloty firmware",
     slotRunning: "Uruchomiony",
     slotRollback: "Wycofanie",

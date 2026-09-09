@@ -1,13 +1,18 @@
 import { filesize } from "filesize";
 import { TriangleAlert } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import RebootModal from "@/components/RebootModal";
 import TableItem from "@/components/TableItem";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import {
   type FirmwareSlot,
   useFirmwareSlotsQuery,
   useUpdateCheckQuery,
 } from "@/lib/api/get";
+import { useRebootBMCMutation } from "@/lib/api/set";
 import { versionLabel } from "@/lib/format";
 
 const human = (bytes: number) => filesize(bytes, { standard: "jedec" });
@@ -106,6 +111,27 @@ export default function FirmwareSlots() {
   const update = useUpdateCheckQuery();
 
   const promotion = data?.last_promotion ?? null;
+  const { toast } = useToast();
+  const [rebootModalOpened, setRebootModalOpened] = useState(false);
+  const { mutate: mutateRebootBMC, isPending: rebootPending } =
+    useRebootBMCMutation();
+
+  const handleRebootBMC = () => {
+    setRebootModalOpened(false);
+    mutateRebootBMC(undefined, {
+      onSuccess: () =>
+        toast({
+          title: t("info.rebootButton"),
+          description: t("info.rebootSuccess"),
+        }),
+      onError: (e) =>
+        toast({
+          title: t("info.rebootFailed"),
+          description: e.message,
+          variant: "destructive",
+        }),
+    });
+  };
 
   return (
     <div>
@@ -145,6 +171,21 @@ export default function FirmwareSlots() {
                       })
                     : t("firmwareUpgrade.slotStagedDescription")}
                 </p>
+                {/* The one action this notice implies, next to the notice.
+                    Until now it lived on another page: install here, then go
+                    to Settings to reboot -- and the two are one operation, so
+                    people either forgot or rebooted from the wrong place. */}
+                <Button
+                  className="mt-3"
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  isLoading={rebootPending}
+                  disabled={rebootPending}
+                  onClick={() => setRebootModalOpened(true)}
+                >
+                  {t("firmwareUpgrade.rebootToApply")}
+                </Button>
               </div>
             </div>
           )}
@@ -257,6 +298,14 @@ export default function FirmwareSlots() {
           </div>
         </>
       )}
+
+      <RebootModal
+        isOpen={rebootModalOpened}
+        onClose={() => setRebootModalOpened(false)}
+        onReboot={handleRebootBMC}
+        title={t("firmwareUpgrade.rebootToApply")}
+        message={t("firmwareUpgrade.rebootToApplyConfirm")}
+      />
     </div>
   );
 }

@@ -240,6 +240,13 @@ const translations = {
     },
   },
   firmwareUpgrade: {
+    parkButton: "Subir a la tarjeta SD",
+    parkModalTitle: "¿Subir esta imagen a la tarjeta?",
+    parkModalDescription:
+      "La imagen se escribe en la tarjeta SD y nada más: sin reinicio y sin preparar nada. Aparecerá en la lista de arriba y podrá instalarse como cualquier otra versión.",
+    rebootToApply: "Reiniciar para aplicar",
+    rebootToApplyConfirm:
+      "El BMC se reinicia y arranca la imagen preparada. Los módulos de cómputo siguen funcionando. Si la nueva imagen no arranca correctamente, la placa vuelve a la actual.",
     firmwareSlots: "Ranuras de firmware",
     slotRunning: "En ejecución",
     slotRollback: "Reversión",

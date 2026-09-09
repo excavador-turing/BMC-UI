@@ -260,6 +260,13 @@ const translations = {
     checkNow: "Check now",
     checkedAt: "checked {{at}}",
     checking: "checking the sources now",
+    parkButton: "Upload to the SD card",
+    parkModalTitle: "Upload this image to the card?",
+    parkModalDescription:
+      "The image is written to the SD card and nothing else happens: no reboot, and nothing staged. It then appears in the list above, where you can install it like any other version.",
+    rebootToApply: "Reboot to apply",
+    rebootToApplyConfirm:
+      "The BMC restarts and boots the staged image. The compute modules keep running throughout. If the new image does not come up healthy the board reboots back onto the one it has now.",
     runningIs: "running {{version}}",
     availableError: "The available firmware could not be read from this board.",
     sourceUnreadable: "This source returned nothing usable: {{reason}}",
