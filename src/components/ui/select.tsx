@@ -24,17 +24,30 @@ interface SelectTriggerProps extends React.ComponentPropsWithoutRef<
   typeof Trigger
 > {
   label: string;
+  /**
+   * Keep the label for assistive technology only.
+   *
+   * The default draws the label as a caption floating above the value and
+   * reserves the top of a 48 px trigger for it. That is right for a form
+   * field with a row to itself and wrong for a control sitting in a line of
+   * buttons: shrink the trigger to match them and the caption lands on top of
+   * the value. Seen on the Nodes tab, where "USB route for node 1" printed
+   * straight through "Device".
+   */
+  hideLabel?: boolean;
 }
 
 const SelectTrigger = forwardRef<
   React.ElementRef<typeof Trigger>,
   SelectTriggerProps
->(({ className, children, label, ...props }, ref) => (
+>(({ className, children, label, hideLabel = false, ...props }, ref) => (
   <label className="relative block">
     <Trigger
       ref={ref}
       className={cn(
         "flex h-12 w-full items-center justify-between rounded-md border border-neutral-200 bg-white px-4 pt-5 pb-2 text-sm font-semibold ring-offset-white placeholder:text-neutral-500 focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900 dark:ring-offset-neutral-800 dark:focus:ring-neutral-300 [&>span]:line-clamp-1",
+        // No caption, so no room reserved for one: the value sits centred.
+        hideLabel && "h-9 py-0 pr-9",
         className
       )}
       aria-label={label}
@@ -42,12 +55,19 @@ const SelectTrigger = forwardRef<
     >
       {children}
       <Icon asChild>
-        <ChevronDown className="absolute top-1/2 right-4 size-6 -translate-y-1/2 opacity-60" />
+        <ChevronDown
+          className={cn(
+            "absolute top-1/2 right-4 size-6 -translate-y-1/2 opacity-60",
+            hideLabel && "right-2 size-5"
+          )}
+        />
       </Icon>
     </Trigger>
-    <span className="absolute top-0 left-0 origin-left -translate-y-2 px-4 py-3 text-sm font-semibold opacity-60 duration-200 ease-in-out peer-placeholder-shown:translate-y-0 peer-focus:-translate-y-2">
-      {label}
-    </span>
+    {!hideLabel && (
+      <span className="absolute top-0 left-0 origin-left -translate-y-2 px-4 py-3 text-sm font-semibold opacity-60 duration-200 ease-in-out peer-placeholder-shown:translate-y-0 peer-focus:-translate-y-2">
+        {label}
+      </span>
+    )}
   </label>
 ));
 SelectTrigger.displayName = Trigger.displayName;

@@ -241,6 +241,7 @@ const translations = {
     },
   },
   firmwareUpgrade: {
+    releaseNotes: "Notas",
     parkButton: "Subir a la tarjeta SD",
     parkModalTitle: "¿Subir esta imagen a la tarjeta?",
     parkModalDescription:

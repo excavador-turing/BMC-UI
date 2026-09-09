@@ -243,6 +243,7 @@ const translations = {
     },
   },
   firmwareUpgrade: {
+    releaseNotes: "Hinweise",
     parkButton: "Auf die SD-Karte hochladen",
     parkModalTitle: "Dieses Image auf die Karte laden?",
     parkModalDescription:

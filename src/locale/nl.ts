@@ -240,6 +240,7 @@ const translations = {
     },
   },
   firmwareUpgrade: {
+    releaseNotes: "Notities",
     parkButton: "Uploaden naar de SD-kaart",
     parkModalTitle: "Dit image naar de kaart uploaden?",
     parkModalDescription:

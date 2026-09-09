@@ -240,6 +240,7 @@ const translations = {
     },
   },
   firmwareUpgrade: {
+    releaseNotes: "Opis",
     parkButton: "Wyślij na kartę SD",
     parkModalTitle: "Wysłać ten obraz na kartę?",
     parkModalDescription:

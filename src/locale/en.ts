@@ -261,6 +261,7 @@ const translations = {
     checkNow: "Check now",
     checkedAt: "checked {{at}}",
     checking: "checking the sources now",
+    releaseNotes: "Notes",
     parkButton: "Upload to the SD card",
     parkModalTitle: "Upload this image to the card?",
     parkModalDescription:

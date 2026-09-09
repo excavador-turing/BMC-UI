@@ -82,7 +82,8 @@ export default function NodeActions({ nodeId }: { nodeId: number }) {
           disabled={setMode.isPending}
         >
           <SelectTrigger
-            className="h-9 w-40"
+            hideLabel
+            className="w-44"
             label={t("nodes.usbRouteLabel", { nodeId })}
           >
             <SelectValue placeholder={t("nodes.usbNotRouted")} />

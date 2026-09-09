@@ -10,6 +10,25 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.9.1] — 2026-09-09
+
+### Fixed
+
+- **The USB route selector on the node cards printed its label through its
+  value.** `SelectTrigger` always floats its label as a caption above the value
+  and reserves the top of a 48 px trigger for it; shrinking the trigger to sit
+  in a row of buttons left the caption on top of "Device". Reported from a
+  screenshot of the live board. The component gains a `hideLabel` mode that
+  keeps the label for assistive technology and draws no caption, and the
+  trigger is wide enough for "not routed here".
+
+### Added
+
+- **A Notes link beside Install** for every candidate from a GitHub source,
+  opening the release page in a new tab, so what changed can be read before
+  deciding to install it. Only where a page exists: a mirror directory and an
+  SD card have nothing to read, and a link to nowhere is worse than none.
+
 ## [3.9.0] — 2026-09-09
 
 ### Changed
@@ -121,7 +140,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Node 24, TypeScript 6, Vite 8, ESLint 10, and all twenty advisories cleared.
 - The release is a tarball with `SHA256SUMS`; upstream's auto-release is inert.
 
-[Unreleased]: https://github.com/excavador-turing/BMC-UI/compare/v3.9.0...hive
+[Unreleased]: https://github.com/excavador-turing/BMC-UI/compare/v3.9.1...hive
+[3.9.1]: https://github.com/excavador-turing/BMC-UI/releases/tag/v3.9.1
 [3.9.0]: https://github.com/excavador-turing/BMC-UI/releases/tag/v3.9.0
 [3.8.0]: https://github.com/excavador-turing/BMC-UI/releases/tag/v3.8.0
 [3.7.0]: https://github.com/excavador-turing/BMC-UI/releases/tag/v3.7.0

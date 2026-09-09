@@ -1,5 +1,6 @@
 import {
   AlertTriangle,
+  ExternalLink,
   RefreshCw,
   ShieldCheck,
   ShieldQuestion,
@@ -61,16 +62,36 @@ function TrustBadge({ trust }: { trust: FirmwareTrust }) {
   );
 }
 
+/**
+ * Where a candidate's release notes live, when there is such a page.
+ *
+ * A GitHub source's `location` is `owner/repo` and a candidate's `version` is
+ * the release tag, so the page is exactly `releases/tag/<version>` -- a
+ * documented, stable URL shape, not a guess. An HTTP mirror is a directory of
+ * files with nothing to read, and a file on the SD card has no page at all,
+ * so those get no link rather than a link to nowhere.
+ */
+function releaseNotesUrl(
+  source: FirmwareSourceCatalog,
+  candidate: FirmwareCandidate
+): string | null {
+  if (source.kind !== "github") return null;
+  return `https://github.com/${source.location}/releases/tag/${encodeURIComponent(candidate.version)}`;
+}
+
 function CandidateRow({
+  source,
   candidate,
   onInstall,
   busy,
 }: {
+  source: FirmwareSourceCatalog;
   candidate: FirmwareCandidate;
   onInstall: (c: FirmwareCandidate) => void;
   busy: boolean;
 }) {
   const { t } = useTranslation();
+  const notes = releaseNotesUrl(source, candidate);
 
   return (
     <div className="flex items-center justify-between gap-4 border-b py-2 last:border-b-0">
@@ -105,18 +126,30 @@ function CandidateRow({
         </div>
         <TrustBadge trust={candidate.trust} />
       </div>
-      {/* A parked image can be installed now: the daemon takes it through the
-          transfer endpoint rather than the updater, which is why this used to
-          be refused. Only the running version is still not installable, and
-          that is because there is nothing to do. */}
-      <Button
-        variant="bw"
-        size="sm"
-        disabled={busy || candidate.relation === "current"}
-        onClick={() => onInstall(candidate)}
-      >
-        {t("firmwareUpgrade.install")}
-      </Button>
+      <div className="flex shrink-0 items-center gap-2">
+        {/* What changed, before deciding to install it. Only where a page
+            exists: a mirror directory and an SD card have nothing to read. */}
+        {notes && (
+          <Button asChild variant="bw" size="sm">
+            <a href={notes} target="_blank" rel="noreferrer noopener">
+              <ExternalLink className="mr-1.5 size-4" />
+              {t("firmwareUpgrade.releaseNotes")}
+            </a>
+          </Button>
+        )}
+        {/* A parked image can be installed now: the daemon takes it through
+            the transfer endpoint rather than the updater, which is why this
+            used to be refused. Only the running version is still not
+            installable, and that is because there is nothing to do. */}
+        <Button
+          variant="bw"
+          size="sm"
+          disabled={busy || candidate.relation === "current"}
+          onClick={() => onInstall(candidate)}
+        >
+          {t("firmwareUpgrade.install")}
+        </Button>
+      </div>
     </div>
   );
 }
@@ -251,6 +284,7 @@ export default function FirmwareCandidates() {
             {shown.map((c) => (
               <CandidateRow
                 key={`${source.id}-${c.version}`}
+                source={source}
                 candidate={c}
                 busy={install.isPending}
                 onInstall={(candidate) => setConfirming({ source, candidate })}

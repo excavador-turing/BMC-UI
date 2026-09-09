@@ -231,6 +231,7 @@ const translations = {
     },
   },
   firmwareUpgrade: {
+    releaseNotes: "说明",
     parkButton: "上传到 SD 卡",
     parkModalTitle: "将该镜像上传到卡上？",
     parkModalDescription:
