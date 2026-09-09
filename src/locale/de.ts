@@ -42,8 +42,6 @@ const translations = {
     rebootButton: "Neustarten",
     reloadDaemonButton: "Daemon neu laden",
     rebootModalTitle: "Möchten Sie neu starten?",
-    rebootModalDescription:
-      "Beachten Sie, dass die Knoten bis zum Neustart keine Stromversorgung haben.",
     backupSuccess: "Sicherungsdatei erfolgreich heruntergeladen.",
     backupFailed: "Sicherung der Benutzerdaten fehlgeschlagen.",
     rebootSuccess: "Das BMC wird neu gestartet...",
@@ -354,7 +352,7 @@ const translations = {
     error: "Ein Fehler ist aufgetreten",
     finishModalTitle: "Aktualisierung abgeschlossen!",
     finishModalDescription:
-      "<0>Um die Aktualisierung abzuschließen, ist ein Systemneustart erforderlich.</0><1>Möchten Sie jetzt mit dem Neustart fortfahren?</1><2>Die Knoten verlieren vorübergehend die Stromversorgung, bis der Neustart abgeschlossen ist.</2>",
+      "<0>Um die Aktualisierung abzuschließen, ist ein Systemneustart erforderlich.</0><1>Möchten Sie jetzt mit dem Neustart fortfahren?</1><2>Die Compute-Module laufen weiter. Nur diese Oberfläche, die API und die Konsolen fehlen etwa eine halbe Minute.</2>",
   },
   flashNode: {
     maskromWarningTitle:

@@ -41,8 +41,6 @@ const translations = {
     rebootButton: "Herstarten",
     reloadDaemonButton: "Daemon herladen",
     rebootModalTitle: "Wilt u opnieuw opstarten?",
-    rebootModalDescription:
-      "Houd er rekening mee dat de nodes de stroom verliezen totdat het systeem is opgestart.",
     backupSuccess: "Back-upbestand succesvol gedownload.",
     backupFailed: "Back-up van gebruikersgegevens mislukt.",
     rebootSuccess: "De BMC wordt opnieuw opgestart...",
@@ -351,7 +349,7 @@ const translations = {
     error: "Er is een fout opgetreden",
     finishModalTitle: "Upgrade voltooid!",
     finishModalDescription:
-      "<0>Om de upgrade af te ronden, is een herstart van het systeem nodig.</0><1>Wilt u nu doorgaan met de herstart?</1><2>De nodes verliezen tijdelijk de stroom totdat het herstartsproces is voltooid.</2>",
+      "<0>Om de upgrade af te ronden, is een herstart van het systeem nodig.</0><1>Wilt u nu doorgaan met de herstart?</1><2>De compute-modules blijven draaien. Alleen deze interface, de API en de consoles zijn ongeveer een halve minuut weg.</2>",
   },
   flashNode: {
     maskromWarningTitle: "Flashen raakt mogelijk niet de gekozen node",

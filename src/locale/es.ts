@@ -41,8 +41,6 @@ const translations = {
     rebootButton: "Reiniciar",
     reloadDaemonButton: "Recargar Daemon",
     rebootModalTitle: "¿Desea reiniciar?",
-    rebootModalDescription:
-      "Tenga en cuenta que los nodos perderán energía hasta que se reinicien.",
     backupSuccess: "Archivo de respaldo descargado con éxito.",
     backupFailed: "Error al respaldar datos de usuario.",
     rebootSuccess: "El BMC se está reiniciando...",
@@ -352,7 +350,7 @@ const translations = {
     error: "Ha ocurrido un error",
     finishModalTitle: "¡Actualización finalizada!",
     finishModalDescription:
-      "<0>Para finalizar la actualización, es necesario reiniciar el sistema.</0><1>¿Desea proceder con el reinicio ahora?</1><2>Los nodos perderán energía temporalmente hasta que se complete el proceso de reinicio.</2>",
+      "<0>Para finalizar la actualización, es necesario reiniciar el sistema.</0><1>¿Desea proceder con el reinicio ahora?</1><2>Los módulos de cómputo siguen funcionando. Solo esta interfaz, la API y las consolas desaparecen durante medio minuto.</2>",
   },
   flashNode: {
     maskromWarningTitle: "El flasheo puede no ir al nodo elegido",

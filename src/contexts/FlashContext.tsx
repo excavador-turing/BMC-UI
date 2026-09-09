@@ -286,8 +286,9 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
                 <p>To finalize the upgrade, a system reboot is necessary.</p>
                 <p>Would you like to proceed with the reboot now?</p>
                 <p className="mt-4 text-xs italic">
-                  The nodes will temporarily lose power until the reboot process
-                  is complete.
+                  The compute modules keep running throughout. Only this
+                  interface, the API and the consoles go away, for about half a
+                  minute.
                 </p>
               </Trans>
             </div>

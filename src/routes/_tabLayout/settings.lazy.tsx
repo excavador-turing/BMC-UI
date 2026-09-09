@@ -13,6 +13,7 @@ import TabView from "@/components/TabView";
 import TimeCard from "@/components/TimeCard";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useFirmwareSlotsQuery } from "@/lib/api/get";
 import { useRebootBMCMutation, useReloadBMCMutation } from "@/lib/api/set";
 
 export const Route = createLazyFileRoute("/_tabLayout/settings")({
@@ -39,6 +40,16 @@ export function Settings() {
   const [rebootModalOpened, setRebootModalOpened] = useState(false);
   const { mutate: mutateRebootBMC, isPending: rebootPending } =
     useRebootBMCMutation();
+
+  // A reboot from here applies a staged firmware just as surely as the button
+  // on the Firmware tab does, and until now this page said nothing about it:
+  // you could reboot for an unrelated reason and silently take an update you
+  // had forgotten was waiting. `update_staged` is three-valued, so only an
+  // explicit `true` warns -- "the boot environment could not be read" is not
+  // a reason to claim an update is pending.
+  const slots = useFirmwareSlotsQuery();
+  const stagedVersion = slots.data?.staged?.version ?? null;
+  const staged = slots.data?.update_staged === true;
   const { mutate: mutateReloadBMC, isPending: reloadPending } =
     useReloadBMCMutation();
 
@@ -109,6 +120,17 @@ export function Settings() {
         {/* The reboot cuts the BMC, not the compute modules. People assume
             otherwise and hesitate over a button that is safe, so say it. */}
         <p className="mt-2 text-sm opacity-60">{t("settings.rebootNote")}</p>
+
+        {/* Amber, like the same fact on the Firmware tab, and for the same
+            reason: a staged update is not a fault, but it does change what
+            this button does. */}
+        {staged && (
+          <p className="mt-2 text-sm font-semibold text-amber-700 dark:text-amber-500">
+            {stagedVersion
+              ? t("settings.rebootStagedNamed", { version: stagedVersion })
+              : t("settings.rebootStaged")}
+          </p>
+        )}
       </div>
 
       <RebootModal
@@ -116,7 +138,18 @@ export function Settings() {
         onClose={() => setRebootModalOpened(false)}
         onReboot={handleRebootBMC}
         title={t("info.rebootModalTitle")}
-        message={t("info.rebootModalDescription")}
+        message={
+          <>
+            <p>{t("settings.rebootModalDescription")}</p>
+            {staged && (
+              <p className="mt-3 font-semibold">
+                {stagedVersion
+                  ? t("settings.rebootStagedNamed", { version: stagedVersion })
+                  : t("settings.rebootStaged")}
+              </p>
+            )}
+          </>
+        }
       />
     </TabView>
   );

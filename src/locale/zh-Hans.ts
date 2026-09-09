@@ -41,7 +41,6 @@ const translations = {
     rebootButton: "重启",
     reloadDaemonButton: "重新加载守护进程",
     rebootModalTitle: "是否要重启？",
-    rebootModalDescription: "请注意，节点将在重启过程中断电。",
     backupSuccess: "成功下载备份文件。",
     backupFailed: "用户数据备份失败。",
     rebootSuccess: "BMC 正在重启...",
@@ -340,7 +339,7 @@ const translations = {
     error: "发生错误",
     finishModalTitle: "升级完成！",
     finishModalDescription:
-      "<0>要完成升级，需要重启系统。</0><1>是否要立即重启？</1><2>在重启过程完成之前，节点将暂时断电。</2>",
+      "<0>要完成升级，需要重启系统。</0><1>是否要立即重启？</1><2>计算模块继续运行。只有此界面、API 和控制台会中断约半分钟。</2>",
   },
   flashNode: {
     maskromWarningTitle: "烧录可能不会写入所选节点",

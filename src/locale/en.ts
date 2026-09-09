@@ -40,8 +40,6 @@ const translations = {
     rebootButton: "Reboot",
     reloadDaemonButton: "Reload Daemon",
     rebootModalTitle: "Do you want to reboot?",
-    rebootModalDescription:
-      "Be aware that the nodes will lose power until booted.",
     backupSuccess: "Successfully downloaded backup file.",
     backupFailed: "User data backup failed.",
     rebootSuccess: "The BMC is rebooting...",
@@ -350,7 +348,7 @@ const translations = {
     error: "An error has occurred",
     finishModalTitle: "Upgrade Finished!",
     finishModalDescription:
-      "<0>To finalize the upgrade, a system reboot is necessary.</0><1>Would you like to proceed with the reboot now?</1><2>The nodes will temporarily lose power until the reboot process is completed.</2>",
+      "<0>To finalize the upgrade, a system reboot is necessary.</0><1>Would you like to proceed with the reboot now?</1><2>The compute modules keep running throughout. Only this interface, the API and the consoles go away, for about half a minute.</2>",
   },
   flashNode: {
     maskromWarningTitle: "Flashing may not target the node you choose",
@@ -411,6 +409,11 @@ const translations = {
     configApplied: "applied",
     configSkipped: "skipped",
     configFailed: "FAILED",
+    rebootModalDescription:
+      "The BMC restarts. The compute modules keep running throughout — only this interface, the API and the consoles go away, for about half a minute.",
+    rebootStaged: "A firmware update is staged. This reboot will start it.",
+    rebootStagedNamed:
+      "A firmware update is staged: this reboot will start {{version}}.",
     rebootNote:
       "Rebooting the BMC does not cut power to the compute modules; they keep running throughout.",
   },

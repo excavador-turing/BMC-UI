@@ -10,6 +10,38 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.12.0] — 2026-09-09
+
+### Fixed
+
+- **The interface told you the compute modules would lose power, and they do
+  not** (SQU-133). Two live places said it, in all six languages: the reboot
+  confirmation on Settings, and the modal shown after a firmware upload
+  finishes. It is upstream's text, from a board where a BMC reboot did cut the
+  node rails; this fork's does not, which is one of the things it exists for.
+
+  Measured before changing it. The BMC rebooted at 13:11 UTC to take v2.12.0
+  and the four modules never left `Ready` — their last transition was 12:39,
+  the earlier power cut. So the modules ride a BMC reboot, and the interface
+  now says what actually happens: the modules keep running, and this UI, the
+  API and the consoles go away for about half a minute.
+
+  A dead `info.rebootModalDescription`, carrying the same claim, is removed
+  from all six locales.
+
+### Added
+
+- **The Settings reboot says when a firmware is staged** (SQU-133). Rebooting
+  from there applies a staged image exactly as the Firmware tab's button does,
+  and nothing on the page said so — you could reboot for an unrelated reason
+  and silently take an update you had forgotten was waiting. Now the button
+  carries an amber line naming the version, and the confirmation repeats it.
+
+  Only an explicit `update_staged === true` warns. The field is three-valued,
+  and "the boot environment could not be read" is not a reason to claim an
+  update is pending.
+
+
 ## [3.11.0] — 2026-09-09
 
 ### Added

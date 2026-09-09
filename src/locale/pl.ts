@@ -42,8 +42,6 @@ const translations = {
     rebootButton: "Uruchom ponownie",
     reloadDaemonButton: "Przeładuj demona",
     rebootModalTitle: "Czy chcesz ponownie uruchomić?",
-    rebootModalDescription:
-      "Pamiętaj, że węzły stracą zasilanie do czasu ponownego uruchomienia.",
     backupSuccess: "Kopia zapasowa została pomyślnie pobrana.",
     backupFailed: "Nie udało się utworzyć kopii zapasowej.",
     rebootSuccess: "BMC jest ponownie uruchamiany...",
@@ -351,7 +349,7 @@ const translations = {
     error: "Wystąpił błąd",
     finishModalTitle: "Aktualizacja zakończona!",
     finishModalDescription:
-      "<0>Aby sfinalizować aktualizację, wymagany jest restart systemu.</0><1>Czy chcesz teraz przejść do restartu?</1><2>Węzły tymczasowo stracą zasilanie do czasu zakończenia procesu restartu.</2>",
+      "<0>Aby sfinalizować aktualizację, wymagany jest restart systemu.</0><1>Czy chcesz teraz przejść do restartu?</1><2>Moduły obliczeniowe działają dalej. Znika tylko ten interfejs, API i konsole, na około pół minuty.</2>",
   },
   flashNode: {
     maskromWarningTitle: "Wgrywanie może trafić w inny węzeł",
