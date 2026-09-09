@@ -3,6 +3,9 @@ import { type OptionalTranslations } from "@/locale/en";
 
 const translations = {
   navigation: {
+    overview: "Przegląd",
+    firmware: "Firmware",
+    settings: "Ustawienia",
     info: "Informacje",
     network: "Sieć",
     nodes: "Węzły",
@@ -364,6 +367,7 @@ const translations = {
     bmcUI: "BMC UI",
   },
   ui: {
+    save: "Zapisz",
     cancel: "Anuluj",
     continue: "Kontynuuj",
     reboot: "Uruchom ponownie",

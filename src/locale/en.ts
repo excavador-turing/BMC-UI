@@ -1,13 +1,18 @@
 const translations = {
   navigation: {
-    info: "Info",
-    network: "Network",
+    overview: "Overview",
     nodes: "Nodes",
     console: "Console",
+    network: "Network",
+    firmware: "Firmware",
+    settings: "Settings",
+    about: "About",
+    // Kept so a bookmark or an old link still renders a label. The tabs
+    // themselves are the list above.
+    info: "Info",
     usb: "USB",
     firmwareUpgrade: "Firmware Upgrade",
     flashNode: "Flash Node",
-    about: "About",
   },
   userNav: {
     language: "Language",
@@ -346,6 +351,45 @@ const translations = {
     success: "Flashing successful",
     successMessage: "Image flashed successfully to the node",
   },
+  settings: {
+    hostnameTitle: "Hostname",
+    hostnameNote:
+      "One DNS label: letters, digits and hyphens, no dots. It is what About reports, what the header shows, what the board advertises over mDNS, and the instance label on every metrics series.",
+    hostnameNextBoot: "after the next reboot: {{name}}",
+    hostnameConfirmTitle: "Rename this board?",
+    hostnameConfirm:
+      "Renaming to {{name}} changes the instance label on every metrics series, so a Prometheus history will not follow this board across the rename. Renaming back does not undo it.",
+    hostnameRenamed: "renamed to {{name}}",
+    timeTitle: "Time",
+    timeNote:
+      "Comma-separated, in preference order; the first is preferred. Leave empty for the pool the firmware ships with.",
+    timePlaceholder: "192.168.1.1, pool.ntp.org",
+    timeNotConfigurable:
+      "This firmware cannot take a server list: its chrony configuration has no sourcedir. Upgrade the firmware first.",
+    timeSynchronised: "synchronised",
+    timeNotSynchronised: "NOT synchronised",
+    timeUnknown: "the clock's state could not be read",
+    timeStratum: "stratum {{stratum}}",
+    timeOffset: "offset {{ms}} ms",
+    timeSaved: "time servers saved",
+    timeCleared: "cleared; back to the pool this firmware ships with",
+    configTitle: "Configuration backup",
+    configExport: "Export",
+    configImport: "Import…",
+    configWithSecrets: "include the metrics token",
+    configSecretsWarning:
+      "The exported file will contain the metrics token. Anything holding it can scrape any board the file is applied to.",
+    configNote: "hostname, time servers, firmware sources and node names",
+    configUnreadable: "that file could not be read",
+    configImportConfirmTitle: "Apply these settings?",
+    configImportConfirm:
+      "Each setting is applied on its own and reported separately. There is no undo, and a partial apply leaves the board part-configured rather than unchanged.",
+    configApplied: "applied",
+    configSkipped: "skipped",
+    configFailed: "FAILED",
+    rebootNote:
+      "Rebooting the BMC does not cut power to the compute modules; they keep running throughout.",
+  },
   about: {
     boardModel: "Board model",
     boardSerial: "Board serial",
@@ -362,6 +406,7 @@ const translations = {
     bmcUI: "BMC UI",
   },
   ui: {
+    save: "Save",
     cancel: "Cancel",
     continue: "Continue",
     reboot: "Reboot",

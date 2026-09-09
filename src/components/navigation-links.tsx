@@ -6,14 +6,22 @@ import { useTranslation } from "react-i18next";
 import { useFlash } from "@/hooks/use-flash";
 import { cn } from "@/lib/utils";
 
+/**
+ * The tabs, in the order a person moves through them.
+ *
+ * What you look at first, then the things you act on, then what changes the
+ * board, then what identifies it. The old order mixed the two -- Info, Network
+ * and About are things you read, while Nodes, Console, USB, Firmware Upgrade
+ * and Flash Node are things you do -- and four of those were about the same
+ * four objects with no path between them.
+ */
 const navigationLinks = [
-  { to: "/info", label: "navigation.info" },
-  { to: "/network", label: "navigation.network" },
+  { to: "/info", label: "navigation.overview" },
   { to: "/nodes", label: "navigation.nodes" },
   { to: "/console", label: "navigation.console" },
-  { to: "/usb", label: "navigation.usb" },
-  { to: "/firmware-upgrade", label: "navigation.firmwareUpgrade" },
-  { to: "/flash-node", label: "navigation.flashNode" },
+  { to: "/network", label: "navigation.network" },
+  { to: "/firmware-upgrade", label: "navigation.firmware" },
+  { to: "/settings", label: "navigation.settings" },
   { to: "/about", label: "navigation.about" },
 ] as const;
 
@@ -78,8 +86,10 @@ export default function NavigationLinks({
   const renderLinks = useMemo(
     () =>
       navigationLinks.map(({ to, label }) => {
+        // Flashing a node happens from the Nodes tab now, not from a tab of
+        // its own; the pulse follows the work.
         const isNodeFlashing =
-          isFlashing && flashType === "node" && to === "/flash-node";
+          isFlashing && flashType === "node" && to === "/nodes";
         const isFirmwareFlashing =
           isFlashing && flashType === "firmware" && to === "/firmware-upgrade";
 
@@ -99,8 +109,10 @@ export default function NavigationLinks({
   const renderMobileLinks = useMemo(
     () =>
       navigationLinks.map(({ to, label }) => {
+        // Flashing a node happens from the Nodes tab now, not from a tab of
+        // its own; the pulse follows the work.
         const isNodeFlashing =
-          isFlashing && flashType === "node" && to === "/flash-node";
+          isFlashing && flashType === "node" && to === "/nodes";
         const isFirmwareFlashing =
           isFlashing && flashType === "firmware" && to === "/firmware-upgrade";
 

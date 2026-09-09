@@ -314,3 +314,75 @@ export function useInstallFirmwareMutation() {
     },
   });
 }
+
+/**
+ * Renames the board.
+ *
+ * The rename moves the metrics `instance` label with it, so a Prometheus
+ * history does not follow the board. That is a decision rather than a side
+ * effect, and the card says so before this runs.
+ */
+export function useSetHostnameMutation() {
+  const api = useAxiosWithAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["setHostname"],
+    mutationFn: async (name: string) => {
+      const response = await api.get<APIResponse<unknown>>("/bmc", {
+        params: { opt: "set", type: "hostname", name },
+      });
+      return response.data.response[0].result;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["hostname"] });
+      // The header shows the name too, and it reads it from `about`.
+      await queryClient.invalidateQueries({ queryKey: ["aboutTabData"] });
+    },
+  });
+}
+
+/** Replaces the time sources. An empty list restores the image's own pool. */
+export function useSetNtpMutation() {
+  const api = useAxiosWithAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["setNtp"],
+    mutationFn: async (servers: string[]) => {
+      const response = await api.get<APIResponse<unknown>>("/bmc", {
+        params: { opt: "set", type: "ntp", servers: servers.join(",") },
+      });
+      return response.data.response[0].result;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["ntp"] });
+    },
+  });
+}
+
+/** What an import did, field by field. */
+export interface ImportReport {
+  applied: string[];
+  skipped: string[];
+  failed: string[];
+}
+
+export function useImportConfigMutation() {
+  const api = useAxiosWithAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["importConfig"],
+    mutationFn: async (document: string) => {
+      const response = await api.get<APIResponse<ImportReport>>("/bmc", {
+        params: { opt: "set", type: "config", config: document },
+      });
+      return response.data.response[0].result;
+    },
+    onSuccess: async () => {
+      // An import can touch any of these, so none of them can be trusted.
+      await queryClient.invalidateQueries();
+    },
+  });
+}

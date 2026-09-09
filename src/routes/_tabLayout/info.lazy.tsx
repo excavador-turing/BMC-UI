@@ -1,12 +1,8 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
 import { filesize } from "filesize";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import BoardHealth from "@/components/BoardHealth";
-import FanControl from "@/components/FanControl";
-import MetricsToken from "@/components/MetricsToken";
-import RebootModal from "@/components/RebootModal";
 import InfoSkeleton from "@/components/skeletons/info";
 import TabView from "@/components/TabView";
 import { Button } from "@/components/ui/button";
@@ -14,7 +10,6 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { useBackupMutation } from "@/lib/api/file";
 import { useInfoTabData } from "@/lib/api/get";
-import { useRebootBMCMutation, useReloadBMCMutation } from "@/lib/api/set";
 
 /**
  * Calculates the progress data based on the total bytes and free bytes.
@@ -36,19 +31,14 @@ const progressData = (totalBytes: number, freeBytes: number) => {
 
 export const Route = createLazyFileRoute("/_tabLayout/info")({
   component: Info,
-  errorComponent: () => <div>Error loading Info</div>,
+  errorComponent: () => <div>Error loading Overview</div>,
   pendingComponent: InfoSkeleton,
 });
 
 export function Info() {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const [rebootModalOpened, setRebootModalOpened] = useState(false);
   const { data } = useInfoTabData();
-  const { mutate: mutateRebootBMC, isPending: rebootPending } =
-    useRebootBMCMutation();
-  const { mutate: mutateReloadBMC, isPending: reloadPending } =
-    useReloadBMCMutation();
   const { mutate: mutateBackup, isPending: backupPending } =
     useBackupMutation();
 
@@ -77,43 +67,6 @@ export function Info() {
       onError: (e) => {
         toast({
           title: t("info.backupFailed"),
-          description: e.message,
-          variant: "destructive",
-        });
-      },
-    });
-  };
-
-  const handleRebootBMC = () => {
-    setRebootModalOpened(false);
-    mutateRebootBMC(undefined, {
-      onSuccess: () => {
-        toast({
-          title: t("info.rebootButton"),
-          description: t("info.rebootSuccess"),
-        });
-      },
-      onError: (e) => {
-        toast({
-          title: t("info.rebootFailed"),
-          description: e.message,
-          variant: "destructive",
-        });
-      },
-    });
-  };
-
-  const handleReloadBMC = () => {
-    mutateReloadBMC(undefined, {
-      onSuccess: () => {
-        toast({
-          title: t("info.reloadDaemonButton"),
-          description: t("info.reloadDaemonSuccess"),
-        });
-      },
-      onError: (e) => {
-        toast({
-          title: t("info.reloadDaemonFailed"),
           description: e.message,
           variant: "destructive",
         });
@@ -162,41 +115,6 @@ export function Info() {
       </div>
 
       <BoardHealth />
-      <MetricsToken />
-
-      <FanControl />
-
-      <div>
-        <div className="mb-6 text-lg font-bold">{t("info.bmc")}</div>
-        <div className="flex gap-4">
-          <Button
-            type="button"
-            variant="destructive"
-            onClick={() => setRebootModalOpened(true)}
-            isLoading={rebootPending}
-            disabled={rebootPending}
-          >
-            {t("info.rebootButton")}
-          </Button>
-          <Button
-            type="button"
-            variant="bw"
-            onClick={() => handleReloadBMC()}
-            isLoading={reloadPending}
-            disabled={reloadPending}
-          >
-            {t("info.reloadDaemonButton")}
-          </Button>
-        </div>
-      </div>
-
-      <RebootModal
-        isOpen={rebootModalOpened}
-        onClose={() => setRebootModalOpened(false)}
-        onReboot={handleRebootBMC}
-        title={t("info.rebootModalTitle")}
-        message={t("info.rebootModalDescription")}
-      />
     </TabView>
   );
 }

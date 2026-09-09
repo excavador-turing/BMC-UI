@@ -984,3 +984,71 @@ export function useSerialStatusQuery() {
     retry: false,
   });
 }
+
+/**
+ * What the board calls itself: the live name, and the one that takes effect at
+ * the next boot.
+ *
+ * Both, because they differ when someone has run `hostname` by hand, and a
+ * page that shows only one cannot explain why the board answers to a name the
+ * settings do not show.
+ */
+export interface HostnameResponse {
+  hostname: string | null;
+  on_next_boot: string | null;
+}
+
+export function useHostnameQuery() {
+  const api = useAxiosWithAuth();
+
+  return useQuery({
+    queryKey: ["hostname"],
+    queryFn: async () => {
+      const response = await api.get<APIResponse<HostnameResponse>>("/bmc", {
+        params: { opt: "get", type: "hostname" },
+      });
+      return response.data.response[0].result;
+    },
+    // Plain useQuery with retry off, like everything else this fork added: an
+    // older bmcd that has no such endpoint must degrade to a missing card
+    // rather than blanking the route.
+    retry: false,
+  });
+}
+
+/** The clock's state, as chrony reports it. */
+export interface NtpClock {
+  synchronised: boolean | null;
+  source: string | null;
+  stratum: number | null;
+  offset_seconds: number | null;
+}
+
+export interface NtpResponse {
+  servers: string[];
+  /**
+   * False on an image whose `chrony.conf` predates the `sourcedir` line. A
+   * list saved on such a board is written and silently never read, so the card
+   * says so rather than offering a setting that does nothing.
+   */
+  configurable: boolean;
+  clock: NtpClock;
+}
+
+export function useNtpQuery() {
+  const api = useAxiosWithAuth();
+
+  return useQuery({
+    queryKey: ["ntp"],
+    queryFn: async () => {
+      const response = await api.get<APIResponse<NtpResponse>>("/bmc", {
+        params: { opt: "get", type: "ntp" },
+      });
+      return response.data.response[0].result;
+    },
+    // The clock line underneath is live state, and a person who has just
+    // pointed the board at a server wants to see it take within a poll.
+    refetchInterval: (query) => (query.state.error ? false : 5000),
+    retry: false,
+  });
+}

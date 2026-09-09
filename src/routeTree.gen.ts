@@ -26,6 +26,9 @@ const TabLayoutFlashNodeLazyRouteImport = createFileRoute(
 const TabLayoutInfoLazyRouteImport = createFileRoute('/_tabLayout/info')()
 const TabLayoutNetworkLazyRouteImport = createFileRoute('/_tabLayout/network')()
 const TabLayoutNodesLazyRouteImport = createFileRoute('/_tabLayout/nodes')()
+const TabLayoutSettingsLazyRouteImport = createFileRoute(
+  '/_tabLayout/settings',
+)()
 const TabLayoutUsbLazyRouteImport = createFileRoute('/_tabLayout/usb')()
 
 const IndexLazyRoute = IndexLazyRouteImport.update({
@@ -92,6 +95,13 @@ const TabLayoutNodesLazyRoute = TabLayoutNodesLazyRouteImport.update({
 } as any).lazy(() =>
   import('./routes/_tabLayout/nodes.lazy').then((d) => d.Route),
 )
+const TabLayoutSettingsLazyRoute = TabLayoutSettingsLazyRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => TabLayoutRoute,
+} as any).lazy(() =>
+  import('./routes/_tabLayout/settings.lazy').then((d) => d.Route),
+)
 const TabLayoutUsbLazyRoute = TabLayoutUsbLazyRouteImport.update({
   id: '/usb',
   path: '/usb',
@@ -110,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/info': typeof TabLayoutInfoLazyRoute
   '/network': typeof TabLayoutNetworkLazyRoute
   '/nodes': typeof TabLayoutNodesLazyRoute
+  '/settings': typeof TabLayoutSettingsLazyRoute
   '/usb': typeof TabLayoutUsbLazyRoute
 }
 export interface FileRoutesByTo {
@@ -122,6 +133,7 @@ export interface FileRoutesByTo {
   '/info': typeof TabLayoutInfoLazyRoute
   '/network': typeof TabLayoutNetworkLazyRoute
   '/nodes': typeof TabLayoutNodesLazyRoute
+  '/settings': typeof TabLayoutSettingsLazyRoute
   '/usb': typeof TabLayoutUsbLazyRoute
 }
 export interface FileRoutesById {
@@ -136,6 +148,7 @@ export interface FileRoutesById {
   '/_tabLayout/info': typeof TabLayoutInfoLazyRoute
   '/_tabLayout/network': typeof TabLayoutNetworkLazyRoute
   '/_tabLayout/nodes': typeof TabLayoutNodesLazyRoute
+  '/_tabLayout/settings': typeof TabLayoutSettingsLazyRoute
   '/_tabLayout/usb': typeof TabLayoutUsbLazyRoute
 }
 export interface FileRouteTypes {
@@ -150,6 +163,7 @@ export interface FileRouteTypes {
     | '/info'
     | '/network'
     | '/nodes'
+    | '/settings'
     | '/usb'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -162,6 +176,7 @@ export interface FileRouteTypes {
     | '/info'
     | '/network'
     | '/nodes'
+    | '/settings'
     | '/usb'
   id:
     | '__root__'
@@ -175,6 +190,7 @@ export interface FileRouteTypes {
     | '/_tabLayout/info'
     | '/_tabLayout/network'
     | '/_tabLayout/nodes'
+    | '/_tabLayout/settings'
     | '/_tabLayout/usb'
   fileRoutesById: FileRoutesById
 }
@@ -256,6 +272,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TabLayoutNodesLazyRouteImport
       parentRoute: typeof TabLayoutRoute
     }
+    '/_tabLayout/settings': {
+      id: '/_tabLayout/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof TabLayoutSettingsLazyRouteImport
+      parentRoute: typeof TabLayoutRoute
+    }
     '/_tabLayout/usb': {
       id: '/_tabLayout/usb'
       path: '/usb'
@@ -274,6 +297,7 @@ interface TabLayoutRouteChildren {
   TabLayoutInfoLazyRoute: typeof TabLayoutInfoLazyRoute
   TabLayoutNetworkLazyRoute: typeof TabLayoutNetworkLazyRoute
   TabLayoutNodesLazyRoute: typeof TabLayoutNodesLazyRoute
+  TabLayoutSettingsLazyRoute: typeof TabLayoutSettingsLazyRoute
   TabLayoutUsbLazyRoute: typeof TabLayoutUsbLazyRoute
 }
 
@@ -285,6 +309,7 @@ const TabLayoutRouteChildren: TabLayoutRouteChildren = {
   TabLayoutInfoLazyRoute: TabLayoutInfoLazyRoute,
   TabLayoutNetworkLazyRoute: TabLayoutNetworkLazyRoute,
   TabLayoutNodesLazyRoute: TabLayoutNodesLazyRoute,
+  TabLayoutSettingsLazyRoute: TabLayoutSettingsLazyRoute,
   TabLayoutUsbLazyRoute: TabLayoutUsbLazyRoute,
 }
 
