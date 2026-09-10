@@ -1,0 +1,1 @@
+{"response":[{"result":{"checked_at":"2026-09-10T22:27:33Z","edge":{"channel":"edge","repo":"excavador-turing/BMC-Firmware","running":"v2.20.0","target":"v2.20.0","update_available":false},"error":null,"stable":{"channel":"stable","repo":"excavador-turing/BMC-Firmware","running":"v2.20.0","target":"v2.20.0","update_available":false}}}]}

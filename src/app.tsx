@@ -14,6 +14,14 @@ import { type router } from "@/router";
 
 const queryClient = new QueryClient();
 
+// The demo answers from fixtures instead of a board. Vite replaces
+// `import.meta.env.VITE_DEMO` at build time, so in a normal build this branch
+// is dead code and the fixtures never enter the bundle a board serves.
+if (import.meta.env.VITE_DEMO === "1") {
+  const { installDemo } = await import("@/demo/install");
+  installDemo();
+}
+
 // Register your router for maximum type safety
 declare module "@tanstack/react-router" {
   interface Register {

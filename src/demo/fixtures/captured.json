@@ -1,5 +1,5 @@
 {
-  "captured_at": "2026-09-10T00:12:23Z",
-  "firmware": "v2.19.0",
+  "captured_at": "2026-09-10T22:48:56Z",
+  "firmware": "v2.20.0",
   "note": "Captured from a Turing Pi 2 running this firmware. Addresses, MAC, hostname and serial are replaced with documentation-range values; every measurement is the board's own."
 }

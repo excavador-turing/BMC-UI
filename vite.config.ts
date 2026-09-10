@@ -18,6 +18,9 @@ const buildVersion =
   process.env.BMC_UI_VERSION ?? process.env.GITHUB_REF_NAME ?? null;
 
 export default defineConfig({
+  // "/" on a board. The site's demo builds with VITE_BASE=/demo/fork/ so
+  // every asset URL and the router's basepath follow it.
+  base: process.env.VITE_BASE ?? "/",
   define: {
     __BMC_UI_VERSION__: JSON.stringify(buildVersion),
   },

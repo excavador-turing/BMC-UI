@@ -306,7 +306,16 @@ export default function SerialConsole({ node }: { node: number }) {
     // land on top of it; the alternative -- attach first, replay after --
     // would put old output below new.
     void replay().then(() => {
-      if (!cancelled) attach();
+      if (cancelled) return;
+      if (import.meta.env.VITE_DEMO === "1") {
+        // The demo has no daemon to stream from. The ring buffer it has just
+        // replayed IS the exhibit; say so in the place a live socket would
+        // name its protocol, rather than opening one and reporting failure.
+        setState("open");
+        setProtocol("a recording, not a live stream");
+        return;
+      }
+      attach();
     });
 
     return () => {
