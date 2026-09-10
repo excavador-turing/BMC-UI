@@ -43,7 +43,10 @@ out="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)/src/demo/fixtures"
 captured_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 # What the interface reads. Anything absent here is a page the demo cannot draw.
-types="about other power node_info usb sdcard cooling thermal firmware_slots firmware_available hostname ntp info"
+# Every `type=` get.ts reads, not a hand-picked subset. Six of these had no
+# fixture at all, so the demo drew those pages from nothing: firmware,
+# firmware_sources, flash, health, network, update_check.
+types="about other power node_info usb sdcard cooling thermal firmware_slots firmware_available firmware_sources firmware flash health hostname ntp info network update_check"
 
 if [ "$mode" = capture ]; then
 mkdir -p "$out"
@@ -60,14 +63,37 @@ for t in $types; do
     fi
     # One board's identity, replaced with a documentation-range equivalent.
     # RFC 5737 for the address, RFC 7042 for the MAC.
+    # Either board, and then the whole management /24 -- a fixture is public
+    # and the network it came from is not.
     sed -e "s/192\.168\.77\.20/$SAFE_IP/g" \
+        -e "s/192\.168\.77\.30/$SAFE_IP/g" \
         -e "s/192\.168\.77\.1\b/$SAFE_GW/g" \
+        -e "s/192\.168\.77\.\([0-9][0-9]*\)/203.0.113.\1/g" \
         -e "s/\([0-9a-f][0-9a-f]:\)\{5\}[0-9a-f][0-9a-f]/$SAFE_MAC/g" \
         -e "s/\"hive-bmc\"/\"$SAFE_HOST\"/g" \
         -e "s/\"board_serial\":\"[^\"]*\"/\"board_serial\":\"$SAFE_SERIAL\"/g" \
         "$out/$t.json.tmp" > "$out/$t.json"
     rm -f "$out/$t.json.tmp"
     printf '  %-20s %s bytes\n' "$t" "$(wc -c < "$out/$t.json")"
+done
+
+# The reader-task liveness the console page shows. POST, because that is the
+# method bmcd exposes it under; it reads.
+ssh "root@$board" "curl -sk -X POST 'https://127.0.0.1/api/bmc/serial/status'" > "$out/serial_status.json"
+printf '  %-20s %s bytes\n' serial_status "$(wc -c < "$out/serial_status.json")"
+
+# Each module's recent console output, so the demo can REPLAY a scrollback
+# instead of pretending to stream. These are compute modules' kernel logs:
+# they name cluster hosts and addresses, so the sanitiser is wider here --
+# hive-N becomes node-N and the management /24 becomes documentation space.
+for n in 0 1 2 3; do
+    ssh "root@$board" "curl -sk 'https://127.0.0.1/api/bmc?opt=get&type=uart&node=$n'" \
+      | sed -e "s/192\.168\.77\.\([0-9][0-9]*\)/203.0.113.\1/g" \
+            -e "s/\([0-9a-f][0-9a-f]:\)\{5\}[0-9a-f][0-9a-f]/$SAFE_MAC/g" \
+            -e "s/hive-\([0-9]\)/node-\1/g" \
+            -e "s/\"hive-bmc\"/\"$SAFE_HOST\"/g" \
+      > "$out/uart_$n.json"
+    printf '  %-20s %s bytes\n' "uart node$n" "$(wc -c < "$out/uart_$n.json")"
 done
 
 ssh "root@$board" 'curl -s http://127.0.0.1:9110/metrics' > "$out/metrics.txt"
