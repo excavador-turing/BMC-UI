@@ -35,7 +35,7 @@ const metricsText =
     import: "default",
   })["./fixtures/metrics.txt"] ?? "";
 
-function fixture(name: string): unknown | undefined {
+function fixture(name: string): unknown {
   return fixtures[`./fixtures/${name}.json`];
 }
 
