@@ -17,6 +17,20 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # The demo's fixtures come from a real board, so a careless re-capture could
+  # commit that board's address, MAC, hostname or serial. The guard runs
+  # against what is committed, needs no board and no network, and is the only
+  # thing standing between a capture and a public site.
+  fixtures:
+    name: no board identifiers in the demo fixtures
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check
+        run: ./scripts/capture-fixtures.sh --check
+
   lint:
     name: Linting rules
     runs-on: ubuntu-latest
