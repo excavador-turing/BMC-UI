@@ -1,0 +1,1 @@
+{"response":[{"result":{"ip":[{"device":"br0","ip":"203.0.113.20","mac":"00:00:5e:00:53:01"}],"storage":[{"bytes_free":144556032,"name":"BMC","total_bytes":144683008},{"bytes_free":29013180416,"name":"SD card","total_bytes":31902400512}]}}]}

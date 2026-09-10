@@ -1,0 +1,1 @@
+{"response":[{"result":{"clock":{"measured_by":"chronyc tracking","offset_seconds":4.15e-7,"rtc":[{"device":"rtc0","name":"rtc-pcf8563 0-0051"},{"device":"rtc1","name":"sun6i-rtc 7090000.rtc"}],"source":"gw.haarlem.lan","stratum":4,"synchronised":true},"configurable":true,"servers":["203.0.113.1","pool.ntp.org"]}}]}
