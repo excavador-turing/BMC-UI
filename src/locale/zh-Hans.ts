@@ -333,11 +333,6 @@ const translations = {
     error: "发生错误",
   },
   flashNode: {
-    maskromWarningTitle: "烧录可能不会写入所选节点",
-    maskromWarning:
-      "在 {{revision}} 主板上，守护进程会写入最先进入 maskrom 的模块并报告成功，与此处的选择无关。安装前请只让目标模块进入 maskrom。",
-    maskromWarningUnknown:
-      "无法读取此主板的版本。在 v2.5 主板上，烧录会写入最先进入 maskrom 的模块，与所选无关。安装前请只让目标模块进入 maskrom。",
     header: "在选定的节点上安装操作系统镜像",
     nodeSelect: "选定的节点：",
     fileInput: "文件（远程或本地）：",
