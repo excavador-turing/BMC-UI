@@ -343,11 +343,6 @@ const translations = {
     error: "Ha ocurrido un error",
   },
   flashNode: {
-    maskromWarningTitle: "El flasheo puede no ir al nodo elegido",
-    maskromWarning:
-      "En placas {{revision}} el demonio escribe en el módulo que aparezca primero en maskrom e informa éxito, sea cual sea la selección. Deje solo el módulo de destino en maskrom antes de instalar.",
-    maskromWarningUnknown:
-      "No se pudo leer la revisión de esta placa. En placas v2.5 el flasheo escribe en el módulo que aparezca primero en maskrom, sea cual sea la selección. Deje solo el módulo de destino en maskrom antes de instalar.",
     header: "Instalar una imagen de SO en un nodo seleccionado",
     nodeSelect: "Nodo seleccionado:",
     fileInput: "Archivo (remoto o local):",

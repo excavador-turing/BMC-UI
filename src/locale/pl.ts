@@ -342,11 +342,6 @@ const translations = {
     error: "Wystąpił błąd",
   },
   flashNode: {
-    maskromWarningTitle: "Wgrywanie może trafić w inny węzeł",
-    maskromWarning:
-      "Na płytach {{revision}} demon zapisuje do modułu, który pierwszy pojawi się w maskrom, i zgłasza sukces niezależnie od wyboru. Przed instalacją zostaw w maskrom tylko moduł docelowy.",
-    maskromWarningUnknown:
-      "Nie udało się odczytać rewizji tej płyty. Na płytach v2.5 wgrywanie zapisuje do modułu, który pierwszy pojawi się w maskrom, niezależnie od wyboru. Przed instalacją zostaw w maskrom tylko moduł docelowy.",
     header: "Zainstaluj obraz systemu operacyjnego na wybranym węźle",
     nodeSelect: "Wybrany węzeł:",
     fileInput: "Plik (zdalnie lub lokalnie):",

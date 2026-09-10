@@ -342,11 +342,6 @@ const translations = {
     error: "Er is een fout opgetreden",
   },
   flashNode: {
-    maskromWarningTitle: "Flashen raakt mogelijk niet de gekozen node",
-    maskromWarning:
-      "Op {{revision}}-boards schrijft de daemon naar de module die als eerste in maskrom verschijnt en meldt succes, ongeacht de keuze hier. Zet vóór het installeren alleen de doelmodule in maskrom.",
-    maskromWarningUnknown:
-      "De revisie van dit board kon niet worden gelezen. Op v2.5-boards schrijft het flashen naar de module die als eerste in maskrom verschijnt, ongeacht de keuze. Zet vóór het installeren alleen de doelmodule in maskrom.",
     header: "Installeer een besturingssysteemimage op een geselecteerde node",
     nodeSelect: "Geselecteerde node:",
     fileInput: "Bestand (extern of lokaal):",

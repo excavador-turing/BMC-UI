@@ -341,11 +341,6 @@ const translations = {
     error: "An error has occurred",
   },
   flashNode: {
-    maskromWarningTitle: "Flashing may not target the node you choose",
-    maskromWarning:
-      "On {{revision}} boards the daemon writes to whichever module is in maskrom first and reports success, whatever is selected here. Put only the target module into maskrom before installing.",
-    maskromWarningUnknown:
-      "This board's revision could not be read. On v2.5 boards, flashing writes to whichever module is in maskrom first, whatever is selected here. Put only the target module into maskrom before installing.",
     header: "Install an OS image on a selected node",
     nodeSelect: "Selected node:",
     fileInput: "File (remote or local):",

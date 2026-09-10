@@ -10,6 +10,27 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.19.0] — 2026-09-10
+
+### Removed
+
+- **The red maskrom warning on the flash page** (SQU-157, closing with
+  SQU-105). It said the daemon writes to whichever module is in maskrom first
+  and reports success, whatever the picker says. That was true and is not any
+  more.
+
+  Proven on the board on 2026-09-10 before removing it: with **two** modules in
+  maskrom at once, flashing node 2 left node 4 answering `talosctl` with the
+  cluster's certificate authority while node 2 rejected it as unknown — a node
+  that was overwritten cannot present the cluster CA, and one that was not
+  cannot fail to. The write landed where it was aimed.
+
+  SQU-157 said to remove it in the change that closes SQU-105, and a warning
+  that is no longer true is worse than no warning: it teaches people to ignore
+  the red ones.
+
+  The component, its use, and its three strings in all six locales are gone.
+
 ## [3.18.0] — 2026-09-09
 
 ### Changed
