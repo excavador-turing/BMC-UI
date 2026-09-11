@@ -153,3 +153,26 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release edit "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --draft=false
+
+      # The site at turingpi.xyz builds its live demo from the LATEST release
+      # of this repository at every deploy, so a release here is what makes
+      # the site stale -- not a commit there. Tell it. The token is a
+      # fine-grained PAT with contents:write on excavador-turing/www, held as
+      # WWW_DISPATCH_TOKEN; without it the site still catches up on its hourly
+      # schedule, so a missing token skips rather than fails a release.
+      - name: tell the site
+        if: ${{ !contains(github.ref_name, '-') }}
+        env:
+          WWW_DISPATCH_TOKEN: ${{ secrets.WWW_DISPATCH_TOKEN }}
+        run: |
+          set -eu
+          if [ -z "${WWW_DISPATCH_TOKEN}" ]; then
+            echo "no WWW_DISPATCH_TOKEN; the site catches up on its schedule"
+            exit 0
+          fi
+          curl -fsS -X POST \
+            -H "Authorization: Bearer ${WWW_DISPATCH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/excavador-turing/www/dispatches \
+            -d "{\"event_type\":\"ui-released\",\"client_payload\":{\"tag\":\"${GITHUB_REF_NAME}\"}}"
+          echo "told excavador-turing/www: ui-released ${GITHUB_REF_NAME}"
