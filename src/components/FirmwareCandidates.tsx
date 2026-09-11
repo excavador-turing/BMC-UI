@@ -8,6 +8,7 @@ import {
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import ConfirmationModal from "@/components/ConfirmationModal";
 import { Button } from "@/components/ui/button";
 import {
   type FirmwareCandidate,
@@ -341,42 +342,49 @@ export default function FirmwareCandidates() {
         );
       })}
 
-      {confirming && (
-        <div className="flex flex-col gap-2 rounded-md border border-amber-500 bg-amber-50 p-4 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-100">
-          {/* The confirmation NAMES the version. The old dialog said only
-              "a reboot is required", which is true of every upgrade and
-              identifies none of them. */}
-          <p className="font-semibold">
-            {t("firmwareUpgrade.confirmTitle", {
-              version: confirming.candidate.version,
-            })}
-          </p>
-          <p className="text-sm">
-            {confirming.candidate.relation === "older"
-              ? t("firmwareUpgrade.confirmDowngrade")
-              : confirming.candidate.relation === "unknown"
-                ? t("firmwareUpgrade.confirmUnknown")
-                : t("firmwareUpgrade.confirmUpgrade")}
-          </p>
-          {confirming.candidate.trust !== "verified" && (
-            <p className="text-sm font-semibold">
-              {t("firmwareUpgrade.confirmUnverified")}
-            </p>
-          )}
-          <div className="flex gap-2">
-            <Button
-              variant="destructive"
-              disabled={install.isPending}
-              onClick={() => void doInstall()}
-            >
-              {t("firmwareUpgrade.install")}
-            </Button>
-            <Button variant="bw" onClick={() => setConfirming(null)}>
-              {t("ui.cancel")}
-            </Button>
-          </div>
-        </div>
-      )}
+      {/* A MODAL, not a panel below the list.
+
+          It used to render inline, after every candidate. With a long
+          catalogue -- and a board with several sources has one -- pressing
+          Install scrolled the confirmation off the bottom of the window, so
+          the button appeared to do nothing and the operator pressed it again.
+          The same modal the reboot and node-power confirmations use puts the
+          question where the answer is expected, and its drawer form handles
+          the phone case the inline panel was worst on. */}
+      <ConfirmationModal
+        isOpen={confirming !== null}
+        onClose={() => {
+          setConfirming(null);
+        }}
+        onConfirm={() => void doInstall()}
+        title={
+          confirming
+            ? t("firmwareUpgrade.confirmTitle", {
+                version: confirming.candidate.version,
+              })
+            : ""
+        }
+        message={
+          confirming ? (
+            <div className="flex flex-col gap-2">
+              <p>
+                {confirming.candidate.relation === "older"
+                  ? t("firmwareUpgrade.confirmDowngrade")
+                  : confirming.candidate.relation === "unknown"
+                    ? t("firmwareUpgrade.confirmUnknown")
+                    : t("firmwareUpgrade.confirmUpgrade")}
+              </p>
+              {confirming.candidate.trust !== "verified" && (
+                <p className="font-semibold text-amber-700 dark:text-amber-400">
+                  {t("firmwareUpgrade.confirmUnverified")}
+                </p>
+              )}
+            </div>
+          ) : (
+            ""
+          )
+        }
+      />
 
       {install.isError && (
         <p className="text-sm text-red-600 dark:text-red-400">
