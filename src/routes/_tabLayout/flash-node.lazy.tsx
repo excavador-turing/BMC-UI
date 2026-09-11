@@ -18,7 +18,7 @@ import {
 import { useFlash } from "@/hooks/use-flash";
 
 export const Route = createLazyFileRoute("/_tabLayout/flash-node")({
-  component: FlashNode,
+  component: FlashNodeRoute,
 });
 
 interface SelectOption {
@@ -33,8 +33,13 @@ const nodeOptions: SelectOption[] = [
   { value: "3", label: "Node 4" },
 ];
 
-export function FlashNode() {
-  const { node: fromLink } = Route.useSearch();
+/**
+ * The flash form. `preselected` rather than a router search read, because the
+ * fleet renders this directly with no router above it; the route wrapper below
+ * passes the parsed `?node=`.
+ */
+export function FlashNode({ preselected }: { preselected?: number }) {
+  const { node: fromLink } = { node: preselected };
   const { t } = useTranslation();
   const formRef = useRef<HTMLFormElement>(null);
   const [confirmFlashModal, setConfirmFlashModal] = useState(false);
@@ -168,4 +173,10 @@ export function FlashNode() {
       />
     </TabView>
   );
+}
+
+/** The routed form: parse `?node=` here, hand it down as a prop. */
+function FlashNodeRoute() {
+  const { node } = Route.useSearch();
+  return <FlashNode preselected={node} />;
 }

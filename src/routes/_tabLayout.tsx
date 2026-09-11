@@ -1,7 +1,17 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Outlet,
+  redirect,
+  useNavigate,
+} from "@tanstack/react-router";
+import { useMemo } from "react";
 
 import Header from "@/components/header";
 import NavigationLinks from "@/components/navigation-links";
+import {
+  type NodeDestination,
+  NodeNavProvider,
+} from "@/contexts/NodeNavContext";
 
 export const Route = createFileRoute("/_tabLayout")({
   beforeLoad: ({ context, location }) => {
@@ -20,16 +30,34 @@ export const Route = createFileRoute("/_tabLayout")({
 });
 
 export function AppLayoutComponent() {
-  return (
-    <div className="flex w-full flex-col items-center justify-center">
-      <Header />
+  const navigate = useNavigate();
 
-      <main className="w-full overflow-hidden border border-neutral-300 bg-white shadow-sm xl:w-300 dark:border-neutral-700 dark:bg-neutral-900">
-        <NavigationLinks isDesktop />
-        <div className="px-3 py-6 md:p-12">
-          <Outlet />
-        </div>
-      </main>
-    </div>
+  // What "open the console for node 3" means HERE: a route in this
+  // application. The fleet answers the same question with a hash change. The
+  // node cards ask and do not care which.
+  const nav = useMemo(
+    () => ({
+      href: (destination: NodeDestination, node: number) =>
+        `/${destination}?node=${String(node)}`,
+      open: (destination: NodeDestination, node: number) => {
+        void navigate({ to: `/${destination}`, search: { node } });
+      },
+    }),
+    [navigate]
+  );
+
+  return (
+    <NodeNavProvider value={nav}>
+      <div className="flex w-full flex-col items-center justify-center">
+        <Header />
+
+        <main className="w-full overflow-hidden border border-neutral-300 bg-white shadow-sm xl:w-300 dark:border-neutral-700 dark:bg-neutral-900">
+          <NavigationLinks isDesktop />
+          <div className="px-3 py-6 md:p-12">
+            <Outlet />
+          </div>
+        </main>
+      </div>
+    </NodeNavProvider>
   );
 }

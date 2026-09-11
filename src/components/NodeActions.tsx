@@ -1,5 +1,5 @@
-import { Link } from "@tanstack/react-router";
 import { HardDriveDownload, TerminalSquare, Usb } from "lucide-react";
+import { type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { type NodeDestination } from "@/contexts/NodeNavContext";
 import { useToast } from "@/hooks/use-toast";
+import { useNodeNav } from "@/hooks/useNodeNav";
 import { useUSBTabData } from "@/lib/api/get";
 import { useUSBModeMutation } from "@/lib/api/set";
 
@@ -60,19 +62,15 @@ export default function NodeActions({ nodeId }: { nodeId: number }) {
 
   return (
     <div className="mt-3 flex flex-wrap items-center gap-2">
-      <Button asChild variant="bw" size="sm">
-        <Link to="/console" search={{ node: nodeId }}>
-          <TerminalSquare className="mr-2 size-4" />
-          {t("nodes.openConsole")}
-        </Link>
-      </Button>
+      <NodeLink destination="console" node={nodeId}>
+        <TerminalSquare className="mr-2 size-4" />
+        {t("nodes.openConsole")}
+      </NodeLink>
 
-      <Button asChild variant="bw" size="sm">
-        <Link to="/flash-node" search={{ node: nodeId }}>
-          <HardDriveDownload className="mr-2 size-4" />
-          {t("nodes.flashNode")}
-        </Link>
-      </Button>
+      <NodeLink destination="flash-node" node={nodeId}>
+        <HardDriveDownload className="mr-2 size-4" />
+        {t("nodes.flashNode")}
+      </NodeLink>
 
       <div className="flex items-center gap-2">
         <Usb className="size-4 opacity-60" aria-hidden />
@@ -117,4 +115,63 @@ function usbModeValue(mode: "Host" | "Device" | "Flash") {
     case "Flash":
       return 2;
   }
+}
+
+/**
+ * One of the two per-node buttons that leave this card.
+ *
+ * Renders an anchor when whoever is above can name an address, so
+ * middle-click, copy-link and the browser's own history keep working; a plain
+ * button when it cannot. The board app names one; the fleet names a hash.
+ */
+function NodeLink({
+  destination,
+  node,
+  children,
+}: {
+  destination: NodeDestination;
+  node: number;
+  children: ReactNode;
+}) {
+  const nav = useNodeNav();
+  const href = nav.href(destination, node);
+
+  if (href) {
+    return (
+      <Button asChild variant="bw" size="sm">
+        <a
+          href={href}
+          onClick={(event) => {
+            // Let the browser handle the gestures that mean "somewhere else":
+            // a new tab is a new tab, and intercepting it is rude.
+            if (
+              event.defaultPrevented ||
+              event.metaKey ||
+              event.ctrlKey ||
+              event.shiftKey ||
+              event.button !== 0
+            ) {
+              return;
+            }
+            event.preventDefault();
+            nav.open(destination, node);
+          }}
+        >
+          {children}
+        </a>
+      </Button>
+    );
+  }
+
+  return (
+    <Button
+      variant="bw"
+      size="sm"
+      onClick={() => {
+        nav.open(destination, node);
+      }}
+    >
+      {children}
+    </Button>
+  );
 }

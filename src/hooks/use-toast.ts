@@ -3,7 +3,12 @@ import { useEffect, useState } from "react";
 
 import type { ToastActionElement, ToastProps } from "@/components/ui/toast";
 
-const TOAST_LIMIT = 1;
+// Three, not one. On a board, one action at a time meant one toast was
+// enough. The fleet drives several boards at once -- power a node here, start
+// a flash there -- and a cap of one means the second result silently replaces
+// the first, so an operator sees a success for something they did not watch
+// and never learns about the failure underneath it.
+const TOAST_LIMIT = 3;
 const TOAST_REMOVE_DELAY = 1000000;
 
 type ToasterToast = ToastProps & {

@@ -22,7 +22,21 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { languages } from "@/locale";
 
-export function UserNav() {
+/**
+ * `signOutHref` and `name` exist because the fleet's session is not the
+ * board's. On a board you are `root` with a token in local storage and
+ * signing out means dropping it. In the fleet you are whoever dex says you
+ * are, the bundle holds no token at all, and signing out means the proxy's
+ * own sign-out endpoint -- calling the board's `logout()` there would clear
+ * nothing and send you to a login page that does not exist.
+ */
+export function UserNav({
+  signOutHref,
+  name,
+}: {
+  signOutHref?: string;
+  name?: string;
+} = {}) {
   const { theme, setTheme } = useTheme();
   const {
     t,
@@ -30,10 +44,8 @@ export function UserNav() {
   } = useTranslation();
   const { logout } = useAuth();
 
-  const username = useMemo(
-    () => localStorage.getItem("username") ?? "root",
-    []
-  );
+  const stored = useMemo(() => localStorage.getItem("username") ?? "root", []);
+  const username = name ?? stored;
 
   const handleLanguageChange = (value: string) => {
     void changeLanguage(value);
@@ -99,9 +111,15 @@ export function UserNav() {
           </DropdownMenuSub>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={logout}>
-          {t("userNav.logout")}
-        </DropdownMenuItem>
+        {signOutHref ? (
+          <DropdownMenuItem asChild>
+            <a href={signOutHref}>{t("userNav.logout")}</a>
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem onClick={logout}>
+            {t("userNav.logout")}
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

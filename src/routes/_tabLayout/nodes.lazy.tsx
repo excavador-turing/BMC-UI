@@ -13,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { useApiBase } from "@/hooks/useApiBase";
 import { type NodeInfoResponse, useNodesTabData } from "@/lib/api/get";
 import {
   usePowerNodeMutation,
@@ -31,7 +32,20 @@ export const Route = createLazyFileRoute("/_tabLayout/nodes")({
   pendingComponent: NodesSkeleton,
 });
 
-const POWER_CONFIRMATION_KEY = "skipNodeConfirmation";
+/**
+ * "Don't ask again", scoped to the board it was agreed for.
+ *
+ * It used to be one key for everything. In a fleet that means dismissing the
+ * confirmation on one board silences it on all of them -- a setting about
+ * cutting power to compute modules, applied to machines the operator never
+ * agreed to. The base URL is what distinguishes a board here, since it is
+ * what every request already goes to.
+ */
+function powerConfirmationKey(base: string) {
+  return base === "/api"
+    ? "skipNodeConfirmation"
+    : `skipNodeConfirmation:${base}`;
+}
 
 const ConfirmationCheckbox = (props: {
   checked: boolean;
@@ -67,8 +81,11 @@ const NodeRow = (
   const [powerOn, setPowerOn] = useState(props.power_on_time !== null);
   const [showPowerDialog, setShowPowerDialog] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
+  // Scoped to this board: see powerConfirmationKey.
+  const { base } = useApiBase();
+  const confirmationKey = powerConfirmationKey(base);
   const [skipConfirmation, setSkipConfirmation] = useState(
-    localStorage.getItem(POWER_CONFIRMATION_KEY) === "true"
+    localStorage.getItem(confirmationKey) === "true"
   );
   const [tempSkipConfirmation, setTempSkipConfirmation] = useState(false);
 
@@ -90,7 +107,7 @@ const NodeRow = (
 
     // Only update localStorage if the checkbox was checked
     if (tempSkipConfirmation) {
-      localStorage.setItem(POWER_CONFIRMATION_KEY, "true");
+      localStorage.setItem(confirmationKey, "true");
       setSkipConfirmation(true);
     }
   };
@@ -124,7 +141,7 @@ const NodeRow = (
 
         // Only update localStorage if the checkbox was checked
         if (tempSkipConfirmation) {
-          localStorage.setItem(POWER_CONFIRMATION_KEY, "true");
+          localStorage.setItem(confirmationKey, "true");
           setSkipConfirmation(true);
         }
       },
