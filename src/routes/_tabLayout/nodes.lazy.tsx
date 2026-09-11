@@ -146,8 +146,8 @@ const NodeRow = (
 
   return (
     <>
-      <div className="rounded-lg border border-neutral-200 p-4 dark:border-neutral-700">
-        <div className="flex flex-col gap-4">
+      <div className="rounded-lg border border-neutral-200 p-3 dark:border-neutral-700">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
           <div className="flex items-center gap-4">
             <Switch
               name={`node-${props.nodeId}-power`}
@@ -170,7 +170,7 @@ const NodeRow = (
               {t("nodes.restartButton")}
             </Button>
           </div>
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-1 flex-wrap gap-3">
             <Input
               type="text"
               name={`node-${props.nodeId}-name`}
@@ -316,7 +316,7 @@ export function NodesTab() {
       <form onSubmit={handleSubmit} ref={formRef}>
         {/* Four modules, two by two. As a single column the page scrolled with
             a third of the width empty; a grid puts all four on one screen. */}
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-2">
           {data.map((node, index) => (
             <NodeRow
               key={index}
