@@ -13,6 +13,7 @@ import {
 } from "@/lib/api/get";
 import { useCoolingDeviceMutation } from "@/lib/api/set";
 import { fanDutyPercent, isReading } from "@/lib/format";
+import { governorReason } from "@/lib/thermal";
 import { cn } from "@/lib/utils";
 
 /**
@@ -172,14 +173,6 @@ function ThermalSkeleton() {
  * fan back, which is the truth about this machine and used to be invisible.
  */
 /**
- * The highest `active` trip the board is above, or null.
- *
- * That is the one the step_wise governor is responding to. Returns null when
- * the daemon reports no trips (an older bmcd), when nothing can be read, or
- * when the board is below every trip -- in which case there is nothing to
- * explain.
- */
-/**
  * The hottest `active` trip any sensor declares, or null.
  *
  * This is the temperature at which the daemon takes a held fan back on its
@@ -198,22 +191,6 @@ function overrideCeiling(sensors: ThermalSensor[]): number | null {
     }
   }
   return hottest;
-}
-
-function governorReason(sensors: ThermalSensor[]): number | null {
-  let highest: number | null = null;
-  for (const sensor of sensors) {
-    if (!sensor.present || !sensor.trips) continue;
-    for (const trip of sensor.trips) {
-      if (trip.kind !== "active" || !isReading(trip.temperature_c)) continue;
-      if (!isReading(sensor.temperature_c)) continue;
-      if (sensor.temperature_c < trip.temperature_c) continue;
-      if (highest === null || trip.temperature_c > highest) {
-        highest = trip.temperature_c;
-      }
-    }
-  }
-  return highest;
 }
 
 export default function FanControl() {

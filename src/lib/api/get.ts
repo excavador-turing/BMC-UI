@@ -614,11 +614,18 @@ export function useCoolingDevicesQuery() {
  * endpoint at all is ours, but "answers it" and "sends both keys" are
  * different promises, and `undefined.length` is not a useful failure.
  */
-export function useThermalQuery() {
+/**
+ * `intervalMs` because two cards read this and they do not deserve the same
+ * cadence. The fan card is a control surface and wants five seconds; Board
+ * Health shows the same sensor as one reading among six, on the tab this
+ * interface opens on, and a five-second poll there is a cost the board pays
+ * for every page left open.
+ */
+export function useThermalQuery(intervalMs = 5000) {
   const api = useAxiosWithAuth();
 
   return useQuery({
-    queryKey: ["thermal"],
+    queryKey: ["thermal", intervalMs],
     queryFn: async () => {
       const response = await api.get<APIResponse<ThermalResponse>>("/bmc", {
         params: {
@@ -644,7 +651,7 @@ export function useThermalQuery() {
     // Stop polling once it has failed: an older daemon answers the same way
     // in five seconds' time, and a card reporting its own absence has no
     // reason to keep asking.
-    refetchInterval: (query) => (query.state.error ? false : 5000),
+    refetchInterval: (query) => (query.state.error ? false : intervalMs),
     retry: false,
   });
 }

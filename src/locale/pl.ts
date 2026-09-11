@@ -74,6 +74,10 @@ const translations = {
     healthLoadWindows: "1 / 5 / 15 min",
     healthMemory: "Pamięć",
     healthMemoryDetail: "wolne {{free}} · dostępne {{available}}",
+    healthTemperatureTerm: "Temperatura",
+    healthTemperature: "{{celsius}} °C",
+    healthFanStep: "stopień wentylatora {{step}} z {{max}}",
+    healthFanTrip: "powyżej progu {{celsius}} °C",
     healthNand: "NAND",
     healthNandFree: "{{available}} z {{total}} bloków kasowania wolnych",
     healthNandBad: "{{blocks}} uszkodzonych",
@@ -192,7 +196,7 @@ const translations = {
     noSession:
       "Brak tokenu sesji, którym można uwierzytelnić konsolę. Wyloguj się i zaloguj ponownie.",
     failedHint:
-      "Przeglądarka nie podaje, dlaczego uzgadnianie WebSocket się nie powiodło. Odrzucony token sesji i demon zbyt stary, by obsłużyć ten punkt końcowy, docierają tu tak samo: jako zamknięcie bez powodu.",
+      "Przeglądarka nie podaje, dlaczego uzgadnianie WebSocket się nie powiodło; wszystkie przyczyny docierają tu jako zamknięcie bez powodu. Jeśli reszta strony działa, zwykle chodzi o certyfikat płyty: przeglądarka nie otworzy WebSocketu do certyfikatu, któremu nie ufa, a zaakceptowanie ostrzeżenia NIE obejmuje tego połączenia. Zaufaj urzędowi certyfikacji płyty albo użyj floty, gdzie TLS kończy się na certyfikacie już zaufanym. Pozostałe dwie przyczyny to odrzucony token sesji i zbyt stary demon.",
     inputNote:
       "Kliknij terminal, aby w nim pisać. Naciśnięcia klawiszy trafiają do modułu dokładnie tak, jak je wpisano, bez niczego doklejonego — łącznie z Ctrl-C, uzupełnianiem tabulatorem i strzałkami.",
     ariaTerminal: "Konsola szeregowa węzła {{nodeId}}",

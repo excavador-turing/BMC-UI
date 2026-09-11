@@ -74,6 +74,10 @@ const translations = {
     healthLoadWindows: "1 / 5 / 15 Min",
     healthMemory: "Arbeitsspeicher",
     healthMemoryDetail: "frei {{free}} · verfügbar {{available}}",
+    healthTemperatureTerm: "Temperatur",
+    healthTemperature: "{{celsius}} °C",
+    healthFanStep: "Lüfterstufe {{step}} von {{max}}",
+    healthFanTrip: "über dem Schwellwert von {{celsius}} °C",
     healthNand: "NAND",
     healthNandFree: "{{available}} von {{total}} Löschblöcken frei",
     healthNandBad: "{{blocks}} defekt",
@@ -192,7 +196,7 @@ const translations = {
     noSession:
       "Es gibt kein Sitzungstoken, mit dem sich die Konsole authentifizieren könnte. Melden Sie sich ab und wieder an.",
     failedHint:
-      "Ein Browser nennt nicht, warum ein WebSocket-Handshake fehlgeschlagen ist. Ein abgelehntes Sitzungstoken und ein Daemon, der zu alt für diesen Endpunkt ist, kommen hier beide als Schließen ohne Begründung an.",
+      "Ein Browser sagt nicht, warum ein WebSocket-Handshake fehlgeschlagen ist; alle Ursachen erscheinen hier als Schließen ohne Grund. Wenn der Rest dieser Seite funktioniert, liegt es meist am Zertifikat des Boards: ein Browser öffnet keinen WebSocket zu einem Zertifikat, dem er nicht vertraut, und das Akzeptieren der Warnung gilt für diese Verbindung NICHT. Vertrauen Sie der Zertifizierungsstelle des Boards, oder nutzen Sie die Flotte, wo TLS auf einem bereits vertrauten Zertifikat endet. Die anderen beiden Ursachen sind ein abgelehntes Sitzungstoken und ein zu alter Daemon.",
     inputNote:
       "Klicken Sie in das Terminal, um darin zu tippen. Tastenanschläge gehen unverändert an das Modul, ohne dass etwas angehängt wird — einschließlich Strg-C, Tab-Vervollständigung und Pfeiltasten.",
     ariaTerminal: "Serielle Konsole für Knoten {{nodeId}}",

@@ -11,6 +11,7 @@ import {
   type HealthMemory,
   type HealthNand,
   useHealthQuery,
+  useThermalQuery,
 } from "@/lib/api/get";
 import {
   EMPTY_VALUE,
@@ -18,6 +19,7 @@ import {
   offsetReading,
   type OffsetUnit,
 } from "@/lib/format";
+import { governorReason, hottestReading } from "@/lib/thermal";
 
 const human = (bytes: number) => filesize(bytes, { standard: "jedec" });
 
@@ -284,6 +286,58 @@ function HealthSkeleton() {
  * in amber; a request that fails leaves one muted line and the rest of the
  * page untouched.
  */
+
+/**
+ * Temperature, and what the fan is doing about it.
+ *
+ * This is a READING. The slider that commands the fan stays on Settings; what
+ * belongs here is the number, because someone asking "is this board hot?"
+ * opens the tab called Board Health. Until 2026-09-12 they found five other
+ * health numbers and no temperature at all, while the board answered 55.1 °C
+ * to anyone who asked the API (SQU-202).
+ *
+ * The trip point is included because it is what explains the step: the
+ * governor is responding to the hottest active trip the board is above, and
+ * a step with no reason beside it reads as arbitrary.
+ */
+function TemperatureReading() {
+  const { t } = useTranslation();
+  // Fifteen seconds, not the fan card's five. This tab is the one the
+  // interface opens on, and a poll here is paid by every page left open on a
+  // board with 116 MB of RAM.
+  const { data, isError } = useThermalQuery(15000);
+
+  if (isError) return <Absent />;
+  if (!data) return <span className="opacity-60">{EMPTY_VALUE}</span>;
+
+  const hottest = hottestReading(data.sensors);
+  if (hottest === null) return <Absent />;
+
+  const fan = data.cooling.find((device) => device.present) ?? null;
+  const trip = governorReason(data.sensors);
+
+  return (
+    <span className="inline-flex flex-wrap items-baseline gap-x-2">
+      <span className="font-semibold">
+        {t("info.healthTemperature", { celsius: hottest.toFixed(1) })}
+      </span>
+      {fan && isReading(fan.cur_state) && isReading(fan.max_state) && (
+        <span className="opacity-60">
+          {t("info.healthFanStep", {
+            step: fan.cur_state,
+            max: fan.max_state,
+          })}
+        </span>
+      )}
+      {trip !== null && (
+        <span className="opacity-60">
+          {t("info.healthFanTrip", { celsius: trip })}
+        </span>
+      )}
+    </span>
+  );
+}
+
 export default function BoardHealth() {
   const { t } = useTranslation();
   const { data, isPending, isError } = useHealthQuery();
@@ -327,6 +381,9 @@ export default function BoardHealth() {
               ) : (
                 <MemoryReading memory={data.memory} />
               )}
+            </TableItem>
+            <TableItem term={t("info.healthTemperatureTerm")}>
+              <TemperatureReading />
             </TableItem>
             <TableItem term={t("info.healthNand")}>
               {data.nand === null ? (
