@@ -54,6 +54,10 @@ if (isFleet) {
         */}
         <AuthProvider>
           <Fleet />
+          {/* Without this every toast a shared control raises in the fleet
+              fires into the void -- the controls report success and failure
+              the same way the board's do, and nothing was listening. */}
+          <Toaster />
         </AuthProvider>
       </ThemeProvider>
     </StrictMode>

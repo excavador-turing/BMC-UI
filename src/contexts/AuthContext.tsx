@@ -40,7 +40,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsAuthenticated(false);
 
     // Redirect to the login page
-    window.location.href = "/login";
+    // BASE_URL, not "/": this bundle is also served under a sub-path -- the
+    // site's demo lives at /demo/fork/ -- and an absolute "/login" there walks
+    // out of the application entirely.
+    window.location.href = `${import.meta.env.BASE_URL}login`.replace(
+      /\/{2,}/g,
+      "/"
+    );
   }, []);
 
   const login = useCallback(

@@ -15,7 +15,7 @@ import {
 import { type SerialReaderState, useSerialStatusQuery } from "@/lib/api/get";
 
 export const Route = createLazyFileRoute("/_tabLayout/console")({
-  component: SerialConsoleTab,
+  component: SerialConsoleRoute,
   errorComponent: () => <div>Error loading Console</div>,
 });
 
@@ -67,13 +67,17 @@ function ReaderState({ state }: { state: SerialReaderState }) {
  * One terminal at a time, selected by module and mounted with `key={node}`,
  * so switching modules disposes the terminal and closes the socket rather
  * than leaving either behind.
+ *
+ * `preselected` rather than a router search read, because the fleet renders
+ * this component directly with no router above it and `Route.useSearch()`
+ * throws there. The route wrapper below passes the parsed `?node=`.
  */
-export function SerialConsoleTab() {
+export function SerialConsoleTab({ preselected }: { preselected?: number }) {
   const { t } = useTranslation();
   // `?node=2`, so a node card on the Nodes tab can open that node's console
   // rather than dropping you on node 1 to choose again. The search is
   // validated in console.tsx and is absent for a plain visit.
-  const { node: fromLink } = Route.useSearch();
+  const { node: fromLink } = { node: preselected };
   const [selectedNode, setSelectedNode] = useState<string>(
     fromLink ? String(fromLink - 1) : "0"
   );
@@ -157,4 +161,10 @@ export function SerialConsoleTab() {
       </div>
     </TabView>
   );
+}
+
+/** The routed form: parse `?node=` here, hand it down as a prop. */
+function SerialConsoleRoute() {
+  const { node } = Route.useSearch();
+  return <SerialConsoleTab preselected={node} />;
 }

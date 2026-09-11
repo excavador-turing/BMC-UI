@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 
 import InfoNote from "@/components/InfoNote";
 import { Button } from "@/components/ui/button";
+import { useApiBase } from "@/hooks/useApiBase";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
@@ -113,6 +114,11 @@ interface CloseInfo {
 export default function SerialConsole({ node }: { node: number }) {
   const { t } = useTranslation();
   const { token } = useAuth();
+  // Where this board's API lives. `/api` on the board's own interface;
+  // `/boards/<id>/api` when the fleet is rendering this against one board
+  // through the gateway. Hardcoding the former is what used to make the
+  // console the one tab a fleet could not have.
+  const { base } = useApiBase();
   const { resolvedTheme } = useTheme();
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -143,12 +149,14 @@ export default function SerialConsole({ node }: { node: number }) {
   /**
    * Write the daemon's UART ring buffer into the terminal.
    *
-   * `fetch` rather than the shared axios hook, for the same reason the socket
-   * below builds its own URL: the hook returns a fresh instance on every
-   * render, and a replay that changed identity every render would rebuild the
-   * socket with it. The cost is the hook's 401-to-logout interceptor, which
-   * this path does not need -- a token the daemon rejects fails the websocket
-   * too, and that is the failure the panel already renders.
+   * `fetch` rather than the shared axios hook. Not because the hook is
+   * unstable any more -- it is memoised now -- but because this path does not
+   * want its 401-to-logout interceptor: a token the daemon rejects fails the
+   * websocket too, and that is the failure the panel already renders.
+   *
+   * Both this and the socket below take their prefix from `useApiBase`, so
+   * the same component serves a board directly and a board behind the fleet's
+   * per-board route.
    *
    * Best-effort on purpose. A module whose reader has not started answers with
    * an error, and a console that refused to open because there was no
@@ -157,9 +165,10 @@ export default function SerialConsole({ node }: { node: number }) {
   const replay = useCallback(async () => {
     if (!usable) return;
     try {
-      const response = await fetch(`/api/bmc?opt=get&type=uart&node=${node}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetch(
+        `${base}/bmc?opt=get&type=uart&node=${node}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       if (!response.ok) return;
       const body = (await response.json()) as UartResponse;
       const text = body.response[0]?.uart ?? "";
@@ -169,7 +178,7 @@ export default function SerialConsole({ node }: { node: number }) {
     } catch {
       // Nothing to show is not an error worth surfacing.
     }
-  }, [node, token, usable]);
+  }, [base, node, token, usable]);
 
   // The terminal, created once and disposed on unmount. Deliberately not
   // keyed on the node: this component is what gets replaced when the node
@@ -240,7 +249,7 @@ export default function SerialConsole({ node }: { node: number }) {
       // serves this over TLS, a `vite dev` proxy does not.
       const scheme = window.location.protocol === "https:" ? "wss:" : "ws:";
       socket = new WebSocket(
-        `${scheme}//${window.location.host}/api/bmc/serial/ws?node=${node}`,
+        `${scheme}//${window.location.host}${base}/bmc/serial/ws?node=${node}`,
         // Credential last. The daemon selects the first entry that is not a
         // `bmcd.bearer.` one, so the plain name has to be offered and has to
         // come first.
@@ -332,7 +341,7 @@ export default function SerialConsole({ node }: { node: number }) {
         socket.close();
       }
     };
-  }, [node, token, usable, generation, replay]);
+  }, [base, node, token, usable, generation, replay]);
 
   const stateLabel: Record<ConnectionState, string> = {
     connecting: t("console.stateConnecting"),

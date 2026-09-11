@@ -1,8 +1,9 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Suspense, useState } from "react";
 
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { ApiBaseProvider } from "@/contexts/ApiBaseContext";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/hooks/use-toast";
 import {
   useAboutTabData,
   useFirmwareSlotsQuery,
@@ -10,22 +11,17 @@ import {
   useNodesTabData,
   useSwitchPortsQuery,
 } from "@/lib/api/get";
+import { usePowerNodeMutation } from "@/lib/api/set";
 
-import {
-  apiBaseFor,
-  type FleetBoard,
-  type FleetConfig,
-  outOfRange,
-} from "./config";
-
-/** A cache of its own per board. See BoardCard for why. */
-function makeClient() {
-  return new QueryClient({ defaultOptions: { queries: { retry: false } } });
-}
+import { BoardScope, makeClient } from "./BoardScope";
+import { type FleetBoard, type FleetConfig, outOfRange } from "./config";
 
 interface Props {
   board: FleetBoard;
   range: FleetConfig["supportedBmcd"];
+  /** Open this board's own interface. The card is a summary; everything you
+   *  can actually change lives behind this. */
+  onOpen?: () => void;
 }
 
 /**
@@ -39,7 +35,7 @@ interface Props {
  * touching nineteen hooks, and cache isolation is what we actually want:
  * these are different machines that happen to share a shape.
  */
-export function BoardCard({ board, range }: Props) {
+export function BoardCard({ board, range, onOpen }: Props) {
   // A board that was down and came back has to be re-asked, and the point of
   // the retry is a cache that does not remember the failure -- so a retry
   // means a NEW client, not an invalidation. The key remounts the boundary,
@@ -54,21 +50,17 @@ export function BoardCard({ board, range }: Props) {
 
   return (
     <div className="rounded-lg border border-neutral-200 p-4 dark:border-neutral-700">
-      <QueryClientProvider client={client}>
-        <ApiBaseProvider
-          value={{ base: apiBaseFor(board), unauthorized: "ignore" }}
+      <BoardScope board={board} client={client}>
+        <ErrorBoundary
+          key={attempt}
+          label={`board:${board.id}`}
+          fallback={<Unreachable board={board} onRetry={retry} />}
         >
-          <ErrorBoundary
-            key={attempt}
-            label={`board:${board.id}`}
-            fallback={<Unreachable board={board} onRetry={retry} />}
-          >
-            <Suspense fallback={<Reaching board={board} />}>
-              <BoardBody board={board} range={range} />
-            </Suspense>
-          </ErrorBoundary>
-        </ApiBaseProvider>
-      </QueryClientProvider>
+          <Suspense fallback={<Reaching board={board} />}>
+            <BoardBody board={board} range={range} onOpen={onOpen} />
+          </Suspense>
+        </ErrorBoundary>
+      </BoardScope>
     </div>
   );
 }
@@ -112,7 +104,7 @@ function Unreachable({
   );
 }
 
-function BoardBody({ board, range }: Props) {
+function BoardBody({ board, range, onOpen }: Props) {
   // Suspense queries: these three decide whether the card can render at all.
   const { data: about } = useAboutTabData();
   // node_info, not type=power. The board's own Nodes page derives power from
@@ -136,12 +128,19 @@ function BoardBody({ board, range }: Props) {
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <Title board={board} sub={board.note ?? about.hostname} />
-        <div className="text-xs text-neutral-500 dark:text-neutral-400">
-          firmware{" "}
-          <b className="text-neutral-900 dark:text-neutral-100">
-            {about.version ?? "—"}
-          </b>
-          {bmcd ? <> · bmcd {bmcd}</> : null}
+        <div className="flex items-center gap-3 text-xs text-neutral-500 dark:text-neutral-400">
+          <span>
+            firmware{" "}
+            <b className="text-neutral-900 dark:text-neutral-100">
+              {about.version ?? "—"}
+            </b>
+            {bmcd ? <> · bmcd {bmcd}</> : null}
+          </span>
+          {onOpen ? (
+            <Button size="sm" variant="bw" onClick={onOpen}>
+              Open
+            </Button>
+          ) : null}
         </div>
       </div>
 
@@ -172,6 +171,11 @@ function BoardBody({ board, range }: Props) {
               <div className="text-neutral-500 dark:text-neutral-400">
                 {portWord(port)}
               </div>
+              {/* The one control worth having on a summary. Everything else
+                  wants the context of a full tab; "that node is wedged, cut
+                  its power" does not, and making an operator open two views
+                  to do it is how a fleet page stops being used. */}
+              <Power board={board} nodeId={i + 1} on={on} />
             </div>
           );
         })}
@@ -282,4 +286,61 @@ function promotionWord(
     ? new Date(promotion.timestamp).toLocaleString()
     : null;
   return [promotion.message, when].filter(Boolean).join(" \u00b7 ") || "\u2014";
+}
+
+/**
+ * Power one node, from the overview.
+ *
+ * No confirmation here, unlike the board's own Nodes page, and that is a
+ * decision rather than an oversight: the switch is small, it is beside a
+ * label saying which node on which board, and an operator who opened a fleet
+ * page to cut power to a wedged module should not have to answer a dialogue
+ * about it. The Nodes tab, where a mis-click is easier, keeps its
+ * confirmation.
+ *
+ * The toast names the board. A fleet's toasts that say only "Node 3" are
+ * worse than none.
+ */
+function Power({
+  board,
+  nodeId,
+  on,
+}: {
+  board: FleetBoard;
+  nodeId: number;
+  on: boolean;
+}) {
+  const power = usePowerNodeMutation();
+  const { toast } = useToast();
+  const who = board.name ?? board.id;
+
+  return (
+    <div className="mt-1 flex items-center gap-1">
+      <Switch
+        checked={on}
+        disabled={power.isPending}
+        aria-label={`Power node ${String(nodeId)} on ${who}`}
+        onCheckedChange={(next) => {
+          power.mutate(
+            { nodeId, powerOn: next },
+            {
+              onSuccess: () => {
+                toast({
+                  title: `${who}: node ${String(nodeId)} ${next ? "on" : "off"}`,
+                });
+              },
+              onError: (error: unknown) => {
+                toast({
+                  title: `${who}: node ${String(nodeId)} did not change`,
+                  description:
+                    error instanceof Error ? error.message : String(error),
+                  variant: "destructive",
+                });
+              },
+            }
+          );
+        }}
+      />
+    </div>
+  );
 }
