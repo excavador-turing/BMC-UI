@@ -29,9 +29,36 @@ declare module "@tanstack/react-router" {
   }
 }
 
+// The fleet is a different application built from this same tree: one
+// interface over every board, served by the cluster rather than by a board.
+// It shares the API hooks and the components by import -- sharing by import
+// cannot drift, sharing by published version can -- and is selected at build
+// time, so the bundle a board serves never carries it.
+const isFleet = import.meta.env.VITE_APP === "fleet";
+
 // Render the app
 const rootElement = document.getElementById("app")!;
-if (!rootElement.innerHTML) {
+if (isFleet) {
+  const { Fleet } = await import("@/fleet/Fleet");
+  document.title = "Turing fleet";
+  createRoot(rootElement).render(
+    <StrictMode>
+      <ThemeProvider attribute="class">
+        {/*
+          The fleet holds no token: Envoy authenticates the operator through
+          dex and presents the client certificate on the board leg, so the
+          bundle never sees a credential. AuthProvider is still here because
+          the shared API hooks read it, and an empty token produces an empty
+          Authorization header, which is exactly right for a request whose
+          identity is added in front of it.
+        */}
+        <AuthProvider>
+          <Fleet />
+        </AuthProvider>
+      </ThemeProvider>
+    </StrictMode>
+  );
+} else if (!rootElement.innerHTML) {
   const root = createRoot(rootElement);
   root.render(
     <StrictMode>
