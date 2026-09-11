@@ -155,24 +155,16 @@ jobs:
           gh release edit "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --draft=false
 
       # The site at turingpi.xyz builds its live demo from the LATEST release
-      # of this repository at every deploy, so a release here is what makes
-      # the site stale -- not a commit there. Tell it. The token is a
-      # fine-grained PAT with contents:write on excavador-turing/www, held as
-      # WWW_DISPATCH_TOKEN; without it the site still catches up on its hourly
-      # schedule, so a missing token skips rather than fails a release.
-      - name: tell the site
-        if: ${{ !contains(github.ref_name, '-') }}
-        env:
-          WWW_DISPATCH_TOKEN: ${{ secrets.WWW_DISPATCH_TOKEN }}
-        run: |
-          set -eu
-          if [ -z "${WWW_DISPATCH_TOKEN}" ]; then
-            echo "no WWW_DISPATCH_TOKEN; the site catches up on its schedule"
-            exit 0
-          fi
-          curl -fsS -X POST \
-            -H "Authorization: Bearer ${WWW_DISPATCH_TOKEN}" \
-            -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/excavador-turing/www/dispatches \
-            -d "{\"event_type\":\"ui-released\",\"client_payload\":{\"tag\":\"${GITHUB_REF_NAME}\"}}"
-          echo "told excavador-turing/www: ui-released ${GITHUB_REF_NAME}"
+      # of this repository, so a release here is what makes the site stale.
+      # It is NOT told from here.
+      #
+      # Telling it would mean a cross-repository write credential living in
+      # this repository's secrets -- a token that can push to the site, held
+      # by a workflow that has no other reason to touch it, for the sake of
+      # saving up to an hour on a demo page. The site polls instead: it
+      # compares this repository's releases/latest with the tag it already
+      # serves and rebuilds only when they differ. No credential exists to
+      # leak, expire, or be scoped wrongly.
+      #
+      # For an immediate rebuild after a release:
+      #   gh workflow run pages.yml --repo excavador-turing/www
