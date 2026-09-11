@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import ConfirmationModal from "@/components/ConfirmationModal";
+import SdCardPicker from "@/components/SdCardPicker";
 import TabView from "@/components/TabView";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -16,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useFlash } from "@/hooks/use-flash";
+import type { SdCardEntry } from "@/lib/api/get";
 
 export const Route = createLazyFileRoute("/_tabLayout/flash-node")({
   component: FlashNodeRoute,
@@ -43,6 +45,8 @@ export function FlashNode({ preselected }: { preselected?: number }) {
   const { t } = useTranslation();
   const formRef = useRef<HTMLFormElement>(null);
   const [confirmFlashModal, setConfirmFlashModal] = useState(false);
+  const [picking, setPicking] = useState(false);
+  const [fromCard, setFromCard] = useState<SdCardEntry | null>(null);
   const {
     flashType,
     isFlashing,
@@ -61,8 +65,12 @@ export function FlashNode({ preselected }: { preselected?: number }) {
         .selectedOptions[0].value;
       const file = (form.elements.namedItem("file") as HTMLInputElement)
         .files?.[0];
-      const url = (form.elements.namedItem("file-url") as HTMLInputElement)
-        .value;
+      // `file-url` is a field this form has not had for several releases, and
+      // reading `.value` off the null it returns threw a TypeError before
+      // anything was sent -- so the button did nothing, every time, with the
+      // failure only in the console. The source a path comes from is state
+      // now, not a DOM lookup that can go stale with the markup.
+      const url = fromCard?.path;
       const sha256 = (form.elements.namedItem("sha256") as HTMLInputElement)
         .value;
       const skipCRC = (form.elements.namedItem("skipCrc") as HTMLInputElement)
@@ -111,7 +119,38 @@ export function FlashNode({ preselected }: { preselected?: number }) {
             name="file"
             label={t("flashNode.fileInput")}
             accept=".img,.bin,.xz,application/octet-stream"
+            disabled={fromCard !== null}
           />
+        </div>
+
+        {/* The other source: the board's own SD card. An image is usually
+            already there -- staged firmware lands on it, and anyone with
+            physical access writes to it directly -- and before this, using
+            one meant typing its path from memory. */}
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <Button
+            type="button"
+            variant="bw"
+            onClick={() => setPicking(true)}
+            disabled={nodeUpdateMutation.isPending || isFlashing}
+          >
+            {t("sdCard.browse")}
+          </Button>
+          {fromCard && (
+            <span className="flex items-center gap-2 text-sm">
+              <span className="font-mono break-all">
+                {t("sdCard.chosen", { path: fromCard.path })}
+              </span>
+              <Button
+                type="button"
+                variant="bw"
+                size="sm"
+                onClick={() => setFromCard(null)}
+              >
+                {t("sdCard.clear")}
+              </Button>
+            </span>
+          )}
         </div>
 
         <div className="mb-4">
@@ -164,6 +203,11 @@ export function FlashNode({ preselected }: { preselected?: number }) {
           <div className="mt-2 text-sm">{statusMessage}</div>
         )}
       </form>
+      <SdCardPicker
+        isOpen={picking}
+        onClose={() => setPicking(false)}
+        onChoose={setFromCard}
+      />
       <ConfirmationModal
         isOpen={confirmFlashModal}
         onClose={() => setConfirmFlashModal(false)}

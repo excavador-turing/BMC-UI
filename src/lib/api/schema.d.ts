@@ -210,7 +210,7 @@ export interface paths {
     get: operations["getHostname"];
     put?: never;
     /**
-     * Rename the board; the metrics instance label changes with it
+     * Rename the board; its metrics carry no name, so none of them move
      * @description Legacy form: `GET /api/bmc?opt=set&type=hostname` with the same parameters in the query string. That form answers `{"response":[{"result":…}]}` and puts a refusal's message in `result`; this path answers the bare result and a refusal as `application/problem+json`.
      */
     post: operations["postHostname"];
@@ -440,6 +440,26 @@ export interface paths {
      * @description Legacy form: `GET /api/bmc?opt=get&type=sdcard` with the same parameters in the query string. That form answers `{"response":[{"result":…}]}` and puts a refusal's message in `result`; this path answers the bare result and a refusal as `application/problem+json`.
      */
     get: operations["getSdcard"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/bmc/sdcard/files": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * What is on the SD card, and which of it can be flashed to a node
+     * @description Legacy form: `GET /api/bmc?opt=get&type=sdcard_files` with the same parameters in the query string. That form answers `{"response":[{"result":…}]}` and puts a refusal's message in `result`; this path answers the bare result and a refusal as `application/problem+json`.
+     */
+    get: operations["getSdcardFiles"];
     put?: never;
     post?: never;
     delete?: never;
@@ -1051,6 +1071,42 @@ export interface components {
        *     which is why the field is renamed rather than called what it means.
        */
       use: number;
+    };
+    /** @description One entry in the listing. */
+    SdCardEntry: {
+      /**
+       * @description `true` for a directory, so a client can render a tree without a second
+       *     request per row.
+       */
+      directory: boolean;
+      /** @description Whether this could be written to a compute module. */
+      flashable: boolean;
+      /**
+       * Format: int64
+       * @description Seconds since the epoch, or `None` where the filesystem will not say.
+       */
+      modified?: number | null;
+      name: string;
+      /**
+       * @description Path relative to the card's root, which is also what a later request
+       *     sends back. Never absolute: the root is the daemon's to decide.
+       */
+      path: string;
+      /**
+       * @description Why not, when it is not. Present ONLY alongside `flashable: false`.
+       *
+       *     A non-candidate is listed rather than hidden: an operator who cannot
+       *     find the file they just copied will not conclude "it must be too
+       *     small", they will conclude the page is broken.
+       */
+      reason?: string | null;
+      /**
+       * Format: uint64
+       * @description Bytes. Meaningless for a directory and reported as 0 rather than
+       *     omitted, because an absent field and a zero are the same thing to most
+       *     clients and only one of them is true.
+       */
+      size: number;
     };
     /** @description One firmware slot. */
     Slot: {
@@ -2452,6 +2508,42 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["SdCard"][];
+        };
+      };
+      /** @description Done, with nothing to report. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A refusal, RFC 9457. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+    };
+  };
+  getSdcardFiles: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The result. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SdCardEntry"][];
         };
       };
       /** @description Done, with nothing to report. */

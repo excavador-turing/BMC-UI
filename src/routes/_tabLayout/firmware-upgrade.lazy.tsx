@@ -41,8 +41,11 @@ export function FirmwareUpgrade() {
       const form = formRef.current;
       const file = (form.elements.namedItem("file") as HTMLInputElement)
         .files?.[0];
-      const url = (form.elements.namedItem("file-url") as HTMLInputElement)
-        .value;
+      // The same trap as the node form had: `file-url` has not been a field
+      // here for several releases, and `.value` on the null it returns threw
+      // before anything was uploaded. This form takes a local file only, so
+      // there is no URL to read.
+      const url = undefined;
       const sha256 = (form.elements.namedItem("sha256") as HTMLInputElement)
         .value;
 
