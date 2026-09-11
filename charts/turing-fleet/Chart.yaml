@@ -1,0 +1,16 @@
+apiVersion: v2
+name: turing-fleet
+description: One interface over every Turing Pi BMC, as a pod
+type: application
+# The published version comes from the RELEASE TAG; the release workflow
+# overrides both of these. What is here only matters to a local
+# `helm template`.
+version: 0.1.0
+appVersion: "0.1.0"
+home: https://turingpi.xyz
+sources:
+  - https://github.com/excavador-turing/BMC-UI
+maintainers:
+  - name: Oleg Tsarev
+    email: oleg@tsarev.id
+keywords: [turing-pi, bmc, fleet]

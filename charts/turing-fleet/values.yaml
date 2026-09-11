@@ -1,0 +1,80 @@
+image:
+  registry: ghcr.io
+  repository: excavador-turing/turing-fleet
+  # Empty means the chart's appVersion. Pin it in a values file to upgrade
+  # deliberately rather than whenever the chart is republished.
+  tag: ""
+  pullPolicy: IfNotPresent
+
+replicaCount: 2
+
+# The boards this interface offers. Written into config.json and fetched by
+# the browser at boot, so adding a board is a values change and not a rebuild
+# of the image.
+#
+# `id` is the path segment Envoy routes on: /boards/<id>/api reaches that
+# board. It has to match the HTTPRoute in the estate, which is why these are
+# ids and not addresses -- this chart never learns a board's address, and the
+# bundle never holds one.
+boards: []
+#  - id: bmc-1
+#    name: bmc-1 (board A)
+#    note: hive-1..4
+
+# The bmcd releases this bundle is known to work against. A board outside the
+# range gets a banner rather than a broken page: talking to boards on
+# different firmware is permanent here, not a transitional state.
+supportedBmcd:
+  min: "2.20.0"
+  max: "2.29.0"
+
+service:
+  type: ClusterIP
+  port: 80
+
+# This pod authenticates NOTHING and holds no credential. Envoy in front of it
+# validates the operator through dex and presents the client certificate on
+# the leg to each board. There is no value here that turns authentication on,
+# because there is none to turn on -- and that is the property that makes
+# exposing this acceptable when exposing a board is not.
+
+resources:
+  requests: {cpu: 10m, memory: 32Mi}
+  limits: {memory: 96Mi}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 101
+  runAsGroup: 101
+  seccompProfile: {type: RuntimeDefault}
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities: {drop: ["ALL"]}
+
+# SQU-185: the exposure plane lives on the control plane and is spread across
+# the trio, never on workers. A worker is the first thing shed for power, and
+# the interface you use to bring hardware back must not be the thing that went
+# away with it.
+nodeSelector:
+  node-role.kubernetes.io/control-plane: ""
+
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule
+
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: turing-fleet
+
+# Annotations on the DEPLOYMENT, not the pod template: Reloader reads them
+# here, and one on the pod template looks right and is never seen.
+deploymentAnnotations: {}
+podAnnotations: {}
+affinity: {}

@@ -20,6 +20,7 @@ concurrency:
 
 permissions:
   contents: read
+  packages: read
 
 jobs:
   release:
@@ -168,3 +169,83 @@ jobs:
       #
       # For an immediate rebuild after a release:
       #   gh workflow run pages.yml --repo excavador-turing/www
+
+  # ---------------------------------------------------------------------
+  # The fleet interface: one image and one chart, both to GHCR.
+  #
+  # Separate jobs from the tarball above because they ship a different thing
+  # to a different consumer. The tarball is what the FIRMWARE unpacks into a
+  # board's web root; these two are what the CLUSTER runs. A tag moves both,
+  # which is the point -- the fleet is built from the same tree as the board
+  # interface and shares its components by import, so they cannot drift.
+  # ---------------------------------------------------------------------
+  fleet-image:
+    name: Fleet image
+    # A NATIVE arm64 runner. Every control-plane node in the estate is arm64
+    # (two RK1s and a Pi 5), and the chart pins this pod to the control plane,
+    # so an amd64-only image would be unschedulable where it is meant to run.
+    # Native beats emulation here: the build runs npm ci and a Vite build,
+    # which under qemu takes minutes rather than seconds.
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
+
+      - uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: build and push
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        with:
+          context: .
+          file: Dockerfile.fleet
+          platforms: linux/arm64
+          push: true
+          # The tag and `latest`. `latest` is a convenience for a human
+          # pulling it by hand; the chart pins the exact tag, because a
+          # deployment that follows `latest` changes when nobody asked it to.
+          tags: |
+            ghcr.io/excavador-turing/turing-fleet:${{ github.ref_name }}
+            ghcr.io/excavador-turing/turing-fleet:latest
+          build-args: |
+            BMC_UI_VERSION=${{ github.ref_name }}
+          provenance: false
+
+      - name: say what was pushed
+        run: |
+          echo "ghcr.io/excavador-turing/turing-fleet:${GITHUB_REF_NAME}" >> "$GITHUB_STEP_SUMMARY"
+
+  fleet-chart:
+    name: Fleet chart
+    needs: fleet-image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: azure/setup-helm@b9e51907a09c216f16ebe8536097933489208112 # v4.3.0
+
+      - name: package and push
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -eu
+          # The tag is the single source of both numbers. Chart.yaml's own
+          # values exist only so a local `helm template` works; publishing
+          # from them would let the chart and the image it points at drift.
+          version="${GITHUB_REF_NAME#v}"
+          helm registry login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin <<< "${GH_TOKEN}"
+          helm package charts/turing-fleet \
+            --version "${version}" --app-version "${GITHUB_REF_NAME}"
+          helm push "turing-fleet-${version}.tgz" oci://ghcr.io/excavador-turing/charts
+          echo "oci://ghcr.io/excavador-turing/charts/turing-fleet:${version}" >> "$GITHUB_STEP_SUMMARY"
+

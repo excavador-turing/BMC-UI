@@ -1,0 +1,4 @@
+{
+  "boards": [],
+  "supportedBmcd": { "min": "2.20.0", "max": "2.29.0" }
+}
