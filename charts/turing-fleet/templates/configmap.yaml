@@ -1,0 +1,14 @@
+{{- /*
+  config.json, fetched by the browser at boot rather than baked into the
+  image. Its checksum is on the Deployment's pod template below, so changing
+  the board list rolls the pods instead of leaving them serving the old list
+  until something else happens to restart them.
+*/ -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "turing-fleet.fullname" . }}
+  labels: {{- include "turing-fleet.labels" . | nindent 4 }}
+data:
+  config.json: |
+    {{- dict "boards" .Values.boards "supportedBmcd" .Values.supportedBmcd | toPrettyJson | nindent 4 }}

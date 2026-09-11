@@ -1,0 +1,40 @@
+# The fleet interface as an image: a static bundle and a web server, nothing
+# else. There is no server code, and deliberately so -- the pod holds no
+# credential, because Envoy in front of it is what authenticates the operator
+# and what presents the client certificate on the leg to each board. An image
+# that could reach a board on its own would be a credential store, and this is
+# the design that avoids having one.
+FROM node:24-alpine AS build
+WORKDIR /src
+
+# Dependencies first, so a source-only change does not refetch them.
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
+
+COPY . .
+# VITE_APP=fleet selects the fleet entry point. The board's own bundle is a
+# different build of this same tree and never contains this code.
+ARG BMC_UI_VERSION=""
+ENV BMC_UI_VERSION=${BMC_UI_VERSION}
+RUN VITE_APP=fleet npm run build
+
+# index.html is shared with the board's build, so its <title> is the board's.
+# The fleet sets document.title at runtime, but that is too late for a
+# bookmark, a browser tab before hydration, or anything that reads the HTML
+# without executing it. Rewritten here rather than in the tree, because the
+# board's own title is correct for the board.
+RUN sed -i 's|<title>[^<]*</title>|<title>Turing fleet</title>|' dist/index.html \
+ && grep -q '<title>Turing fleet</title>' dist/index.html
+
+# Unprivileged nginx: listens on 8080 as uid 101, which is what lets the pod
+# run with runAsNonRoot and a read-only root filesystem without a fight.
+FROM nginxinc/nginx-unprivileged:1.29-alpine
+COPY --from=build /src/dist /usr/share/nginx/html
+COPY docker/fleet-nginx.conf /etc/nginx/conf.d/default.conf
+
+# config.json is NOT baked in. The chart mounts it, so racking a board is a
+# configuration change rather than a rebuild of this image. A placeholder
+# ships so the page renders something honest if nobody mounts one.
+COPY docker/fleet-config-placeholder.json /usr/share/nginx/html/config.json
+
+EXPOSE 8080
