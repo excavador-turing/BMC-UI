@@ -73,6 +73,10 @@ const translations = {
     healthLoadWindows: "1 / 5 / 15 分钟",
     healthMemory: "内存",
     healthMemoryDetail: "空闲 {{free}} · 可用 {{available}}",
+    healthTemperatureTerm: "温度",
+    healthTemperature: "{{celsius}} °C",
+    healthFanStep: "风扇档位 {{step}} / {{max}}",
+    healthFanTrip: "高于 {{celsius}} °C 触发点",
     healthNand: "NAND",
     healthNandFree: "{{total}} 个擦除块中有 {{available}} 个空闲",
     healthNandBad: "{{blocks}} 个坏块",
@@ -188,7 +192,7 @@ const translations = {
     redrawButton: "重绘",
     noSession: "没有可用于认证控制台的会话令牌。请退出后重新登录。",
     failedHint:
-      "浏览器不会说明 WebSocket 握手为何失败。被拒绝的会话令牌，以及过旧、不支持该端点的守护进程，在这里都表现为一次没有原因的关闭。",
+      "浏览器不会说明 WebSocket 握手失败的原因，所有原因在这里都表现为没有理由的关闭。如果本页其余部分正常，通常是主板的证书问题：浏览器不会向它不信任的证书打开 WebSocket，而且在页面上接受警告并不适用于此连接。请信任主板的证书颁发机构，或改用集群页面，那里的 TLS 终止于浏览器已经信任的证书。另外两个原因是会话令牌被拒绝和守护进程版本过旧。",
     inputNote:
       "点击终端即可输入。按键会原样发送到模块，不附加任何内容——包括 Ctrl-C、Tab 补全和方向键。",
     ariaTerminal: "节点 {{nodeId}} 的串口控制台",

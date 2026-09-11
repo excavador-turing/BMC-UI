@@ -72,6 +72,10 @@ const translations = {
     healthLoadWindows: "1 / 5 / 15 min",
     healthMemory: "Memory",
     healthMemoryDetail: "free {{free}} · available {{available}}",
+    healthTemperatureTerm: "Temperature",
+    healthTemperature: "{{celsius}} °C",
+    healthFanStep: "fan step {{step}} of {{max}}",
+    healthFanTrip: "above the {{celsius}} °C trip",
     healthNand: "NAND",
     healthNandFree: "{{available}} of {{total}} eraseblocks free",
     healthNandBad: "{{blocks}} bad",
@@ -190,7 +194,7 @@ const translations = {
     noSession:
       "There is no session token to authenticate the console with. Log out and back in.",
     failedHint:
-      "A browser does not say why a WebSocket handshake failed. A rejected session token and a daemon too old to serve this endpoint both arrive here as a close with no reason.",
+      "A browser does not say why a WebSocket handshake failed, so all of these arrive here as a close with no reason. If the rest of this page works, the usual cause is the board's certificate: a browser will not open a WebSocket to a certificate it does not trust, and accepting the warning on the page does NOT extend to this connection. Trust the board's authority, or reach it through the fleet, where TLS ends on a certificate your browser already trusts. The other two causes are a rejected session token and a daemon too old to serve this endpoint.",
     inputNote:
       "Click the terminal to type into it. Keystrokes go to the module exactly as typed, with nothing appended — Ctrl-C, tab completion and the arrow keys included.",
     ariaTerminal: "Serial console for node {{nodeId}}",

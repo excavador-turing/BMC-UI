@@ -73,6 +73,10 @@ const translations = {
     healthLoadWindows: "1 / 5 / 15 min",
     healthMemory: "Geheugen",
     healthMemoryDetail: "vrij {{free}} · beschikbaar {{available}}",
+    healthTemperatureTerm: "Temperatuur",
+    healthTemperature: "{{celsius}} °C",
+    healthFanStep: "ventilatorstand {{step}} van {{max}}",
+    healthFanTrip: "boven de drempel van {{celsius}} °C",
     healthNand: "NAND",
     healthNandFree: "{{available}} van {{total}} wisblokken vrij",
     healthNandBad: "{{blocks}} defect",
@@ -191,7 +195,7 @@ const translations = {
     noSession:
       "Er is geen sessietoken om de console mee te authenticeren. Log uit en weer in.",
     failedHint:
-      "Een browser zegt niet waarom een WebSocket-handshake is mislukt. Een geweigerd sessietoken en een daemon die te oud is voor dit eindpunt komen hier allebei aan als een sluiting zonder reden.",
+      "Een browser zegt niet waarom een WebSocket-handshake mislukte; alle oorzaken komen hier aan als een sluiting zonder reden. Werkt de rest van deze pagina wel, dan is het meestal het certificaat van het bord: een browser opent geen WebSocket naar een certificaat dat hij niet vertrouwt, en de waarschuwing accepteren geldt NIET voor deze verbinding. Vertrouw de certificaatautoriteit van het bord, of gebruik de vloot, waar TLS eindigt op een certificaat dat uw browser al vertrouwt. De andere twee oorzaken zijn een geweigerd sessietoken en een te oude daemon.",
     inputNote:
       "Klik in de terminal om erin te typen. Toetsaanslagen gaan onveranderd naar de module, zonder dat er iets wordt toegevoegd — Ctrl-C, tab-aanvulling en de pijltjestoetsen inbegrepen.",
     ariaTerminal: "Seriële console voor node {{nodeId}}",

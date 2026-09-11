@@ -74,6 +74,10 @@ const translations = {
     healthLoadWindows: "1 / 5 / 15 min",
     healthMemory: "Memoria",
     healthMemoryDetail: "libre {{free}} · disponible {{available}}",
+    healthTemperatureTerm: "Temperatura",
+    healthTemperature: "{{celsius}} °C",
+    healthFanStep: "paso del ventilador {{step}} de {{max}}",
+    healthFanTrip: "por encima del umbral de {{celsius}} °C",
     healthNand: "NAND",
     healthNandFree: "{{available}} de {{total}} bloques de borrado libres",
     healthNandBad: "{{blocks}} defectuosos",
@@ -192,7 +196,7 @@ const translations = {
     noSession:
       "No hay ningún token de sesión con el que autenticar la consola. Cierre la sesión y vuelva a iniciarla.",
     failedHint:
-      "Un navegador no dice por qué ha fallado un saludo WebSocket. Un token de sesión rechazado y un demonio demasiado antiguo para servir este punto final llegan aquí igual: como un cierre sin motivo.",
+      "Un navegador no dice por qué falló un handshake de WebSocket; todas las causas llegan aquí como un cierre sin motivo. Si el resto de esta página funciona, lo habitual es el certificado de la placa: un navegador no abre un WebSocket hacia un certificado en el que no confía, y aceptar la advertencia de la página NO se extiende a esta conexión. Confíe en la autoridad de la placa, o acceda a través de la flota, donde TLS termina en un certificado que su navegador ya acepta. Las otras dos causas son un token de sesión rechazado y un daemon demasiado antiguo.",
     inputNote:
       "Haga clic en el terminal para escribir en él. Las pulsaciones se envían al módulo tal cual, sin añadir nada: incluidos Ctrl-C, el completado con tabulador y las flechas.",
     ariaTerminal: "Consola serie del nodo {{nodeId}}",
