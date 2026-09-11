@@ -722,6 +722,68 @@ export function useHealthQuery() {
  * which is why the key stays `switchPorts` rather than being named after
  * either page.
  */
+/**
+ * What is on the SD card, and which of it could be written to a module.
+ *
+ * The daemon decides both: `flashable` and `reason` come from it, not from a
+ * filename check here. An interface that guessed would disagree with the
+ * daemon the moment either changed, and the disagreement would show up as a
+ * flash that refuses after the operator already pressed the button.
+ */
+export type SdCardEntry = Schemas["SdCardEntry"];
+
+/** Capacity and use, from `statvfs` on the mount point. */
+export type SdCardUsage = Schemas["SdCard"];
+
+export function useSdCardQuery(enabled = true) {
+  const api = useAxiosWithAuth();
+
+  return useQuery({
+    queryKey: ["sdCard"],
+    enabled,
+    queryFn: async () => {
+      // An ARRAY of one, not an object: the document says `minItems: 1,
+      // maxItems: 1` and the board agrees. Reading it as an object gives an
+      // undefined `free`, which reaches `filesize` and throws "Invalid
+      // number" -- a blank tab with the cause three layers away.
+      const response = await api.get<APIResponse<SdCardUsage[]>>("/bmc", {
+        params: { opt: "get", type: "sdcard" },
+      });
+      return response.data.response[0].result[0];
+    },
+    // No polling. A card's capacity does not move while you look at it, and
+    // this board has 116 MB of RAM -- every interval here is a cost it pays
+    // for as long as the tab is open.
+    retry: false,
+  });
+}
+
+/**
+ * The listing, fetched only while the picker is open.
+ *
+ * `enabled` rather than an always-on query: reading a directory tree off an
+ * SD card is the most expensive thing on this tab, and nobody is looking at
+ * it until they open the picker.
+ */
+export function useSdCardFilesQuery(enabled: boolean) {
+  const api = useAxiosWithAuth();
+
+  return useQuery({
+    queryKey: ["sdCardFiles"],
+    enabled,
+    queryFn: async () => {
+      const response = await api.get<APIResponse<SdCardEntry[]>>("/bmc", {
+        params: { opt: "get", type: "sdcard_files" },
+      });
+      return response.data.response[0].result;
+    },
+    // A daemon older than 2.34.0 has no such endpoint and will answer the
+    // same way in five seconds. The picker says so rather than spinning.
+    retry: false,
+    staleTime: 10_000,
+  });
+}
+
 export function useSwitchPortsQuery() {
   const api = useAxiosWithAuth();
 

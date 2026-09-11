@@ -340,6 +340,29 @@ const translations = {
     writtenData: "{{written}} written",
     error: "An error has occurred",
   },
+  sdCard: {
+    pickerTitle: "Choose an image from the SD card",
+    pickerNote:
+      "What is on the board's own card. Whether a file can be written to a module is the daemon's answer, not a guess from its name.",
+    usage: "{{free}} free of {{total}} on the card.",
+    loading: "Reading the card\u2026",
+    unavailable:
+      "This daemon cannot list the card. Listing arrived in bmcd 2.34.0; upgrade the firmware to use this.",
+    empty: "Nothing on the card.",
+    noneFlashable:
+      "Nothing on the card can be written to a module. Show everything to see why.",
+    colName: "Path on the card",
+    colSize: "Size",
+    colState: "Can be flashed",
+    flashable: "yes",
+    notFlashable: "no",
+    choose: "Choose",
+    showAll: "Show everything",
+    showFlashable: "Show only what can be flashed ({{count}})",
+    browse: "Choose from the SD card\u2026",
+    chosen: "From the SD card: {{path}}",
+    clear: "Clear",
+  },
   flashNode: {
     header: "Install an OS image on a selected node",
     nodeSelect: "Selected node:",
