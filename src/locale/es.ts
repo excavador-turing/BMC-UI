@@ -31,6 +31,10 @@ const translations = {
     errorCredentials: "Nombre de usuario o contraseña inválidos",
     errorUnknown: "Ha ocurrido un error. Intenta nuevamente más tarde.",
   },
+  // access: deliberately English until someone who speaks this language
+  // reviews it. These strings decide who can log in to hardware, and a
+  // guessed translation of "stop trusting any proxy" is worse than a
+  // sentence the reader can look up.
   info: {
     fanAboveTrip: "por encima de {{celsius}} °C",
     userStorage: "Almacenamiento de Usuario",

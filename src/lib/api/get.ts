@@ -947,3 +947,71 @@ export function useNtpQuery() {
     retry: false,
   });
 }
+
+/**
+ * Who may reach this board (bmcd 2.36.0).
+ *
+ * `identity_header.source` and `client_ca_pinned_in_config` are the two
+ * fields that decide whether the interface may change anything: where
+ * `config.yaml` spoke, the daemon refuses to overwrite it and the card has to
+ * say so rather than offer a control that will be refused.
+ */
+export interface AccessState {
+  actor: { name: string; scheme: string };
+  local_account: string;
+  client_ca: {
+    subject: string;
+    issuer: string;
+    not_after: string;
+    fingerprint: string;
+    count: number;
+  } | null;
+  identity_header: { name: string; source: "config" | "override" | "default" };
+  client_ca_pinned_in_config: boolean;
+}
+
+/**
+ * A 200 IS NOT ENOUGH HERE, and finding that out cost a broken Settings tab.
+ *
+ * bmcd serves the web interface from the same listener as the API and falls
+ * back to `index.html` for anything it does not route. So a board on an older
+ * daemon answers `GET /bmc/access` with **200 and a page of HTML**, not a 404
+ * — `isError` stays false, `data` is a string, and the first property read
+ * throws inside the component rather than at the fetch. Rendered through the
+ * fleet that becomes "this tab could not be shown", which is the error a
+ * rebooting board gives, for a board that is perfectly healthy and merely
+ * older.
+ *
+ * So the shape is checked, not the status. Anything that is not the object
+ * this release expects reads as "this daemon does not have the endpoint".
+ */
+function isAccessState(value: unknown): value is AccessState {
+  if (typeof value !== "object" || value === null) return false;
+  const v = value as Record<string, unknown>;
+  const actor = v.actor as Record<string, unknown> | undefined;
+  const header = v.identity_header as Record<string, unknown> | undefined;
+  return (
+    typeof actor?.name === "string" &&
+    typeof actor?.scheme === "string" &&
+    typeof v.local_account === "string" &&
+    typeof header?.name === "string"
+  );
+}
+
+export function useAccessQuery() {
+  const api = useAxiosWithAuth();
+
+  return useQuery({
+    queryKey: ["access"],
+    queryFn: async () => {
+      const { data } = await api.get<unknown>("/bmc/access");
+      if (!isAccessState(data)) {
+        throw new Error("this daemon has no /bmc/access endpoint");
+      }
+      return data;
+    },
+    // One try, no retries: the card hides itself either way, and three
+    // attempts only delay that by a few seconds on every older board.
+    retry: false,
+  });
+}

@@ -56,7 +56,14 @@ export function BoardScope({
   const active = client ?? own;
 
   const apiBase = useMemo(
-    () => ({ base: apiBaseFor(board), unauthorized: "ignore" as const }),
+    () => ({
+      base: apiBaseFor(board),
+      unauthorized: "ignore" as const,
+      // Nothing here holds a board credential, by design: the pod is a static
+      // bundle, and Envoy in front of it authenticates the operator through
+      // dex and presents a client certificate on the leg to the board.
+      identity: "gateway" as const,
+    }),
     [board]
   );
 

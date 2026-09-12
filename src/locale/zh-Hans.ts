@@ -31,6 +31,10 @@ const translations = {
     errorCredentials: "无效的用户名或密码",
     errorUnknown: "发生错误。请稍后再试。",
   },
+  // access: deliberately English until someone who speaks this language
+  // reviews it. These strings decide who can log in to hardware, and a
+  // guessed translation of "stop trusting any proxy" is worse than a
+  // sentence the reader can look up.
   info: {
     fanAboveTrip: "高于 {{celsius}} °C",
     userStorage: "用户存储",

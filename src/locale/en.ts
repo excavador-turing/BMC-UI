@@ -31,6 +31,44 @@ const translations = {
     errorCredentials: "Invalid username or password",
     errorUnknown: "An error has occurred. Please try again later.",
   },
+  access: {
+    title: "Who may reach this board",
+    youAre: "You are here as {{name}}, authenticated by {{scheme}}.",
+    viaGatewayNote:
+      "The gateway vouched for you with a certificate this board trusts; you are not holding its password.",
+    passwordFor: "Password for {{account}}",
+    currentPassword: "Current password",
+    newPassword: "New password",
+    repeatPassword: "Repeat the new password",
+    tooShort: "At least 12 characters.",
+    noMatch: "The two new passwords are different.",
+    changePassword: "Change password",
+    passwordChanged: "Password changed.",
+    passwordFailed: "The password was not changed",
+    sessionsNote:
+      "The current password is required even when a gateway vouched for you. Sessions already open keep working \u2014 sign them out separately if that matters.",
+    trustedProxy: "Trusted proxy",
+    noTrustAnchor:
+      "No client certificate authority. Nothing may name an operator on this board's behalf, so only a password or a session token gets in.",
+    caExpires: "Expires {{date}}",
+    caBundle: "{{count}} certificates in the bundle; all are trusted.",
+    identityHeader:
+      "An operator's name is read from {{name}} ({{source}}), and only on a connection carrying a certificate from the CA above.",
+    identityHeaderPlaceholder: "Header naming the operator (now: {{name}})",
+    pemPlaceholder: "Paste a CA certificate in PEM form",
+    storeCa: "Store this CA",
+    removeCa: "Stop trusting any proxy",
+    removeCaConfirm:
+      "Every proxied session ends at the next reload, and the fleet will no longer reach this board. A password still works.",
+    caStored: "Certificate authority stored.",
+    caRemoved: "Certificate authority removed.",
+    caFailed: "The certificate authority was not changed",
+    reloadRequired: "It takes effect when the daemon reloads.",
+    pinnedInConfig:
+      "This is set in the board's config.yaml, which the daemon does not rewrite. Change it there.",
+    cannotRemoveFromHere:
+      "You are authenticated by this CA, so removing it here would end your own session. Do it from the board's own interface with a password.",
+  },
   info: {
     userStorage: "User Storage",
     ariaStorageUtilization: "Storage utilization",

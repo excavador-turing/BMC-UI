@@ -118,7 +118,7 @@ export default function SerialConsole({ node }: { node: number }) {
   // `/boards/<id>/api` when the fleet is rendering this against one board
   // through the gateway. Hardcoding the former is what used to make the
   // console the one tab a fleet could not have.
-  const { base } = useApiBase();
+  const { base, identity } = useApiBase();
   const { resolvedTheme } = useTheme();
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -135,7 +135,22 @@ export default function SerialConsole({ node }: { node: number }) {
   // stays exactly where it is.
   const [generation, setGeneration] = useState(0);
 
-  const usable = token !== null && TOKEN_PATTERN.test(token);
+  // WHAT MAKES A SOCKET POSSIBLE, which is not the same as holding a token.
+  //
+  // On the board's own interface it is: the browser talks to the daemon
+  // directly, so it must present the session token, and a WebSocket
+  // subprotocol name is the only place it can put one -- hence the pattern
+  // check, because a name outside RFC 6455's token characters makes
+  // `new WebSocket` throw rather than fail a handshake.
+  //
+  // Through the fleet the browser presents nothing. The gateway holds the
+  // certificate and names the operator on a hop the browser is not part of,
+  // and this page has no board credential at all. Requiring one here is what
+  // made the fleet's console the single tab that refused to work against a
+  // board answering every other request on the same page.
+  const bearer = identity === "session" ? token : null;
+  const usable =
+    identity === "gateway" || (token !== null && TOKEN_PATTERN.test(token));
   const dark = resolvedTheme === "dark";
 
   // With no usable token there is no socket to have a state, so the panel's
@@ -167,7 +182,12 @@ export default function SerialConsole({ node }: { node: number }) {
     try {
       const response = await fetch(
         `${base}/bmc?opt=get&type=uart&node=${node}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        // No header at all through the gateway: Envoy attaches the identity
+        // this board will believe, and `Bearer null` is a credential to be
+        // refused rather than an absent one.
+        {
+          headers: bearer === null ? {} : { Authorization: `Bearer ${bearer}` },
+        }
       );
       if (!response.ok) return;
       const body = (await response.json()) as UartResponse;
@@ -178,7 +198,7 @@ export default function SerialConsole({ node }: { node: number }) {
     } catch {
       // Nothing to show is not an error worth surfacing.
     }
-  }, [base, node, token, usable]);
+  }, [base, bearer, node, usable]);
 
   // The terminal, created once and disposed on unmount. Deliberately not
   // keyed on the node: this component is what gets replaced when the node
@@ -250,10 +270,14 @@ export default function SerialConsole({ node }: { node: number }) {
       const scheme = window.location.protocol === "https:" ? "wss:" : "ws:";
       socket = new WebSocket(
         `${scheme}//${window.location.host}${base}/bmc/serial/ws?node=${node}`,
-        // Credential last. The daemon selects the first entry that is not a
-        // `bmcd.bearer.` one, so the plain name has to be offered and has to
-        // come first.
-        ["bmcd.serial.v1", `bmcd.bearer.${token}`]
+        // Credential last, and only when this page holds one. The daemon
+        // selects the first entry that is not a `bmcd.bearer.` one, so the
+        // plain name has to be offered and has to come first. Through the
+        // gateway there is no second entry at all: `bmcd.bearer.null` would
+        // be a credential the daemon must then reject.
+        bearer === null
+          ? ["bmcd.serial.v1"]
+          : ["bmcd.serial.v1", `bmcd.bearer.${bearer}`]
       );
       // Binary frames as ArrayBuffers rather than Blobs: a Blob would have to
       // be read asynchronously, which reorders UART output.
@@ -341,7 +365,7 @@ export default function SerialConsole({ node }: { node: number }) {
         socket.close();
       }
     };
-  }, [base, node, token, usable, generation, replay]);
+  }, [base, bearer, node, usable, generation, replay]);
 
   const stateLabel: Record<ConnectionState, string> = {
     connecting: t("console.stateConnecting"),

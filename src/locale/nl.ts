@@ -31,6 +31,10 @@ const translations = {
     errorCredentials: "Ongeldige gebruikersnaam of wachtwoord",
     errorUnknown: "Er is een fout opgetreden. Probeer het later opnieuw.",
   },
+  // access: deliberately English until someone who speaks this language
+  // reviews it. These strings decide who can log in to hardware, and a
+  // guessed translation of "stop trusting any proxy" is worse than a
+  // sentence the reader can look up.
   info: {
     fanAboveTrip: "boven {{celsius}} °C",
     userStorage: "Gebruikersopslag",

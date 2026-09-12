@@ -32,6 +32,10 @@ const translations = {
     errorUnknown:
       "Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.",
   },
+  // access: deliberately English until someone who speaks this language
+  // reviews it. These strings decide who can log in to hardware, and a
+  // guessed translation of "stop trusting any proxy" is worse than a
+  // sentence the reader can look up.
   info: {
     fanAboveTrip: "über {{celsius}} °C",
     userStorage: "Benutzerspeicher",
