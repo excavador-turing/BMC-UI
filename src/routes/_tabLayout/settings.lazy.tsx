@@ -2,6 +2,7 @@ import { createLazyFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import AccessCard from "@/components/AccessCard";
 import ConfigBackup from "@/components/ConfigBackup";
 import FanControl from "@/components/FanControl";
 import FirmwareSources from "@/components/FirmwareSources";
@@ -89,6 +90,7 @@ export function Settings() {
     <TabView>
       <HostnameCard />
       <TimeCard />
+      <AccessCard />
       <FanControl />
       <FirmwareSources />
       <ConfigBackup />

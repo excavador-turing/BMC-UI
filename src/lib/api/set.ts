@@ -387,3 +387,56 @@ export function useImportConfigMutation() {
     },
   });
 }
+
+/**
+ * Change a local account's password (bmcd 2.36.0).
+ *
+ * The CURRENT password travels with it, always -- the daemon requires it even
+ * from an operator a proxy vouched for, because a certificate proves the
+ * gateway trusts you rather than that you hold this board's console.
+ *
+ * Nothing here is cached or logged. `mutationKey` carries no payload and the
+ * component keeps the fields in local state that it clears on success.
+ */
+export function useSetPasswordMutation() {
+  const api = useAxiosWithAuth();
+
+  return useMutation({
+    mutationKey: ["setPassword"],
+    mutationFn: async (body: {
+      username: string;
+      current_password: string;
+      new_password: string;
+    }) => {
+      await api.post("/bmc/access/password", body);
+    },
+  });
+}
+
+/** Replace the CA whose client certificates may name an operator. */
+export function useSetClientCaMutation() {
+  const api = useAxiosWithAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["setClientCa"],
+    mutationFn: async (body: { pem: string; identity_header?: string }) => {
+      await api.put("/bmc/access/client-ca", body);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["access"] }),
+  });
+}
+
+/** Stop trusting any proxy. Refused by the daemon when asked THROUGH one. */
+export function useRemoveClientCaMutation() {
+  const api = useAxiosWithAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["removeClientCa"],
+    mutationFn: async () => {
+      await api.delete("/bmc/access/client-ca");
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["access"] }),
+  });
+}
