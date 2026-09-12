@@ -10,6 +10,7 @@ import InfoNote from "@/components/InfoNote";
 import { Button } from "@/components/ui/button";
 import { useApiBase } from "@/hooks/useApiBase";
 import { useAuth } from "@/hooks/useAuth";
+import { rememberShown, unseenTail } from "@/lib/console-replay";
 import { cn } from "@/lib/utils";
 
 /**
@@ -125,6 +126,17 @@ export default function SerialConsole({ node }: { node: number }) {
   const terminalRef = useRef<Terminal | null>(null);
   const fitRef = useRef<FitAddon | null>(null);
 
+  // A bounded tail of everything the terminal has been given, replayed and
+  // live alike. It exists so a second replay can tell which part of the ring
+  // buffer is already on screen; see `unseenTail`. A ref rather than state:
+  // nothing renders from it, and a re-render per received frame would be
+  // absurd.
+  const shownRef = useRef("");
+  // Live frames arrive as bytes and a multi-byte character can be split
+  // across two of them. The terminal has its own decoder; this is the shadow
+  // copy's, and it has to be a streaming one for the same reason.
+  const decoderRef = useRef<TextDecoder | null>(null);
+
   const [state, setState] = useState<ConnectionState>("connecting");
   const [closeInfo, setCloseInfo] = useState<CloseInfo | null>(null);
   const [protocol, setProtocol] = useState<string | null>(null);
@@ -192,9 +204,20 @@ export default function SerialConsole({ node }: { node: number }) {
       if (!response.ok) return;
       const body = (await response.json()) as UartResponse;
       const text = body.response[0]?.uart ?? "";
+      // Only the part of the ring the terminal has not already been given.
+      // On a first open that is all of it; on a reconnect it is whatever the
+      // module wrote while the socket was down, which is usually nothing.
+      //
+      // Without this, every reconnect wrote a second identical copy of the
+      // whole ring underneath the first -- the same lines with the same
+      // kernel timestamps, twice.
+      const fresh = unseenTail(shownRef.current, text);
       // Re-read the ref: the await is long enough for the node to have changed
       // under us, which unmounts this terminal.
-      if (text !== "") terminalRef.current?.write(text);
+      if (fresh !== "") {
+        terminalRef.current?.write(fresh);
+        shownRef.current = rememberShown(shownRef.current, fresh);
+      }
     } catch {
       // Nothing to show is not an error worth surfacing.
     }
@@ -304,10 +327,23 @@ export default function SerialConsole({ node }: { node: number }) {
         // Bytes go to the terminal as bytes. Decoding them here would break
         // any multi-byte sequence a frame happens to split, and the terminal
         // has a decoder that carries state across writes.
+        //
+        // The shadow copy needs the text, so it gets its own streaming
+        // decoder for exactly the same reason. It is only ever compared
+        // against the ring buffer, so a replacement character at a boundary
+        // costs at worst a few duplicated bytes after a reconnect, never a
+        // broken terminal.
         if (event.data instanceof ArrayBuffer) {
-          target.write(new Uint8Array(event.data));
+          const bytes = new Uint8Array(event.data);
+          target.write(bytes);
+          decoderRef.current ??= new TextDecoder("utf-8");
+          shownRef.current = rememberShown(
+            shownRef.current,
+            decoderRef.current.decode(bytes, { stream: true })
+          );
         } else if (typeof event.data === "string") {
           target.write(event.data);
+          shownRef.current = rememberShown(shownRef.current, event.data);
         }
       };
 
@@ -411,7 +447,12 @@ export default function SerialConsole({ node }: { node: number }) {
           <Button
             type="button"
             variant="bw"
-            onClick={() => terminalRef.current?.clear()}
+            onClick={() => {
+              terminalRef.current?.clear();
+              // Nothing is on screen now, so nothing counts as shown. A later
+              // replay repopulates instead of deciding it has nothing to add.
+              shownRef.current = "";
+            }}
           >
             {t("console.clearButton")}
           </Button>
@@ -425,6 +466,7 @@ export default function SerialConsole({ node }: { node: number }) {
               // second copy below the first. It costs local scrollback beyond
               // the daemon's 16 KiB, which is the trade a redraw is.
               terminalRef.current?.clear();
+              shownRef.current = "";
               void replay();
             }}
           >
