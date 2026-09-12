@@ -10,6 +10,34 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Every reconnect wrote a second copy of the scrollback.** Pressing
+  Reconnect kept the terminal, as it is meant to, and then replayed the
+  daemon's whole 16 KiB ring buffer underneath what was already there. Seen on
+  both interfaces on 2026-09-12 — five lines of `eth0: renamed from ...`, then
+  those same five lines again, carrying the same kernel timestamps.
+
+  The replay exists because the daemon forwards only what arrives after a
+  subscriber joins, so without it a console opened on a module that has been
+  up for hours shows nothing at all. It just never asked whether the terminal
+  already had that output.
+
+  Clearing the terminal first would have fixed the duplication and cost the
+  thing the scrollback is for: the daemon keeps only the last 16 KiB, and one
+  boot is about 82 KB, so the terminal is the only place a full boot survives.
+  Instead the replay now works out where what it has already shown ends inside
+  the buffer it has just been handed, and writes only what follows — so a
+  reconnect with nothing new writes nothing, and a reconnect after a gap
+  writes exactly the gap.
+
+  Live frames count as shown too, so output that arrived over the socket is
+  not replayed back a second time either.
+
+  Redraw is unchanged and still clears first: it means "show me what the
+  module's screen says now", which is a different question.
+
+
 ## [3.19.0] — 2026-09-10
 
 ### Removed
