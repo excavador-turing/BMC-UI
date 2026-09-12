@@ -24,6 +24,70 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/bmc/access": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Who may reach this board, and how you reached it
+     * @description The local account the password belongs to, the trust anchor for proxied identity if one is in effect, the header an identity is read from, and how THIS request was authenticated. `client_ca_pinned_in_config` means config.yaml chose it and the daemon will not overwrite that choice.
+     */
+    get: operations["getAccess"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/bmc/access/client-ca": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Set the CA whose client certificates name an operator
+     * @description The bundle is loaded through the same call the TLS acceptor makes at startup before it is stored, so a bundle this accepts is one the daemon can start with. Takes effect on the next reload (`opt=set&type=reload`). Refused when config.yaml pins the path.
+     */
+    put: operations["putClientCa"];
+    post?: never;
+    /**
+     * Stop trusting any proxy
+     * @description Refused when the caller is authenticated BY that CA -- removing it ends the session asking, through the proxy it is asking through. Do it from the board's own interface with a password. Also refused when config.yaml pins the path.
+     */
+    delete: operations["deleteClientCa"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/bmc/access/password": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Change a local account's password
+     * @description The CURRENT password is required, including from an operator a proxy vouched for: a certificate proves the gateway trusts you, not that you hold this board's console. At least 12 characters, counted as characters rather than bytes. Existing sessions keep working -- a token outlives the password it was minted from.
+     */
+    post: operations["setPassword"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/bmc/config": {
     parameters: {
       query?: never;
@@ -610,6 +674,32 @@ export interface components {
        */
       version: string;
     };
+    /** @description Who may reach this board. See GET /api/bmc/access. */
+    AccessState: {
+      /** @description How this request was authenticated. */
+      actor: {
+        name: string;
+        /** @enum {string} */
+        scheme: "mtls" | "token" | "basic" | "loopback" | "none";
+      };
+      /** @description Null when this board trusts no proxy. */
+      client_ca?: {
+        /** @description Certificates in the bundle; all are trusted. */
+        count?: number;
+        /** @description SHA-256 over the DER, colon-separated. */
+        fingerprint?: string;
+        issuer?: string;
+        not_after?: string;
+        subject?: string;
+      } | null;
+      client_ca_pinned_in_config: boolean;
+      identity_header: {
+        name: string;
+        /** @enum {string} */
+        source: "config" | "override" | "default";
+      };
+      local_account: string;
+    };
     /**
      * @description `GET /api/bmc/info` -- what the Overview page reads.
      *
@@ -620,10 +710,17 @@ export interface components {
       ip: components["schemas"]["NetInfo"][];
       storage: components["schemas"]["StorageInfo"][];
     };
+    /**
+     * @description Deserialize as well as Serialize: the same shape is written to
+     *     /mnt/overlay/firmware-catalog.json and read back at the next boot, so the
+     *     wire format and the stored format are one format by construction. Every
+     *     field that is skipped when serialising takes `default`, or a settled
+     *     catalogue would fail to load the moment it omitted one.
+     */
     Candidate: {
       /** @description For a local candidate, the file it came from. */
       file?: string | null;
-      prerelease: boolean;
+      prerelease?: boolean;
       relation: components["schemas"]["Relation"];
       /** Format: uint64 */
       size_bytes?: number | null;
@@ -645,7 +742,7 @@ export interface components {
        *     list underneath readable, rather than blanking or freezing. Skipped
        *     when false so a settled catalogue serialises as it always did.
        */
-      refreshing: boolean;
+      refreshing?: boolean;
       running: string;
       sources: components["schemas"]["SourceCatalog"][];
     };
@@ -1373,6 +1470,150 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description A refusal, RFC 9457. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+    };
+  };
+  getAccess: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The board's access configuration. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AccessState"];
+        };
+      };
+      /** @description A refusal, RFC 9457. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+    };
+  };
+  putClientCa: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description Optional. The header an identity is read from; absent leaves it alone. */
+          identity_header?: string;
+          /** @description One or more certificates, PEM. */
+          pem: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Stored; a reload is required. */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            detail?: string;
+            reload_required?: boolean;
+          };
+        };
+      };
+      /** @description A refusal, RFC 9457. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+    };
+  };
+  deleteClientCa: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Removed; a reload is required. */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A refusal, RFC 9457. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+    };
+  };
+  setPassword: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: password */
+          current_password: string;
+          /** Format: password */
+          new_password: string;
+          /** @description Whose password. `root` on a board. */
+          username: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Changed. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The current password is wrong. The same answer is given for an account that does not exist, so this cannot enumerate them. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
       };
       /** @description A refusal, RFC 9457. */
       default: {
