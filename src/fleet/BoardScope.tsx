@@ -8,6 +8,7 @@ import {
   type NodeDestination,
   NodeNavProvider,
 } from "@/contexts/NodeNavContext";
+import { ToastScopeContext } from "@/contexts/ToastScopeContext";
 import { apiBaseFor, type FleetBoard } from "@/fleet/config";
 import { toHash } from "@/fleet/route";
 
@@ -41,6 +42,12 @@ export function makeClient() {
  * `NodeNavProvider` -- what the per-node Console and Flash buttons mean here:
  * a hash change within this board, not a route in an application that is not
  * running.
+ *
+ * `ToastScopeContext` -- which board a toast is about. The shared tabs raise
+ * fifteen toasts between them and none of them name a machine, because on a
+ * board there is only one. In a fleet "node 2 powered off" is useless. Supplied
+ * here rather than passed down, so the shared components stay identical to the
+ * board interface's.
  */
 export function BoardScope({
   board,
@@ -86,9 +93,13 @@ export function BoardScope({
     <QueryClientProvider client={active}>
       <ApiBaseProvider value={apiBase}>
         <NodeNavProvider value={nav}>
-          <FlashProvider>
-            <TooltipProvider>{children}</TooltipProvider>
-          </FlashProvider>
+          {/* Outside FlashProvider on purpose: the flash state machine raises
+              its own toasts, and they need naming as much as any other. */}
+          <ToastScopeContext.Provider value={board.name ?? board.id}>
+            <FlashProvider>
+              <TooltipProvider>{children}</TooltipProvider>
+            </FlashProvider>
+          </ToastScopeContext.Provider>
         </NodeNavProvider>
       </ApiBaseProvider>
     </QueryClientProvider>

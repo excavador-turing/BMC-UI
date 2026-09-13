@@ -1,7 +1,8 @@
 // Inspired by react-hot-toast library
-import { useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 
 import type { ToastActionElement, ToastProps } from "@/components/ui/toast";
+import { ToastScopeContext } from "@/contexts/ToastScopeContext";
 
 // Three, not one. On a board, one action at a time meant one toast was
 // enough. The fleet drives several boards at once -- power a node here, start
@@ -171,6 +172,9 @@ function toast({ ...props }: Toast) {
 
 function useToast() {
   const [state, setState] = useState<State>(memoryState);
+  // Which board, if we are inside one. Null on the board interface, where a
+  // prefix would only add noise to an unambiguous message.
+  const scope = useContext(ToastScopeContext);
 
   useEffect(() => {
     listeners.push(setState);
@@ -182,9 +186,21 @@ function useToast() {
     };
   }, [state]);
 
+  const scoped = useCallback(
+    (props: Toast) => {
+      if (scope === null) return toast(props);
+      // `title` is a string here, not a ReactNode: ToastProps narrows it, so
+      // there is no element case to compose around.
+      const title =
+        props.title === undefined ? scope : `${scope}: ${props.title}`;
+      return toast({ ...props, title });
+    },
+    [scope]
+  );
+
   return {
     ...state,
-    toast,
+    toast: scoped,
     dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
   };
 }

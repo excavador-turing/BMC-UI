@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import {
   useFirmwareUpdateMutation,
   useNodeUpdateMutation,
@@ -54,6 +54,10 @@ interface FlashProviderProps {
 }
 
 export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
+  // The hook, not the module-level `toast`: only the hook can see which board
+  // this provider belongs to, and a flash toast that does not say which board
+  // it is about is the least useful of all of them.
+  const { toast } = useToast();
   const { t } = useTranslation();
   const [flashType, setFlashType] = useState<FlashType>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -153,16 +157,19 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
     });
   };
 
-  const handleError = useCallback((error: string, title: string) => {
-    setIsFlashing(false);
-    setUploadProgress(undefined);
-    setStatusMessage(error);
-    toast({
-      title,
-      description: error,
-      variant: "destructive",
-    });
-  }, []);
+  const handleError = useCallback(
+    (error: string, title: string) => {
+      setIsFlashing(false);
+      setUploadProgress(undefined);
+      setStatusMessage(error);
+      toast({
+        title,
+        description: error,
+        variant: "destructive",
+      });
+    },
+    [toast]
+  );
 
   const handleTransferProgress = useCallback(
     (data: FlashStatus) => {
@@ -178,12 +185,15 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
     [t]
   );
 
-  const handleSuccess = useCallback((title: string, message: string) => {
-    setIsFlashing(false);
-    setUploadProgress(undefined);
-    setStatusMessage(message);
-    toast({ title, description: message });
-  }, []);
+  const handleSuccess = useCallback(
+    (title: string, message: string) => {
+      setIsFlashing(false);
+      setUploadProgress(undefined);
+      setStatusMessage(message);
+      toast({ title, description: message });
+    },
+    [toast]
+  );
 
   // react-hooks/set-state-in-effect: this effect *is* the external-system sync
   // the rule carves out -- bmcd's flash status arrives by polling and lands

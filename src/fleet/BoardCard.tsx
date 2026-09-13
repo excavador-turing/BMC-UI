@@ -326,12 +326,12 @@ function Power({
             {
               onSuccess: () => {
                 toast({
-                  title: `${who}: node ${String(nodeId)} ${next ? "on" : "off"}`,
+                  title: `node ${String(nodeId)} ${next ? "on" : "off"}`,
                 });
               },
               onError: (error: unknown) => {
                 toast({
-                  title: `${who}: node ${String(nodeId)} did not change`,
+                  title: `node ${String(nodeId)} did not change`,
                   description:
                     error instanceof Error ? error.message : String(error),
                   variant: "destructive",
