@@ -204,6 +204,9 @@ const translations = {
     linkDown: "link down",
     linkAbsent: "switch port not detected",
     linkSpeed: "{{speed}} Mb/s",
+    usbBootArmed: "armed for USB boot — will not boot from eMMC",
+    usbBootArmedNote:
+      "This module's USB-boot pin is held high, so it will stay silent at its next reboot; set its USB route to Device to clear it.",
     powerOnTimeNote:
       "Power-on time is a stamp the BMC writes when it switches a node on, not a probe of the running module, and it is measured against this browser's clock.",
   },

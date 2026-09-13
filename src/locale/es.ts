@@ -171,6 +171,9 @@ const translations = {
     linkDown: "enlace caído",
     linkAbsent: "puerto del conmutador no detectado",
     linkSpeed: "{{speed}} Mb/s",
+    usbBootArmed: "preparado para arranque USB — no arrancará desde la eMMC",
+    usbBootArmedNote:
+      "El pin de arranque USB de este módulo está activado, por lo que seguirá en silencio en su próximo reinicio; cambia su ruta USB a Dispositivo para desactivarlo.",
     powerOnTimeNote:
       "La hora de encendido es una marca que el BMC escribe al encender un nodo, no una comprobación del módulo en marcha, y se mide contra el reloj de este navegador.",
   },

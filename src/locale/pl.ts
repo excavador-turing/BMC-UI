@@ -171,6 +171,9 @@ const translations = {
     linkDown: "brak łącza",
     linkAbsent: "port przełącznika nie wykryty",
     linkSpeed: "{{speed}} Mb/s",
+    usbBootArmed: "uzbrojony do rozruchu z USB — nie uruchomi się z eMMC",
+    usbBootArmedNote:
+      "Pin rozruchu USB tego modułu jest aktywny, więc przy następnym restarcie moduł pozostanie cichy; ustaw jego tryb USB na Urządzenie, aby to wyłączyć.",
     powerOnTimeNote:
       "Czas włączenia to znacznik, który BMC zapisuje przy włączaniu węzła, a nie odpytanie działającego modułu, i jest mierzony względem zegara tej przeglądarki.",
   },

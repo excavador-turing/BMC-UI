@@ -169,6 +169,9 @@ const translations = {
     linkDown: "链路断开",
     linkAbsent: "未检测到交换机端口",
     linkSpeed: "{{speed}} Mb/s",
+    usbBootArmed: "已置为 USB 启动 — 不会从 eMMC 启动",
+    usbBootArmedNote:
+      "该模块的 USB 启动引脚处于高电平，下次重启时将毫无输出；将其 USB 模式设为“设备”即可解除。",
     powerOnTimeNote:
       "上电时间是 BMC 在给节点上电时写入的时间戳，并非对运行中模块的探测，而且它是相对本浏览器的时钟计算的。",
   },

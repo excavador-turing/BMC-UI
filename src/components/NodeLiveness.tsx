@@ -2,7 +2,11 @@ import { useTranslation } from "react-i18next";
 
 import InfoNote from "@/components/InfoNote";
 import { useDurationLabel } from "@/hooks/use-duration";
-import { type NodeInfoResponse, useSwitchPortsQuery } from "@/lib/api/get";
+import {
+  type NodeInfoResponse,
+  useSwitchPortsQuery,
+  useUSBTabData,
+} from "@/lib/api/get";
 import { isReading } from "@/lib/format";
 
 /**
@@ -23,6 +27,18 @@ import { isReading } from "@/lib/format";
  * `type=network` shows no link fragment at all, because the Nodes page is not
  * the place to report that the switch endpoint is missing -- the Info panel
  * already does that, in a section devoted to it.
+ *
+ * The third fragment is the loudest, and it leads. A module whose USB-boot pin
+ * is held will not boot from its own eMMC, and the next reboot -- which can be
+ * weeks after whatever armed it -- produces something indistinguishable from
+ * dead hardware: silent on the serial console, off the network, and the board
+ * still reporting its rail on. Twenty minutes went into exactly that on
+ * 2026-09-12 (SQU-213).
+ *
+ * The USB selector below already shows `Flash` on that node's card, which is
+ * why this is worth being precise about: a SELECT says what you may set, not
+ * what is wrong, and it says nothing about the consequence. This line is where
+ * someone looking at a node that will not come up is already reading.
  */
 export default function NodeLiveness({
   nodeId,
@@ -33,9 +49,18 @@ export default function NodeLiveness({
 }) {
   const { t } = useTranslation();
   const { data: ports } = useSwitchPortsQuery();
+  const usb = useUSBTabData();
   const durationLabel = useDurationLabel();
 
   const port = ports?.find((candidate) => candidate.name === `node${nodeId}`);
+
+  // The board holds ONE usb configuration, so being armed is a property of the
+  // single node named in it, and only while the mode is Flash. bmcd persists
+  // that config and re-applies it on every start, so this survives a power
+  // cycle -- which is exactly why it is worth saying out loud.
+  const armed =
+    usb.data.mode === "Flash" &&
+    Number.parseInt(usb.data.node.replace(/\D/g, ""), 10) === nodeId;
 
   // `power_on_time` is ALREADY elapsed seconds, not an epoch stamp. The daemon
   // stores a wall-clock instant and hands out the difference, so subtracting it
@@ -47,6 +72,17 @@ export default function NodeLiveness({
 
   return (
     <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+      {armed && (
+        <span className="flex items-center gap-1 text-red-600 dark:text-red-400">
+          {t("nodes.usbBootArmed")}
+          <InfoNote
+            text={t("nodes.usbBootArmedNote")}
+            path="/reference/known-faults/#a-module-in-flash-mode-looked-exactly-like-dead-hardware"
+            label={t("nodes.usbBootArmed")}
+          />
+        </span>
+      )}
+
       {powerOnTime === null && (
         <span className="opacity-60">{t("nodes.powerOff")}</span>
       )}
