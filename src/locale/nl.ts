@@ -170,6 +170,9 @@ const translations = {
     linkDown: "geen verbinding",
     linkAbsent: "switchpoort niet gedetecteerd",
     linkSpeed: "{{speed}} Mb/s",
+    usbBootArmed: "gereed voor USB-boot — start niet op vanaf eMMC",
+    usbBootArmedNote:
+      "De USB-bootpin van deze module staat hoog, dus blijft hij bij de volgende herstart stil; zet de USB-route op Apparaat om dit op te heffen.",
     powerOnTimeNote:
       "De inschakeltijd is een tijdstempel die het BMC schrijft wanneer het een node inschakelt, geen meting aan de draaiende module, en hij wordt afgezet tegen de klok van deze browser.",
   },

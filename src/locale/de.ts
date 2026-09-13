@@ -171,6 +171,9 @@ const translations = {
     linkDown: "keine Verbindung",
     linkAbsent: "Switch-Port nicht erkannt",
     linkSpeed: "{{speed}} Mb/s",
+    usbBootArmed: "für USB-Boot scharf geschaltet — bootet nicht von der eMMC",
+    usbBootArmedNote:
+      "Der USB-Boot-Pin dieses Moduls ist aktiv, daher bleibt es beim nächsten Neustart stumm; setze seine USB-Route auf Gerät, um das aufzuheben.",
     powerOnTimeNote:
       "Die Einschaltzeit ist ein Zeitstempel, den das BMC beim Einschalten eines Knotens schreibt, keine Abfrage des laufenden Moduls, und sie wird gegen die Uhr dieses Browsers gemessen.",
   },
