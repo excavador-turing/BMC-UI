@@ -10,6 +10,30 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.29.0] — 2026-09-13
+
+### Added
+
+- **A node armed for USB boot says so, on its own liveness line.** A module
+  whose USB-boot pin is held will not boot from its own eMMC, and from outside
+  that is indistinguishable from dead hardware: silent on the serial console,
+  off the network, and the board still reporting its rail on. The note leads
+  the liveness line, in red, ahead of power state and link state, because both
+  of those read perfectly normal in this failure.
+
+  The USB selector on the same card already showed `Flash` for that node. A
+  select says what you may *set*, not what is *wrong*, and says nothing about
+  the consequence or the remedy; the note beside the warning names both.
+
+### Changed
+
+- **A toast names the board it is about.** With a fleet on one screen,
+  "Flashing started" told you an operation began somewhere, and a notification
+  from one board was indistinguishable from the same notification from
+  another. Toasts raised inside a board's scope now carry that board's name.
+
+## [3.28.0] — 2026-09-12
+
 ### Fixed
 
 - **Every reconnect wrote a second copy of the scrollback.** Pressing
@@ -37,6 +61,112 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   Redraw is unchanged and still clears first: it means "show me what the
   module's screen says now", which is a different question.
 
+## [3.27.0] — 2026-09-12
+
+### Fixed
+
+- **The fleet's serial console connects.** It was one gate away: the
+  certificate path was already wired end to end, and the interface refused
+  before trying.
+
+### Added
+
+- **Settings can say who may get in.** The access card: how you arrived, the
+  password for the local account, and the certificate authority a proxy must
+  hold to name you — the first time either half was visible from the
+  interface, let alone changeable there.
+
+## [3.26.0] — 2026-09-12
+
+### Changed
+
+- **The temperature moved to Board Health.** It was filed under Settings,
+  inside the fan card — a reading beside a control — so somebody asking "is
+  this board hot?" opened the tab called Board Health, found five other
+  numbers, and concluded the board could not tell them. It now sits with
+  uptime, load, memory and the clock, and shows the trip point that explains
+  the fan's step, because a step with no reason beside it reads as arbitrary.
+
+### Fixed
+
+- **The console hint names what actually breaks it.** A browser will not open
+  a WebSocket to a certificate it does not trust, and the exception you
+  granted by clicking through on the page does not extend to that connection.
+  The hint led with a rejected token and a daemon too old to serve the
+  endpoint; both are possible and neither is what people hit.
+
+## [3.25.0] — 2026-09-12
+
+### Added
+
+- **Choose an image off the SD card.** A 2 GB image is usually already on the
+  board's own card, and installing it meant typing its path from memory into a
+  field and finding out minutes later whether you had. The picker lists what is
+  there, marks what can be written to a module, and says why the rest cannot.
+
+### Fixed
+
+- A button on the flash page that had never worked.
+
+## [3.24.0] — 2026-09-11
+
+### Changed
+
+- **Installing firmware asks in a modal**, not in a confirmation that appeared
+  below the version list where the reader was not looking.
+
+## [3.23.0] — 2026-09-11
+
+### Added
+
+- **The fleet can drive a board, not just describe one.** It shipped as an
+  overview — tiles, versions, uptime, nothing you could press — and a status
+  page is not what removes the need to open eight tabs. First pass at parity
+  with the board's own interface.
+
+### Fixed
+
+- **Stop escaping the daemon's messages twice**, which rendered `&#x2F;` where
+  a slash belonged on the Firmware page.
+
+## [3.22.0] — 2026-09-11
+
+### Added
+
+- **The fleet: one interface over every board**, and the image and chart that
+  deploy it. A board that can reflash four computers should not face the
+  internet; the fleet is the thing that is exposed instead, and it holds no
+  credential of its own.
+
+### Changed
+
+- **The site is not told what shipped; it looks.** The demo the site serves is
+  built from the latest release rather than committed by hand.
+
+## [3.21.0] — 2026-09-11
+
+### Fixed
+
+- **The four modules fit the demo frame too.** The same one-screen fix as
+  3.20.0, in the frame the site embeds.
+
+## [3.20.0] — 2026-09-11
+
+### Added
+
+- **A release tells the site**, so a new interface reaches turingpi.xyz
+  without anyone remembering.
+
+### Changed
+
+- **The four modules fit on one screen.** The node cards had grown past the
+  height a laptop has.
+
+### Fixed
+
+- **The demo answers from fixtures instead of a board**, so the interface on
+  the site is the real bundle with captured data behind it rather than a
+  build that tries to reach hardware that is not there.
 
 ## [3.19.0] — 2026-09-10
 
