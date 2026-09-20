@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import Logo from "@/assets/logo-light.svg?react";
+import SiteFooter from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { UserNav } from "@/components/user-nav";
 
@@ -54,25 +56,50 @@ export function Fleet() {
   // removed and a link that was not.
   const missing = route.board !== null && loaded && selected === null;
 
+  /**
+   * What this bundle is, as its image tag.
+   *
+   * Injected at build time by `Dockerfile.fleet` from the release tag. Absent
+   * in a development build, where "dev" is the honest answer -- a version
+   * invented locally would be worse than none.
+   */
+  const version = (import.meta.env.VITE_BMC_UI_VERSION as string) || "dev";
+
   return (
-    <main className="mx-auto max-w-7xl p-6">
-      <header className="mb-4 flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
-            {selected ? (selected.name ?? selected.id) : "Turing fleet"}
-          </h1>
-          {/* The subtitle is orientation, not instruction, and on a phone it
+    <div className="mx-auto flex min-h-screen max-w-7xl flex-col p-6">
+      {/* The fleet had no mark of its own: no logo, no version, and no
+          footer, because it never renders the board's root route. So the one
+          page that exists to watch several boards could not say which
+          version of itself it was -- and sat two releases behind with
+          nothing on screen to show it. */}
+      <div className="mb-4 flex items-center gap-3 border-b border-neutral-200 pb-3 dark:border-neutral-700">
+        <Logo className="size-8 shrink-0 dark:fill-neutral-100" />
+        <span className="text-lg font-bold whitespace-nowrap">
+          Turing fleet
+        </span>
+        <span className="font-mono text-xs opacity-60">{version}</span>
+        <div className="ml-auto">
+          <UserNav signOutHref="/oauth2/sign_out" name="operator" />
+        </div>
+      </div>
+
+      <main className="flex-1">
+        <header className="mb-4 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
+              {selected ? (selected.name ?? selected.id) : "Every board"}
+            </h1>
+            {/* The subtitle is orientation, not instruction, and on a phone it
               is three lines of it above the boards. Kept where there is room
               for it. */}
-          <p className="hidden text-sm text-neutral-500 sm:block dark:text-neutral-400">
-            {selected
-              ? (selected.note ??
-                "Everything this board's own interface can do.")
-              : "Every board this cluster can reach. Each one answers for itself; a board that is down costs you its card and nothing else."}
-          </p>
-        </div>
+            <p className="hidden text-sm text-neutral-500 sm:block dark:text-neutral-400">
+              {selected
+                ? (selected.note ??
+                  "Everything this board's own interface can do.")
+                : "Every board this cluster can reach. Each one answers for itself; a board that is down costs you its card and nothing else."}
+            </p>
+          </div>
 
-        <div className="flex items-center gap-2">
           {selected ? (
             <Button
               size="sm"
@@ -84,13 +111,9 @@ export function Fleet() {
               ← All boards
             </Button>
           ) : null}
-          {/* The proxy's sign-out, not the board's: this bundle holds no
-              token to drop, and the session belongs to dex. */}
-          <UserNav signOutHref="/oauth2/sign_out" name="operator" />
-        </div>
-      </header>
+        </header>
 
-      {/* The board switcher stays visible inside a board, so moving from one
+        {/* The board switcher stays visible inside a board, so moving from one
           board's Nodes tab to another's is one click and not a trip through
           the overview.
 
@@ -100,76 +123,80 @@ export function Fleet() {
           than a third of the viewport -- before the first thing anybody came
           to look at. A wrapped row also moves the tab you were about to press
           when a board is added. */}
-      {config.boards.length > 1 ? (
-        <nav className="mb-4 flex gap-1 overflow-x-auto pb-1">
-          <Button
-            size="sm"
-            variant={selected ? "bw" : "turing-green"}
-            onClick={() => {
-              go(OVERVIEW);
-            }}
-          >
-            Overview
-          </Button>
-          {config.boards.map((board) => (
+        {config.boards.length > 1 ? (
+          <nav className="mb-4 flex gap-1 overflow-x-auto pb-1">
             <Button
-              key={board.id}
               size="sm"
-              variant={selected?.id === board.id ? "turing-green" : "bw"}
+              variant={selected ? "bw" : "turing-green"}
               onClick={() => {
-                go({ board: board.id, tab: route.tab });
+                go(OVERVIEW);
               }}
             >
-              {board.name ?? board.id}
+              Overview
             </Button>
-          ))}
-        </nav>
-      ) : null}
+            {config.boards.map((board) => (
+              <Button
+                key={board.id}
+                size="sm"
+                variant={selected?.id === board.id ? "turing-green" : "bw"}
+                onClick={() => {
+                  go({ board: board.id, tab: route.tab });
+                }}
+              >
+                {board.name ?? board.id}
+              </Button>
+            ))}
+          </nav>
+        ) : null}
 
-      {error ? (
-        <p className="rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-900 dark:bg-red-950 dark:text-red-200">
-          Could not read the fleet&apos;s configuration: {error}. The chart
-          writes <code>config.json</code> into the pod; without it this page has
-          no list of boards to show.
-        </p>
-      ) : null}
+        {error ? (
+          <p className="rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-900 dark:bg-red-950 dark:text-red-200">
+            Could not read the fleet&apos;s configuration: {error}. The chart
+            writes <code>config.json</code> into the pod; without it this page
+            has no list of boards to show.
+          </p>
+        ) : null}
 
-      {missing ? (
-        <p className="rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200">
-          No board here is called <code>{route.board}</code>. It may have been
-          removed from the fleet&apos;s configuration since this link was made.
-        </p>
-      ) : null}
+        {missing ? (
+          <p className="rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+            No board here is called <code>{route.board}</code>. It may have been
+            removed from the fleet&apos;s configuration since this link was
+            made.
+          </p>
+        ) : null}
 
-      {loaded && !error && config.boards.length === 0 ? (
-        <p className="text-sm text-neutral-500 dark:text-neutral-400">
-          The configuration lists no boards.
-        </p>
-      ) : null}
+        {loaded && !error && config.boards.length === 0 ? (
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">
+            The configuration lists no boards.
+          </p>
+        ) : null}
 
-      {selected ? (
-        // Keyed by board so switching boards tears the whole subtree down.
-        // Every provider under here is per board, including the cache and the
-        // flash state machine; carrying either across would show one board's
-        // answers under another board's name.
-        <BoardScope key={selected.id} board={selected}>
-          <BoardTabs board={selected} route={route} go={go} />
-        </BoardScope>
-      ) : (
-        <div className="grid items-start gap-4 lg:grid-cols-2">
-          {config.boards.map((board) => (
-            <BoardCard
-              key={board.id}
-              board={board}
-              range={config.supportedBmcd}
-              onOpen={() => {
-                go({ board: board.id, tab: "" });
-              }}
-            />
-          ))}
-        </div>
-      )}
-    </main>
+        {selected ? (
+          // Keyed by board so switching boards tears the whole subtree down.
+          // Every provider under here is per board, including the cache and the
+          // flash state machine; carrying either across would show one board's
+          // answers under another board's name.
+          <BoardScope key={selected.id} board={selected}>
+            <BoardTabs board={selected} route={route} go={go} />
+          </BoardScope>
+        ) : (
+          <div className="grid items-start gap-4 lg:grid-cols-2">
+            {config.boards.map((board) => (
+              <BoardCard
+                key={board.id}
+                board={board}
+                range={config.supportedBmcd}
+                onOpen={() => {
+                  go({ board: board.id, tab: "" });
+                }}
+              />
+            ))}
+          </div>
+        )}
+      </main>
+
+      <SiteFooter />
+    </div>
   );
 }
 
