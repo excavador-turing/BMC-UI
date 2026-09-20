@@ -6,8 +6,10 @@ import {
 } from "@tanstack/react-router";
 import { useMemo } from "react";
 
+import ConnectionBanner from "@/components/ConnectionBanner";
 import Header from "@/components/header";
 import NavigationLinks from "@/components/navigation-links";
+import { ConnectionProvider } from "@/contexts/ConnectionContext";
 import {
   type NodeDestination,
   NodeNavProvider,
@@ -48,16 +50,21 @@ export function AppLayoutComponent() {
 
   return (
     <NodeNavProvider value={nav}>
-      <div className="flex w-full flex-col items-center justify-center">
-        <Header />
+      <ConnectionProvider>
+        <div className="flex w-full flex-col items-center justify-center">
+          {/* Above the header, full width: an outage is not a property of the
+              tab you happen to be on. */}
+          <ConnectionBanner />
+          <Header />
 
-        <main className="w-full overflow-hidden border border-neutral-300 bg-white shadow-sm xl:w-300 dark:border-neutral-700 dark:bg-neutral-900">
-          <NavigationLinks isDesktop />
-          <div className="px-3 py-6 md:p-12">
-            <Outlet />
-          </div>
-        </main>
-      </div>
+          <main className="w-full overflow-hidden border border-neutral-300 bg-white shadow-sm xl:w-300 dark:border-neutral-700 dark:bg-neutral-900">
+            <NavigationLinks isDesktop />
+            <div className="px-3 py-6 md:p-12">
+              <Outlet />
+            </div>
+          </main>
+        </div>
+      </ConnectionProvider>
     </NodeNavProvider>
   );
 }

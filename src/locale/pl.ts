@@ -177,6 +177,14 @@ const translations = {
     powerOnTimeNote:
       "Czas włączenia to znacznik, który BMC zapisuje przy włączaniu węzła, a nie odpytanie działającego modułu, i jest mierzony względem zegara tej przeglądarki.",
   },
+  connection: {
+    rebooting:
+      "Płyta się restartuje. Zwykle trwa to około {{expected}} sekund; jak dotąd {{elapsed}}. Strona wróci sama.",
+    rebootingOverdue:
+      "Płyta restartuje się już {{elapsed}} sekund, dłużej niż zwykle. Czekamy dalej; strona wróci sama, gdy płyta odpowie.",
+    lost: "Płyta przestała odpowiadać {{elapsed}} sekund temu, a nic tutaj o to nie prosiło. Strona nadal próbuje i wróci sama.",
+    cameBack: "Płyta wróciła po {{seconds}} sekundach.",
+  },
   console: {
     inputTerm: "Pisanie tutaj",
     header: "Konsola szeregowa modułu obliczeniowego",

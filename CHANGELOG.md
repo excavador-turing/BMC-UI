@@ -10,6 +10,46 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **The page notices when the board goes away, and notices when it comes
+  back.** Until now neither happened. Every polling query uses
+  `refetchInterval: (query) => (query.state.error ? false : N)`, which stops
+  the interval **permanently** on the first error — so a BMC reboot silenced
+  every query and nothing resumed when the board returned. A reboot the page
+  itself started ended at a toast, and the tab held stale data until somebody
+  reloaded it.
+
+  A banner above the header now says which of two things is happening, because
+  only one of them has a number. A reboot this page asked for takes about 48
+  seconds — measured, from the upgrade guide's cost table — and says so, with
+  a count. A board that stops answering on its own says that instead, with no
+  countdown, because nobody promised one.
+
+  The count is a hint and says so when it passes: a board taking longer is
+  still coming back, and presenting 48 seconds as a deadline would turn a slow
+  reboot into an apparent failure.
+
+  When the daemon answers again the page reloads itself and reports how long
+  it took, once. That is also how the number on the upgrade guide gets checked
+  by everyone who updates.
+
+  **Only a request that got no response counts as the board being gone.** A
+  query that fails with a status is a board that answered: endpoints are
+  allowed to refuse, and treating that as a dead board would put an outage
+  banner over a healthy one.
+
+  **And coming back is judged by the shape of the answer, not its status.**
+  bmcd serves this interface from the same listener and falls back to
+  `index.html` for a path it does not route, so a half-started daemon can
+  answer 200 with a page of HTML. Reloading on that lands on a page whose
+  first real query fails — the very fault this removes.
+
+  Six locales. The demo is excluded: its reboot answers with a refusal wrapped
+  in a 200, which the mutation reads as success, so without the guard the
+  exhibit would raise a banner and eventually reload itself.
+
+
 ### Changed
 
 - **The console says why it failed, instead of listing three possibilities.**
