@@ -143,6 +143,40 @@ export const demoAdapter: AxiosAdapter = (config) => {
     );
   }
 
+  // Path-style reads, bmcd 2.36 and 2.37: the switch document, its presets,
+  // the certificate the board serves, and who may reach it. Fixtures like any
+  // other; a miss falls through to the 404 below, which is what an older
+  // daemon answers and what the cards hide themselves on.
+  const reads: Record<string, string> = {
+    "/bmc/network/switch": "switch",
+    "/bmc/network/switch/presets": "switch_presets",
+    "/bmc/tls/certificate": "tls_certificate",
+    "/bmc/access": "access",
+  };
+  if (method === "get") {
+    for (const [suffix, name] of Object.entries(reads)) {
+      if (url.endsWith(suffix)) {
+        const data = fixture(name);
+        if (data !== undefined) return reply(config, 200, data);
+      }
+    }
+  } else if (url.includes("/bmc/")) {
+    // Every write on a path-style endpoint -- a switch document, a
+    // certificate, a password, the client CA -- and the validate call, which
+    // is a judgement only the daemon can make: refused, and said so.
+    return reply(
+      config,
+      403,
+      {
+        type: "about:blank",
+        title: "This is a demo",
+        status: 403,
+        detail: REFUSED,
+      },
+      "application/problem+json"
+    );
+  }
+
   if (url.endsWith("/metrics")) {
     return reply(config, 200, metricsText, "text/plain");
   }

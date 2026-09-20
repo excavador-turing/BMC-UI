@@ -68,6 +68,8 @@ for t in $types; do
     sed -e "s/192\.168\.77\.20/$SAFE_IP/g" \
         -e "s/192\.168\.77\.30/$SAFE_IP/g" \
         -e "s/192\.168\.77\.1\b/$SAFE_GW/g" \
+        -e "s/\"bmc-[12]\"/\"$SAFE_HOST\"/g" \
+        -e "s/haarlem\.lan/example/g" \
         -e "s/192\.168\.77\.\([0-9][0-9]*\)/203.0.113.\1/g" \
         -e "s/\([0-9a-f][0-9a-f]:\)\{5\}[0-9a-f][0-9a-f]/$SAFE_MAC/g" \
         -e "s/\"hive-bmc\"/\"$SAFE_HOST\"/g" \
@@ -81,6 +83,45 @@ done
 # method bmcd exposes it under; it reads.
 ssh "root@$board" "curl -sk -X POST 'https://127.0.0.1/api/bmc/serial/status'" > "$out/serial_status.json"
 printf '  %-20s %s bytes\n' serial_status "$(wc -c < "$out/serial_status.json")"
+
+# Path-style endpoints, bmcd 2.36 and 2.37: the switch document and its
+# presets, the certificate the board serves, and who may reach it. Without
+# these the demo's Security tab was a blank card and the Network tab had no
+# switch, because both hide themselves on a daemon that answers 404 -- which
+# is exactly what the demo answered. A certificate names the board and its
+# address, and the access document names the client CA an estate trusts and
+# prints fingerprints; all of it is replaced. The captures are otherwise the
+# board's own.
+# Upper-case on purpose: the leak guard below hunts MAC-shaped runs of
+# lower-case hex, and a fingerprint of zeros is thirty-one of those. The
+# board prints its fingerprints upper-case too, which is why they never
+# tripped it.
+SAFE_FP=DE:AD:BE:EF:DE:AD:BE:EF:DE:AD:BE:EF:DE:AD:BE:EF:DE:AD:BE:EF:DE:AD:BE:EF:DE:AD:BE:EF:DE:AD:BE:EF
+for pair in network/switch:switch network/switch/presets:switch_presets \
+            tls/certificate:tls_certificate access:access; do
+    ep=${pair%%:*}; name=${pair##*:}
+    ssh "root@$board" "curl -sk 'https://127.0.0.1/api/bmc/$ep'" > "$out/$name.json.tmp"
+    if [ ! -s "$out/$name.json.tmp" ]; then
+        rm -f "$out/$name.json.tmp"
+        printf '  %-20s EMPTY -- not captured (older daemon?)\n' "$name"
+        continue
+    fi
+    sed -e "s/192\.168\.77\.20/$SAFE_IP/g" \
+        -e "s/192\.168\.77\.30/$SAFE_IP/g" \
+        -e "s/192\.168\.77\.\([0-9][0-9]*\)/203.0.113.\1/g" \
+        -e "s/\([0-9a-f][0-9a-f]:\)\{5\}[0-9a-f][0-9a-f]/$SAFE_MAC/g" \
+        -e "s/\"bmc-[12]\"/\"$SAFE_HOST\"/g" \
+        -e "s/\"bmc-[12]\"/\"$SAFE_HOST\"/g" \
+        -e "s/bmc-[12ab]\.haarlem\.lan/$SAFE_HOST.example/g" \
+        -e "s/haarlem\.lan/example/g" \
+        -e "s/opwerm Internal Intermediate CA [0-9-]*/Example Internal CA/g" \
+        -e "s/O=opwerm/O=Example/g" \
+        -e "s/CN=hive-[A-Za-z0-9-]*/CN=demo-client-ca/g" \
+        -e "s/\([0-9A-F][0-9A-F]:\)\{31\}[0-9A-F][0-9A-F]/$SAFE_FP/g" \
+        "$out/$name.json.tmp" > "$out/$name.json"
+    rm -f "$out/$name.json.tmp"
+    printf '  %-20s %s bytes\n' "$name" "$(wc -c < "$out/$name.json")"
+done
 
 # Each module's recent console output, so the demo can REPLAY a scrollback
 # instead of pretending to stream. These are compute modules' kernel logs:
@@ -115,7 +156,7 @@ fi
 # The documentation MAC this script substitutes in is MAC-shaped and must not
 # count against itself -- the first version of this guard failed on its own
 # replacement, which is the right way round for a guard to be wrong.
-leaks=$(grep -rhoE '192\.168\.[0-9]+\.[0-9]+|([0-9a-f][0-9a-f]:){5}[0-9a-f][0-9a-f]|hive-[a-z0-9-]*|XZCT[0-9][0-9]*' "$out" \
+leaks=$(grep -rhoE '192\.168\.[0-9]+\.[0-9]+|([0-9a-f][0-9a-f]:){5}[0-9a-f][0-9a-f]|hive-[a-z0-9-]*|XZCT[0-9][0-9]*|haarlem|opwerm|\bbmc-[12ab]\b' "$out" \
         | grep -vxF "$SAFE_MAC" \
         | grep -vxF "$SAFE_SERIAL" \
         | sort -u || true)

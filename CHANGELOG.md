@@ -10,6 +10,21 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **The demo shows the switch and the Security tab.** Both hid themselves on
+  a daemon that answers 404 to `/api/bmc/network/switch` and `/api/bmc/access`
+  -- which is exactly what the demo answered, because `capture-fixtures.sh`
+  only knew the legacy `?type=` reads. It captures the four path-style
+  endpoints now (the switch document and its presets, the certificate the
+  board serves, who may reach it), and the adapter serves them; every write on
+  a path-style endpoint, and the validate call -- a judgement only the daemon
+  can make -- is refused with the demo's own problem+json. The sanitiser
+  learned what those captures carry: the board's name, the estate's domain,
+  its CA name and two fingerprints; the leak guard hunts those too.
+
+  Fixtures re-captured from a board on firmware v2.33.0.
+
 ## [v3.32.0] — 2026-09-21
 
 ### Changed
