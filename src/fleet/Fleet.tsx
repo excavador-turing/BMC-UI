@@ -56,12 +56,15 @@ export function Fleet() {
 
   return (
     <main className="mx-auto max-w-7xl p-6">
-      <header className="mb-5 flex flex-wrap items-start justify-between gap-3">
+      <header className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">
+          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
             {selected ? (selected.name ?? selected.id) : "Turing fleet"}
           </h1>
-          <p className="text-sm text-neutral-500 dark:text-neutral-400">
+          {/* The subtitle is orientation, not instruction, and on a phone it
+              is three lines of it above the boards. Kept where there is room
+              for it. */}
+          <p className="hidden text-sm text-neutral-500 sm:block dark:text-neutral-400">
             {selected
               ? (selected.note ??
                 "Everything this board's own interface can do.")
@@ -89,9 +92,16 @@ export function Fleet() {
 
       {/* The board switcher stays visible inside a board, so moving from one
           board's Nodes tab to another's is one click and not a trip through
-          the overview. */}
+          the overview.
+
+          ONE ROW THAT SCROLLS, not a row that wraps. Measured on the demo
+          build: at 390px this and the tab bar below wrapped to three and four
+          lines, and with the header above them the fleet spent 301px -- more
+          than a third of the viewport -- before the first thing anybody came
+          to look at. A wrapped row also moves the tab you were about to press
+          when a board is added. */}
       {config.boards.length > 1 ? (
-        <nav className="mb-6 flex flex-wrap gap-1">
+        <nav className="mb-4 flex gap-1 overflow-x-auto pb-1">
           <Button
             size="sm"
             variant={selected ? "bw" : "turing-green"}
