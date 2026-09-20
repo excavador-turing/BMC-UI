@@ -213,6 +213,8 @@ const translations = {
     unnamed: "未命名",
     notNumbers: "表格中有内容不是 VLAN 号。",
     cannotCheck: "本板卡无法在应用前检查配置。",
+    windowLabel: "确认时限",
+    windowRange: "秒，{{min}}–{{max}}",
     tryIt: "试一下",
     tryItNote:
       "试一下会应用改动但不保留：观察你用来访问本板卡的那条路径，然后让它自行回退。",

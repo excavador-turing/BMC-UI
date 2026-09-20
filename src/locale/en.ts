@@ -295,6 +295,8 @@ const translations = {
     notNumbers: "Something in the table is not a VLAN number.",
     cannotCheck:
       "This board cannot check a configuration before it is applied.",
+    windowLabel: "Confirm within",
+    windowRange: "s, {{min}}–{{max}}",
     tryIt: "Try it",
     tryItNote:
       "Try it applies the change and does not keep it: watch what you reach this board by, then let it go back.",

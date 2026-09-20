@@ -218,6 +218,8 @@ const translations = {
     unnamed: "naamloos",
     notNumbers: "Iets in de tabel is geen VLAN-nummer.",
     cannotCheck: "Dit board kan een configuratie niet vooraf controleren.",
+    windowLabel: "Bevestig binnen",
+    windowRange: "s, {{min}}–{{max}}",
     tryIt: "Probeer het",
     tryItNote:
       "Probeer het past de wijziging toe en houdt hem niet: kijk waarmee je dit board bereikt en laat hem terugdraaien.",

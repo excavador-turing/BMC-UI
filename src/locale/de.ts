@@ -219,6 +219,8 @@ const translations = {
     unnamed: "unbenannt",
     notNumbers: "Etwas in der Tabelle ist keine VLAN-Nummer.",
     cannotCheck: "Dieses Board kann eine Konfiguration nicht vorab prüfen.",
+    windowLabel: "Bestätigen in",
+    windowRange: "s, {{min}}–{{max}}",
     tryIt: "Ausprobieren",
     tryItNote:
       "Ausprobieren wendet die Änderung an und behält sie nicht: Beobachten Sie, worüber Sie dieses Board erreichen, und lassen Sie sie zurückgehen.",
