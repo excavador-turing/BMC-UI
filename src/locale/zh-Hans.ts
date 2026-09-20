@@ -7,6 +7,7 @@ const translations = {
     settings: "设置",
     info: "信息",
     network: "网络",
+    access: "访问",
     nodes: "节点",
     console: "控制台",
     usb: "USB",

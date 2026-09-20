@@ -2,12 +2,8 @@ import { createLazyFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import AccessCard from "@/components/AccessCard";
-import CertificateCard from "@/components/CertificateCard";
 import ConfigBackup from "@/components/ConfigBackup";
 import FanControl from "@/components/FanControl";
-import FirmwareSources from "@/components/FirmwareSources";
-import HostnameCard from "@/components/HostnameCard";
 import RebootModal from "@/components/RebootModal";
 import InfoSkeleton from "@/components/skeletons/info";
 import TabView from "@/components/TabView";
@@ -25,16 +21,22 @@ export const Route = createLazyFileRoute("/_tabLayout/settings")({
 });
 
 /**
- * Everything that changes the board, in one place.
+ * Everything that changes the board and is not about who may reach it.
  *
  * Info was 1500 px of storage, health, a scrape credential, a fan slider and a
  * REBOOT button — three of those being settings or actions, and a destructive
- * reboot at the foot of an information page is the wrong neighbourhood.
+ * reboot at the foot of an information page is the wrong neighbourhood. So
+ * they came here.
  *
- * The order is identity, then behaviour, then credentials and sources, then
- * the two things that touch the whole board. Reboot is last and red for the
- * same reason it is not on Overview: you should have to arrive here on
- * purpose.
+ * Then this page reached seven cards and 3014 px. The name, the password, the
+ * trusted proxy and the certificate went to Access, which is where somebody
+ * looks for them. Firmware sources went nowhere: it was rendered on BOTH this
+ * tab and Firmware, the same editor twice, and it only ever belonged on the
+ * one where the sources are used.
+ *
+ * What is left is time, the fan, backup and restore, and the two buttons that
+ * touch the whole board. Reboot is last and red for the same reason it is not
+ * on Overview: you should have to arrive here on purpose.
  */
 export function Settings() {
   const { t } = useTranslation();
@@ -96,15 +98,8 @@ export function Settings() {
 
   return (
     <TabView>
-      <HostnameCard />
       <TimeCard />
-      <AccessCard />
-      {/* Beside the access card, because both answer "who can reach this
-          board and on what terms" -- and because the trust anchor above and
-          the certificate here are the two halves people confuse. */}
-      <CertificateCard />
       <FanControl />
-      <FirmwareSources />
       <ConfigBackup />
 
       <div>

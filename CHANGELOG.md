@@ -10,7 +10,25 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **An Access tab: what this board is called, and who may reach it.** The
+  hostname, the password and trusted proxy, and the certificate this board
+  serves, moved out of Settings into a tab of their own between Network and
+  Firmware. Reading one of the three usually means reading the next.
+
+  "Security" was considered and rejected: a hostname is not a security
+  setting, and a tab whose name is wrong for a quarter of what it holds is a
+  tab people do not look in.
+
 ### Changed
+
+- **Settings is a page again: 3014 px to 942 px** at 1280×800, four screens to
+  just over one. Three cards went to Access, and **Firmware sources stopped
+  being rendered on two tabs** — the same editor was on Settings and on
+  Firmware, and it only ever belonged where the sources are used. What is left
+  is time, the fan, backup and restore, and the two buttons that touch the
+  whole board.
 
 - **One header bar, with the tabs inside it: 126 px back on every page.**
   Measured on bmc-2 at 1280×800, the logo block was 128 px and the tab strip

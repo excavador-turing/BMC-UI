@@ -87,6 +87,11 @@ export const FLEET_TABS: FleetTab[] = [
     ),
   },
   {
+    id: "access",
+    label: "Access",
+    Component: named(() => import("@/routes/_tabLayout/access.lazy"), "Access"),
+  },
+  {
     id: "firmware-upgrade",
     label: "Firmware",
     Component: named(

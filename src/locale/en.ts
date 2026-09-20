@@ -4,6 +4,7 @@ const translations = {
     nodes: "Nodes",
     console: "Console",
     network: "Network",
+    access: "Access",
     firmware: "Firmware",
     settings: "Settings",
     about: "About",
