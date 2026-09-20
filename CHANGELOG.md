@@ -10,6 +10,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [v3.33.0] — 2026-09-21
+
 ### Fixed
 
 - **The demo shows the switch and the Security tab.** Both hid themselves on
