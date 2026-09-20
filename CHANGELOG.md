@@ -10,6 +10,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Which module: four pills, not a drop-down.** Console, USB and Flash each
+  opened with a list that unfolded to show four fixed entries, one of them
+  already chosen -- a click and a scan to answer a question the page could
+  have asked in one row. The three tabs now share one `NodePicker`: Node 1
+  to 4 side by side, the chosen one green, keyboard-reachable as a radio
+  group. The flash form still reads the module by field name; a hidden
+  input carries it where the select used to.
+
 ## [v3.31.0] — 2026-09-21
 
 ### Fixed

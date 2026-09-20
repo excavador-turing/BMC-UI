@@ -3,6 +3,7 @@ import { InfoIcon } from "lucide-react";
 import { type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { NodePicker } from "@/components/NodePicker";
 import USBSkeleton from "@/components/skeletons/usb";
 import TabView from "@/components/TabView";
 import { Button } from "@/components/ui/button";
@@ -122,24 +123,12 @@ export function USB() {
               ))}
             </SelectContent>
           </Select>
-          <Select
+          <NodePicker
+            label={t("usb.nodeSelect")}
             name="node"
             value={selectedNode}
-            onValueChange={(value) => setSelectedNode(value)}
-          >
-            <SelectTrigger label={t("usb.nodeSelect")}>
-              <SelectValue placeholder={t("ui.selectPlaceholder")} />
-            </SelectTrigger>
-            <SelectContent>
-              {nodeOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {t("nodes.node", {
-                    nodeId: Number.parseInt(option.value) + 1,
-                  })}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            onChange={setSelectedNode}
+          />
           {data.bus_type === "Usb hub" && (
             <div className="mb-4 flex items-center">
               <Checkbox
