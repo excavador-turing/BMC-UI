@@ -10,6 +10,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [v3.32.0] — 2026-09-21
+
 ### Changed
 
 - **Which module: four pills, not a drop-down.** Console, USB and Flash each
