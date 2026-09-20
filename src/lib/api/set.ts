@@ -427,6 +427,46 @@ export function useSetClientCaMutation() {
   });
 }
 
+/**
+ * Install a certificate and its key.
+ *
+ * The daemon validates before it writes anything -- the key must belong to
+ * the certificate, it must be valid now, permit server authentication and
+ * name this board -- and the refusal carries the reason, which is what the
+ * card shows. Nothing is stored by halves.
+ *
+ * It takes effect on the next connection, with no restart and no dropped
+ * session, so the query is simply invalidated and the card redraws.
+ */
+export function useInstallCertificateMutation() {
+  const api = useAxiosWithAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["installCertificate"],
+    mutationFn: async (body: { certificate: string; private_key: string }) => {
+      await api.put("/bmc/tls/certificate", body);
+    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["tlsCertificate"] }),
+  });
+}
+
+/** Remove an installed certificate; the board issues its own at once. */
+export function useResetCertificateMutation() {
+  const api = useAxiosWithAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["resetCertificate"],
+    mutationFn: async () => {
+      await api.delete("/bmc/tls/certificate");
+    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["tlsCertificate"] }),
+  });
+}
+
 /** Stop trusting any proxy. Refused by the daemon when asked THROUGH one. */
 export function useRemoveClientCaMutation() {
   const api = useAxiosWithAuth();

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import AccessCard from "@/components/AccessCard";
+import CertificateCard from "@/components/CertificateCard";
 import ConfigBackup from "@/components/ConfigBackup";
 import FanControl from "@/components/FanControl";
 import FirmwareSources from "@/components/FirmwareSources";
@@ -91,6 +92,10 @@ export function Settings() {
       <HostnameCard />
       <TimeCard />
       <AccessCard />
+      {/* Beside the access card, because both answer "who can reach this
+          board and on what terms" -- and because the trust anchor above and
+          the certificate here are the two halves people confuse. */}
+      <CertificateCard />
       <FanControl />
       <FirmwareSources />
       <ConfigBackup />

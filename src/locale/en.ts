@@ -31,6 +31,38 @@ const translations = {
     errorCredentials: "Invalid username or password",
     errorUnknown: "An error has occurred. Please try again later.",
   },
+  certificate: {
+    title: "The certificate this board serves",
+    issuedBy: "Issued by {{issuer}}",
+    expires: "Valid until {{date}}",
+    key: "Key: {{key}}",
+    names: "Names: {{names}}",
+    sourceSelfSigned:
+      "The board issued this certificate itself and reissues it 30 days before it expires, so it never serves an expired one. A browser will warn about it, because nothing else has any reason to trust it \u2014 and the serial console will refuse to connect, since a click-through exception does not cover its WebSocket.",
+    sourceInstalled:
+      "This certificate was installed, so the board will not touch it \u2014 including when it expires. Renewing it is yours to remember.",
+    installHeading: "Install your own",
+    installNote:
+      "For a certificate from your own authority. A browser that already trusts that authority opens this board with no warning, and the serial console works.",
+    certPlaceholder:
+      "Paste the certificate in PEM form. Intermediates may follow it, leaf first.",
+    keyPlaceholder: "Paste its private key in PEM form",
+    notACertificate:
+      "That does not look like a PEM certificate. A DER or PKCS#12 file has to be converted first.",
+    certHoldsKey:
+      "That box holds a private key as well as a certificate. Split them \u2014 the key belongs in the box below, and only there.",
+    notAKey: "That does not look like a PEM private key.",
+    install: "Install",
+    installed: "Certificate installed.",
+    installedNote: "It is being served now. Nothing was restarted.",
+    installFailed: "The certificate was not installed",
+    reset: "Use the board's own certificate",
+    resetConfirm:
+      "The installed certificate and its key are removed, and the board issues its own at once. Browsers will warn again, and the serial console will stop connecting. It takes effect on the next connection.",
+    resetFailed: "The certificate was not removed",
+    noRestartNote:
+      "A change takes effect on the next connection. The board is not restarted and open sessions are not dropped, including this one.",
+  },
   access: {
     title: "Who may reach this board",
     youAre: "You are here as {{name}}, authenticated by {{scheme}}.",

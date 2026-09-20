@@ -10,6 +10,43 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **A certificate card on Settings.** What the board serves over HTTPS, and a
+  form to replace it with your own. Asked for twice in the Turing Pi Discord
+  by people running their own CA, who want a board a browser opens without a
+  warning — and a serial console that works, since a click-through certificate
+  exception does not extend to the console's WebSocket.
+
+  The card leads with **where the certificate came from**, because that looks
+  like a label and is really a question of who renews it. The board reissues
+  its own 30 days before expiry and needs nobody. It never touches an
+  installed one — deliberately, since replacing an operator's certificate with
+  a self-signed one at boot would turn a working deployment into a browser
+  warning — so an installed certificate's expiry is a date somebody has to
+  diarise, and the card says so in those words.
+
+  It shows the names the certificate asserts, because those are the reason a
+  browser accepts or refuses it, and the fingerprint, because it is the only
+  field that tells two certificates with the same subject apart.
+
+  Two mistakes are caught before the request: a certificate box that holds no
+  certificate, and one that holds a private key as well. The second is the
+  dangerous one — it is what `openssl` writes when told to put both in one
+  place, and sending it would put the key in a field the board treats as
+  public and echoes back.
+
+  A change takes effect on the next connection. Nothing restarts and no
+  session is dropped, including the one making the change.
+
+  Needs bmcd with `/bmc/tls/certificate`. On an older board the card hides
+  itself rather than appearing broken, by checking the shape of the answer
+  rather than its status — an older daemon serves `index.html` for a path it
+  does not route, so the status is 200 and the body is a page of HTML.
+
+  Not in the demo: its fixtures are captured from a real board, never written,
+  and there is no board running this daemon yet.
+
 ## [3.29.0] — 2026-09-13
 
 ### Added
