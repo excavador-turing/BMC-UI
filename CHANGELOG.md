@@ -12,6 +12,118 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **A page-length gate in CI.** `scripts/screens.py` measures every tab at
+  1280×800 and 390×844 on every pull request and fails on a header over
+  64 px, a tab over two screens, or a horizontal scrollbar at phone width.
+  Console is exempt: a terminal is meant to be tall.
+
+  Against the **demo build**, so no board is involved — the captured fixtures
+  answer, and a card whose endpoint they lack hides itself exactly as it does
+  on an older board. That also means the gate undercounts Access and Network
+  by the access, certificate and switch cards, which is said in the script
+  rather than left for somebody to discover; capturing those endpoints from a
+  board closes it.
+
+  A baseline holds what is over the line today and is checked **both
+  directions**, so a fault that gets fixed and left in the baseline fails too.
+  It keys on the fault, never on the pixel count: a baseline holding numbers
+  would fail on a one-pixel move, and a gate that cries every day gets
+  switched off.
+
+  `npm run screens` runs it locally; `npm run screens -- --record` re-records.
+
+### Changed
+
+- **The Firmware tab shows the newest release per source, not three.** Four
+  sources at three rows each was twelve rows of catalogue; the question the
+  page exists to answer is *is there something newer than what I am running,
+  and where from*. Each source now shows its newest, with **show all N**
+  opening the rest of that source in place. Nothing on offer changed, only how
+  much of it is open at once — and a source that returned an error still shows
+  the error where its row would be, because an empty list and an unreadable
+  one are different answers.
+
+### Added
+
+- **An Access tab: what this board is called, and who may reach it.** The
+  hostname, the password and trusted proxy, and the certificate this board
+  serves, moved out of Settings into a tab of their own between Network and
+  Firmware. Reading one of the three usually means reading the next.
+
+  "Security" was considered and rejected: a hostname is not a security
+  setting, and a tab whose name is wrong for a quarter of what it holds is a
+  tab people do not look in.
+
+### Changed
+
+- **Settings is a page again: 3014 px to 942 px** at 1280×800, four screens to
+  just over one. Three cards went to Access, and **Firmware sources stopped
+  being rendered on two tabs** — the same editor was on Settings and on
+  Firmware, and it only ever belonged where the sources are used. What is left
+  is time, the fan, backup and restore, and the two buttons that touch the
+  whole board.
+
+- **One header bar, with the tabs inside it: 126 px back on every page.**
+  Measured on bmc-2 at 1280×800, the logo block was 128 px and the tab strip
+  beneath it another 54 px, so every tab began 182 px down and a laptop showed
+  618 px of content out of 800. It is now 56 px, and the tabs are in it.
+
+  The board's name and firmware version stay — they are how you know which
+  window you are typing into — on one line beside the logo rather than under
+  it. The active tab is underlined rather than drawn as a tab, because inside
+  a header bar there is no strip for it to be part of.
+
+  Between `md` and `xl` the strip stays: seven tabs plus the board's name do
+  not fit beside each other at 768 px, and tabs that wrap are worse than tabs
+  on a row of their own. Below `md` nothing changes at all — logo, name,
+  hamburger, tabs in the drawer.
+
+- **The switch table is editable, and it is the only table on the Network
+  tab.** Presets fill it; they are no longer the only thing you can ask for.
+
+  Pick Flat, Split or Trunk and the cells populate from the board's own
+  expansion. Then change any of them: each port's untagged VLAN is one box,
+  its tagged VLANs a comma-separated list, and spanning tree and VLAN
+  filtering are switches under the table. There is no Custom mode to enter,
+  because there is no mode — **the table is the configuration and a preset is
+  a starting point.**
+
+  **The board judges every edit, and this page judges none of them.** The
+  whole table goes to `POST .../network/switch/validate` as you type; a
+  refusal disables Apply and is shown in the board's own words, and each
+  warning sits beside the port it is about. The one judgement the client makes
+  is whether what you typed is a number, because that is about text rather
+  than about switches. A copy of the board's rules in here would eventually
+  disagree with the board, and the way that disagreement surfaces is a board
+  nobody can reach.
+
+  **Try it** applies a change with no intention of keeping it. Watch what you
+  reach the board by, see whether it still works, and let the window run out.
+  For a hand-made layout it is the only honest dry run: the alternative is
+  finding out by being locked out.
+
+  **VLANs can be named** — a word beside each number, carried in the document
+  the board persists. A table of bare numbers is not a layout anybody can read
+  a year later.
+
+  **One table, not two.** Link state and VLAN membership were separate panels
+  about the same seven ports, so answering *is node 3's cable in, and which
+  network is it on* meant matching names between them. They are now one row
+  per port: link, negotiated rate, untagged, tagged — with traffic and error
+  counters one click away. The unprobed-port alarm moved with them, and the
+  table still renders on a board whose daemon has no switch configuration at
+  all, because link state is the older feature and the one people arrive
+  looking for.
+
+  **The BMC's own row cannot be given a tagged VLAN.** The board refuses such
+  a document; a box you cannot type in says so before it has to.
+
+  Under Confirm, one line about where a confirmation has to come from: the
+  browser you reach this board with, never a shell on the board itself. The
+  daemon refuses the latter outright.
+
+### Added
+
 - **The switch on the Network tab: what it is doing, and how to change it.**
   The most-asked feature on the public roadmap, and the one with the sharpest
   failure — a wrong VLAN on the BMC's own port takes the board off the

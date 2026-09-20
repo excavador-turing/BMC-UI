@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useAxiosWithAuth } from "./_core";
-import type { FirmwareSources } from "./get";
+import type { FirmwareSources, SwitchDocument } from "./get";
 
 interface APIResponse<T> {
   response: {
@@ -480,7 +480,10 @@ export function useApplySwitchMutation() {
 
   return useMutation({
     mutationKey: ["applySwitch"],
-    mutationFn: async (body: Record<string, unknown>) => {
+    // A preset with its parameters, or a whole document. The daemon reads
+    // either, and the editor sends documents while the preset buttons send
+    // presets -- because the board is the only thing that expands a preset.
+    mutationFn: async (body: SwitchDocument | Record<string, unknown>) => {
       // Typed at the call rather than cast afterwards: `axios.put` is
       // generic, and asking it for the shape is the difference between a
       // checked value and an `any` wearing a type.

@@ -88,6 +88,44 @@ jobs:
       - name: Run test suite
         run: npm test
 
+  # How tall every tab is, measured rather than guessed.
+  #
+  # The site has had a screen gate since its rework and the interface had
+  # none, which is how Settings reached four screens and the firmware-sources
+  # editor came to be rendered on two tabs for a release with nobody noticing.
+  #
+  # Against the DEMO build, so no board is involved: the captured fixtures
+  # answer, and a card whose endpoint they lack hides itself exactly as it
+  # does on an older board. The script says in its own docstring which cards
+  # that leaves uncounted.
+  screens:
+    name: No tab longer than two screens
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          pip install websockets
+
+      # ubuntu-latest ships Chrome. The script starts it and kills it in the
+      # same block, whatever happens.
+      - name: Measure
+        run: npm run screens
+
   api-types:
     name: Generated API types match the pinned release
     runs-on: ubuntu-latest

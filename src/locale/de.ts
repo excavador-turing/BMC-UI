@@ -7,6 +7,7 @@ const translations = {
     settings: "Einstellungen",
     info: "Info",
     network: "Netzwerk",
+    access: "Zugang",
     nodes: "Knoten",
     console: "Konsole",
     usb: "USB",
@@ -191,6 +192,38 @@ const translations = {
     oneNetwork:
       "Ein Netzwerk. Alle Module, der BMC und beide Uplinks teilen es, und der Switch beachtet keine VLANs.",
     port: "Port",
+    link: "Verbindung",
+    traffic: "Datenverkehr",
+    showTraffic: "Datenverkehr und Fehler anzeigen",
+    hideTraffic: "Datenverkehr und Fehler ausblenden",
+    untaggedOn: "Untagged-VLAN auf {{port}}",
+    taggedOn: "Tagged-VLANs auf {{port}}",
+    none: "keins",
+    never: "—",
+    bmcUntaggedOnly:
+      "Dieses Board liest nur untagged Frames; ein Tag hier wäre Verkehr, den es nicht sehen kann.",
+    startFrom: "Ausgehen von",
+    discard: "Meine Änderungen verwerfen",
+    unchanged:
+      "Das ist, was das Board gerade fährt. Ändern Sie eine Zelle, um etwas anderes vorzuschlagen.",
+    filtering:
+      "VLANs beachten (aus heißt ein flaches Netzwerk, was auch immer in der Tabelle steht)",
+    spanningTree:
+      "Spanning Tree, damit zwei Uplinks in dasselbe Netz keine Schleife bilden können",
+    names: "Namen für diese VLANs",
+    vlanNumber: "VLAN {{vid}}",
+    unnamed: "unbenannt",
+    notNumbers: "Etwas in der Tabelle ist keine VLAN-Nummer.",
+    cannotCheck: "Dieses Board kann eine Konfiguration nicht vorab prüfen.",
+    tryIt: "Ausprobieren",
+    tryItNote:
+      "Ausprobieren wendet die Änderung an und behält sie nicht: Beobachten Sie, worüber Sie dieses Board erreichen, und lassen Sie sie zurückgehen.",
+    triedNote:
+      "Beobachten Sie, was Sie beobachten müssen, und lassen Sie es zurückgehen — oder behalten Sie es doch.",
+    tryingNow:
+      "Sie haben das mit Ausprobieren gestartet. Nichts zu tun ist der Plan: Das Board stellt die vorherige Konfiguration wieder her.",
+    confirmFromHere:
+      "Bestätigen Sie von dem Browser oder Rechner aus, über den Sie dieses Board erreichen — das ist der Beweis. Eine Bestätigung aus einer Shell auf dem Board selbst beweist nichts, und das Board weist sie ab.",
     untagged: "Untagged",
     tagged: "Tagged",
     thisBoard: "dieses Board",
@@ -307,7 +340,7 @@ const translations = {
     },
   },
   firmwareUpgrade: {
-    showMore: "{{count}} weitere anzeigen",
+    showAll: "Alle {{count}} anzeigen",
     showFewer: "weniger anzeigen",
     releaseNotes: "Hinweise",
     parkButton: "Auf die SD-Karte hochladen",

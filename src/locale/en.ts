@@ -4,6 +4,7 @@ const translations = {
     nodes: "Nodes",
     console: "Console",
     network: "Network",
+    access: "Access",
     firmware: "Firmware",
     settings: "Settings",
     about: "About",
@@ -256,12 +257,45 @@ const translations = {
     oneNetwork:
       "One network. Every module, the BMC and both uplinks share it, and the switch does not look at VLANs.",
     port: "Port",
+    link: "Link",
+    traffic: "Traffic",
+    showTraffic: "Show traffic and errors",
+    hideTraffic: "Hide traffic and errors",
     untagged: "Untagged",
     tagged: "Tagged",
+    untaggedOn: "Untagged VLAN on {{port}}",
+    taggedOn: "Tagged VLANs on {{port}}",
+    none: "none",
+    never: "—",
+    bmcUntaggedOnly:
+      "This board reads untagged frames only, so a tag here would be traffic it cannot see.",
     thisBoard: "this board",
     nothingConfirmed:
       "Nothing has been confirmed, so a reboot comes back to this.",
     change: "Change it",
+    startFrom: "Start from",
+    discard: "Discard my changes",
+    unchanged:
+      "This is what the board is running. Change a cell to propose something else.",
+    filtering:
+      "Look at VLANs (off means one flat network, whatever the table says)",
+    spanningTree:
+      "Spanning tree, so two uplinks into the same network cannot form a loop",
+    names: "Names for these VLANs",
+    vlanNumber: "VLAN {{vid}}",
+    unnamed: "unnamed",
+    notNumbers: "Something in the table is not a VLAN number.",
+    cannotCheck:
+      "This board cannot check a configuration before it is applied.",
+    tryIt: "Try it",
+    tryItNote:
+      "Try it applies the change and does not keep it: watch what you reach this board by, then let it go back.",
+    triedNote:
+      "Watch what you need to watch, then let it go back — or keep it after all.",
+    tryingNow:
+      "You started this with Try it. Doing nothing is the plan: the board will put the previous configuration back.",
+    confirmFromHere:
+      "Confirm from the browser or machine you reach this board with — that is the proof. A confirmation sent from a shell on the board itself proves nothing, and the board refuses it.",
     showTable: "Show the table",
     hideTable: "Hide the table",
     trunkNote:
@@ -401,7 +435,7 @@ const translations = {
     availableError: "The available firmware could not be read from this board.",
     sourceUnreadable: "This source returned nothing usable: {{reason}}",
     sourceEmpty: "This source offers nothing.",
-    showMore: "show {{count}} more",
+    showAll: "Show all {{count}}",
     showFewer: "show fewer",
     install: "Install",
     installLocalHint: "Install a local image with the upload form below.",

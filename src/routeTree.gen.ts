@@ -18,6 +18,7 @@ import { Route as TabLayoutFlashNodeRouteImport } from './routes/_tabLayout/flas
 
 const IndexLazyRouteImport = createFileRoute('/')()
 const TabLayoutAboutLazyRouteImport = createFileRoute('/_tabLayout/about')()
+const TabLayoutAccessLazyRouteImport = createFileRoute('/_tabLayout/access')()
 const TabLayoutFirmwareUpgradeLazyRouteImport = createFileRoute(
   '/_tabLayout/firmware-upgrade',
 )()
@@ -49,6 +50,13 @@ const TabLayoutAboutLazyRoute = TabLayoutAboutLazyRouteImport.update({
   getParentRoute: () => TabLayoutRoute,
 } as any).lazy(() =>
   import('./routes/_tabLayout/about.lazy').then((d) => d.Route),
+)
+const TabLayoutAccessLazyRoute = TabLayoutAccessLazyRouteImport.update({
+  id: '/access',
+  path: '/access',
+  getParentRoute: () => TabLayoutRoute,
+} as any).lazy(() =>
+  import('./routes/_tabLayout/access.lazy').then((d) => d.Route),
 )
 const TabLayoutConsoleRoute = TabLayoutConsoleRouteImport.update({
   id: '/console',
@@ -114,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/console': typeof TabLayoutConsoleRoute
   '/flash-node': typeof TabLayoutFlashNodeRoute
   '/about': typeof TabLayoutAboutLazyRoute
+  '/access': typeof TabLayoutAccessLazyRoute
   '/firmware-upgrade': typeof TabLayoutFirmwareUpgradeLazyRoute
   '/info': typeof TabLayoutInfoLazyRoute
   '/network': typeof TabLayoutNetworkLazyRoute
@@ -127,6 +136,7 @@ export interface FileRoutesByTo {
   '/console': typeof TabLayoutConsoleRoute
   '/flash-node': typeof TabLayoutFlashNodeRoute
   '/about': typeof TabLayoutAboutLazyRoute
+  '/access': typeof TabLayoutAccessLazyRoute
   '/firmware-upgrade': typeof TabLayoutFirmwareUpgradeLazyRoute
   '/info': typeof TabLayoutInfoLazyRoute
   '/network': typeof TabLayoutNetworkLazyRoute
@@ -142,6 +152,7 @@ export interface FileRoutesById {
   '/_tabLayout/console': typeof TabLayoutConsoleRoute
   '/_tabLayout/flash-node': typeof TabLayoutFlashNodeRoute
   '/_tabLayout/about': typeof TabLayoutAboutLazyRoute
+  '/_tabLayout/access': typeof TabLayoutAccessLazyRoute
   '/_tabLayout/firmware-upgrade': typeof TabLayoutFirmwareUpgradeLazyRoute
   '/_tabLayout/info': typeof TabLayoutInfoLazyRoute
   '/_tabLayout/network': typeof TabLayoutNetworkLazyRoute
@@ -157,6 +168,7 @@ export interface FileRouteTypes {
     | '/console'
     | '/flash-node'
     | '/about'
+    | '/access'
     | '/firmware-upgrade'
     | '/info'
     | '/network'
@@ -170,6 +182,7 @@ export interface FileRouteTypes {
     | '/console'
     | '/flash-node'
     | '/about'
+    | '/access'
     | '/firmware-upgrade'
     | '/info'
     | '/network'
@@ -184,6 +197,7 @@ export interface FileRouteTypes {
     | '/_tabLayout/console'
     | '/_tabLayout/flash-node'
     | '/_tabLayout/about'
+    | '/_tabLayout/access'
     | '/_tabLayout/firmware-upgrade'
     | '/_tabLayout/info'
     | '/_tabLayout/network'
@@ -226,6 +240,13 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof TabLayoutAboutLazyRouteImport
+      parentRoute: typeof TabLayoutRoute
+    }
+    '/_tabLayout/access': {
+      id: '/_tabLayout/access'
+      path: '/access'
+      fullPath: '/access'
+      preLoaderRoute: typeof TabLayoutAccessLazyRouteImport
       parentRoute: typeof TabLayoutRoute
     }
     '/_tabLayout/console': {
@@ -291,6 +312,7 @@ interface TabLayoutRouteChildren {
   TabLayoutConsoleRoute: typeof TabLayoutConsoleRoute
   TabLayoutFlashNodeRoute: typeof TabLayoutFlashNodeRoute
   TabLayoutAboutLazyRoute: typeof TabLayoutAboutLazyRoute
+  TabLayoutAccessLazyRoute: typeof TabLayoutAccessLazyRoute
   TabLayoutFirmwareUpgradeLazyRoute: typeof TabLayoutFirmwareUpgradeLazyRoute
   TabLayoutInfoLazyRoute: typeof TabLayoutInfoLazyRoute
   TabLayoutNetworkLazyRoute: typeof TabLayoutNetworkLazyRoute
@@ -303,6 +325,7 @@ const TabLayoutRouteChildren: TabLayoutRouteChildren = {
   TabLayoutConsoleRoute: TabLayoutConsoleRoute,
   TabLayoutFlashNodeRoute: TabLayoutFlashNodeRoute,
   TabLayoutAboutLazyRoute: TabLayoutAboutLazyRoute,
+  TabLayoutAccessLazyRoute: TabLayoutAccessLazyRoute,
   TabLayoutFirmwareUpgradeLazyRoute: TabLayoutFirmwareUpgradeLazyRoute,
   TabLayoutInfoLazyRoute: TabLayoutInfoLazyRoute,
   TabLayoutNetworkLazyRoute: TabLayoutNetworkLazyRoute,

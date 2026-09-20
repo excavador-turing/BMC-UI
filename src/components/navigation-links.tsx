@@ -20,6 +20,7 @@ const navigationLinks = [
   { to: "/nodes", label: "navigation.nodes" },
   { to: "/console", label: "navigation.console" },
   { to: "/network", label: "navigation.network" },
+  { to: "/access", label: "navigation.access" },
   { to: "/firmware-upgrade", label: "navigation.firmware" },
   { to: "/settings", label: "navigation.settings" },
   { to: "/about", label: "navigation.about" },
@@ -54,6 +55,37 @@ function MobileLink({
   );
 }
 
+/**
+ * A tab in the header bar, at `xl` and above.
+ *
+ * Underlined rather than boxed: the strip version below draws a tab shape,
+ * which needs a row of its own and a background to sit on. Inside the header
+ * there is no strip to be part of, so the active tab says so with a line
+ * under it and everything fits in the 64 px the header already costs.
+ */
+function InlineTabLink({
+  to,
+  children,
+  isFlashing,
+}: LinkProps & FlashingLinkProps) {
+  return (
+    <Link
+      to={to}
+      viewTransition
+      className={cn(
+        "border-b-2 border-transparent px-2 py-1 text-sm font-semibold whitespace-nowrap text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100",
+        isFlashing && "animate-pulse duration-700"
+      )}
+      activeProps={{
+        className:
+          "border-neutral-900 text-neutral-900 dark:border-neutral-100 dark:text-neutral-100",
+      }}
+    >
+      {children}
+    </Link>
+  );
+}
+
 function TabLink({ to, children, isFlashing }: LinkProps & FlashingLinkProps) {
   return (
     <Link
@@ -75,13 +107,37 @@ function TabLink({ to, children, isFlashing }: LinkProps & FlashingLinkProps) {
 
 export default function NavigationLinks({
   isDesktop,
+  inHeader = false,
   onClick,
 }: {
   isDesktop: boolean;
+  /** Inside the header bar, one row with everything else. */
+  inHeader?: boolean;
   onClick?: () => void;
 }) {
   const { t } = useTranslation();
   const { flashType, isFlashing } = useFlash();
+
+  const renderInline = useMemo(
+    () =>
+      navigationLinks.map(({ to, label }) => {
+        const isNodeFlashing =
+          isFlashing && flashType === "node" && to === "/nodes";
+        const isFirmwareFlashing =
+          isFlashing && flashType === "firmware" && to === "/firmware-upgrade";
+
+        return (
+          <InlineTabLink
+            key={to}
+            to={to}
+            isFlashing={isNodeFlashing || isFirmwareFlashing}
+          >
+            {t(label)}
+          </InlineTabLink>
+        );
+      }),
+    [isFlashing, flashType, t]
+  );
 
   const renderLinks = useMemo(
     () =>
@@ -129,6 +185,13 @@ export default function NavigationLinks({
       }),
     [isFlashing, flashType, onClick, t]
   );
+
+  if (inHeader)
+    return (
+      <nav className="flex min-w-0 flex-1 items-center justify-end gap-1 overflow-x-auto">
+        {renderInline}
+      </nav>
+    );
 
   if (isDesktop)
     return (

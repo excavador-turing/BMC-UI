@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import NetworkSkeleton from "@/components/skeletons/network";
 import SwitchConfig from "@/components/SwitchConfig";
-import SwitchPorts from "@/components/SwitchPorts";
 import TableItem from "@/components/TableItem";
 import TabView from "@/components/TabView";
 import { Button } from "@/components/ui/button";
@@ -105,10 +104,9 @@ export function Network() {
         message={t("network.resetNetworkConfirm")}
       />
 
-      {/* Link state first, configuration second. "Is the cable in?" is the
-          question people arrive with, and it is also the one you need
-          answered before you move a module onto an uplink. */}
-      <SwitchPorts />
+      {/* One panel, not two. Link state and VLAN membership are facts about
+          the same seven ports, and answering "is node 3's cable in, and which
+          network is it on" used to mean matching names between two tables. */}
       <SwitchConfig />
     </TabView>
   );

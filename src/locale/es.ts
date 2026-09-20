@@ -7,6 +7,7 @@ const translations = {
     settings: "Ajustes",
     info: "Información",
     network: "Red",
+    access: "Acceso",
     nodes: "Nodos",
     console: "Consola",
     usb: "USB",
@@ -191,6 +192,39 @@ const translations = {
     oneNetwork:
       "Una sola red. Todos los módulos, el BMC y ambos enlaces la comparten, y el conmutador no mira las VLAN.",
     port: "Puerto",
+    link: "Enlace",
+    traffic: "Tráfico",
+    showTraffic: "Mostrar tráfico y errores",
+    hideTraffic: "Ocultar tráfico y errores",
+    untaggedOn: "VLAN sin etiqueta en {{port}}",
+    taggedOn: "VLAN etiquetadas en {{port}}",
+    none: "ninguna",
+    never: "—",
+    bmcUntaggedOnly:
+      "Esta placa solo lee tramas sin etiqueta, así que una etiqueta aquí sería tráfico que no puede ver.",
+    startFrom: "Partir de",
+    discard: "Descartar mis cambios",
+    unchanged:
+      "Esto es lo que la placa está ejecutando. Cambia una celda para proponer otra cosa.",
+    filtering:
+      "Mirar las VLAN (desactivado significa una sola red plana, diga lo que diga la tabla)",
+    spanningTree:
+      "Spanning tree, para que dos enlaces ascendentes a la misma red no formen un bucle",
+    names: "Nombres para estas VLAN",
+    vlanNumber: "VLAN {{vid}}",
+    unnamed: "sin nombre",
+    notNumbers: "Algo en la tabla no es un número de VLAN.",
+    cannotCheck:
+      "Esta placa no puede comprobar una configuración antes de aplicarla.",
+    tryIt: "Pruébalo",
+    tryItNote:
+      "Pruébalo aplica el cambio y no lo conserva: observa aquello por lo que llegas a esta placa y deja que vuelva atrás.",
+    triedNote:
+      "Observa lo que tengas que observar y deja que vuelva atrás — o consérvalo después de todo.",
+    tryingNow:
+      "Empezaste esto con Pruébalo. No hacer nada es el plan: la placa restaurará la configuración anterior.",
+    confirmFromHere:
+      "Confirma desde el navegador o la máquina con la que llegas a esta placa: esa es la prueba. Una confirmación enviada desde un shell en la propia placa no prueba nada, y la placa la rechaza.",
     untagged: "Sin etiqueta",
     tagged: "Con etiqueta",
     thisBoard: "esta placa",
@@ -304,7 +338,7 @@ const translations = {
     },
   },
   firmwareUpgrade: {
-    showMore: "mostrar {{count}} más",
+    showAll: "Mostrar las {{count}}",
     showFewer: "mostrar menos",
     releaseNotes: "Notas",
     parkButton: "Subir a la tarjeta SD",
