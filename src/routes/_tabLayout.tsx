@@ -69,7 +69,10 @@ export function AppLayoutComponent() {
           <FactoryPasswordGate>
             <main className="w-full overflow-hidden border border-neutral-300 bg-white shadow-sm xl:w-300 dark:border-neutral-700 dark:bg-neutral-900">
               {!isWide && <NavigationLinks isDesktop />}
-              <div className="px-3 py-6 md:p-12">
+              {/* Tighter at xl than at md: 48 px of padding top and bottom is 96 px
+                  of a 800 px laptop window, and the tabs that scrolled were
+                  scrolling by less than that. */}
+              <div className="px-3 py-6 md:p-12 xl:p-8">
                 <Outlet />
               </div>
             </main>

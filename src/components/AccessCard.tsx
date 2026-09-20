@@ -120,7 +120,11 @@ export default function AccessCard() {
           </div>
         )}
 
-        <div className="mb-3 text-sm opacity-80">
+        {/* One paragraph with the next, not a gap between them: on a board
+            whose CA is pinned in config.yaml these are two short sentences
+            about the same thing, and the gap was the last 10 px keeping this
+            tab scrolling. */}
+        <div className={`text-sm opacity-80 ${pinned ? "" : "mb-3"}`}>
           {t("access.identityHeader", {
             name: state.identity_header.name,
             source: state.identity_header.source,

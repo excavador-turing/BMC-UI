@@ -3,9 +3,9 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import ConfirmationModal from "@/components/ConfirmationModal";
+import HostnameCard from "@/components/HostnameCard";
 import NetworkSkeleton from "@/components/skeletons/network";
 import SwitchConfig from "@/components/SwitchConfig";
-import TableItem from "@/components/TableItem";
 import TabView from "@/components/TabView";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -61,18 +61,31 @@ export function Network() {
   };
 
   return (
-    <TabView title={t("network.header")}>
+    <TabView title={t("network.header")} columns>
+      {/* What this board is called and where it answers, together. The name
+          IS a network fact: it is how somebody reaches the board, it is in
+          the certificate's subject-alternative names, and it is the mDNS
+          name. It used to live on a different tab from the addresses it
+          belongs with. */}
       <div>
-        <div className="mb-6 text-lg font-bold">
+        <HostnameCard />
+
+        <div className="mt-8 mb-4 text-lg font-bold">
           {t("network.networkInterfaces")}
         </div>
-        <div className="space-y-4">
+        {/* One row per interface, not three. The device, its address and its
+            MAC are one fact about one thing, and three definition rows each
+            spent 150 px saying so. */}
+        <div className="space-y-2">
           {data.ip.map((ip) => (
-            <dl key={ip.device}>
-              <TableItem term={ip.device} />
-              <TableItem term="ip">{ip.ip}</TableItem>
-              <TableItem term="mac">{ip.mac}</TableItem>
-            </dl>
+            <div
+              key={ip.device}
+              className="flex flex-wrap items-baseline gap-x-4 text-sm"
+            >
+              <span className="w-16 shrink-0 font-semibold">{ip.device}</span>
+              <span className="font-mono">{ip.ip}</span>
+              <span className="font-mono opacity-60">{ip.mac}</span>
+            </div>
           ))}
         </div>
         <div className="mt-4">
@@ -107,7 +120,9 @@ export function Network() {
       {/* One panel, not two. Link state and VLAN membership are facts about
           the same seven ports, and answering "is node 3's cable in, and which
           network is it on" used to mean matching names between two tables. */}
-      <SwitchConfig />
+      <div>
+        <SwitchConfig />
+      </div>
     </TabView>
   );
 }

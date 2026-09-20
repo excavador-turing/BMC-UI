@@ -177,25 +177,27 @@ function LinkCell({ port }: { port: SwitchPort | undefined }) {
     );
   }
 
-  const duplex =
-    port.duplex === "full"
-      ? t("network.switchPortDuplexFull")
-      : port.duplex === "half"
-        ? t("network.switchPortDuplexHalf")
-        : port.duplex;
-  const rate = [
-    port.speed_mbps === null
-      ? null
-      : t("network.switchPortSpeed", { speed: port.speed_mbps }),
-    duplex,
-  ]
-    .filter(Boolean)
-    .join(" · ");
+  // "1 Gb", not "1000 Mb/s · full duplex". The long form was most of the
+  // table's width and pushed it into a horizontal scrollbar in a column.
+  // Half duplex is the one that matters -- a gigabit port that negotiated
+  // half is a bad cable -- so it is the only duplex worth the space.
+  const speed = port.speed_mbps ?? null;
+  const rate =
+    speed === null
+      ? ""
+      : speed >= 1000
+        ? `${String(speed / 1000)} Gb`
+        : `${String(speed)} Mb`;
+  const half =
+    port.duplex === "half" ? t("network.switchPortDuplexHalf") : null;
 
   return (
     <span className="whitespace-nowrap">
       {t("network.switchPortUp")}
       {rate !== "" && <span className="ml-2 opacity-60">{rate}</span>}
+      {half && (
+        <span className="ml-2 text-amber-600 dark:text-amber-500">{half}</span>
+      )}
     </span>
   );
 }
@@ -270,7 +272,7 @@ function PortTable({
     });
   };
 
-  const cell = "px-2 py-1 align-top";
+  const cell = "px-2 py-0.5 align-top";
   // With filtering off the switch does not read this table at all. It is
   // still editable -- setting a layout up and then turning filtering on is
   // the sane order -- but showing it at full strength would be showing
@@ -654,24 +656,28 @@ export default function SwitchConfig() {
 
       {configurable && draft && (
         <div className="mt-4 flex max-w-3xl flex-col gap-3">
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={draft.filtering}
-              onChange={(e) =>
-                setEdited({ ...draft, filtering: e.target.checked })
-              }
-            />
-            {t("switchConfig.filtering")}
-          </label>
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={draft.stp}
-              onChange={(e) => setEdited({ ...draft, stp: e.target.checked })}
-            />
-            {t("switchConfig.spanningTree")}
-          </label>
+          <div className="flex flex-col gap-2 xl:flex-row xl:gap-6">
+            <label className="flex items-start gap-2 text-sm">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={draft.filtering}
+                onChange={(e) =>
+                  setEdited({ ...draft, filtering: e.target.checked })
+                }
+              />
+              {t("switchConfig.filtering")}
+            </label>
+            <label className="flex items-start gap-2 text-sm">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={draft.stp}
+                onChange={(e) => setEdited({ ...draft, stp: e.target.checked })}
+              />
+              {t("switchConfig.spanningTree")}
+            </label>
+          </div>
 
           {/* A word beside a number, so that a layout is still legible to
               whoever opens this board next year. The board carries these and
@@ -745,9 +751,6 @@ export default function SwitchConfig() {
             >
               {t("switchConfig.tryIt")}
             </Button>
-            <span className="text-sm opacity-80">
-              {t("switchConfig.tryItNote")}
-            </span>
           </div>
 
           {pending !== null && (
@@ -755,11 +758,12 @@ export default function SwitchConfig() {
               {t("switchConfig.oneAtATime")}
             </div>
           )}
-          {!edits && (
-            <div className="text-sm opacity-60">
-              {t("switchConfig.unchanged")}
-            </div>
-          )}
+          {/* One line, not two. "Try it does not keep it" and "this is what
+              the board is running" were both permanently on screen; the
+              first is only useful once there is something to try. */}
+          <div className="text-sm opacity-60">
+            {edits ? t("switchConfig.tryItNote") : t("switchConfig.unchanged")}
+          </div>
         </div>
       )}
 

@@ -12,6 +12,40 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- **Network, Security and Settings each fit a laptop window now.** Measured on
+  bmc-2 at 1280×800, where a tab has 744 px of usable height: Network was
+  1149 px, Access 1670, Settings 942. **All three are 800 px** — no scroll.
+
+  The cause was shared: every tab stacked full-width cards down a 1280 px
+  screen, so pages made of three or four short cards scrolled while half the
+  window stayed empty. `TabView` takes a `columns` prop and lays them out in
+  two columns at `xl`, where a column is still wide enough for a form. Below
+  `xl` nothing changes — two columns at 768 px would be two cramped ones.
+
+- **The hostname moved to Network, and Access became Security.** A board's
+  name is a network fact: it is how you reach it, it is in the certificate's
+  subject-alternative names, and it is what the board advertises over mDNS. It
+  sat on a different tab from the addresses it belongs with.
+
+  With it gone, the honest name for what is left — the password, the trusted
+  proxy, the certificate — is **Security**. That name was considered and
+  rejected one release ago for the good reason that a hostname is not a
+  security setting; moving the hostname is what makes it right.
+
+- **Addresses are one line per interface**, not three definition rows. The
+  device, its address and its MAC are one fact about one thing.
+
+- **Installing a certificate is behind a disclosure.** Two PEM boxes were
+  250 px of a card whose everyday job is answering *what certificate does this
+  board serve, and when does it expire*.
+
+- **The switch's link column reads `1 Gb`**, not `1000 Mb/s · full duplex` —
+  which was most of the table's width and pushed it into a horizontal
+  scrollbar inside a column. Half duplex still shows, in amber, because a
+  gigabit port that negotiated half is a bad cable.
+
+### Changed
+
 - **The fleet's chrome on a phone: 301 px to 121 px.** Measured on the demo
   build at 390×844, a board inside the fleet spent **more than a third of the
   viewport** on three stacked rows — a header with a three-line subtitle, the

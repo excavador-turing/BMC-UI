@@ -7,7 +7,7 @@ const translations = {
     settings: "Einstellungen",
     info: "Info",
     network: "Netzwerk",
-    access: "Zugang",
+    security: "Sicherheit",
     nodes: "Knoten",
     console: "Konsole",
     usb: "USB",
