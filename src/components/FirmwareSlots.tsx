@@ -7,6 +7,7 @@ import RebootModal from "@/components/RebootModal";
 import TableItem from "@/components/TableItem";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useConnection } from "@/hooks/useConnection";
 import {
   type FirmwareSlot,
   useFirmwareSlotsQuery,
@@ -113,6 +114,7 @@ export default function FirmwareSlots() {
 
   const promotion = data?.last_promotion ?? null;
   const { toast } = useToast();
+  const { expectReboot } = useConnection();
   const [rebootModalOpened, setRebootModalOpened] = useState(false);
   const { mutate: mutateRebootBMC, isPending: rebootPending } =
     useRebootBMCMutation();
@@ -120,11 +122,14 @@ export default function FirmwareSlots() {
   const handleRebootBMC = () => {
     setRebootModalOpened(false);
     mutateRebootBMC(undefined, {
-      onSuccess: () =>
+      // See the Settings button: this names the wait so the banner can too.
+      onSuccess: () => {
+        expectReboot();
         toast({
           title: t("info.rebootButton"),
           description: t("info.rebootSuccess"),
-        }),
+        });
+      },
       onError: (e) =>
         toast({
           title: t("info.rebootFailed"),

@@ -176,6 +176,14 @@ const translations = {
     powerOnTimeNote:
       "De inschakeltijd is een tijdstempel die het BMC schrijft wanneer het een node inschakelt, geen meting aan de draaiende module, en hij wordt afgezet tegen de klok van deze browser.",
   },
+  connection: {
+    rebooting:
+      "Het bord start opnieuw op. Dat duurt meestal ongeveer {{expected}} seconden; tot nu toe {{elapsed}}. De pagina komt vanzelf terug.",
+    rebootingOverdue:
+      "Het bord start na {{elapsed}} seconden nog steeds op, langer dan gebruikelijk. Er wordt doorgewacht; de pagina komt vanzelf terug zodra het antwoordt.",
+    lost: "Het bord antwoordt al {{elapsed}} seconden niet meer, en niets hier heeft daarom gevraagd. De pagina blijft het proberen en komt vanzelf terug.",
+    cameBack: "Het bord was na {{seconds}} seconden terug.",
+  },
   console: {
     inputTerm: "Hier typen",
     header: "Seriële console voor een compute-module",

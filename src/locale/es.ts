@@ -177,6 +177,14 @@ const translations = {
     powerOnTimeNote:
       "La hora de encendido es una marca que el BMC escribe al encender un nodo, no una comprobación del módulo en marcha, y se mide contra el reloj de este navegador.",
   },
+  connection: {
+    rebooting:
+      "La placa se está reiniciando. Suele tardar unos {{expected}} segundos; {{elapsed}} hasta ahora. La página volverá sola.",
+    rebootingOverdue:
+      "La placa sigue reiniciándose tras {{elapsed}} segundos, más de lo habitual. Se sigue esperando; la página volverá sola cuando responda.",
+    lost: "La placa dejó de responder hace {{elapsed}} segundos, y nada aquí se lo pidió. La página sigue intentándolo y volverá sola.",
+    cameBack: "La placa volvió en {{seconds}} segundos.",
+  },
   console: {
     inputTerm: "Escribir aquí",
     header: "Consola serie de un módulo de cómputo",

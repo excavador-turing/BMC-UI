@@ -177,6 +177,14 @@ const translations = {
     powerOnTimeNote:
       "Die Einschaltzeit ist ein Zeitstempel, den das BMC beim Einschalten eines Knotens schreibt, keine Abfrage des laufenden Moduls, und sie wird gegen die Uhr dieses Browsers gemessen.",
   },
+  connection: {
+    rebooting:
+      "Das Board startet neu. Das dauert normalerweise etwa {{expected}} Sekunden; bisher {{elapsed}}. Die Seite kehrt von selbst zurück.",
+    rebootingOverdue:
+      "Das Board startet nach {{elapsed}} Sekunden immer noch neu, länger als üblich. Es wird weiter gewartet; die Seite kehrt von selbst zurück, sobald es antwortet.",
+    lost: "Das Board antwortet seit {{elapsed}} Sekunden nicht mehr, und nichts hier hat es dazu aufgefordert. Die Seite versucht es weiter und kehrt von selbst zurück.",
+    cameBack: "Das Board war nach {{seconds}} Sekunden wieder da.",
+  },
   console: {
     inputTerm: "Eingabe hier",
     header: "Serielle Konsole für ein Compute-Modul",

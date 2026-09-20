@@ -14,6 +14,7 @@ import TabView from "@/components/TabView";
 import TimeCard from "@/components/TimeCard";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useConnection } from "@/hooks/useConnection";
 import { useFirmwareSlotsQuery } from "@/lib/api/get";
 import { useRebootBMCMutation, useReloadBMCMutation } from "@/lib/api/set";
 
@@ -38,6 +39,7 @@ export const Route = createLazyFileRoute("/_tabLayout/settings")({
 export function Settings() {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { expectReboot } = useConnection();
   const [rebootModalOpened, setRebootModalOpened] = useState(false);
   const { mutate: mutateRebootBMC, isPending: rebootPending } =
     useRebootBMCMutation();
@@ -57,11 +59,16 @@ export function Settings() {
   const handleRebootBMC = () => {
     setRebootModalOpened(false);
     mutateRebootBMC(undefined, {
-      onSuccess: () =>
+      // Named before the queries start failing, so the banner says "the board
+      // is rebooting, about 48 seconds" rather than "the connection was
+      // lost". The difference is whether the page can offer a number.
+      onSuccess: () => {
+        expectReboot();
         toast({
           title: t("info.rebootButton"),
           description: t("info.rebootSuccess"),
-        }),
+        });
+      },
       onError: (e) =>
         toast({
           title: t("info.rebootFailed"),

@@ -242,6 +242,14 @@ const translations = {
     powerOnTimeNote:
       "Power-on time is a stamp the BMC writes when it switches a node on, not a probe of the running module, and it is measured against this browser's clock.",
   },
+  connection: {
+    rebooting:
+      "The board is rebooting. This usually takes about {{expected}} seconds; {{elapsed}} so far. The page will come back on its own.",
+    rebootingOverdue:
+      "The board is still rebooting after {{elapsed}} seconds, which is longer than usual. Still waiting; the page will come back on its own when it answers.",
+    lost: "The board stopped answering {{elapsed}} seconds ago, and nothing here asked it to. The page is still trying, and will come back on its own.",
+    cameBack: "The board came back in {{seconds}} seconds.",
+  },
   console: {
     inputTerm: "Typing here",
     header: "Serial console for a compute module",

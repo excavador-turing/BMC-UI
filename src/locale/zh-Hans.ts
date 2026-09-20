@@ -175,6 +175,14 @@ const translations = {
     powerOnTimeNote:
       "上电时间是 BMC 在给节点上电时写入的时间戳，并非对运行中模块的探测，而且它是相对本浏览器的时钟计算的。",
   },
+  connection: {
+    rebooting:
+      "主板正在重启。通常约需 {{expected}} 秒，目前已 {{elapsed}} 秒。页面会自行恢复。",
+    rebootingOverdue:
+      "主板已重启 {{elapsed}} 秒，比平常更久。仍在等待；主板一旦响应，页面会自行恢复。",
+    lost: "主板在 {{elapsed}} 秒前停止响应，而本页并未要求它这样做。页面仍在重试，并会自行恢复。",
+    cameBack: "主板在 {{seconds}} 秒后恢复。",
+  },
   console: {
     inputTerm: "在此输入",
     header: "计算模块串口控制台",
