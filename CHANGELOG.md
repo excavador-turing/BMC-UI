@@ -10,6 +10,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [v3.31.0] — 2026-09-21
+
 ### Fixed
 
 - **The fleet says which version of itself it is.** `Dockerfile.fleet` has
