@@ -32,6 +32,10 @@ const translations = {
     errorCredentials: "Ongeldige gebruikersnaam of wachtwoord",
     errorUnknown: "Er is een fout opgetreden. Probeer het later opnieuw.",
   },
+  // factoryPassword: English here too, and for the same reason as
+  // `access` above. This is the page that tells somebody their board is
+  // open to anyone who can reach it; a guessed translation of that is
+  // worse than a sentence they can look up.
   // access: deliberately English until someone who speaks this language
   // reviews it. These strings decide who can log in to hardware, and a
   // guessed translation of "stop trusting any proxy" is worse than a

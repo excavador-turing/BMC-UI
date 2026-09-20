@@ -64,6 +64,13 @@ const translations = {
     noRestartNote:
       "A change takes effect on the next connection. The board is not restarted and open sessions are not dropped, including this one.",
   },
+  factoryPassword: {
+    title: "This board is still using the password it shipped with",
+    why: "It is printed in the quick-start guide and is the same on every board, so anyone who can reach this board can administer it. Until you change it, this is the only thing the board will do.",
+    heading: "Choose a password for {{account}}",
+    sshNote:
+      "This is one account: the new password is also the SSH password for this board.",
+  },
   access: {
     title: "Who may reach this board",
     youAre: "You are here as {{name}}, authenticated by {{scheme}}.",

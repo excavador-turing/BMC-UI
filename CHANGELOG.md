@@ -10,6 +10,35 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Security
+
+- **A board still on the password it shipped with shows one page and nothing
+  else.** Every board leaves the factory as `root` / `turing`, which is
+  printed in the quick-start guide and identical on every board anyone has
+  bought — so a board that has not had it changed is a board anybody who can
+  reach it can administer.
+
+  The daemon refuses everything but logging in and changing it, so without
+  this page the interface would render every tab as an error and leave the
+  operator to work out why. Not a banner over the ordinary interface: a banner
+  is a thing people close.
+
+  The page asks for the current password like any other change, which on this
+  board is the published one. That is one more field to type and it keeps a
+  single code path, rather than a "first time" route that skips a check.
+
+  It says, because it is one account: the new password is also the SSH
+  password for the board.
+
+  The strings are English in every locale, for the reason the `access` strings
+  already are — this is the page that tells somebody their board is open to
+  anyone who can reach it, and a guessed translation of that is worse than a
+  sentence they can look up.
+
+  A board on an older daemon sends no `factory_password` at all, and nothing
+  changes for it: that daemon refuses nothing, so a page saying otherwise
+  would simply be false.
+
 ### Added
 
 - **A page-length gate in CI.** `scripts/screens.py` measures every tab at

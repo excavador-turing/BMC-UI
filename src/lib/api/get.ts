@@ -968,6 +968,15 @@ export interface AccessState {
   } | null;
   identity_header: { name: string; source: "config" | "override" | "default" };
   client_ca_pinned_in_config: boolean;
+  /**
+   * True while the board is still on the password it shipped with, in which
+   * case this endpoint and the password change are the only two that answer.
+   *
+   * Optional: a board on a daemon from before the gate existed sends no such
+   * key, and `undefined` reads as "not a factory board" — which is the right
+   * answer for it, because that daemon does not refuse anything either.
+   */
+  factory_password?: boolean;
 }
 
 /**
