@@ -29,7 +29,11 @@ export function BoardTabs({
 
   return (
     <div>
-      <nav className="mb-6 flex flex-wrap gap-1 border-b border-neutral-200 pb-2 dark:border-neutral-700">
+      {/* One row that scrolls rather than one that wraps: ten tabs wrapped to
+          four lines at 390px. A wrapped row also moves every tab sideways
+          when one is added, which is how somebody ends up on Settings having
+          aimed at Network. */}
+      <nav className="mb-4 flex gap-1 overflow-x-auto border-b border-neutral-200 pb-2 whitespace-nowrap dark:border-neutral-700">
         {FLEET_TABS.map((entry) => (
           <Button
             key={entry.id}

@@ -10,6 +10,24 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **The fleet's chrome on a phone: 301 px to 121 px.** Measured on the demo
+  build at 390×844, a board inside the fleet spent **more than a third of the
+  viewport** on three stacked rows — a header with a three-line subtitle, the
+  board switcher wrapped to two lines, and ten tabs wrapped to four — before
+  the first thing anybody came to look at.
+
+  Both rows now **scroll rather than wrap**. That is not only about height: a
+  row that wraps moves every tab sideways when a board is added, which is how
+  somebody ends up on Settings having aimed at Network. The subtitle is
+  orientation rather than instruction, and is kept where there is room for it.
+
+  Desktop is unchanged at 137 px, which it already was: the fleet has its own
+  header and never rendered the board's, so it did not pay the 182 px the
+  board tab bar used to cost. That is worth saying because the ticket assumed
+  otherwise — the fleet's problem was the phone, and only the phone.
+
 ### Security
 
 - **A board still on the password it shipped with shows one page and nothing
