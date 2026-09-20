@@ -430,6 +430,14 @@ export default function SwitchConfig() {
 
   const [edited, setEdited] = useState<Draft | null>(null);
   const [showTraffic, setShowTraffic] = useState(false);
+  /**
+   * Seconds to confirm within, or null while the board's default stands.
+   *
+   * Null rather than a number, so an untouched card sends no `window_s` at
+   * all and the board decides. Hard-coding 30 here would be this page having
+   * an opinion about a default the daemon publishes.
+   */
+  const [window_s, setWindow] = useState<number | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [tried, setTried] = useState(false);
   const [now, setNow] = useState(() => Date.now());
@@ -463,6 +471,11 @@ export default function SwitchConfig() {
   const unprobed = ports?.some((port) => !port.present) ?? false;
   const empty = ports?.length === 0;
 
+  // The board's own published range. Undefined only while the presets query
+  // is in flight or on a daemon too old to have them -- in which case the
+  // control is not rendered and there is nothing to bound.
+  const limits = presets.data?.limits;
+
   const configurable =
     !state.isError && state.data != null && !presets.isError && presets.data;
 
@@ -475,9 +488,19 @@ export default function SwitchConfig() {
     .filter((w) => w.port === null)
     .map((w) => w.reason);
 
+  // The board's rule, read from the board, so an out-of-range window greys
+  // the button out instead of being sent to be refused.
+  const windowOk =
+    window_s === null ||
+    limits === undefined ||
+    (Number.isInteger(window_s) &&
+      window_s >= limits.window_min_s &&
+      window_s <= limits.window_max_s);
+
   const canApply =
     proposed !== null &&
     edits &&
+    windowOk &&
     refusal === null &&
     verdict.isSuccess &&
     pending === null &&
@@ -486,7 +509,11 @@ export default function SwitchConfig() {
   const send = (why: "apply" | "try") => {
     if (!proposed) return;
     setTried(why === "try");
-    apply.mutate(proposed, {
+    // The daemon flattens the proposal, so `window_s` rides alongside the
+    // document's own fields -- proved against bmc-2 before this was written.
+    const body =
+      window_s === null ? proposed : { ...proposed, window_s: window_s };
+    apply.mutate(body, {
       onSuccess: () => {
         setEdited(null);
         toast({
@@ -751,6 +778,35 @@ export default function SwitchConfig() {
             >
               {t("switchConfig.tryIt")}
             </Button>
+
+            {/* On the same row as the buttons it belongs to, and bounded by
+                what the board says it accepts -- never by a number written
+                here. Thirty seconds is enough to watch a preset take effect
+                and too short to check a layout you made by hand, which is
+                exactly when Try it is worth using. */}
+            {limits && (
+              <label className="flex items-center gap-2 text-sm">
+                {t("switchConfig.windowLabel")}
+                <input
+                  type="number"
+                  className="w-16 border border-neutral-300 bg-transparent px-1 py-0.5 dark:border-neutral-600"
+                  min={limits.window_min_s}
+                  max={limits.window_max_s}
+                  step={5}
+                  value={window_s ?? limits.window_default_s}
+                  onChange={(e) => {
+                    const next = Number(e.target.value);
+                    setWindow(Number.isFinite(next) ? next : null);
+                  }}
+                />
+                <span className="whitespace-nowrap opacity-60">
+                  {t("switchConfig.windowRange", {
+                    min: limits.window_min_s,
+                    max: limits.window_max_s,
+                  })}
+                </span>
+              </label>
+            )}
           </div>
 
           {pending !== null && (
@@ -776,7 +832,7 @@ export default function SwitchConfig() {
         }}
         title={t("switchConfig.apply")}
         message={t("switchConfig.applyWarning", {
-          seconds: state.data?.default_window_s ?? 30,
+          seconds: window_s ?? state.data?.default_window_s ?? 30,
         })}
       />
     </div>
