@@ -185,6 +185,47 @@ const translations = {
     lost: "La placa dejó de responder hace {{elapsed}} segundos, y nada aquí se lo pidió. La página sigue intentándolo y volverá sola.",
     cameBack: "La placa volvió en {{seconds}} segundos.",
   },
+  switchConfig: {
+    title: "El conmutador de la placa",
+    running: "Lo que hace ahora",
+    oneNetwork:
+      "Una sola red. Todos los módulos, el BMC y ambos enlaces la comparten, y el conmutador no mira las VLAN.",
+    port: "Puerto",
+    untagged: "Sin etiqueta",
+    tagged: "Con etiqueta",
+    thisBoard: "esta placa",
+    nothingConfirmed:
+      "No se ha confirmado nada, así que un reinicio vuelve a esto.",
+    change: "Cambiarlo",
+    showTable: "Ver la tabla",
+    hideTable: "Ocultar la tabla",
+    trunkNote:
+      "Estos dos números son suyos: su router debe usar los mismos, y solo usted sabe cuáles están libres.",
+    managementVid: "VLAN de esta placa",
+    nodeVid: "VLAN de los módulos",
+    redundant:
+      "El segundo enlace lleva las mismas VLAN; el spanning tree decide cuál reenvía",
+    trunkNumbers:
+      "Ambos números deben estar entre {{min}} y {{max}}, y deben ser distintos.",
+    apply: "Aplicar",
+    applyWarning:
+      "Esto cambia el conmutador por el que está conectado. El cambio se aplica pero NO se conserva: si esta página no alcanza la placa en unos {{seconds}} segundos, la placa restaura por sí misma la configuración anterior. Si ocurre, no se ha roto nada — recargue e inténtelo otra vez.",
+    applied: "Aplicado, y aún no conservado.",
+    appliedNote: "Confírmelo antes de que acabe la ventana, o volverá atrás.",
+    applyFailed: "La configuración no se aplicó",
+    pendingTitle: "Un cambio espera confirmación",
+    waitingForUplink:
+      "La cuenta atrás no ha empezado: el enlace aún no reenvía. El spanning tree retiene un puerto durante su propio retardo antes de pasar tráfico.",
+    countdown: "Quedan {{seconds}} segundos para confirmar.",
+    confirm: "Conservarlo",
+    confirmed: "Conservado. Un reinicio ahora vuelve a esto.",
+    confirmFailed: "El cambio no se conservó",
+    revertNow: "Restaurar lo anterior ahora",
+    wasReverted:
+      "Su cambio de las {{at}} se restauró porque no se confirmó a tiempo.",
+    oneAtATime:
+      "Confirme o revierta el cambio pendiente antes de aplicar otro.",
+  },
   console: {
     inputTerm: "Escribir aquí",
     header: "Consola serie de un módulo de cómputo",

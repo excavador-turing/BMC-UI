@@ -12,6 +12,40 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **The switch on the Network tab: what it is doing, and how to change it.**
+  The most-asked feature on the public roadmap, and the one with the sharpest
+  failure — a wrong VLAN on the BMC's own port takes the board off the
+  network, and the thing you would use to undo it is this page.
+
+  So the card never applies anything it keeps. An apply puts the change on the
+  switch and starts a window; confirming is a second request, and the fact
+  that it arrives at all is the proof that the new configuration works. If the
+  page cannot reach the board there is nothing to press, the board puts the
+  old configuration back by itself, and the next load says *your change at
+  12:03 was put back because it was not confirmed in time*.
+
+  **The countdown does not start until the uplink forwards**, and the card
+  says which of the two it is waiting on. Spanning tree holds a port for its
+  own delay before it passes traffic, so a countdown started at the apply
+  would be counting down to a revert nobody could prevent.
+
+  The table shows all seven ports as they sit on the board, coloured by the
+  VLAN each is untagged in, with the BMC's own row marked. Colours are
+  assigned by order of appearance rather than by VLAN number, because the
+  numbers are the operator's and under Split they are internal ones nobody
+  should be reading.
+
+  **The card never expands a preset itself.** The board returns each preset's
+  full table and this shows it. A client that computed its own would
+  eventually disagree with the board about what a preset means, and that
+  disagreement is a board nobody can reach.
+
+  Six locales. Needs a daemon with `/bmc/network/switch`; on an older board
+  the card hides itself rather than appearing broken.
+
+
+### Added
+
 - **The page notices when the board goes away, and notices when it comes
   back.** Until now neither happened. Every polling query uses
   `refetchInterval: (query) => (query.state.error ? false : N)`, which stops

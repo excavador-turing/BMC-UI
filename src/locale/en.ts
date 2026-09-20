@@ -250,6 +250,46 @@ const translations = {
     lost: "The board stopped answering {{elapsed}} seconds ago, and nothing here asked it to. The page is still trying, and will come back on its own.",
     cameBack: "The board came back in {{seconds}} seconds.",
   },
+  switchConfig: {
+    title: "The on-board switch",
+    running: "What it is doing now",
+    oneNetwork:
+      "One network. Every module, the BMC and both uplinks share it, and the switch does not look at VLANs.",
+    port: "Port",
+    untagged: "Untagged",
+    tagged: "Tagged",
+    thisBoard: "this board",
+    nothingConfirmed:
+      "Nothing has been confirmed, so a reboot comes back to this.",
+    change: "Change it",
+    showTable: "Show the table",
+    hideTable: "Hide the table",
+    trunkNote:
+      "These two numbers are yours: your router has to use the same ones, and only you know what is free there.",
+    managementVid: "VLAN for this board",
+    nodeVid: "VLAN for the modules",
+    redundant:
+      "Second uplink carries the same VLANs, with spanning tree deciding which one forwards",
+    trunkNumbers:
+      "Both numbers must be between {{min}} and {{max}}, and they must differ.",
+    apply: "Apply",
+    applyWarning:
+      "This changes the switch you are connected through. The change is applied but NOT kept: if this page cannot reach the board within about {{seconds}} seconds, the board puts the previous configuration back by itself. If that happens, nothing is broken — reload and try again.",
+    applied: "Applied, and not yet kept.",
+    appliedNote: "Confirm it before the window runs out, or it goes back.",
+    applyFailed: "The configuration was not applied",
+    pendingTitle: "A change is waiting to be confirmed",
+    waitingForUplink:
+      "The countdown has not started: the uplink is not forwarding yet. Spanning tree holds a port for its own delay before it passes traffic.",
+    countdown: "{{seconds}} seconds left to confirm.",
+    confirm: "Keep it",
+    confirmed: "Kept. A reboot now comes back to this.",
+    confirmFailed: "The change was not kept",
+    revertNow: "Put the old one back now",
+    wasReverted:
+      "Your change at {{at}} was put back because it was not confirmed in time.",
+    oneAtATime: "Confirm or revert the waiting change before applying another.",
+  },
   console: {
     inputTerm: "Typing here",
     header: "Serial console for a compute module",
