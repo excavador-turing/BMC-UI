@@ -7,6 +7,7 @@ import {
 import { useMemo } from "react";
 
 import ConnectionBanner from "@/components/ConnectionBanner";
+import FactoryPasswordGate from "@/components/FactoryPasswordGate";
 import Header from "@/components/header";
 import NavigationLinks from "@/components/navigation-links";
 import { ConnectionProvider } from "@/contexts/ConnectionContext";
@@ -61,12 +62,18 @@ export function AppLayoutComponent() {
           <ConnectionBanner />
           <Header />
 
-          <main className="w-full overflow-hidden border border-neutral-300 bg-white shadow-sm xl:w-300 dark:border-neutral-700 dark:bg-neutral-900">
-            {!isWide && <NavigationLinks isDesktop />}
-            <div className="px-3 py-6 md:p-12">
-              <Outlet />
-            </div>
-          </main>
+          {/* A board still on the password it shipped with shows one page and
+              nothing else -- not the tabs, not a banner over them. The
+              daemon refuses everything but the change anyway, so the tabs
+              would render as a wall of errors. */}
+          <FactoryPasswordGate>
+            <main className="w-full overflow-hidden border border-neutral-300 bg-white shadow-sm xl:w-300 dark:border-neutral-700 dark:bg-neutral-900">
+              {!isWide && <NavigationLinks isDesktop />}
+              <div className="px-3 py-6 md:p-12">
+                <Outlet />
+              </div>
+            </main>
+          </FactoryPasswordGate>
         </div>
       </ConnectionProvider>
     </NodeNavProvider>
