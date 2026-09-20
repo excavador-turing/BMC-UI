@@ -3,37 +3,19 @@ import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import ConfirmationModal from "@/components/ConfirmationModal";
+import { NodePicker } from "@/components/NodePicker";
 import SdCardPicker from "@/components/SdCardPicker";
 import TabView from "@/components/TabView";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useFlash } from "@/hooks/use-flash";
 import type { SdCardEntry } from "@/lib/api/get";
 
 export const Route = createLazyFileRoute("/_tabLayout/flash-node")({
   component: FlashNodeRoute,
 });
-
-interface SelectOption {
-  value: string;
-  label: string;
-}
-
-const nodeOptions: SelectOption[] = [
-  { value: "0", label: "Node 1" },
-  { value: "1", label: "Node 2" },
-  { value: "2", label: "Node 3" },
-  { value: "3", label: "Node 4" },
-];
 
 /**
  * The flash form. `preselected` rather than a router search read, because the
@@ -44,6 +26,9 @@ export function FlashNode({ preselected }: { preselected?: number }) {
   const { node: fromLink } = { node: preselected };
   const { t } = useTranslation();
   const formRef = useRef<HTMLFormElement>(null);
+  const [selectedNode, setSelectedNode] = useState<string>(
+    fromLink ? String(fromLink - 1) : "0"
+  );
   const [confirmFlashModal, setConfirmFlashModal] = useState(false);
   const [picking, setPicking] = useState(false);
   const [fromCard, setFromCard] = useState<SdCardEntry | null>(null);
@@ -61,8 +46,8 @@ export function FlashNode({ preselected }: { preselected?: number }) {
       setConfirmFlashModal(false);
       const form = formRef.current;
 
-      const nodeId = (form.elements.namedItem("node") as HTMLSelectElement)
-        .selectedOptions[0].value;
+      const nodeId = (form.elements.namedItem("node") as HTMLInputElement)
+        .value;
       const file = (form.elements.namedItem("file") as HTMLInputElement)
         .files?.[0];
       // `file-url` is a field this form has not had for several releases, and
@@ -94,23 +79,12 @@ export function FlashNode({ preselected }: { preselected?: number }) {
         <div className="mb-4">
           {/* Preselected from `?node=2` when the Nodes tab sent you here, so
               the node you were looking at is the node this flashes. */}
-          <Select
+          <NodePicker
+            label={t("flashNode.nodeSelect")}
             name="node"
-            defaultValue={fromLink ? String(fromLink - 1) : undefined}
-          >
-            <SelectTrigger label={t("flashNode.nodeSelect")}>
-              <SelectValue placeholder={t("ui.selectPlaceholder")} />
-            </SelectTrigger>
-            <SelectContent>
-              {nodeOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {t("nodes.node", {
-                    nodeId: Number.parseInt(option.value) + 1,
-                  })}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            value={selectedNode}
+            onChange={setSelectedNode}
+          />
         </div>
 
         <div className="mb-4">

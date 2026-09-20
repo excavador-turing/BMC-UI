@@ -3,24 +3,15 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import InfoNote from "@/components/InfoNote";
+import { NodePicker } from "@/components/NodePicker";
 import SerialConsole from "@/components/SerialConsole";
 import TabView from "@/components/TabView";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { type SerialReaderState, useSerialStatusQuery } from "@/lib/api/get";
 
 export const Route = createLazyFileRoute("/_tabLayout/console")({
   component: SerialConsoleRoute,
   errorComponent: () => <div>Error loading Console</div>,
 });
-
-/** The four module bays, addressed the way the daemon addresses them: 0..3. */
-const nodeValues = ["0", "1", "2", "3"] as const;
 
 /**
  * The reader task's state, in words.
@@ -89,22 +80,11 @@ export function SerialConsoleTab({ preselected }: { preselected?: number }) {
   return (
     <TabView title={t("console.header")}>
       <div className="space-y-4">
-        <Select
-          name="node"
+        <NodePicker
+          label={t("console.nodeSelect")}
           value={selectedNode}
-          onValueChange={(value) => setSelectedNode(value)}
-        >
-          <SelectTrigger label={t("console.nodeSelect")}>
-            <SelectValue placeholder={t("ui.selectPlaceholder")} />
-          </SelectTrigger>
-          <SelectContent>
-            {nodeValues.map((value) => (
-              <SelectItem key={value} value={value}>
-                {t("nodes.node", { nodeId: Number.parseInt(value) + 1 })}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          onChange={setSelectedNode}
+        />
 
         <div className="flex flex-wrap items-baseline gap-3">
           <span className="inline-flex items-center gap-1 text-sm font-semibold opacity-60">
