@@ -15,7 +15,12 @@ COPY . .
 # VITE_APP=fleet selects the fleet entry point. The board's own bundle is a
 # different build of this same tree and never contains this code.
 ARG BMC_UI_VERSION=""
-ENV BMC_UI_VERSION=${BMC_UI_VERSION}
+# VITE_-prefixed, because that is the only kind Vite puts into the bundle.
+# It was set without the prefix, so the release workflow has been passing the
+# tag in since this image existed and the interface has never been able to
+# read it -- which is why the fleet could sit two releases behind with
+# nothing on the page saying so.
+ENV VITE_BMC_UI_VERSION=${BMC_UI_VERSION}
 RUN VITE_APP=fleet npm run build
 
 # index.html is shared with the board's build, so its <title> is the board's.
