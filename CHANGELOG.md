@@ -10,6 +10,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [v3.30.0] — 2026-09-20
+
 ### Added
 
 - **The confirm window is settable, beside the buttons it belongs to.** The
