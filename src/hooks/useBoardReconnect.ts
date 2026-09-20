@@ -117,11 +117,24 @@ export function useBoardReconnect(): {
       if (startedAt.current !== null) return;
       const offline = cache.getAll().some((query) => {
         const error = query.state.error as
-          { response?: unknown; code?: string } | undefined | null;
+          { isAxiosError?: boolean; response?: unknown } | undefined | null;
         if (!error) return false;
-        // axios sets `response` whenever the board answered at all. No
-        // response means the request never arrived or never came back.
-        return error.response === undefined;
+        // ONLY AN AXIOS ERROR WITH NO RESPONSE. Two things lack a `response`
+        // and only one of them is a dead board. The other is a query that
+        // threw its own `Error` because the daemon answered with the wrong
+        // shape -- the certificate and switch queries do exactly that on an
+        // older daemon, by design, so the card can hide itself. Treating
+        // those as a lost connection put the "board stopped answering"
+        // banner over a perfectly healthy board, and worse: the probe then
+        // succeeded, the page reloaded, the query threw again, and the page
+        // reloaded again, every few seconds, on every board older than the
+        // interface. Seen on bmc-2 under headless Chrome an hour after it
+        // shipped.
+        //
+        // axios marks its own errors, and sets `response` whenever the board
+        // answered at all. No response on an axios error means the request
+        // never arrived or never came back, and nothing else does.
+        return error.isAxiosError === true && error.response === undefined;
       });
       if (offline) {
         startedAt.current = Date.now();
