@@ -10,6 +10,28 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **A page-length gate in CI.** `scripts/screens.py` measures every tab at
+  1280×800 and 390×844 on every pull request and fails on a header over
+  64 px, a tab over two screens, or a horizontal scrollbar at phone width.
+  Console is exempt: a terminal is meant to be tall.
+
+  Against the **demo build**, so no board is involved — the captured fixtures
+  answer, and a card whose endpoint they lack hides itself exactly as it does
+  on an older board. That also means the gate undercounts Access and Network
+  by the access, certificate and switch cards, which is said in the script
+  rather than left for somebody to discover; capturing those endpoints from a
+  board closes it.
+
+  A baseline holds what is over the line today and is checked **both
+  directions**, so a fault that gets fixed and left in the baseline fails too.
+  It keys on the fault, never on the pixel count: a baseline holding numbers
+  would fail on a one-pixel move, and a gate that cries every day gets
+  switched off.
+
+  `npm run screens` runs it locally; `npm run screens -- --record` re-records.
+
 ### Changed
 
 - **The Firmware tab shows the newest release per source, not three.** Four
