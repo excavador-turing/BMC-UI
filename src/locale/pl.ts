@@ -220,6 +220,8 @@ const translations = {
     notNumbers: "Coś w tabeli nie jest numerem VLAN.",
     cannotCheck:
       "Ta płyta nie potrafi sprawdzić konfiguracji przed zastosowaniem.",
+    windowLabel: "Potwierdź w ciągu",
+    windowRange: "s, {{min}}–{{max}}",
     tryIt: "Wypróbuj",
     tryItNote:
       "Wypróbuj stosuje zmianę i jej nie zachowuje: obserwuj to, czym docierasz do tej płyty, i pozwól jej wrócić.",

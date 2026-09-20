@@ -10,6 +10,23 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **The confirm window is settable, beside the buttons it belongs to.** The
+  daemon has accepted `window_s` per apply since the switch landed — 10 to 300
+  seconds — and publishes its own default and range; `tpi` has `--window`. The
+  card sent neither, so every apply, **including Try it**, silently got 30
+  seconds.
+
+  Thirty is enough to watch a preset take effect and too short to check a
+  layout you made by hand, which is exactly when Try it is worth using.
+
+  The bounds come from the board's published limits, never from a number in
+  this page, and an untouched control sends no `window_s` at all so the board
+  keeps deciding. An out-of-range value greys the button out rather than being
+  sent to be refused, and the Apply confirmation quotes the number it will
+  actually use.
+
 ### Changed
 
 - **Network, Security and Settings each fit a laptop window now.** Measured on

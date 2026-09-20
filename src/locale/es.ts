@@ -220,6 +220,8 @@ const translations = {
     notNumbers: "Algo en la tabla no es un número de VLAN.",
     cannotCheck:
       "Esta placa no puede comprobar una configuración antes de aplicarla.",
+    windowLabel: "Confirmar en",
+    windowRange: "s, {{min}}–{{max}}",
     tryIt: "Pruébalo",
     tryItNote:
       "Pruébalo aplica el cambio y no lo conserva: observa aquello por lo que llegas a esta placa y deja que vuelva atrás.",
