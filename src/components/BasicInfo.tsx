@@ -6,9 +6,24 @@ import BasicInfoSkeleton from "@/components/skeletons/basic-info";
 import { useAboutTabData } from "@/lib/api/get";
 import { versionLabel } from "@/lib/format";
 
-function BasicInfoContent() {
+function BasicInfoContent({ compact }: { compact: boolean }) {
   const { t } = useTranslation();
   const { data } = useAboutTabData();
+
+  // One line, name and facts side by side, for the slim header. The facts
+  // stay: which board this is and what it is running are how somebody knows
+  // they are typing into the right window.
+  if (compact) {
+    return (
+      <div className="flex items-baseline gap-3 whitespace-nowrap">
+        <h1 className="text-lg font-bold">Turing Pi</h1>
+        <span className="text-xs font-semibold">{data.hostname}</span>
+        <span className="text-xs font-semibold opacity-60">
+          {versionLabel(data.version)}
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col">
@@ -47,18 +62,39 @@ function BasicInfoContent() {
  * application. A board whose daemon is briefly busy must cost the header, not
  * the page someone is working on.
  */
-export default function BasicInfo() {
+export default function BasicInfo({ compact = false }: { compact?: boolean }) {
   return (
-    <ErrorBoundary label="BasicInfo" fallback={<BasicInfoUnavailable />}>
-      <Suspense fallback={BasicInfoSkeleton()}>
-        <BasicInfoContent />
+    <ErrorBoundary
+      label="BasicInfo"
+      fallback={<BasicInfoUnavailable compact={compact} />}
+    >
+      <Suspense
+        fallback={
+          compact ? (
+            <h1 className="text-lg font-bold">Turing Pi</h1>
+          ) : (
+            BasicInfoSkeleton()
+          )
+        }
+      >
+        <BasicInfoContent compact={compact} />
       </Suspense>
     </ErrorBoundary>
   );
 }
 
-function BasicInfoUnavailable() {
+function BasicInfoUnavailable({ compact }: { compact: boolean }) {
   const { t } = useTranslation();
+  if (compact) {
+    return (
+      <div className="flex items-baseline gap-3 whitespace-nowrap">
+        <h1 className="text-lg font-bold">Turing Pi</h1>
+        <span className="text-xs font-semibold opacity-60">
+          {t("about.unavailable")}
+        </span>
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col">
       <h1 className="text-3xl font-bold">Turing Pi</h1>

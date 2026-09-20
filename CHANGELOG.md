@@ -12,6 +12,21 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- **One header bar, with the tabs inside it: 126 px back on every page.**
+  Measured on bmc-2 at 1280×800, the logo block was 128 px and the tab strip
+  beneath it another 54 px, so every tab began 182 px down and a laptop showed
+  618 px of content out of 800. It is now 56 px, and the tabs are in it.
+
+  The board's name and firmware version stay — they are how you know which
+  window you are typing into — on one line beside the logo rather than under
+  it. The active tab is underlined rather than drawn as a tab, because inside
+  a header bar there is no strip for it to be part of.
+
+  Between `md` and `xl` the strip stays: seven tabs plus the board's name do
+  not fit beside each other at 768 px, and tabs that wrap are worse than tabs
+  on a row of their own. Below `md` nothing changes at all — logo, name,
+  hamburger, tabs in the drawer.
+
 - **The switch table is editable, and it is the only table on the Network
   tab.** Presets fill it; they are no longer the only thing you can ask for.
 

@@ -14,6 +14,7 @@ import {
   type NodeDestination,
   NodeNavProvider,
 } from "@/contexts/NodeNavContext";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 export const Route = createFileRoute("/_tabLayout")({
   beforeLoad: ({ context, location }) => {
@@ -33,6 +34,9 @@ export const Route = createFileRoute("/_tabLayout")({
 
 export function AppLayoutComponent() {
   const navigate = useNavigate();
+  // At `xl` the tabs are in the header bar. Rendering the strip here as well
+  // would be the same seven links twice.
+  const isWide = useMediaQuery("(min-width: 1280px)");
 
   // What "open the console for node 3" means HERE: a route in this
   // application. The fleet answers the same question with a hash change. The
@@ -58,7 +62,7 @@ export function AppLayoutComponent() {
           <Header />
 
           <main className="w-full overflow-hidden border border-neutral-300 bg-white shadow-sm xl:w-300 dark:border-neutral-700 dark:bg-neutral-900">
-            <NavigationLinks isDesktop />
+            {!isWide && <NavigationLinks isDesktop />}
             <div className="px-3 py-6 md:p-12">
               <Outlet />
             </div>
