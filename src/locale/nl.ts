@@ -201,6 +201,16 @@ const translations = {
     redrawButton: "Opnieuw tekenen",
     noSession:
       "Er is geen sessietoken om de console mee te authenticeren. Log uit en weer in.",
+    failed: {
+      certificate:
+        "Uw browser vertrouwt het certificaat van dit bord niet. De rest van deze pagina werkt omdat u de waarschuwing hebt geaccepteerd, en dat geldt niet voor een WebSocket \u2014 en dat is precies wat de console is. Twee oplossingen: vertrouw de certificaatautoriteit van het bord in uw browser, of benader het bord via de vloot, waar TLS eindigt op een certificaat dat uw browser al vertrouwt.",
+      session:
+        "Het bord heeft deze sessie geweigerd. Meld u opnieuw aan; de console werd om dezelfde reden geweigerd als al het andere op deze pagina.",
+      daemon:
+        "De daemon van dit bord is te oud voor de console. Werk de firmware bij, dan werkt hij; er is niets mis met uw certificaat of uw sessie.",
+      unreachable:
+        "Het bord antwoordde helemaal niet, dus de console is niet het probleem. Mogelijk start het opnieuw op of is het niet op het netwerk.",
+    },
     failedHint:
       "Een browser zegt niet waarom een WebSocket-handshake mislukte; alle oorzaken komen hier aan als een sluiting zonder reden. Werkt de rest van deze pagina wel, dan is het meestal het certificaat van het bord: een browser opent geen WebSocket naar een certificaat dat hij niet vertrouwt, en de waarschuwing accepteren geldt NIET voor deze verbinding. Vertrouw de certificaatautoriteit van het bord, of gebruik de vloot, waar TLS eindigt op een certificaat dat uw browser al vertrouwt. De andere twee oorzaken zijn een geweigerd sessietoken en een te oude daemon.",
     inputNote:

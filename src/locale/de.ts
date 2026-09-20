@@ -202,6 +202,16 @@ const translations = {
     redrawButton: "Neu zeichnen",
     noSession:
       "Es gibt kein Sitzungstoken, mit dem sich die Konsole authentifizieren könnte. Melden Sie sich ab und wieder an.",
+    failed: {
+      certificate:
+        "Ihr Browser vertraut dem Zertifikat dieses Boards nicht. Der Rest dieser Seite funktioniert, weil Sie die Warnung akzeptiert haben, und das gilt nicht für einen WebSocket \u2014 und genau das ist die Konsole. Zwei Abhilfen: der Zertifizierungsstelle des Boards im Browser vertrauen, oder das Board über die Flotte erreichen, wo TLS auf einem bereits vertrauten Zertifikat endet.",
+      session:
+        "Das Board hat diese Sitzung abgelehnt. Melden Sie sich erneut an; die Konsole wurde aus demselben Grund abgelehnt wie alles andere auf dieser Seite.",
+      daemon:
+        "Der Daemon dieses Boards ist zu alt für die Konsole. Aktualisieren Sie die Firmware, dann funktioniert sie; an Ihrem Zertifikat oder Ihrer Sitzung liegt es nicht.",
+      unreachable:
+        "Das Board hat überhaupt nicht geantwortet, die Konsole ist also nicht das Problem. Möglicherweise startet es neu oder ist nicht im Netz.",
+    },
     failedHint:
       "Ein Browser sagt nicht, warum ein WebSocket-Handshake fehlgeschlagen ist; alle Ursachen erscheinen hier als Schließen ohne Grund. Wenn der Rest dieser Seite funktioniert, liegt es meist am Zertifikat des Boards: ein Browser öffnet keinen WebSocket zu einem Zertifikat, dem er nicht vertraut, und das Akzeptieren der Warnung gilt für diese Verbindung NICHT. Vertrauen Sie der Zertifizierungsstelle des Boards, oder nutzen Sie die Flotte, wo TLS auf einem bereits vertrauten Zertifikat endet. Die anderen beiden Ursachen sind ein abgelehntes Sitzungstoken und ein zu alter Daemon.",
     inputNote:
