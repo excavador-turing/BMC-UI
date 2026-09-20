@@ -998,6 +998,59 @@ function isAccessState(value: unknown): value is AccessState {
   );
 }
 
+/**
+ * The certificate this board serves over HTTPS.
+ *
+ * `source` is the field that matters most and reads as a detail: `self-signed`
+ * means the board issued it and renews it 30 days before expiry, `installed`
+ * means somebody put it there and renewal is now theirs. An expiry date means
+ * something different for each.
+ */
+export interface TlsCertificate {
+  subject: string;
+  issuer: string;
+  not_before: string;
+  not_after: string;
+  fingerprint: string;
+  key: string | null;
+  source: "self-signed" | "installed";
+  names: string[];
+  chain_length: number;
+}
+
+/**
+ * The shape, not the status, for the reason spelled out above
+ * `isAccessState`: an older daemon answers an unrouted path with 200 and the
+ * index page, so `isError` stays false and `data` is a string of HTML.
+ */
+function isTlsCertificate(value: unknown): value is TlsCertificate {
+  if (typeof value !== "object" || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return (
+    typeof v.subject === "string" &&
+    typeof v.issuer === "string" &&
+    typeof v.not_after === "string" &&
+    typeof v.source === "string" &&
+    Array.isArray(v.names)
+  );
+}
+
+export function useTlsCertificateQuery() {
+  const api = useAxiosWithAuth();
+
+  return useQuery({
+    queryKey: ["tlsCertificate"],
+    queryFn: async () => {
+      const { data } = await api.get<unknown>("/bmc/tls/certificate");
+      if (!isTlsCertificate(data)) {
+        throw new Error("this daemon has no /bmc/tls/certificate endpoint");
+      }
+      return data;
+    },
+    retry: false,
+  });
+}
+
 export function useAccessQuery() {
   const api = useAxiosWithAuth();
 
