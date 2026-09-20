@@ -1046,6 +1046,14 @@ export interface SwitchDocument {
   vlan_filtering: boolean;
   stp: boolean;
   ports: Record<string, SwitchPortConfig>;
+  /**
+   * What the operator calls each VLAN, keyed by its number as a string
+   * because that is what JSON does to a map key.
+   *
+   * Optional: a board on a daemon from before names existed sends no such
+   * key, and the table simply shows numbers.
+   */
+  names?: Record<string, string>;
 }
 
 export interface SwitchPending {
@@ -1077,7 +1085,24 @@ export interface SwitchPreset {
   name: string;
   summary: string;
   document: SwitchDocument;
-  warnings: { port: string | null; reason: string }[];
+  warnings: SwitchWarning[];
+}
+
+/** One thing worth saying about a port, short of refusing. */
+export interface SwitchWarning {
+  port: string | null;
+  reason: string;
+}
+
+/**
+ * What the board thinks of a document it has not been asked to apply.
+ *
+ * `refusal` null means it would apply this.
+ */
+export interface SwitchVerdict {
+  document: SwitchDocument;
+  refusal: { reason: string } | null;
+  warnings: SwitchWarning[];
 }
 
 export interface SwitchPresets {
@@ -1140,6 +1165,53 @@ export function useSwitchPresetsQuery() {
     },
     // The board's own expansion of its presets does not change between
     // releases, so this is fetched once and kept.
+    staleTime: Infinity,
+    retry: false,
+  });
+}
+
+function isSwitchVerdict(value: unknown): value is SwitchVerdict {
+  if (typeof value !== "object" || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return typeof v.document === "object" && Array.isArray(v.warnings);
+}
+
+/**
+ * Ask the board what it thinks of a document, without applying it.
+ *
+ * A query rather than a mutation, although it is a POST, because that is what
+ * it is: the same question about the same document has the same answer, and
+ * keying on the document means an edit undone costs nothing to re-ask.
+ *
+ * **The client does not judge documents.** Every rule lives in the daemon and
+ * is asked over the wire, even the obvious ones. A copy of the rules in here
+ * would eventually disagree with the board, and the way that disagreement
+ * surfaces is a lockout -- the editor greys out a button the board would have
+ * accepted, or offers one it will refuse.
+ *
+ * `document` null disables the query: that is the editor saying a cell does
+ * not parse yet, which is the one judgement it does make, and it is about
+ * text rather than about switches.
+ */
+export function useSwitchValidationQuery(document: SwitchDocument | null) {
+  const api = useAxiosWithAuth();
+  const key = document === null ? "" : JSON.stringify(document);
+
+  return useQuery({
+    queryKey: ["switchValidate", key],
+    enabled: document !== null,
+    queryFn: async () => {
+      const { data } = await api.post<unknown>(
+        "/bmc/network/switch/validate",
+        document
+      );
+      if (!isSwitchVerdict(data)) {
+        throw new Error("this daemon cannot check a switch document");
+      }
+      return data;
+    },
+    // A verdict about a document cannot go stale: the document is the whole
+    // input, and it is in the key.
     staleTime: Infinity,
     retry: false,
   });

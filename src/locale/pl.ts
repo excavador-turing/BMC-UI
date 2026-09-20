@@ -191,6 +191,39 @@ const translations = {
     oneNetwork:
       "Jedna sieć. Wszystkie moduły, BMC i oba łącza dzielą ją, a przełącznik nie patrzy na VLAN-y.",
     port: "Port",
+    link: "Łącze",
+    traffic: "Ruch",
+    showTraffic: "Pokaż ruch i błędy",
+    hideTraffic: "Ukryj ruch i błędy",
+    untaggedOn: "VLAN bez tagu na {{port}}",
+    taggedOn: "VLAN-y z tagiem na {{port}}",
+    none: "brak",
+    never: "—",
+    bmcUntaggedOnly:
+      "Ta płyta czyta tylko ramki bez tagu, więc tag tutaj byłby ruchem, którego nie widzi.",
+    startFrom: "Zacznij od",
+    discard: "Odrzuć moje zmiany",
+    unchanged:
+      "To jest to, co płyta ma teraz. Zmień komórkę, aby zaproponować coś innego.",
+    filtering:
+      "Patrz na VLAN-y (wyłączone oznacza jedną płaską sieć, cokolwiek mówi tabela)",
+    spanningTree:
+      "Spanning tree, aby dwa łącza nadrzędne do tej samej sieci nie utworzyły pętli",
+    names: "Nazwy tych VLAN-ów",
+    vlanNumber: "VLAN {{vid}}",
+    unnamed: "bez nazwy",
+    notNumbers: "Coś w tabeli nie jest numerem VLAN.",
+    cannotCheck:
+      "Ta płyta nie potrafi sprawdzić konfiguracji przed zastosowaniem.",
+    tryIt: "Wypróbuj",
+    tryItNote:
+      "Wypróbuj stosuje zmianę i jej nie zachowuje: obserwuj to, czym docierasz do tej płyty, i pozwól jej wrócić.",
+    triedNote:
+      "Obejrzyj, co masz obejrzeć, i pozwól temu wrócić — albo jednak to zachowaj.",
+    tryingNow:
+      "Zacząłeś to przez Wypróbuj. Nicnierobienie jest planem: płyta przywróci poprzednią konfigurację.",
+    confirmFromHere:
+      "Potwierdź z przeglądarki lub maszyny, którą docierasz do tej płyty — to jest dowód. Potwierdzenie wysłane z powłoki na samej płycie niczego nie dowodzi i płyta je odrzuci.",
     untagged: "Bez znacznika",
     tagged: "Ze znacznikiem",
     thisBoard: "ta płyta",

@@ -190,6 +190,38 @@ const translations = {
     oneNetwork:
       "Eén netwerk. Alle modules, de BMC en beide uplinks delen het, en de switch kijkt niet naar VLAN's.",
     port: "Poort",
+    link: "Verbinding",
+    traffic: "Verkeer",
+    showTraffic: "Verkeer en fouten tonen",
+    hideTraffic: "Verkeer en fouten verbergen",
+    untaggedOn: "Untagged VLAN op {{port}}",
+    taggedOn: "Tagged VLAN's op {{port}}",
+    none: "geen",
+    never: "—",
+    bmcUntaggedOnly:
+      "Dit board leest alleen untagged frames, dus een tag hier zou verkeer zijn dat het niet kan zien.",
+    startFrom: "Begin met",
+    discard: "Mijn wijzigingen weggooien",
+    unchanged:
+      "Dit is wat het board draait. Wijzig een cel om iets anders voor te stellen.",
+    filtering:
+      "Naar VLAN's kijken (uit betekent één plat netwerk, wat de tabel ook zegt)",
+    spanningTree:
+      "Spanning tree, zodat twee uplinks in hetzelfde netwerk geen lus kunnen vormen",
+    names: "Namen voor deze VLAN's",
+    vlanNumber: "VLAN {{vid}}",
+    unnamed: "naamloos",
+    notNumbers: "Iets in de tabel is geen VLAN-nummer.",
+    cannotCheck: "Dit board kan een configuratie niet vooraf controleren.",
+    tryIt: "Probeer het",
+    tryItNote:
+      "Probeer het past de wijziging toe en houdt hem niet: kijk waarmee je dit board bereikt en laat hem terugdraaien.",
+    triedNote:
+      "Kijk wat je moet bekijken en laat het terugdraaien — of houd het alsnog.",
+    tryingNow:
+      "Je bent hiermee begonnen via Probeer het. Niets doen is het plan: het board zet de vorige configuratie terug.",
+    confirmFromHere:
+      "Bevestig vanaf de browser of machine waarmee je dit board bereikt — dat is het bewijs. Een bevestiging vanuit een shell op het board zelf bewijst niets, en het board weigert hem.",
     untagged: "Untagged",
     tagged: "Tagged",
     thisBoard: "dit bord",

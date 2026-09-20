@@ -10,6 +10,52 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **The switch table is editable, and it is the only table on the Network
+  tab.** Presets fill it; they are no longer the only thing you can ask for.
+
+  Pick Flat, Split or Trunk and the cells populate from the board's own
+  expansion. Then change any of them: each port's untagged VLAN is one box,
+  its tagged VLANs a comma-separated list, and spanning tree and VLAN
+  filtering are switches under the table. There is no Custom mode to enter,
+  because there is no mode — **the table is the configuration and a preset is
+  a starting point.**
+
+  **The board judges every edit, and this page judges none of them.** The
+  whole table goes to `POST .../network/switch/validate` as you type; a
+  refusal disables Apply and is shown in the board's own words, and each
+  warning sits beside the port it is about. The one judgement the client makes
+  is whether what you typed is a number, because that is about text rather
+  than about switches. A copy of the board's rules in here would eventually
+  disagree with the board, and the way that disagreement surfaces is a board
+  nobody can reach.
+
+  **Try it** applies a change with no intention of keeping it. Watch what you
+  reach the board by, see whether it still works, and let the window run out.
+  For a hand-made layout it is the only honest dry run: the alternative is
+  finding out by being locked out.
+
+  **VLANs can be named** — a word beside each number, carried in the document
+  the board persists. A table of bare numbers is not a layout anybody can read
+  a year later.
+
+  **One table, not two.** Link state and VLAN membership were separate panels
+  about the same seven ports, so answering *is node 3's cable in, and which
+  network is it on* meant matching names between them. They are now one row
+  per port: link, negotiated rate, untagged, tagged — with traffic and error
+  counters one click away. The unprobed-port alarm moved with them, and the
+  table still renders on a board whose daemon has no switch configuration at
+  all, because link state is the older feature and the one people arrive
+  looking for.
+
+  **The BMC's own row cannot be given a tagged VLAN.** The board refuses such
+  a document; a box you cannot type in says so before it has to.
+
+  Under Confirm, one line about where a confirmation has to come from: the
+  browser you reach this board with, never a shell on the board itself. The
+  daemon refuses the latter outright.
+
 ### Added
 
 - **The switch on the Network tab: what it is doing, and how to change it.**
