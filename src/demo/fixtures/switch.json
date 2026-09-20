@@ -1,0 +1,1 @@
+{"running":{"vlan_filtering":false,"stp":false,"ports":{"node1":{"untagged":1,"tagged":[]},"node2":{"untagged":1,"tagged":[]},"node3":{"untagged":1,"tagged":[]},"node4":{"untagged":1,"tagged":[]},"bmc":{"untagged":1,"tagged":[]},"ge0":{"untagged":1,"tagged":[]},"ge1":{"untagged":1,"tagged":[]}},"names":{}},"confirmed":null,"pending":null,"last_revert":null,"default_window_s":30}
