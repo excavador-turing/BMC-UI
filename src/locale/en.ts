@@ -435,7 +435,7 @@ const translations = {
     availableError: "The available firmware could not be read from this board.",
     sourceUnreadable: "This source returned nothing usable: {{reason}}",
     sourceEmpty: "This source offers nothing.",
-    showMore: "show {{count}} more",
+    showAll: "Show all {{count}}",
     showFewer: "show fewer",
     install: "Install",
     installLocalHint: "Install a local image with the upload form below.",

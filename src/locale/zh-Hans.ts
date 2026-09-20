@@ -320,7 +320,7 @@ const translations = {
     },
   },
   firmwareUpgrade: {
-    showMore: "显示另外 {{count}} 个",
+    showAll: "显示全部 {{count}} 个",
     showFewer: "收起",
     releaseNotes: "说明",
     parkButton: "上传到 SD 卡",

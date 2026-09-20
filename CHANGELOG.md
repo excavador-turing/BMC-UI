@@ -10,6 +10,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **The Firmware tab shows the newest release per source, not three.** Four
+  sources at three rows each was twelve rows of catalogue; the question the
+  page exists to answer is *is there something newer than what I am running,
+  and where from*. Each source now shows its newest, with **show all N**
+  opening the rest of that source in place. Nothing on offer changed, only how
+  much of it is open at once — and a source that returned an error still shows
+  the error where its row would be, because an empty list and an unreadable
+  one are different answers.
+
 ### Added
 
 - **An Access tab: what this board is called, and who may reach it.** The

@@ -29,10 +29,13 @@ import { cn } from "@/lib/utils";
  * be read. Collapsing those into "up to date" is how a board with no route to
  * GitHub quietly claims to be current.
  *
- * Each source shows its newest three, whatever their relation to the running
- * version; the rest are behind "show more". This board's SD card has carried a
- * dozen images from deleted releases, and a list that starts with the newest
- * keeps them out of the way without pretending they are not there.
+ * Each source shows its NEWEST ONE, whatever its relation to the running
+ * version; the rest are behind "show all". The question this page exists to
+ * answer is *is there something newer than what I am running, and where
+ * from*, and twelve rows is not the answer to that -- it is the catalogue.
+ * Four sources at three rows each made the tab 2508 px, most of it versions
+ * nobody was going to install. Nothing on offer changed; only how much of it
+ * is open at once.
  *
  * Trust is shown per candidate, because a publisher-verified checksum and a
  * file of unknown provenance are different acts and the page is the only place
@@ -156,8 +159,8 @@ function CandidateRow({
   );
 }
 
-/** How many of a source's newest candidates are shown before "show more". */
-const VISIBLE_PER_SOURCE = 3;
+/** How many of a source's newest candidates are shown before "show all". */
+const VISIBLE_PER_SOURCE = 1;
 
 export default function FirmwareCandidates() {
   const { t } = useTranslation();
@@ -281,12 +284,12 @@ export default function FirmwareCandidates() {
       )}
 
       {catalog.data?.sources.map((source) => {
-        // The newest three, always. Filtering to "newer or current" left a
-        // card with nothing in it but a "show 3 older" link the moment a
-        // board ran something no source offered yet -- which is exactly the
-        // state right after a release is cut and before it is published. The
-        // relation badge on each row still says what it is; hiding the row
-        // said nothing.
+        // The newest, always -- not "the newest that is newer than what is
+        // running". Filtering by relation left a card with nothing in it but
+        // a "show 3 older" link the moment a board ran something no source
+        // offered yet, which is exactly the state right after a release is
+        // cut and before it is published. The relation badge on the row says
+        // what it is; hiding the row said nothing.
         const isOpen = expanded.has(source.id);
         const shown = isOpen
           ? source.candidates
@@ -335,7 +338,9 @@ export default function FirmwareCandidates() {
               >
                 {isOpen
                   ? t("firmwareUpgrade.showFewer")
-                  : t("firmwareUpgrade.showMore", { count: hidden })}
+                  : t("firmwareUpgrade.showAll", {
+                      count: source.candidates.length,
+                    })}
               </button>
             )}
           </div>

@@ -337,7 +337,7 @@ const translations = {
     },
   },
   firmwareUpgrade: {
-    showMore: "pokaż {{count}} więcej",
+    showAll: "Pokaż wszystkie ({{count}})",
     showFewer: "pokaż mniej",
     releaseNotes: "Opis",
     parkButton: "Wyślij na kartę SD",

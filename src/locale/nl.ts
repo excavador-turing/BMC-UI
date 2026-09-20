@@ -337,7 +337,7 @@ const translations = {
     },
   },
   firmwareUpgrade: {
-    showMore: "{{count}} meer tonen",
+    showAll: "Alle {{count}} tonen",
     showFewer: "minder tonen",
     releaseNotes: "Notities",
     parkButton: "Uploaden naar de SD-kaart",
