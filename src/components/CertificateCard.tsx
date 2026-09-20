@@ -37,6 +37,7 @@ export default function CertificateCard() {
   const [cert, setCert] = useState("");
   const [key, setKey] = useState("");
   const [resetting, setResetting] = useState(false);
+  const [installing, setInstalling] = useState(false);
 
   // A board on an older daemon has no such endpoint. A card that cannot work
   // is not shown as a card that is broken.
@@ -116,8 +117,24 @@ export default function CertificateCard() {
           : t("certificate.sourceSelfSigned")}
       </div>
 
-      <div className="flex max-w-2xl flex-col gap-2">
-        <div className="font-semibold">{t("certificate.installHeading")}</div>
+      {/* Behind a disclosure, because the two PEM boxes were 250 px of a card
+          whose everyday job is answering "what certificate does this board
+          serve, and when does it expire". Installing one is an occasional
+          act; reading what is installed is not. The reset button stays out
+          here with it, since it belongs to the same decision. */}
+      <button
+        type="button"
+        className="text-sm underline opacity-80"
+        onClick={() => setInstalling((open) => !open)}
+      >
+        {installing
+          ? t("certificate.installHide")
+          : t("certificate.installHeading")}
+      </button>
+
+      <div
+        className={`mt-3 max-w-2xl flex-col gap-2 ${installing ? "flex" : "hidden"}`}
+      >
         <div className="text-sm opacity-80">{t("certificate.installNote")}</div>
 
         <textarea

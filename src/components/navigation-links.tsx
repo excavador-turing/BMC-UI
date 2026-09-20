@@ -20,7 +20,7 @@ const navigationLinks = [
   { to: "/nodes", label: "navigation.nodes" },
   { to: "/console", label: "navigation.console" },
   { to: "/network", label: "navigation.network" },
-  { to: "/access", label: "navigation.access" },
+  { to: "/security", label: "navigation.security" },
   { to: "/firmware-upgrade", label: "navigation.firmware" },
   { to: "/settings", label: "navigation.settings" },
   { to: "/about", label: "navigation.about" },

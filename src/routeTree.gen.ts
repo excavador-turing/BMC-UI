@@ -18,13 +18,15 @@ import { Route as TabLayoutFlashNodeRouteImport } from './routes/_tabLayout/flas
 
 const IndexLazyRouteImport = createFileRoute('/')()
 const TabLayoutAboutLazyRouteImport = createFileRoute('/_tabLayout/about')()
-const TabLayoutAccessLazyRouteImport = createFileRoute('/_tabLayout/access')()
 const TabLayoutFirmwareUpgradeLazyRouteImport = createFileRoute(
   '/_tabLayout/firmware-upgrade',
 )()
 const TabLayoutInfoLazyRouteImport = createFileRoute('/_tabLayout/info')()
 const TabLayoutNetworkLazyRouteImport = createFileRoute('/_tabLayout/network')()
 const TabLayoutNodesLazyRouteImport = createFileRoute('/_tabLayout/nodes')()
+const TabLayoutSecurityLazyRouteImport = createFileRoute(
+  '/_tabLayout/security',
+)()
 const TabLayoutSettingsLazyRouteImport = createFileRoute(
   '/_tabLayout/settings',
 )()
@@ -50,13 +52,6 @@ const TabLayoutAboutLazyRoute = TabLayoutAboutLazyRouteImport.update({
   getParentRoute: () => TabLayoutRoute,
 } as any).lazy(() =>
   import('./routes/_tabLayout/about.lazy').then((d) => d.Route),
-)
-const TabLayoutAccessLazyRoute = TabLayoutAccessLazyRouteImport.update({
-  id: '/access',
-  path: '/access',
-  getParentRoute: () => TabLayoutRoute,
-} as any).lazy(() =>
-  import('./routes/_tabLayout/access.lazy').then((d) => d.Route),
 )
 const TabLayoutConsoleRoute = TabLayoutConsoleRouteImport.update({
   id: '/console',
@@ -101,6 +96,13 @@ const TabLayoutNodesLazyRoute = TabLayoutNodesLazyRouteImport.update({
 } as any).lazy(() =>
   import('./routes/_tabLayout/nodes.lazy').then((d) => d.Route),
 )
+const TabLayoutSecurityLazyRoute = TabLayoutSecurityLazyRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => TabLayoutRoute,
+} as any).lazy(() =>
+  import('./routes/_tabLayout/security.lazy').then((d) => d.Route),
+)
 const TabLayoutSettingsLazyRoute = TabLayoutSettingsLazyRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -122,11 +124,11 @@ export interface FileRoutesByFullPath {
   '/console': typeof TabLayoutConsoleRoute
   '/flash-node': typeof TabLayoutFlashNodeRoute
   '/about': typeof TabLayoutAboutLazyRoute
-  '/access': typeof TabLayoutAccessLazyRoute
   '/firmware-upgrade': typeof TabLayoutFirmwareUpgradeLazyRoute
   '/info': typeof TabLayoutInfoLazyRoute
   '/network': typeof TabLayoutNetworkLazyRoute
   '/nodes': typeof TabLayoutNodesLazyRoute
+  '/security': typeof TabLayoutSecurityLazyRoute
   '/settings': typeof TabLayoutSettingsLazyRoute
   '/usb': typeof TabLayoutUsbLazyRoute
 }
@@ -136,11 +138,11 @@ export interface FileRoutesByTo {
   '/console': typeof TabLayoutConsoleRoute
   '/flash-node': typeof TabLayoutFlashNodeRoute
   '/about': typeof TabLayoutAboutLazyRoute
-  '/access': typeof TabLayoutAccessLazyRoute
   '/firmware-upgrade': typeof TabLayoutFirmwareUpgradeLazyRoute
   '/info': typeof TabLayoutInfoLazyRoute
   '/network': typeof TabLayoutNetworkLazyRoute
   '/nodes': typeof TabLayoutNodesLazyRoute
+  '/security': typeof TabLayoutSecurityLazyRoute
   '/settings': typeof TabLayoutSettingsLazyRoute
   '/usb': typeof TabLayoutUsbLazyRoute
 }
@@ -152,11 +154,11 @@ export interface FileRoutesById {
   '/_tabLayout/console': typeof TabLayoutConsoleRoute
   '/_tabLayout/flash-node': typeof TabLayoutFlashNodeRoute
   '/_tabLayout/about': typeof TabLayoutAboutLazyRoute
-  '/_tabLayout/access': typeof TabLayoutAccessLazyRoute
   '/_tabLayout/firmware-upgrade': typeof TabLayoutFirmwareUpgradeLazyRoute
   '/_tabLayout/info': typeof TabLayoutInfoLazyRoute
   '/_tabLayout/network': typeof TabLayoutNetworkLazyRoute
   '/_tabLayout/nodes': typeof TabLayoutNodesLazyRoute
+  '/_tabLayout/security': typeof TabLayoutSecurityLazyRoute
   '/_tabLayout/settings': typeof TabLayoutSettingsLazyRoute
   '/_tabLayout/usb': typeof TabLayoutUsbLazyRoute
 }
@@ -168,11 +170,11 @@ export interface FileRouteTypes {
     | '/console'
     | '/flash-node'
     | '/about'
-    | '/access'
     | '/firmware-upgrade'
     | '/info'
     | '/network'
     | '/nodes'
+    | '/security'
     | '/settings'
     | '/usb'
   fileRoutesByTo: FileRoutesByTo
@@ -182,11 +184,11 @@ export interface FileRouteTypes {
     | '/console'
     | '/flash-node'
     | '/about'
-    | '/access'
     | '/firmware-upgrade'
     | '/info'
     | '/network'
     | '/nodes'
+    | '/security'
     | '/settings'
     | '/usb'
   id:
@@ -197,11 +199,11 @@ export interface FileRouteTypes {
     | '/_tabLayout/console'
     | '/_tabLayout/flash-node'
     | '/_tabLayout/about'
-    | '/_tabLayout/access'
     | '/_tabLayout/firmware-upgrade'
     | '/_tabLayout/info'
     | '/_tabLayout/network'
     | '/_tabLayout/nodes'
+    | '/_tabLayout/security'
     | '/_tabLayout/settings'
     | '/_tabLayout/usb'
   fileRoutesById: FileRoutesById
@@ -240,13 +242,6 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof TabLayoutAboutLazyRouteImport
-      parentRoute: typeof TabLayoutRoute
-    }
-    '/_tabLayout/access': {
-      id: '/_tabLayout/access'
-      path: '/access'
-      fullPath: '/access'
-      preLoaderRoute: typeof TabLayoutAccessLazyRouteImport
       parentRoute: typeof TabLayoutRoute
     }
     '/_tabLayout/console': {
@@ -291,6 +286,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TabLayoutNodesLazyRouteImport
       parentRoute: typeof TabLayoutRoute
     }
+    '/_tabLayout/security': {
+      id: '/_tabLayout/security'
+      path: '/security'
+      fullPath: '/security'
+      preLoaderRoute: typeof TabLayoutSecurityLazyRouteImport
+      parentRoute: typeof TabLayoutRoute
+    }
     '/_tabLayout/settings': {
       id: '/_tabLayout/settings'
       path: '/settings'
@@ -312,11 +314,11 @@ interface TabLayoutRouteChildren {
   TabLayoutConsoleRoute: typeof TabLayoutConsoleRoute
   TabLayoutFlashNodeRoute: typeof TabLayoutFlashNodeRoute
   TabLayoutAboutLazyRoute: typeof TabLayoutAboutLazyRoute
-  TabLayoutAccessLazyRoute: typeof TabLayoutAccessLazyRoute
   TabLayoutFirmwareUpgradeLazyRoute: typeof TabLayoutFirmwareUpgradeLazyRoute
   TabLayoutInfoLazyRoute: typeof TabLayoutInfoLazyRoute
   TabLayoutNetworkLazyRoute: typeof TabLayoutNetworkLazyRoute
   TabLayoutNodesLazyRoute: typeof TabLayoutNodesLazyRoute
+  TabLayoutSecurityLazyRoute: typeof TabLayoutSecurityLazyRoute
   TabLayoutSettingsLazyRoute: typeof TabLayoutSettingsLazyRoute
   TabLayoutUsbLazyRoute: typeof TabLayoutUsbLazyRoute
 }
@@ -325,11 +327,11 @@ const TabLayoutRouteChildren: TabLayoutRouteChildren = {
   TabLayoutConsoleRoute: TabLayoutConsoleRoute,
   TabLayoutFlashNodeRoute: TabLayoutFlashNodeRoute,
   TabLayoutAboutLazyRoute: TabLayoutAboutLazyRoute,
-  TabLayoutAccessLazyRoute: TabLayoutAccessLazyRoute,
   TabLayoutFirmwareUpgradeLazyRoute: TabLayoutFirmwareUpgradeLazyRoute,
   TabLayoutInfoLazyRoute: TabLayoutInfoLazyRoute,
   TabLayoutNetworkLazyRoute: TabLayoutNetworkLazyRoute,
   TabLayoutNodesLazyRoute: TabLayoutNodesLazyRoute,
+  TabLayoutSecurityLazyRoute: TabLayoutSecurityLazyRoute,
   TabLayoutSettingsLazyRoute: TabLayoutSettingsLazyRoute,
   TabLayoutUsbLazyRoute: TabLayoutUsbLazyRoute,
 }

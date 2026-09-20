@@ -4,7 +4,7 @@ const translations = {
     nodes: "Nodes",
     console: "Console",
     network: "Network",
-    access: "Access",
+    security: "Security",
     firmware: "Firmware",
     settings: "Settings",
     about: "About",
@@ -42,6 +42,7 @@ const translations = {
       "The board issued this certificate itself and reissues it 30 days before it expires, so it never serves an expired one. A browser will warn about it, because nothing else has any reason to trust it \u2014 and the serial console will refuse to connect, since a click-through exception does not cover its WebSocket.",
     sourceInstalled:
       "This certificate was installed, so the board will not touch it \u2014 including when it expires. Renewing it is yours to remember.",
+    installHide: "Hide the install form",
     installHeading: "Install your own",
     installNote:
       "For a certificate from your own authority. A browser that already trusts that authority opens this board with no warning, and the serial console works.",

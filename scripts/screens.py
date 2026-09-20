@@ -56,7 +56,7 @@ TABS = [
     "nodes",
     "console",
     "network",
-    "access",
+    "security",
     "firmware-upgrade",
     "settings",
     "about",

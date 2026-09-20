@@ -97,7 +97,7 @@ export function Settings() {
   };
 
   return (
-    <TabView>
+    <TabView columns>
       <TimeCard />
       <FanControl />
       <ConfigBackup />
