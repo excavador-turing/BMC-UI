@@ -1035,6 +1035,116 @@ function isTlsCertificate(value: unknown): value is TlsCertificate {
   );
 }
 
+/** One port's VLAN membership, as the daemon's document spells it. */
+export interface SwitchPortConfig {
+  untagged: number | null;
+  tagged: number[];
+}
+
+/** The whole switch, as one object. See the daemon's switch_document. */
+export interface SwitchDocument {
+  vlan_filtering: boolean;
+  stp: boolean;
+  ports: Record<string, SwitchPortConfig>;
+}
+
+export interface SwitchPending {
+  token: string;
+  document: SwitchDocument;
+  applied_at: string;
+  window_s: number;
+  /**
+   * Null until the uplink carrying the BMC's VLAN forwards. While it is null
+   * the window is NOT running, and the card says so rather than showing a
+   * countdown that has not started.
+   */
+  counting_from: string | null;
+}
+
+export interface SwitchState {
+  running: SwitchDocument;
+  confirmed: SwitchDocument | null;
+  pending: SwitchPending | null;
+  last_revert: {
+    at: string;
+    reason: "not_confirmed" | "requested";
+    document: SwitchDocument;
+  } | null;
+  default_window_s: number;
+}
+
+export interface SwitchPreset {
+  name: string;
+  summary: string;
+  document: SwitchDocument;
+  warnings: { port: string | null; reason: string }[];
+}
+
+export interface SwitchPresets {
+  limits: {
+    vid_min: number;
+    vid_max: number;
+    window_default_s: number;
+    window_min_s: number;
+    window_max_s: number;
+  };
+  presets: SwitchPreset[];
+}
+
+/** The shape, not the status; see the note above `isAccessState`. */
+function isSwitchState(value: unknown): value is SwitchState {
+  if (typeof value !== "object" || value === null) return false;
+  const v = value as Record<string, unknown>;
+  const running = v.running as Record<string, unknown> | undefined;
+  return typeof running?.vlan_filtering === "boolean";
+}
+
+function isSwitchPresets(value: unknown): value is SwitchPresets {
+  if (typeof value !== "object" || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return Array.isArray(v.presets) && typeof v.limits === "object";
+}
+
+export function useSwitchQuery() {
+  const api = useAxiosWithAuth();
+
+  return useQuery({
+    queryKey: ["switch"],
+    queryFn: async () => {
+      const { data } = await api.get<unknown>("/bmc/network/switch");
+      if (!isSwitchState(data)) {
+        throw new Error("this daemon has no /bmc/network/switch endpoint");
+      }
+      return data;
+    },
+    // A pending change has a deadline, and a card that shows a countdown must
+    // notice when the board reverts on its own. Polling stops the moment the
+    // query errors, which is the same board-went-away case the connection
+    // banner handles.
+    refetchInterval: (query) => (query.state.error ? false : 2000),
+    retry: false,
+  });
+}
+
+export function useSwitchPresetsQuery() {
+  const api = useAxiosWithAuth();
+
+  return useQuery({
+    queryKey: ["switchPresets"],
+    queryFn: async () => {
+      const { data } = await api.get<unknown>("/bmc/network/switch/presets");
+      if (!isSwitchPresets(data)) {
+        throw new Error("this daemon has no switch presets");
+      }
+      return data;
+    },
+    // The board's own expansion of its presets does not change between
+    // releases, so this is fetched once and kept.
+    staleTime: Infinity,
+    retry: false,
+  });
+}
+
 export function useTlsCertificateQuery() {
   const api = useAxiosWithAuth();
 

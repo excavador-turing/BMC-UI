@@ -185,6 +185,48 @@ const translations = {
     lost: "Das Board antwortet seit {{elapsed}} Sekunden nicht mehr, und nichts hier hat es dazu aufgefordert. Die Seite versucht es weiter und kehrt von selbst zurück.",
     cameBack: "Das Board war nach {{seconds}} Sekunden wieder da.",
   },
+  switchConfig: {
+    title: "Der Onboard-Switch",
+    running: "Was er gerade tut",
+    oneNetwork:
+      "Ein Netzwerk. Alle Module, der BMC und beide Uplinks teilen es, und der Switch beachtet keine VLANs.",
+    port: "Port",
+    untagged: "Untagged",
+    tagged: "Tagged",
+    thisBoard: "dieses Board",
+    nothingConfirmed:
+      "Nichts wurde bestätigt, ein Neustart kehrt also hierher zurück.",
+    change: "Ändern",
+    showTable: "Tabelle anzeigen",
+    hideTable: "Tabelle ausblenden",
+    trunkNote:
+      "Diese beiden Nummern gehören Ihnen: Ihr Router muss dieselben verwenden, und nur Sie wissen, was dort frei ist.",
+    managementVid: "VLAN für dieses Board",
+    nodeVid: "VLAN für die Module",
+    redundant:
+      "Zweiter Uplink führt dieselben VLANs; Spanning Tree entscheidet, welcher weiterleitet",
+    trunkNumbers:
+      "Beide Nummern müssen zwischen {{min}} und {{max}} liegen und sich unterscheiden.",
+    apply: "Anwenden",
+    applyWarning:
+      "Dies ändert den Switch, über den Sie verbunden sind. Die Änderung wird angewendet, aber NICHT behalten: Erreicht diese Seite das Board nicht innerhalb von etwa {{seconds}} Sekunden, stellt das Board die vorherige Konfiguration selbst wieder her. Dann ist nichts kaputt — neu laden und erneut versuchen.",
+    applied: "Angewendet, aber noch nicht behalten.",
+    appliedNote:
+      "Bestätigen Sie, bevor das Zeitfenster abläuft, sonst wird zurückgesetzt.",
+    applyFailed: "Die Konfiguration wurde nicht angewendet",
+    pendingTitle: "Eine Änderung wartet auf Bestätigung",
+    waitingForUplink:
+      "Der Countdown läuft noch nicht: Der Uplink leitet noch nicht weiter. Spanning Tree hält einen Port erst für seine eigene Verzögerung zurück.",
+    countdown: "Noch {{seconds}} Sekunden zum Bestätigen.",
+    confirm: "Behalten",
+    confirmed: "Behalten. Ein Neustart kehrt jetzt hierher zurück.",
+    confirmFailed: "Die Änderung wurde nicht behalten",
+    revertNow: "Jetzt zurücksetzen",
+    wasReverted:
+      "Ihre Änderung um {{at}} wurde zurückgesetzt, weil sie nicht rechtzeitig bestätigt wurde.",
+    oneAtATime:
+      "Bestätigen oder verwerfen Sie die wartende Änderung, bevor Sie eine weitere anwenden.",
+  },
   console: {
     inputTerm: "Eingabe hier",
     header: "Serielle Konsole für ein Compute-Modul",

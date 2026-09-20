@@ -185,6 +185,47 @@ const translations = {
     lost: "Płyta przestała odpowiadać {{elapsed}} sekund temu, a nic tutaj o to nie prosiło. Strona nadal próbuje i wróci sama.",
     cameBack: "Płyta wróciła po {{seconds}} sekundach.",
   },
+  switchConfig: {
+    title: "Przełącznik na płycie",
+    running: "Co robi teraz",
+    oneNetwork:
+      "Jedna sieć. Wszystkie moduły, BMC i oba łącza dzielą ją, a przełącznik nie patrzy na VLAN-y.",
+    port: "Port",
+    untagged: "Bez znacznika",
+    tagged: "Ze znacznikiem",
+    thisBoard: "ta płyta",
+    nothingConfirmed:
+      "Nic nie zostało potwierdzone, więc restart wróci do tego stanu.",
+    change: "Zmień",
+    showTable: "Pokaż tabelę",
+    hideTable: "Ukryj tabelę",
+    trunkNote:
+      "Te dwa numery są twoje: router po drugiej stronie musi używać tych samych, a tylko ty wiesz, które są wolne.",
+    managementVid: "VLAN dla tej płyty",
+    nodeVid: "VLAN dla modułów",
+    redundant:
+      "Drugie łącze niesie te same VLAN-y; spanning tree decyduje, które przekazuje",
+    trunkNumbers:
+      "Oba numery muszą mieścić się między {{min}} a {{max}} i muszą się różnić.",
+    apply: "Zastosuj",
+    applyWarning:
+      "To zmienia przełącznik, przez który jesteś połączony. Zmiana zostanie zastosowana, ale NIE zachowana: jeśli ta strona nie dosięgnie płyty w ciągu około {{seconds}} sekund, płyta sama przywróci poprzednią konfigurację. Wtedy nic nie jest zepsute — odśwież i spróbuj ponownie.",
+    applied: "Zastosowano, jeszcze nie zachowano.",
+    appliedNote: "Potwierdź przed końcem okna, inaczej wróci do poprzedniej.",
+    applyFailed: "Konfiguracja nie została zastosowana",
+    pendingTitle: "Zmiana czeka na potwierdzenie",
+    waitingForUplink:
+      "Odliczanie się nie zaczęło: łącze jeszcze nie przekazuje ruchu. Spanning tree najpierw wstrzymuje port na własne opóźnienie.",
+    countdown: "Pozostało {{seconds}} s na potwierdzenie.",
+    confirm: "Zachowaj",
+    confirmed: "Zachowano. Restart wróci teraz do tego stanu.",
+    confirmFailed: "Zmiana nie została zachowana",
+    revertNow: "Przywróć poprzednią teraz",
+    wasReverted:
+      "Twoja zmiana z {{at}} została cofnięta, bo nie potwierdzono jej na czas.",
+    oneAtATime:
+      "Potwierdź lub cofnij oczekującą zmianę przed zastosowaniem kolejnej.",
+  },
   console: {
     inputTerm: "Pisanie tutaj",
     header: "Konsola szeregowa modułu obliczeniowego",

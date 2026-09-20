@@ -467,6 +467,66 @@ export function useResetCertificateMutation() {
   });
 }
 
+/**
+ * Apply a switch configuration, to be confirmed.
+ *
+ * Answers 202, not 200. The configuration is on the switch and is not yours
+ * to keep: confirm within the window or the board puts the previous one back
+ * by itself.
+ */
+export function useApplySwitchMutation() {
+  const api = useAxiosWithAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["applySwitch"],
+    mutationFn: async (body: Record<string, unknown>) => {
+      // Typed at the call rather than cast afterwards: `axios.put` is
+      // generic, and asking it for the shape is the difference between a
+      // checked value and an `any` wearing a type.
+      const { data } = await api.put<{ token: string; window_s: number }>(
+        "/bmc/network/switch",
+        body
+      );
+      return data;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["switch"] }),
+  });
+}
+
+/**
+ * Keep a pending change.
+ *
+ * This request IS the proof. After an apply the old path no longer exists, so
+ * if it reaches the board at all, the new configuration works.
+ */
+export function useConfirmSwitchMutation() {
+  const api = useAxiosWithAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["confirmSwitch"],
+    mutationFn: async (token: string) => {
+      await api.post("/bmc/network/switch/confirm", { token });
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["switch"] }),
+  });
+}
+
+/** Put a pending change back now, rather than waiting out its window. */
+export function useRevertSwitchMutation() {
+  const api = useAxiosWithAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["revertSwitch"],
+    mutationFn: async () => {
+      await api.post("/bmc/network/switch/revert");
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["switch"] }),
+  });
+}
+
 /** Stop trusting any proxy. Refused by the daemon when asked THROUGH one. */
 export function useRemoveClientCaMutation() {
   const api = useAxiosWithAuth();

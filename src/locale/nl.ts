@@ -184,6 +184,48 @@ const translations = {
     lost: "Het bord antwoordt al {{elapsed}} seconden niet meer, en niets hier heeft daarom gevraagd. De pagina blijft het proberen en komt vanzelf terug.",
     cameBack: "Het bord was na {{seconds}} seconden terug.",
   },
+  switchConfig: {
+    title: "De switch op het bord",
+    running: "Wat hij nu doet",
+    oneNetwork:
+      "Eén netwerk. Alle modules, de BMC en beide uplinks delen het, en de switch kijkt niet naar VLAN's.",
+    port: "Poort",
+    untagged: "Untagged",
+    tagged: "Tagged",
+    thisBoard: "dit bord",
+    nothingConfirmed:
+      "Er is niets bevestigd, dus een herstart komt hierop terug.",
+    change: "Wijzigen",
+    showTable: "Toon de tabel",
+    hideTable: "Verberg de tabel",
+    trunkNote:
+      "Deze twee nummers zijn van u: uw router moet dezelfde gebruiken, en alleen u weet wat daar vrij is.",
+    managementVid: "VLAN voor dit bord",
+    nodeVid: "VLAN voor de modules",
+    redundant:
+      "Tweede uplink draagt dezelfde VLAN's; spanning tree bepaalt welke doorstuurt",
+    trunkNumbers:
+      "Beide nummers moeten tussen {{min}} en {{max}} liggen en van elkaar verschillen.",
+    apply: "Toepassen",
+    applyWarning:
+      "Dit wijzigt de switch waardoor u verbonden bent. De wijziging wordt toegepast maar NIET behouden: kan deze pagina het bord niet binnen ongeveer {{seconds}} seconden bereiken, dan zet het bord de vorige configuratie zelf terug. Er is dan niets stuk — herlaad en probeer opnieuw.",
+    applied: "Toegepast, en nog niet behouden.",
+    appliedNote:
+      "Bevestig voordat het venster verstrijkt, anders gaat het terug.",
+    applyFailed: "De configuratie is niet toegepast",
+    pendingTitle: "Een wijziging wacht op bevestiging",
+    waitingForUplink:
+      "Het aftellen is nog niet begonnen: de uplink stuurt nog niet door. Spanning tree houdt een poort eerst zijn eigen vertraging vast.",
+    countdown: "Nog {{seconds}} seconden om te bevestigen.",
+    confirm: "Behouden",
+    confirmed: "Behouden. Een herstart komt nu hierop terug.",
+    confirmFailed: "De wijziging is niet behouden",
+    revertNow: "Zet de oude nu terug",
+    wasReverted:
+      "Uw wijziging van {{at}} is teruggezet omdat die niet op tijd is bevestigd.",
+    oneAtATime:
+      "Bevestig of draai de wachtende wijziging terug voordat u een volgende toepast.",
+  },
   console: {
     inputTerm: "Hier typen",
     header: "Seriële console voor een compute-module",
