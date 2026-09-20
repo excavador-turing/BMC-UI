@@ -202,6 +202,16 @@ const translations = {
     redrawButton: "Odśwież ekran",
     noSession:
       "Brak tokenu sesji, którym można uwierzytelnić konsolę. Wyloguj się i zaloguj ponownie.",
+    failed: {
+      certificate:
+        "Przeglądarka nie ufa certyfikatowi tej płyty. Reszta strony działa, ponieważ zaakceptowano ostrzeżenie, a to nie obejmuje WebSocketu \u2014 a konsola nim właśnie jest. Dwa rozwiązania: zaufaj urzędowi certyfikacji płyty w przeglądarce albo połącz się z płytą przez flotę, gdzie TLS kończy się na certyfikacie już zaufanym.",
+      session:
+        "Płyta odrzuciła tę sesję. Zaloguj się ponownie; konsolę odrzucono z tego samego powodu co wszystko inne na tej stronie.",
+      daemon:
+        "Demon tej płyty jest zbyt stary, aby obsłużyć konsolę. Zaktualizuj oprogramowanie układowe, a konsola zadziała; certyfikat i sesja są w porządku.",
+      unreachable:
+        "Płyta w ogóle nie odpowiedziała, więc problemem nie jest konsola. Może się restartować albo być poza siecią.",
+    },
     failedHint:
       "Przeglądarka nie podaje, dlaczego uzgadnianie WebSocket się nie powiodło; wszystkie przyczyny docierają tu jako zamknięcie bez powodu. Jeśli reszta strony działa, zwykle chodzi o certyfikat płyty: przeglądarka nie otworzy WebSocketu do certyfikatu, któremu nie ufa, a zaakceptowanie ostrzeżenia NIE obejmuje tego połączenia. Zaufaj urzędowi certyfikacji płyty albo użyj floty, gdzie TLS kończy się na certyfikacie już zaufanym. Pozostałe dwie przyczyny to odrzucony token sesji i zbyt stary demon.",
     inputNote:

@@ -266,6 +266,16 @@ const translations = {
     redrawButton: "Redraw",
     noSession:
       "There is no session token to authenticate the console with. Log out and back in.",
+    failed: {
+      certificate:
+        "Your browser does not trust this board's certificate. The rest of this page works because you accepted the warning, and that acceptance does not extend to a WebSocket \u2014 which is what the console is. Two fixes: trust the board's certificate authority in your browser, or reach the board through the fleet, where TLS ends on a certificate your browser already trusts.",
+      session:
+        "The board refused this session. Sign in again; the console was refused for the same reason as everything else on this page.",
+      daemon:
+        "This board's daemon is too old to serve the console. Update the firmware and the console will work; nothing about your certificate or your session is wrong.",
+      unreachable:
+        "The board did not answer at all, so the console is not the problem. It may be rebooting, or off the network.",
+    },
     failedHint:
       "A browser does not say why a WebSocket handshake failed, so all of these arrive here as a close with no reason. If the rest of this page works, the usual cause is the board's certificate: a browser will not open a WebSocket to a certificate it does not trust, and accepting the warning on the page does NOT extend to this connection. Trust the board's authority, or reach it through the fleet, where TLS ends on a certificate your browser already trusts. The other two causes are a rejected session token and a daemon too old to serve this endpoint.",
     inputNote:

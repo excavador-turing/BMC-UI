@@ -10,6 +10,33 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **The console says why it failed, instead of listing three possibilities.**
+  A browser exposes nothing about a failed WebSocket handshake — no status, no
+  reason, close code 1006 and silence — so the hint named the certificate as
+  the likely cause and left the other two for the reader to weigh.
+
+  It does not have to guess. After a socket that never opened, one request to
+  the same origin, for the console's own ring buffer, separates all three: an
+  answer proves this origin, this session and this daemon's console support
+  are all fine, which leaves only a certificate the browser will not open a
+  socket to. A 401 is a refused session. Anything else is an unreachable
+  board.
+
+  One sentence is shown, with the fix that matches it. The probe runs only
+  after a failure, so a console that works costs nothing extra.
+
+  **A 200 is not enough to say the daemon is fine.** bmcd serves the interface
+  from the same listener and falls back to `index.html` for a path it does not
+  route, so a daemon without the console endpoints answers the probe with the
+  interface's own page and a 200. The shape decides, not the status —
+  otherwise a board with a perfectly good certificate would be reported as
+  untrusted.
+
+  Six locales. The demo never opens a socket, so it cannot reach the probe.
+
+
 ### Added
 
 - **A certificate card on Settings.** What the board serves over HTTPS, and a

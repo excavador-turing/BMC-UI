@@ -202,6 +202,16 @@ const translations = {
     redrawButton: "Redibujar",
     noSession:
       "No hay ningún token de sesión con el que autenticar la consola. Cierre la sesión y vuelva a iniciarla.",
+    failed: {
+      certificate:
+        "Su navegador no confía en el certificado de esta placa. El resto de la página funciona porque aceptó la advertencia, y esa aceptación no se extiende a un WebSocket \u2014 que es lo que es la consola. Dos soluciones: confiar en la autoridad de certificación de la placa en su navegador, o acceder a la placa a través de la flota, donde TLS termina en un certificado en el que su navegador ya confía.",
+      session:
+        "La placa rechazó esta sesión. Vuelva a iniciar sesión; la consola fue rechazada por el mismo motivo que todo lo demás en esta página.",
+      daemon:
+        "El daemon de esta placa es demasiado antiguo para servir la consola. Actualice el firmware y funcionará; su certificado y su sesión no tienen nada de malo.",
+      unreachable:
+        "La placa no respondió en absoluto, así que la consola no es el problema. Puede estar reiniciándose o fuera de la red.",
+    },
     failedHint:
       "Un navegador no dice por qué falló un handshake de WebSocket; todas las causas llegan aquí como un cierre sin motivo. Si el resto de esta página funciona, lo habitual es el certificado de la placa: un navegador no abre un WebSocket hacia un certificado en el que no confía, y aceptar la advertencia de la página NO se extiende a esta conexión. Confíe en la autoridad de la placa, o acceda a través de la flota, donde TLS termina en un certificado que su navegador ya acepta. Las otras dos causas son un token de sesión rechazado y un daemon demasiado antiguo.",
     inputNote:

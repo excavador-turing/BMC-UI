@@ -29,6 +29,30 @@ import { cn } from "@/lib/utils";
 type ConnectionState = "connecting" | "open" | "closed" | "failed";
 
 /**
+ * Why the socket did not open, decided rather than guessed.
+ *
+ * A browser exposes nothing about a failed WebSocket handshake -- no status,
+ * no reason, close code 1006 and silence -- which is why this used to be a
+ * list of three possibilities with the reader left to pick one.
+ *
+ * It does not have to be. A plain request to the SAME ORIGIN, made after the
+ * socket has failed, separates all three:
+ *
+ *   it answers with the console's own data   the page's TLS is fine and the
+ *                                            socket's was not, which only an
+ *                                            untrusted certificate produces
+ *   it answers 401 or 403                    the session was refused, and the
+ *                                            socket was refused for the same
+ *                                            reason
+ *   it answers 200 with something that is    the daemon has no such endpoint;
+ *   not the console's data                   see below, this is what "too old"
+ *                                            looks like here
+ *   it does not answer at all                the board is unreachable and the
+ *                                            socket is not the story
+ */
+type Diagnosis = "certificate" | "session" | "daemon" | "unreachable";
+
+/**
  * The session token goes into a WebSocket subprotocol name, and subprotocol
  * names are RFC 6455 tokens -- a restricted character set the browser
  * validates before it sends anything. bmcd's session id is 64 characters of
@@ -140,6 +164,8 @@ export default function SerialConsole({ node }: { node: number }) {
   const [state, setState] = useState<ConnectionState>("connecting");
   const [closeInfo, setCloseInfo] = useState<CloseInfo | null>(null);
   const [protocol, setProtocol] = useState<string | null>(null);
+  // Only ever set after a failure, so the happy path costs no extra request.
+  const [diagnosis, setDiagnosis] = useState<Diagnosis | null>(null);
 
   // Bumped by the reconnect button. It is a dependency of the socket effect
   // and of nothing else, so a reconnect tears down the socket and builds a
@@ -222,6 +248,43 @@ export default function SerialConsole({ node }: { node: number }) {
       // Nothing to show is not an error worth surfacing.
     }
   }, [base, bearer, node, usable]);
+
+  /**
+   * One request to the same origin, to find out what the socket could not say.
+   *
+   * It asks for the console's own ring buffer -- the endpoint `replay` uses --
+   * because that is the one request whose success proves everything the socket
+   * needed: this origin, this session, this daemon's console support.
+   *
+   * A 200 IS NOT ENOUGH, and that is not a subtlety. bmcd serves the web
+   * interface from the same listener and falls back to `index.html` for any
+   * path it does not route, so a daemon without the console endpoints answers
+   * this with the interface's own page and a 200. Judged by status alone that
+   * is a success, and the reader would be told their certificate is untrusted
+   * on a board whose certificate is fine. So the shape decides.
+   */
+  const diagnose = useCallback(async (): Promise<Diagnosis> => {
+    let response: Response;
+    try {
+      response = await fetch(`${base}/bmc?opt=get&type=uart&node=${node}`, {
+        headers: bearer === null ? {} : { Authorization: `Bearer ${bearer}` },
+      });
+    } catch {
+      return "unreachable";
+    }
+
+    if (response.status === 401 || response.status === 403) return "session";
+    if (!response.ok) return "unreachable";
+
+    try {
+      const body = (await response.json()) as Partial<UartResponse>;
+      if (typeof body?.response?.[0]?.uart !== "string") return "daemon";
+    } catch {
+      return "daemon";
+    }
+
+    return "certificate";
+  }, [base, bearer, node]);
 
   // The terminal, created once and disposed on unmount. Deliberately not
   // keyed on the node: this component is what gets replaced when the node
@@ -355,8 +418,15 @@ export default function SerialConsole({ node }: { node: number }) {
       };
 
       live.onclose = (event) => {
-        setState(opened && !errored ? "closed" : "failed");
+        const failed = !opened || errored;
+        setState(failed ? "failed" : "closed");
         setCloseInfo({ code: event.code, reason: event.reason });
+        // Only on a socket that never opened. A socket that opened and later
+        // closed is an ended session, not a diagnosis, and probing it would
+        // ask the board a question nobody wanted answered.
+        if (failed) {
+          void diagnose().then(setDiagnosis);
+        }
       };
 
       // Keystrokes go to this socket and no other: registered with the socket
@@ -401,7 +471,10 @@ export default function SerialConsole({ node }: { node: number }) {
         socket.close();
       }
     };
-  }, [base, bearer, node, usable, generation, replay]);
+    // `diagnose` is memoised on [base, bearer, node], a strict subset of this
+    // list, so naming it here cannot make the socket rebuild any more often
+    // than it already does.
+  }, [base, bearer, node, usable, generation, replay, diagnose]);
 
   const stateLabel: Record<ConnectionState, string> = {
     connecting: t("console.stateConnecting"),
@@ -492,9 +565,23 @@ export default function SerialConsole({ node }: { node: number }) {
         </p>
       )}
 
-      {shown === "failed" && usable && (
-        <p className="mb-4 text-sm opacity-60">{t("console.failedHint")}</p>
-      )}
+      {/* Exactly one sentence, and only once the probe has answered. The old
+          text listed three causes and left the reader to pick; the probe knows
+          which one it is, so saying all three would now be a choice to be
+          vaguer than we have to be.
+
+          Until it answers -- one request, on a board that has just refused a
+          socket -- the generic text stands, because a blank space under a
+          failed console is worse than a hint that is merely unspecific. */}
+      {shown === "failed" &&
+        usable &&
+        (diagnosis === null ? (
+          <p className="mb-4 text-sm opacity-60">{t("console.failedHint")}</p>
+        ) : (
+          <p className="mb-4 text-sm opacity-60">
+            {t(`console.failed.${diagnosis}`)}
+          </p>
+        ))}
 
       <div
         ref={containerRef}
