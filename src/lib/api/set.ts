@@ -530,6 +530,54 @@ export function useRevertSwitchMutation() {
   });
 }
 
+/**
+ * Apply an address, to be confirmed at the new address. The daemon answers
+ * 202; nothing is kept until `confirm` reaches it there.
+ */
+export function useApplyAddressMutation() {
+  const api = useAxiosWithAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["applyAddress"],
+    mutationFn: async (body: Record<string, unknown>) => {
+      const { data } = await api.put<{ token: string; window_s: number }>(
+        "/bmc/network/address",
+        body
+      );
+      return data;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["address"] }),
+  });
+}
+
+/** Keep a pending address. Reaching the board at all is the proof. */
+export function useConfirmAddressMutation() {
+  const api = useAxiosWithAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["confirmAddress"],
+    mutationFn: async (token: string) => {
+      await api.post("/bmc/network/address/confirm", { token });
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["address"] }),
+  });
+}
+
+export function useRevertAddressMutation() {
+  const api = useAxiosWithAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["revertAddress"],
+    mutationFn: async () => {
+      await api.post("/bmc/network/address/revert");
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["address"] }),
+  });
+}
+
 /** Stop trusting any proxy. Refused by the daemon when asked THROUGH one. */
 export function useRemoveClientCaMutation() {
   const api = useAxiosWithAuth();

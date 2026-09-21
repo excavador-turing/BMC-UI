@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
+  epochMillis,
   type SwitchDocument,
   type SwitchPort,
   useSwitchPortsQuery,
@@ -535,8 +536,9 @@ export default function SwitchConfig() {
 
   const remaining = (() => {
     if (!pending?.counting_from) return null;
-    const deadline =
-      new Date(pending.counting_from).getTime() + pending.window_s * 1000;
+    const from = epochMillis(pending.counting_from);
+    if (from === null) return null;
+    const deadline = from + pending.window_s * 1000;
     return Math.max(0, Math.round((deadline - now) / 1000));
   })();
 
@@ -622,7 +624,9 @@ export default function SwitchConfig() {
       {!pending && state.data?.last_revert?.reason === "not_confirmed" && (
         <div className="mb-6 text-sm text-amber-700 dark:text-amber-500">
           {t("switchConfig.wasReverted", {
-            at: new Date(state.data.last_revert.at).toLocaleTimeString(),
+            at: new Date(
+              epochMillis(state.data.last_revert.at) ?? 0
+            ).toLocaleTimeString(),
           })}
         </div>
       )}

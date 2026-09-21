@@ -2,6 +2,7 @@ import { createLazyFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import AddressCard from "@/components/AddressCard";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import HostnameCard from "@/components/HostnameCard";
 import NetworkSkeleton from "@/components/skeletons/network";
@@ -46,13 +47,13 @@ export function Network() {
     mutateResetNetwork(undefined, {
       onSuccess: () => {
         toast({
-          title: t("network.resetNetworkButton"),
+          title: t("network.resetSwitchButton"),
           description: t("network.resetNetworkSuccess"),
         });
       },
       onError: (e) => {
         toast({
-          title: t("network.resetNetworkButton"),
+          title: t("network.resetSwitchButton"),
           description: e.message,
           variant: "destructive",
         });
@@ -69,6 +70,7 @@ export function Network() {
           belongs with. */}
       <div>
         <HostnameCard />
+        <AddressCard />
 
         <div className="mt-8 mb-4 text-lg font-bold">
           {t("network.networkInterfaces")}
@@ -90,10 +92,10 @@ export function Network() {
         </div>
         <div className="mt-4">
           {/* Red, not lime. One rule across the interface: lime is safe to
-              press, red is consequential and confirms first. This drops the
-              board's network configuration -- on a headless board reached
-              over that network, it is the control most able to end the
-              session that is using it. */}
+              press, red is consequential and confirms first. This resets the
+              switch CHIP -- every port drops for a moment -- and used to be
+              labelled "Reset network", which read as the address. The
+              address has its own card above, with a confirm window. */}
           <Button
             type="button"
             variant="destructive"
@@ -101,7 +103,7 @@ export function Network() {
             isLoading={resetNetworkPending}
             disabled={resetNetworkPending}
           >
-            {t("network.resetNetworkButton")}
+            {t("network.resetSwitchButton")}
           </Button>
         </div>
       </div>
@@ -113,8 +115,8 @@ export function Network() {
           setConfirmReset(false);
           handleResetNetwork();
         }}
-        title={t("network.resetNetworkButton")}
-        message={t("network.resetNetworkConfirm")}
+        title={t("network.resetSwitchButton")}
+        message={t("network.resetSwitchConfirm")}
       />
 
       {/* One panel, not two. Link state and VLAN membership are facts about

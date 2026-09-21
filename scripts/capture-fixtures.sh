@@ -70,6 +70,7 @@ for t in $types; do
         -e "s/192\.168\.77\.1\b/$SAFE_GW/g" \
         -e "s/\"bmc-[12]\"/\"$SAFE_HOST\"/g" \
         -e "s/haarlem\.lan/example/g" \
+        -e "s/haarlem\.internal/example/g" \
         -e "s/192\.168\.77\.\([0-9][0-9]*\)/203.0.113.\1/g" \
         -e "s/\([0-9a-f][0-9a-f]:\)\{5\}[0-9a-f][0-9a-f]/$SAFE_MAC/g" \
         -e "s/\"hive-bmc\"/\"$SAFE_HOST\"/g" \
@@ -98,7 +99,8 @@ printf '  %-20s %s bytes\n' serial_status "$(wc -c < "$out/serial_status.json")"
 # tripped it.
 SAFE_FP=DE:AD:BE:EF:DE:AD:BE:EF:DE:AD:BE:EF:DE:AD:BE:EF:DE:AD:BE:EF:DE:AD:BE:EF:DE:AD:BE:EF:DE:AD:BE:EF
 for pair in network/switch:switch network/switch/presets:switch_presets \
-            tls/certificate:tls_certificate access:access; do
+            tls/certificate:tls_certificate access:access \
+            network/address:address network/address/limits:address_limits; do
     ep=${pair%%:*}; name=${pair##*:}
     ssh "root@$board" "curl -sk 'https://127.0.0.1/api/bmc/$ep'" > "$out/$name.json.tmp"
     if [ ! -s "$out/$name.json.tmp" ]; then
@@ -114,6 +116,7 @@ for pair in network/switch:switch network/switch/presets:switch_presets \
         -e "s/\"bmc-[12]\"/\"$SAFE_HOST\"/g" \
         -e "s/bmc-[12ab]\.haarlem\.lan/$SAFE_HOST.example/g" \
         -e "s/haarlem\.lan/example/g" \
+        -e "s/haarlem\.internal/example/g" \
         -e "s/opwerm Internal Intermediate CA [0-9-]*/Example Internal CA/g" \
         -e "s/O=opwerm/O=Example/g" \
         -e "s/CN=hive-[A-Za-z0-9-]*/CN=demo-client-ca/g" \
