@@ -928,6 +928,33 @@ export interface NtpResponse {
    */
   configurable: boolean;
   clock: NtpClock;
+  /**
+   * What chrony thinks of each source, from the daemon that carries it
+   * (2.38.0 and later). Absent on an older daemon, and the card then says
+   * only what `clock` says.
+   */
+  sources?: NtpSource[];
+}
+
+/** One time source as chrony sees it; every field is chrony's own column. */
+export interface NtpSource {
+  name: string;
+  kind: string;
+  state:
+    | "selected"
+    | "combined"
+    | "excluded"
+    | "unreachable"
+    | "falseticker"
+    | "too_variable"
+    | "unresolved"
+    | "unknown";
+  stratum: number;
+  poll_seconds: number;
+  reach: number;
+  last_rx_seconds: number | null;
+  offset_seconds: number;
+  configured: boolean;
 }
 
 export function useNtpQuery() {
@@ -1065,17 +1092,44 @@ export interface SwitchDocument {
   names?: Record<string, string>;
 }
 
+/**
+ * A moment as the daemon sends it. Rust's `SystemTime` serialises as an
+ * object with seconds and nanoseconds since the epoch, not as a string; a
+ * client that did `new Date(value)` on it got an Invalid Date and a countdown
+ * of NaN. `epochMillis` takes either form, so a daemon that ever switches to
+ * RFC 3339 keeps working too.
+ */
+export type DaemonTime =
+  string | { secs_since_epoch: number; nanos_since_epoch: number };
+
+export function epochMillis(
+  value: DaemonTime | null | undefined
+): number | null {
+  if (value == null) return null;
+  if (typeof value === "string") {
+    const ms = Date.parse(value);
+    return Number.isFinite(ms) ? ms : null;
+  }
+  if (typeof value.secs_since_epoch === "number") {
+    return (
+      value.secs_since_epoch * 1000 +
+      Math.floor((value.nanos_since_epoch ?? 0) / 1e6)
+    );
+  }
+  return null;
+}
+
 export interface SwitchPending {
   token: string;
   document: SwitchDocument;
-  applied_at: string;
+  applied_at: DaemonTime;
   window_s: number;
   /**
    * Null until the uplink carrying the BMC's VLAN forwards. While it is null
    * the window is NOT running, and the card says so rather than showing a
    * countdown that has not started.
    */
-  counting_from: string | null;
+  counting_from: DaemonTime | null;
 }
 
 export interface SwitchState {
@@ -1083,7 +1137,7 @@ export interface SwitchState {
   confirmed: SwitchDocument | null;
   pending: SwitchPending | null;
   last_revert: {
-    at: string;
+    at: DaemonTime;
     reason: "not_confirmed" | "requested";
     document: SwitchDocument;
   } | null;
@@ -1221,6 +1275,141 @@ export function useSwitchValidationQuery(document: SwitchDocument | null) {
     },
     // A verdict about a document cannot go stale: the document is the whole
     // input, and it is in the key.
+    staleTime: Infinity,
+    retry: false,
+  });
+}
+
+/* ---- the board's own address (daemon 2.38.0 and later) ------------------ */
+
+export type AddressDocument =
+  | { mode: "dhcp" }
+  | {
+      mode: "static";
+      address: string;
+      prefix: number;
+      gateway?: string | null;
+      dns: string[];
+      search?: string | null;
+    };
+
+export interface AddressLive {
+  mode: string;
+  address: string | null;
+  gateway: string | null;
+  dns: string[];
+  search: string | null;
+}
+
+export interface AddressPending {
+  token: string;
+  document: AddressDocument;
+  applied_at: DaemonTime;
+  window_s: number;
+}
+
+export interface AddressState {
+  running: AddressDocument;
+  configured: AddressDocument | null;
+  file: "bmcd" | "hand_edited" | "unreadable";
+  live: AddressLive;
+  pending: AddressPending | null;
+  last_revert: {
+    at: DaemonTime;
+    reason: "not_confirmed" | "requested" | "apply_failed";
+    document: AddressDocument;
+  } | null;
+  default_window_s: number;
+}
+
+export interface AddressLimits {
+  prefix_min: number;
+  prefix_max: number;
+  window_default_s: number;
+  window_min_s: number;
+  window_max_s: number;
+}
+
+export interface AddressVerdict {
+  document: AddressDocument;
+  refusal: { reason: string } | null;
+  warnings: { reason: string }[];
+}
+
+function isAddressState(value: unknown): value is AddressState {
+  if (typeof value !== "object" || value === null) return false;
+  const v = value as Record<string, unknown>;
+  const running = v.running as Record<string, unknown> | undefined;
+  return typeof running?.mode === "string" && typeof v.live === "object";
+}
+
+function isAddressLimits(value: unknown): value is AddressLimits {
+  if (typeof value !== "object" || value === null) return false;
+  return (
+    typeof (value as Record<string, unknown>).window_default_s === "number"
+  );
+}
+
+function isAddressVerdict(value: unknown): value is AddressVerdict {
+  if (typeof value !== "object" || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return typeof v.document === "object" && Array.isArray(v.warnings);
+}
+
+export function useAddressQuery() {
+  const api = useAxiosWithAuth();
+
+  return useQuery({
+    queryKey: ["address"],
+    queryFn: async () => {
+      const { data } = await api.get<unknown>("/bmc/network/address");
+      if (!isAddressState(data)) {
+        throw new Error("this daemon has no /bmc/network/address endpoint");
+      }
+      return data;
+    },
+    // A pending change has a deadline; the card must notice the board
+    // reverting on its own. Polling stops the moment the query errors.
+    refetchInterval: (query) => (query.state.error ? false : 2000),
+    retry: false,
+  });
+}
+
+export function useAddressLimitsQuery() {
+  const api = useAxiosWithAuth();
+
+  return useQuery({
+    queryKey: ["addressLimits"],
+    queryFn: async () => {
+      const { data } = await api.get<unknown>("/bmc/network/address/limits");
+      if (!isAddressLimits(data)) {
+        throw new Error("this daemon publishes no address limits");
+      }
+      return data;
+    },
+    staleTime: Infinity,
+    retry: false,
+  });
+}
+
+/** Ask the board what it thinks of an address, without applying it. */
+export function useAddressValidationQuery(document: AddressDocument | null) {
+  const api = useAxiosWithAuth();
+  const key = document === null ? "" : JSON.stringify(document);
+
+  return useQuery({
+    queryKey: ["addressValidate", key],
+    enabled: document !== null,
+    queryFn: async () => {
+      const { data } = await api.post<unknown>(
+        "/bmc/network/address/validate",
+        document
+      );
+      if (!isAddressVerdict(data)) {
+        throw new Error("this daemon cannot check an address");
+      }
+      return data;
+    },
     staleTime: Infinity,
     retry: false,
   });

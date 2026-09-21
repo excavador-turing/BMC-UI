@@ -152,6 +152,8 @@ export const demoAdapter: AxiosAdapter = (config) => {
     "/bmc/network/switch/presets": "switch_presets",
     "/bmc/tls/certificate": "tls_certificate",
     "/bmc/access": "access",
+    "/bmc/network/address/limits": "address_limits",
+    "/bmc/network/address": "address",
   };
   if (method === "get") {
     for (const [suffix, name] of Object.entries(reads)) {

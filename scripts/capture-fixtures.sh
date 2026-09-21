@@ -98,7 +98,8 @@ printf '  %-20s %s bytes\n' serial_status "$(wc -c < "$out/serial_status.json")"
 # tripped it.
 SAFE_FP=DE:AD:BE:EF:DE:AD:BE:EF:DE:AD:BE:EF:DE:AD:BE:EF:DE:AD:BE:EF:DE:AD:BE:EF:DE:AD:BE:EF:DE:AD:BE:EF
 for pair in network/switch:switch network/switch/presets:switch_presets \
-            tls/certificate:tls_certificate access:access; do
+            tls/certificate:tls_certificate access:access \
+            network/address:address network/address/limits:address_limits; do
     ep=${pair%%:*}; name=${pair##*:}
     ssh "root@$board" "curl -sk 'https://127.0.0.1/api/bmc/$ep'" > "$out/$name.json.tmp"
     if [ ! -s "$out/$name.json.tmp" ]; then

@@ -64,6 +64,7 @@ export default function TimeCard() {
   };
 
   const clock = ntp.data?.clock;
+  const sources = ntp.data?.sources ?? [];
   const state = (() => {
     if (!clock) return null;
     if (clock.synchronised === true) {
@@ -120,6 +121,61 @@ export default function TimeCard() {
 
       <p className="mt-2 text-sm opacity-60">{t("settings.timeNote")}</p>
       {state && <p className="mt-1 text-sm font-semibold">{state}</p>}
+
+      {/* What chrony thinks of each source. "NOT synchronised" alone sent a
+          user to Discord with nothing to act on; chrony always knows why, and
+          every line here is its own column put into words. */}
+      {sources.length > 0 && (
+        <div className="mt-3">
+          <div className="mb-1 text-sm font-semibold opacity-60">
+            {t("settings.timeSources")}
+          </div>
+          <ul className="space-y-0.5 text-sm">
+            {sources.map((source) => (
+              <li
+                key={`${source.kind}:${source.name}`}
+                className="flex flex-wrap gap-x-2"
+              >
+                <span className="font-mono">{source.name}</span>
+                <span
+                  className={
+                    source.state === "selected"
+                      ? "font-semibold"
+                      : source.state === "unreachable" ||
+                          source.state === "falseticker" ||
+                          source.state === "unresolved"
+                        ? "font-semibold text-amber-700 dark:text-amber-500"
+                        : "opacity-80"
+                  }
+                >
+                  {t(`settings.timeSourceState.${source.state}`)}
+                </span>
+                <span className="opacity-60">
+                  {t("settings.timeSourceReach", { reach: source.reach })}
+                  {" · "}
+                  {t("settings.timeSourceStratum", { stratum: source.stratum })}
+                  {source.state !== "unreachable" &&
+                    source.state !== "unresolved" && (
+                      <>
+                        {" · "}
+                        {t("settings.timeSourceOffset", {
+                          ms: (source.offset_seconds * 1000).toFixed(1),
+                        })}
+                      </>
+                    )}
+                  {source.configured &&
+                    ` · ${t("settings.timeSourceConfigured")}`}
+                </span>
+              </li>
+            ))}
+          </ul>
+          {!sources.some((source) => source.state === "selected") && (
+            <p className="mt-2 text-sm text-amber-700 dark:text-amber-500">
+              {t("settings.timeNoSourceSelected")}
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -10,6 +10,43 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **The BMC's address, from the Network tab.** An *Address* card beside
+  Hostname: what the bridge has now (the DHCP lease, or the fixed address),
+  DHCP or Static as two pills, and for static the address with its prefix,
+  the gateway, the resolvers and a search domain. Every rule is the board's
+  (`POST /network/address/validate` as you type); the card only checks that
+  what was typed has the shape of an address. **Apply** and **Try it** work as
+  they do for the switch: the address goes on the board and is not kept until
+  a confirmation reaches it -- *at the new address*, which means this page,
+  reloaded there -- or the board puts the old one back by itself. Needs bmcd
+  2.38.0; on an older daemon the card is not shown. Asked for from the
+  Discord on 2026-09-21 by a user who had done it over SSH -- and whose board
+  then had no resolver, which is the next item.
+
+- **The Time card says what chrony thinks of each source**: selected,
+  combined in, excluded, unreachable, refused for reporting itself
+  unsynchronised, or -- the case that actually happened -- *unresolved*: a
+  name chrony was given and never managed to look up, because the board has
+  no working resolver. Stratum, how many of the last eight polls answered, the
+  offset, and which ones are yours. When nothing is selected it says what the
+  states mean. "NOT synchronised" alone sent a user to Discord with nothing to
+  act on; his `chronyc sources` was empty. Needs bmcd 2.38.0.
+
+### Changed
+
+- **"Reset network" is now "Reset the switch chip"**, because that is what it
+  does -- `rtl_reset()` -- and it never touched the address. The confirmation
+  says what it costs: every port drops for a moment.
+
+### Fixed
+
+- **A countdown that could not count.** The daemon serialises a moment as
+  `{secs_since_epoch, nanos_since_epoch}`, and the switch card did
+  `new Date(...)` on it -- an Invalid Date, a countdown of NaN. One converter
+  in the API layer takes either form; both cards use it.
+
 ## [v3.33.0] — 2026-09-21
 
 ### Fixed
