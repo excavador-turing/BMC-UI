@@ -217,17 +217,21 @@ const translations = {
     discard: "odrzuć zmiany",
     tryItNote:
       "Wypróbuj ustawia adres na płycie i samo go cofa, chyba że potwierdzisz — z tej strony, otwartej ponownie pod nowym adresem.",
-    unchanged: "Tak działa teraz płyta: {{address}}. Zmień, aby zaproponować coś innego.",
+    unchanged:
+      "Tak działa teraz płyta: {{address}}. Zmień, aby zaproponować coś innego.",
     applyWarning:
       "To zmienia adres, pod którym docierasz do płyty. Ta strona przestanie tu odpowiadać. Otwórz ją pod nowym adresem i potwierdź w ciągu {{seconds}} sekund, inaczej płyta sama przywróci stary adres.",
     applied: "Zastosowano, jeszcze nie zachowano",
-    appliedNote: "Otwórz tę stronę pod nowym adresem i potwierdź, zanim minie czas, inaczej zmiana się cofnie.",
+    appliedNote:
+      "Otwórz tę stronę pod nowym adresem i potwierdź, zanim minie czas, inaczej zmiana się cofnie.",
     applyFailed: "Adres nie został zastosowany",
-    applyFailedRevert: "Ostatniej zmiany nie udało się zastosować; poprzedni adres przywrócono od razu.",
+    applyFailedRevert:
+      "Ostatniej zmiany nie udało się zastosować; poprzedni adres przywrócono od razu.",
     pendingTitle: "{{address}} czeka na potwierdzenie",
     pendingNoClock: "Czas biegnie.",
     countdown: "Zostało {{seconds}} sekund na potwierdzenie.",
-    tryingNow: "Próbujesz. Nic nie zostanie zachowane, dopóki nie potwierdzisz.",
+    tryingNow:
+      "Próbujesz. Nic nie zostanie zachowane, dopóki nie potwierdzisz.",
     confirm: "Zachowaj",
     confirmed: "Zachowano. Po restarcie płyta wraca do tego.",
     confirmFailed: "Adres nie został zachowany",
@@ -237,7 +241,8 @@ const translations = {
     wasReverted: "Zmiana z {{at}} została cofnięta, bo jej nie potwierdzono.",
     fileUnreadable:
       "Plik interfaces płyty został napisany ręcznie i nie dało się go odczytać; potwierdzona zmiana zastąpi go w całości.",
-    fileHandEdited: "Obecny adres statyczny wpisano ręcznie; potwierdzona zmiana zastąpi plik.",
+    fileHandEdited:
+      "Obecny adres statyczny wpisano ręcznie; potwierdzona zmiana zastąpi plik.",
   },
   switchConfig: {
     title: "Przełącznik na płycie",

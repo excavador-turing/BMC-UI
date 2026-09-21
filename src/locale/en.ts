@@ -286,13 +286,16 @@ const translations = {
     discard: "discard changes",
     tryItNote:
       "Try it puts the address on the board and takes it back by itself unless you confirm — from this page, reloaded at the new address.",
-    unchanged: "This is what the board is running: {{address}}. Change it to propose something else.",
+    unchanged:
+      "This is what the board is running: {{address}}. Change it to propose something else.",
     applyWarning:
       "This changes the address you are reaching the board at. This page will stop answering here. Open it at the new address and confirm within {{seconds}} seconds, or the board puts the old address back by itself.",
     applied: "Applied, and not yet kept",
-    appliedNote: "Open this page at the new address and confirm before the window runs out, or it goes back.",
+    appliedNote:
+      "Open this page at the new address and confirm before the window runs out, or it goes back.",
     applyFailed: "The address was not applied",
-    applyFailedRevert: "The last change could not be applied, and the previous address was put back at once.",
+    applyFailedRevert:
+      "The last change could not be applied, and the previous address was put back at once.",
     pendingTitle: "{{address}} is waiting to be confirmed",
     pendingNoClock: "The window is running.",
     countdown: "{{seconds}} seconds left to confirm.",
@@ -303,10 +306,12 @@ const translations = {
     revertNow: "Put the old one back now",
     confirmFromThere:
       "A confirmation counts only when it arrives at the new address — this page, reached there. From a shell on the board it proves nothing and is refused.",
-    wasReverted: "The change at {{at}} was put back because it was not confirmed.",
+    wasReverted:
+      "The change at {{at}} was put back because it was not confirmed.",
     fileUnreadable:
       "The board's interfaces file was written by hand and could not be read; a confirmed change replaces it whole.",
-    fileHandEdited: "The current static address was written by hand; a confirmed change replaces the file.",
+    fileHandEdited:
+      "The current static address was written by hand; a confirmed change replaces the file.",
   },
   switchConfig: {
     title: "The on-board switch",
