@@ -10,6 +10,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [v3.34.1] — 2026-09-21
+
+### Fixed
+
+- **The demo build was broken by a fixture that was not JSON.** The capture
+  script read the firmware version with a pattern that wanted a `v`, the
+  board it captured from reported `local`, and `captured.json` got an empty
+  field. v3.34.0 shipped it; the board bundle is unaffected, the demo could
+  not build. The script now takes the version as it is.
+
 ## [v3.34.0] — 2026-09-21
 
 ### Added
