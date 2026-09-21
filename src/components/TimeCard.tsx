@@ -22,8 +22,13 @@ export default function TimeCard() {
   const ntp = useNtpQuery();
   const save = useSetNtpMutation();
 
-  const [draft, setDraft] = useState("");
   const configured = (ntp.data?.servers ?? []).join(", ");
+  // Seeded from the query, not from "": when the answer is already in the
+  // cache at mount -- any second visit to the tab -- `seen` starts equal to
+  // `configured` and the sync below never fires, so a draft seeded empty
+  // stayed empty until a refresh cleared the cache. Reported from a 2.4
+  // board on 2026-09-21: "the Time box is blank; refresh loads it".
+  const [draft, setDraft] = useState(configured);
   // Adjusted during render, not in an effect: an effect would commit the
   // stale value first and the new one immediately after.
   const [seen, setSeen] = useState(configured);

@@ -10,6 +10,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **The Time and Hostname boxes are no longer blank on a second visit.** Both
+  cards seeded their text box from `""` and relied on a "value changed"
+  re-seed to fill it once the query answered. When the answer was already in
+  the cache at mount -- any return to the tab within the query's stale window
+  -- nothing had changed, so nothing fired, and the box stayed empty until a
+  refresh cleared the cache. Reported from a 2.4 board on 2026-09-21: "the
+  Time box is blank; refresh loads the server I saved". Reproduced in the demo
+  on the hostname card (first visit `turingpi`, away and back: blank) and gone
+  after seeding the draft from the query.
+
 ## [v3.33.0] — 2026-09-21
 
 ### Fixed
