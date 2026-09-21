@@ -217,27 +217,33 @@ const translations = {
     discard: "Änderungen verwerfen",
     tryItNote:
       "Ausprobieren setzt die Adresse auf dem Board und nimmt sie von selbst zurück, sofern Sie nicht bestätigen — von dieser Seite, neu geladen unter der neuen Adresse.",
-    unchanged: "Das läuft gerade auf dem Board: {{address}}. Ändern Sie es, um etwas anderes vorzuschlagen.",
+    unchanged:
+      "Das läuft gerade auf dem Board: {{address}}. Ändern Sie es, um etwas anderes vorzuschlagen.",
     applyWarning:
       "Das ändert die Adresse, unter der Sie das Board gerade erreichen. Diese Seite antwortet hier dann nicht mehr. Öffnen Sie sie unter der neuen Adresse und bestätigen Sie innerhalb von {{seconds}} Sekunden, sonst stellt das Board die alte Adresse von selbst wieder her.",
     applied: "Angewendet, noch nicht übernommen",
-    appliedNote: "Öffnen Sie diese Seite unter der neuen Adresse und bestätigen Sie, bevor das Zeitfenster abläuft, sonst geht es zurück.",
+    appliedNote:
+      "Öffnen Sie diese Seite unter der neuen Adresse und bestätigen Sie, bevor das Zeitfenster abläuft, sonst geht es zurück.",
     applyFailed: "Die Adresse wurde nicht angewendet",
-    applyFailedRevert: "Die letzte Änderung konnte nicht angewendet werden; die vorherige Adresse wurde sofort wiederhergestellt.",
+    applyFailedRevert:
+      "Die letzte Änderung konnte nicht angewendet werden; die vorherige Adresse wurde sofort wiederhergestellt.",
     pendingTitle: "{{address}} wartet auf Bestätigung",
     pendingNoClock: "Das Zeitfenster läuft.",
     countdown: "Noch {{seconds}} Sekunden zum Bestätigen.",
-    tryingNow: "Sie probieren es aus. Nichts wird übernommen, bis Sie bestätigen.",
+    tryingNow:
+      "Sie probieren es aus. Nichts wird übernommen, bis Sie bestätigen.",
     confirm: "Behalten",
     confirmed: "Übernommen. Ein Neustart kommt jetzt hierher zurück.",
     confirmFailed: "Die Adresse wurde nicht übernommen",
     revertNow: "Alte Adresse jetzt wiederherstellen",
     confirmFromThere:
       "Eine Bestätigung zählt nur, wenn sie unter der neuen Adresse ankommt — diese Seite, dort geöffnet. Von einer Shell auf dem Board beweist sie nichts und wird abgelehnt.",
-    wasReverted: "Die Änderung von {{at}} wurde zurückgenommen, weil sie nicht bestätigt wurde.",
+    wasReverted:
+      "Die Änderung von {{at}} wurde zurückgenommen, weil sie nicht bestätigt wurde.",
     fileUnreadable:
       "Die interfaces-Datei des Boards wurde von Hand geschrieben und konnte nicht gelesen werden; eine bestätigte Änderung ersetzt sie vollständig.",
-    fileHandEdited: "Die aktuelle statische Adresse wurde von Hand eingetragen; eine bestätigte Änderung ersetzt die Datei.",
+    fileHandEdited:
+      "Die aktuelle statische Adresse wurde von Hand eingetragen; eine bestätigte Änderung ersetzt die Datei.",
   },
   switchConfig: {
     title: "Der Onboard-Switch",

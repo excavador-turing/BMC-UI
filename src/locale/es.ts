@@ -217,13 +217,16 @@ const translations = {
     discard: "descartar cambios",
     tryItNote:
       "Probar pone la dirección en la placa y la retira por sí sola salvo que confirme — desde esta página, recargada en la nueva dirección.",
-    unchanged: "Esto es lo que ejecuta la placa: {{address}}. Cámbielo para proponer otra cosa.",
+    unchanged:
+      "Esto es lo que ejecuta la placa: {{address}}. Cámbielo para proponer otra cosa.",
     applyWarning:
       "Esto cambia la dirección por la que está llegando a la placa. Esta página dejará de responder aquí. Ábrala en la nueva dirección y confirme en {{seconds}} segundos, o la placa restaurará la dirección anterior por sí sola.",
     applied: "Aplicada, todavía sin conservar",
-    appliedNote: "Abra esta página en la nueva dirección y confirme antes de que acabe el plazo, o volverá atrás.",
+    appliedNote:
+      "Abra esta página en la nueva dirección y confirme antes de que acabe el plazo, o volverá atrás.",
     applyFailed: "La dirección no se aplicó",
-    applyFailedRevert: "El último cambio no pudo aplicarse y la dirección anterior se restauró de inmediato.",
+    applyFailedRevert:
+      "El último cambio no pudo aplicarse y la dirección anterior se restauró de inmediato.",
     pendingTitle: "{{address}} espera confirmación",
     pendingNoClock: "El plazo está corriendo.",
     countdown: "Quedan {{seconds}} segundos para confirmar.",
@@ -237,7 +240,8 @@ const translations = {
     wasReverted: "El cambio de las {{at}} se deshizo porque no se confirmó.",
     fileUnreadable:
       "El archivo interfaces de la placa se escribió a mano y no pudo leerse; un cambio confirmado lo reemplaza por completo.",
-    fileHandEdited: "La dirección estática actual se escribió a mano; un cambio confirmado reemplaza el archivo.",
+    fileHandEdited:
+      "La dirección estática actual se escribió a mano; un cambio confirmado reemplaza el archivo.",
   },
   switchConfig: {
     title: "El conmutador de la placa",

@@ -216,13 +216,16 @@ const translations = {
     discard: "wijzigingen verwerpen",
     tryItNote:
       "Uitproberen zet het adres op het board en neemt het vanzelf terug tenzij u bevestigt — vanaf deze pagina, herladen op het nieuwe adres.",
-    unchanged: "Dit draait het board nu: {{address}}. Wijzig het om iets anders voor te stellen.",
+    unchanged:
+      "Dit draait het board nu: {{address}}. Wijzig het om iets anders voor te stellen.",
     applyWarning:
       "Dit verandert het adres waarop u het board nu bereikt. Deze pagina stopt hier met antwoorden. Open haar op het nieuwe adres en bevestig binnen {{seconds}} seconden, anders zet het board het oude adres zelf terug.",
     applied: "Toegepast, nog niet bewaard",
-    appliedNote: "Open deze pagina op het nieuwe adres en bevestig voor de tijd om is, anders gaat het terug.",
+    appliedNote:
+      "Open deze pagina op het nieuwe adres en bevestig voor de tijd om is, anders gaat het terug.",
     applyFailed: "Het adres is niet toegepast",
-    applyFailedRevert: "De laatste wijziging kon niet worden toegepast; het vorige adres is direct teruggezet.",
+    applyFailedRevert:
+      "De laatste wijziging kon niet worden toegepast; het vorige adres is direct teruggezet.",
     pendingTitle: "{{address}} wacht op bevestiging",
     pendingNoClock: "De tijd loopt.",
     countdown: "Nog {{seconds}} seconden om te bevestigen.",
@@ -233,10 +236,12 @@ const translations = {
     revertNow: "Het oude nu terugzetten",
     confirmFromThere:
       "Een bevestiging telt alleen als ze op het nieuwe adres aankomt — deze pagina, daar geopend. Vanaf een shell op het board bewijst ze niets en wordt ze geweigerd.",
-    wasReverted: "De wijziging van {{at}} is teruggedraaid omdat ze niet is bevestigd.",
+    wasReverted:
+      "De wijziging van {{at}} is teruggedraaid omdat ze niet is bevestigd.",
     fileUnreadable:
       "Het interfaces-bestand van het board is met de hand geschreven en kon niet worden gelezen; een bevestigde wijziging vervangt het volledig.",
-    fileHandEdited: "Het huidige statische adres is met de hand ingesteld; een bevestigde wijziging vervangt het bestand.",
+    fileHandEdited:
+      "Het huidige statische adres is met de hand ingesteld; een bevestigde wijziging vervangt het bestand.",
   },
   switchConfig: {
     title: "De switch op het bord",
