@@ -10,6 +10,28 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [v3.35.0] — 2026-09-22
+
+### Added
+
+- **The demo can be *used*, not only read, on the one card whose subject is
+  time passing.** Every write in the demo is refused -- a captured board
+  cannot be changed -- and for the address card that made the feature
+  unshowable: apply, a window running, a confirmation that must arrive over
+  the new address, and the old address coming back by itself are a sequence,
+  and a fixture can only hold one frozen frame of it. The demo now answers
+  `validate`, `PUT`, `confirm` and `revert` from a state machine it keeps in
+  memory (`src/demo/address.ts`), so a reader can apply an address, watch the
+  countdown, keep it -- or say nothing and watch the board put the old one
+  back.
+
+  **The card is unchanged.** The interface still keeps no copy of the
+  daemon's rules: the new file is the demo's stand-in for the *board*, the
+  thing on the other side of the wire, and it exists only under
+  `VITE_DEMO=1`. Its refusals and warnings are `address_document.rs`'s own
+  words, so what the demo says is what a board would say. Nothing persists; a
+  reload starts again from the captured fixture.
+
 ## [v3.34.1] — 2026-09-21
 
 ### Fixed

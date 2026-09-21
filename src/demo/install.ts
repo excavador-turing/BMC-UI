@@ -24,6 +24,10 @@ import type {
 } from "axios";
 import axios from "axios";
 
+import type { AddressDocument, AddressState } from "@/lib/api/get";
+
+import { DemoAddress, verdictFor } from "./address";
+
 const fixtures = import.meta.glob("./fixtures/*.json", {
   eager: true,
   import: "default",
@@ -85,6 +89,30 @@ function reply(
 
 function legacyResult(result: unknown) {
   return { response: [{ result }] };
+}
+
+/**
+ * The one write the demo answers rather than refuses, and why: the address
+ * feature IS a sequence -- apply, a window, a confirmation that must arrive
+ * over the new address, a revert when it does not -- and a fixture can only
+ * show one frozen frame of it. `./address.ts` says what this is and, more
+ * importantly, what it is not.
+ */
+/** A request body, typed once. `JSON.parse` answers `any`, and exactly one
+ * place in this file is allowed to say what it is. */
+function sent<T>(config: InternalAxiosRequestConfig): T | null {
+  if (typeof config.data !== "string") return null;
+  return JSON.parse(config.data) as T;
+}
+
+let address: DemoAddress | null = null;
+
+function demoAddress(): DemoAddress | null {
+  if (address) return address;
+  const captured = fixture("address") as AddressState | undefined;
+  if (!captured) return null;
+  address = new DemoAddress(captured);
+  return address;
 }
 
 export const demoAdapter: AxiosAdapter = (config) => {
@@ -156,12 +184,69 @@ export const demoAdapter: AxiosAdapter = (config) => {
     "/bmc/network/address": "address",
   };
   if (method === "get") {
+    // The address is the one read that is not a constant: it carries the
+    // pending change and its deadline, and the card polls it to notice the
+    // board reverting on its own.
+    if (url.endsWith("/bmc/network/address")) {
+      const state = demoAddress();
+      if (state) return reply(config, 200, state.view());
+    }
     for (const [suffix, name] of Object.entries(reads)) {
       if (url.endsWith(suffix)) {
         const data = fixture(name);
         if (data !== undefined) return reply(config, 200, data);
       }
     }
+  } else if (url.endsWith("/bmc/network/address/validate")) {
+    // The judgement is the board's, and in the demo the board is us. The
+    // words are the daemon's own (see ./address.ts).
+    const document = sent<AddressDocument>(config);
+    if (!document) return reply(config, 400, { detail: "no document" });
+    return reply(config, 200, verdictFor(document));
+  } else if (method === "put" && url.endsWith("/bmc/network/address")) {
+    const state = demoAddress();
+    const body = sent<AddressDocument & { window_s?: number }>(config);
+    if (!state || !body) return reply(config, 400, { detail: "no document" });
+    const { window_s, ...document } = body;
+    const verdict = verdictFor(document);
+    if (verdict.refusal) {
+      return reply(
+        config,
+        400,
+        {
+          type: "about:blank",
+          title: "The board refused this address",
+          status: 400,
+          detail: verdict.refusal.reason,
+        },
+        "application/problem+json"
+      );
+    }
+    // 202, as the daemon answers: applied, and waiting to be proved right.
+    return reply(config, 202, state.apply(document, window_s ?? 30));
+  } else if (url.endsWith("/bmc/network/address/confirm")) {
+    const state = demoAddress();
+    const token = sent<{ token?: string }>(config)?.token;
+    if (!state || !token) return reply(config, 400, { detail: "no token" });
+    const result = state.confirm(token);
+    if ("error" in result) {
+      return reply(
+        config,
+        409,
+        {
+          type: "about:blank",
+          title: "Nothing to confirm",
+          status: 409,
+          detail: result.error,
+        },
+        "application/problem+json"
+      );
+    }
+    return reply(config, 200, result);
+  } else if (url.endsWith("/bmc/network/address/revert")) {
+    const state = demoAddress();
+    if (!state) return reply(config, 400, { detail: "no address" });
+    return reply(config, 200, state.revert());
   } else if (url.includes("/bmc/")) {
     // Every write on a path-style endpoint -- a switch document, a
     // certificate, a password, the client CA -- and the validate call, which
