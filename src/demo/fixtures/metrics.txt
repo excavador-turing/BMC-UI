@@ -12,7 +12,7 @@ bmcd_tls_certificate_info{key="ecdsa-p384",source="installed"} 1
 
 # HELP bmcd_temperature_celsius Temperature reported by a kernel thermal zone.
 # TYPE bmcd_temperature_celsius gauge
-bmcd_temperature_celsius{sensor="bmc-thermal"} 44.9
+bmcd_temperature_celsius{sensor="bmc-thermal"} 46.1
 
 # HELP bmcd_cooling_state Step a cooling device is currently at.
 # TYPE bmcd_cooling_state gauge
@@ -54,20 +54,20 @@ bmcd_switch_port_speed_bits_per_second{port="ge0",kind="uplink"} 1000000000
 
 # HELP bmcd_switch_port_rx_bytes_total Bytes received on a switch port.
 # TYPE bmcd_switch_port_rx_bytes_total counter
-bmcd_switch_port_rx_bytes_total{port="node1",kind="node"} 1404840965
-bmcd_switch_port_rx_bytes_total{port="node2",kind="node"} 1025661514
-bmcd_switch_port_rx_bytes_total{port="node3",kind="node"} 2065741995
-bmcd_switch_port_rx_bytes_total{port="node4",kind="node"} 1982407595
-bmcd_switch_port_rx_bytes_total{port="ge0",kind="uplink"} 5617028786
+bmcd_switch_port_rx_bytes_total{port="node1",kind="node"} 43459076
+bmcd_switch_port_rx_bytes_total{port="node2",kind="node"} 128258991
+bmcd_switch_port_rx_bytes_total{port="node3",kind="node"} 5213351
+bmcd_switch_port_rx_bytes_total{port="node4",kind="node"} 306926943
+bmcd_switch_port_rx_bytes_total{port="ge0",kind="uplink"} 843526436
 bmcd_switch_port_rx_bytes_total{port="ge1",kind="uplink"} 0
 
 # HELP bmcd_switch_port_tx_bytes_total Bytes transmitted on a switch port.
 # TYPE bmcd_switch_port_tx_bytes_total counter
-bmcd_switch_port_tx_bytes_total{port="node1",kind="node"} 421974129
-bmcd_switch_port_tx_bytes_total{port="node2",kind="node"} 2040107982
-bmcd_switch_port_tx_bytes_total{port="node3",kind="node"} 2176044690
-bmcd_switch_port_tx_bytes_total{port="node4",kind="node"} 3886326048
-bmcd_switch_port_tx_bytes_total{port="ge0",kind="uplink"} 3583419687
+bmcd_switch_port_tx_bytes_total{port="node1",kind="node"} 695667969
+bmcd_switch_port_tx_bytes_total{port="node2",kind="node"} 129364765
+bmcd_switch_port_tx_bytes_total{port="node3",kind="node"} 21056898
+bmcd_switch_port_tx_bytes_total{port="node4",kind="node"} 235633696
+bmcd_switch_port_tx_bytes_total{port="ge0",kind="uplink"} 261236928
 bmcd_switch_port_tx_bytes_total{port="ge1",kind="uplink"} 0
 
 # HELP bmcd_switch_port_rx_errors_total Receive errors on a switch port.
@@ -97,10 +97,10 @@ bmcd_node_power_state{node="node4"} 1
 
 # HELP bmcd_node_power_on_seconds Seconds since a compute module was powered on.
 # TYPE bmcd_node_power_on_seconds gauge
-bmcd_node_power_on_seconds{node="node1"} 806134
-bmcd_node_power_on_seconds{node="node2"} 712407
-bmcd_node_power_on_seconds{node="node3"} 806134
-bmcd_node_power_on_seconds{node="node4"} 806134
+bmcd_node_power_on_seconds{node="node1"} 879127
+bmcd_node_power_on_seconds{node="node2"} 785400
+bmcd_node_power_on_seconds{node="node3"} 879127
+bmcd_node_power_on_seconds{node="node4"} 879127
 
 # HELP bmcd_node_usb_boot_armed 1 when a module's USB-boot pin is asserted, which stops it booting from its own eMMC.
 # TYPE bmcd_node_usb_boot_armed gauge
@@ -115,19 +115,19 @@ bmcd_usb_config{node="node2",mode="device",route="alternative-port",bus_type="Us
 
 # HELP bmcd_uptime_seconds Seconds since the BMC booted.
 # TYPE bmcd_uptime_seconds gauge
-bmcd_uptime_seconds 5319.5
+bmcd_uptime_seconds 665.52
 
 # HELP bmcd_load1 1-minute load average of the BMC.
 # TYPE bmcd_load1 gauge
-bmcd_load1 1.25
+bmcd_load1 3.16
 
 # HELP bmcd_load5 5-minute load average of the BMC.
 # TYPE bmcd_load5 gauge
-bmcd_load5 0.79
+bmcd_load5 3.31
 
 # HELP bmcd_load15 15-minute load average of the BMC.
 # TYPE bmcd_load15 gauge
-bmcd_load15 0.39
+bmcd_load15 1.66
 
 # HELP bmcd_memory_total_bytes Total memory of the BMC.
 # TYPE bmcd_memory_total_bytes gauge
@@ -135,19 +135,19 @@ bmcd_memory_total_bytes 121839616
 
 # HELP bmcd_memory_free_bytes Free memory of the BMC.
 # TYPE bmcd_memory_free_bytes gauge
-bmcd_memory_free_bytes 46936064
+bmcd_memory_free_bytes 47144960
 
 # HELP bmcd_memory_available_bytes Memory available to a new allocation on the BMC, reclaim included.
 # TYPE bmcd_memory_available_bytes gauge
-bmcd_memory_available_bytes 89686016
+bmcd_memory_available_bytes 89772032
 
 # HELP bmcd_process_resident_bytes This daemon's own resident set. Board memory says the board is being consumed; only this says by whom.
 # TYPE bmcd_process_resident_bytes gauge
-bmcd_process_resident_bytes 21385216
+bmcd_process_resident_bytes 20541440
 
 # HELP bmcd_process_threads Threads this daemon has. Read beside the resident set: a heap leak grows memory with this flat, while a leaked task or an unreaped blocking thread grows both, because every thread carries a stack.
 # TYPE bmcd_process_threads gauge
-bmcd_process_threads 16
+bmcd_process_threads 11
 
 # HELP bmcd_nand_eraseblocks Eraseblocks of the BMC's NAND, by what UBI counts them as.
 # TYPE bmcd_nand_eraseblocks gauge
@@ -179,30 +179,30 @@ bmcd_clock_synchronised 1
 
 # HELP bmcd_clock_stratum Stratum of the time source the BMC is synchronised to.
 # TYPE bmcd_clock_stratum gauge
-bmcd_clock_stratum 2
+bmcd_clock_stratum 4
 
 # HELP bmcd_clock_offset_seconds The BMC's system clock minus true time; negative when the board is behind.
 # TYPE bmcd_clock_offset_seconds gauge
-bmcd_clock_offset_seconds 0.00003042
+bmcd_clock_offset_seconds -0.00002176
 
 # HELP bmcd_firmware_promotion_total Boots that ran the firmware health gate, by what the gate decided. `promoted` is derived as attempts minus rollbacks, because the gate has no single line meaning `kept`; a board cut off mid-gate therefore counts as promoted.
 # TYPE bmcd_firmware_promotion_total counter
-bmcd_firmware_promotion_total{result="promoted"} 17
+bmcd_firmware_promotion_total{result="promoted"} 19
 bmcd_firmware_promotion_total{result="rolled_back"} 0
 
 # HELP bmcd_firmware_last_promotion_timestamp_seconds When the health gate last reached a verdict, in Unix seconds. Taken from the board's own clock at that moment, which on a BMC that had just come up may be behind true time; absent when the recorded timestamp cannot be read as UTC.
 # TYPE bmcd_firmware_last_promotion_timestamp_seconds gauge
-bmcd_firmware_last_promotion_timestamp_seconds 1789941514
+bmcd_firmware_last_promotion_timestamp_seconds 1790019160
 
 # HELP bmcd_firmware_slot_info A firmware slot on the BMC's NAND. The rollback slot is not mounted, so it has no version.
 # TYPE bmcd_firmware_slot_info gauge
-bmcd_firmware_slot_info{slot="running",volume="rootfs",version="v2.33.0"} 1
-bmcd_firmware_slot_info{slot="rollback",volume="rootfs_prev",version="local"} 1
+bmcd_firmware_slot_info{slot="running",volume="rootfs",version="local"} 1
+bmcd_firmware_slot_info{slot="rollback",volume="rootfs_prev",version="v2.34.0"} 1
 
 # HELP bmcd_firmware_slot_size_bytes Size of the firmware in a slot.
 # TYPE bmcd_firmware_slot_size_bytes gauge
-bmcd_firmware_slot_size_bytes{slot="running",volume="rootfs"} 38432768
-bmcd_firmware_slot_size_bytes{slot="rollback",volume="rootfs_prev"} 40173568
+bmcd_firmware_slot_size_bytes{slot="running",volume="rootfs"} 38535168
+bmcd_firmware_slot_size_bytes{slot="rollback",volume="rootfs_prev"} 38432768
 
 # HELP bmcd_firmware_update_staged Whether a firmware update is staged for the next boot. Absent when the U-Boot environment cannot be read.
 # TYPE bmcd_firmware_update_staged gauge

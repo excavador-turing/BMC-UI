@@ -1,0 +1,1 @@
+{"running":{"mode":"dhcp"},"configured":{"mode":"dhcp"},"file":"bmcd","live":{"mode":"dhcp","address":"203.0.113.20/24","gateway":"203.0.113.1","dns":["203.0.113.1"],"search":"example"},"pending":null,"last_revert":null,"default_window_s":30}
