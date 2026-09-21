@@ -10,6 +10,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [v3.34.0] — 2026-09-21
+
 ### Added
 
 - **The BMC's address, from the Network tab.** An *Address* card beside
