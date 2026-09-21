@@ -26,10 +26,13 @@ export default function HostnameCard() {
   const hostname = useHostnameQuery();
   const rename = useSetHostnameMutation();
 
-  const [draft, setDraft] = useState("");
+  const current = hostname.data?.hostname ?? "";
+  // Seeded from the query, not from "": with the answer already cached at
+  // mount, `seen` below starts equal to `current` and never re-seeds an
+  // empty draft. Same slip as the time card's.
+  const [draft, setDraft] = useState(current);
   const [confirming, setConfirming] = useState(false);
 
-  const current = hostname.data?.hostname ?? "";
   // React's own pattern for resetting local state when the value behind it
   // changes: adjust during render rather than in an effect, which would
   // commit once with the stale value and then again with the new one.
