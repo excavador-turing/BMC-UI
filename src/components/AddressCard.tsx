@@ -66,6 +66,11 @@ function documentFrom(draft: Draft): AddressDocument | null {
   };
 }
 
+/** What was typed, or -- if nothing was -- what the bridge has. */
+function typedOr(typed: string, live: string | null): string {
+  return typed !== "" ? typed : (live ?? "");
+}
+
 function useDebounced<T>(value: T, ms: number): T {
   const [settled, setSettled] = useState(value);
   useEffect(() => {
@@ -315,10 +320,10 @@ export default function AddressCard() {
                       // Start a static draft from what the bridge has now:
                       // the address a person wants to fix is usually the one
                       // the lease gave them.
-                      cidr: draft.cidr || live.address || "",
-                      gateway: draft.gateway || live.gateway || "",
-                      dns: draft.dns || live.dns.join(", "),
-                      search: draft.search || live.search || "",
+                      cidr: typedOr(draft.cidr, live.address),
+                      gateway: typedOr(draft.gateway, live.gateway),
+                      dns: typedOr(draft.dns, live.dns.join(", ")),
+                      search: typedOr(draft.search, live.search),
                     }
               )
             }
