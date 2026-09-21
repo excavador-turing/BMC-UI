@@ -1,5 +1,5 @@
 {
   "captured_at": "2026-09-21T19:39:06Z",
-  "firmware": ,
+  "firmware": "local build for v2.35.0 (bmcd 2.38.0, BMC-UI 3.34.0)",
   "note": "Captured from a Turing Pi 2 running this firmware. Addresses, MAC, hostname and serial are replaced with documentation-range values; every measurement is the board's own."
 }

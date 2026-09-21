@@ -148,7 +148,7 @@ printf '  %-20s %s bytes\n' metrics "$(wc -c < "$out/metrics.txt")"
 cat > "$out/captured.json" <<EOF
 {
   "captured_at": "$captured_at",
-  "firmware": $(sed -n 's/.*"version":"\(v[^"]*\)".*/"\1"/p' "$out/about.json" | head -1),
+  "firmware": $(sed -n 's/.*"version":"\([^"]*\)".*/"\1"/p' "$out/about.json" | head -1 | grep . || echo '"unknown"'),
   "note": "Captured from a Turing Pi 2 running this firmware. Addresses, MAC, hostname and serial are replaced with documentation-range values; every measurement is the board's own."
 }
 EOF
