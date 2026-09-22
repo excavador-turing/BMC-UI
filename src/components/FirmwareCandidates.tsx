@@ -84,16 +84,28 @@ function releaseNotesUrl(
   return `https://github.com/${source.location}/releases/tag/${encodeURIComponent(candidate.version)}`;
 }
 
+/**
+ * How long an install takes, for the status line below, measured rather than
+ * guessed: `firmware_install` on board B, v2.37.0 from GitHub into the spare
+ * slot -- download (38.5 MB at 7 MB/s), sum, write, arm -- 26 s wall on
+ * 2026-09-23. A hint, not a deadline: a slow link takes longer and the line
+ * says so once it passes.
+ */
+export const EXPECTED_INSTALL_SECONDS = 26;
+
 function CandidateRow({
   source,
   candidate,
   onInstall,
   busy,
+  installing,
 }: {
   source: FirmwareSourceCatalog;
   candidate: FirmwareCandidate;
   onInstall: (c: FirmwareCandidate) => void;
   busy: boolean;
+  /** This row's candidate is the one being installed right now. */
+  installing: boolean;
 }) {
   const { t } = useTranslation();
   const notes = releaseNotesUrl(source, candidate);
@@ -152,7 +164,9 @@ function CandidateRow({
           disabled={busy || candidate.relation === "current"}
           onClick={() => onInstall(candidate)}
         >
-          {t("firmwareUpgrade.install")}
+          {installing
+            ? t("firmwareUpgrade.installing")
+            : t("firmwareUpgrade.install")}
         </Button>
       </div>
     </div>
@@ -182,6 +196,26 @@ export default function FirmwareCandidates() {
   const catalog = useFirmwareAvailableQuery();
   const install = useInstallFirmwareMutation();
   const [checking, setChecking] = useState(false);
+
+  /**
+   * The daemon does the whole install inside the one request -- download,
+   * sum, write to the spare slot, arm the next boot -- and answers when it is
+   * done. Until this counter existed the page showed a greyed button for the
+   * whole of that, and a reader wondered whether to refresh (Discord,
+   * 2026-09-22). The reboot banner already says "about N s, now at M"; this
+   * is the same shape for the same reason.
+   */
+  // Derived from the mutation's own submittedAt rather than counted, so the
+  // effect sets no state itself: the interval only moves the clock.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!install.isPending) return;
+    const tick = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(tick);
+  }, [install.isPending]);
+  const installElapsed = install.isPending
+    ? Math.max(0, Math.floor((now - install.submittedAt) / 1000))
+    : 0;
 
   /**
    * The daemon answers a `refresh` at once and re-polls the sources behind
@@ -326,6 +360,11 @@ export default function FirmwareCandidates() {
                 source={source}
                 candidate={c}
                 busy={install.isPending}
+                installing={
+                  install.isPending &&
+                  install.variables?.source === source.id &&
+                  install.variables?.version === c.version
+                }
                 onInstall={(candidate) => setConfirming({ source, candidate })}
               />
             ))}
@@ -391,6 +430,24 @@ export default function FirmwareCandidates() {
         }
       />
 
+      {install.isPending && (
+        <p
+          role="status"
+          aria-live="polite"
+          className="text-sm text-amber-700 dark:text-amber-400"
+        >
+          {installElapsed > EXPECTED_INSTALL_SECONDS
+            ? t("firmwareUpgrade.installingOverdue", {
+                version: install.variables?.version,
+                elapsed: installElapsed,
+              })
+            : t("firmwareUpgrade.installingNow", {
+                version: install.variables?.version,
+                expected: EXPECTED_INSTALL_SECONDS,
+                elapsed: installElapsed,
+              })}
+        </p>
+      )}
       {install.isError && (
         <p className="text-sm text-red-600 dark:text-red-400">
           {t("firmwareUpgrade.installFailed")}
