@@ -10,6 +10,23 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [v3.37.0] — 2026-09-23
+
+### Changed
+
+- **Installing a firmware image now says what it is doing, and for how
+  long.** The daemon does the whole install inside one request — download
+  the image, check its sum, write it to the spare slot, arm the next boot —
+  and answers only when it is done. Until now the page showed a greyed
+  Install button for the whole of that and nothing else, and a reader on
+  Discord wondered whether to refresh (he did not need to; nothing is armed
+  until the board says staged, and now the page says that too). The
+  candidate's button reads *Installing…* and a status line beneath the list
+  gives "about 26 s, now at N" — the same shape as the reboot banner, and the
+  number is measured the same way: a real install on board B, v2.37.0 from
+  GitHub, 26 s wall on 2026-09-23. Past it the line says the board is still
+  working and that a slow link takes longer, rather than looking stuck.
+
 ## [v3.36.0] — 2026-09-22
 
 ### Fixed
