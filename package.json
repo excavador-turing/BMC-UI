@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "screens": "VITE_DEMO=1 vite build && python3 scripts/screens.py",
+    "type-test": "VITE_DEMO=1 vite build && python3 scripts/type-test.py",
     "preview": "vite preview",
     "test": "echo \"Error: no test specified\" && exit 0",
     "api:refresh": "sh scripts/refresh-api-types.sh"

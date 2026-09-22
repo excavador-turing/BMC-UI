@@ -8,321 +8,319 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from '@tanstack/react-router'
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as TabLayoutRouteImport } from "./routes/_tabLayout";
-import { Route as LoginRouteImport } from "./routes/login";
-import { Route as TabLayoutConsoleRouteImport } from "./routes/_tabLayout/console";
-import { Route as TabLayoutFlashNodeRouteImport } from "./routes/_tabLayout/flash-node";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as TabLayoutRouteImport } from './routes/_tabLayout'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as TabLayoutConsoleRouteImport } from './routes/_tabLayout/console'
+import { Route as TabLayoutFlashNodeRouteImport } from './routes/_tabLayout/flash-node'
 
-const IndexLazyRouteImport = createFileRoute("/")();
-const TabLayoutAboutLazyRouteImport = createFileRoute("/_tabLayout/about")();
+const IndexLazyRouteImport = createFileRoute('/')()
+const TabLayoutAboutLazyRouteImport = createFileRoute('/_tabLayout/about')()
 const TabLayoutFirmwareUpgradeLazyRouteImport = createFileRoute(
-  "/_tabLayout/firmware-upgrade"
-)();
-const TabLayoutInfoLazyRouteImport = createFileRoute("/_tabLayout/info")();
-const TabLayoutNetworkLazyRouteImport = createFileRoute(
-  "/_tabLayout/network"
-)();
-const TabLayoutNodesLazyRouteImport = createFileRoute("/_tabLayout/nodes")();
+  '/_tabLayout/firmware-upgrade',
+)()
+const TabLayoutInfoLazyRouteImport = createFileRoute('/_tabLayout/info')()
+const TabLayoutNetworkLazyRouteImport = createFileRoute('/_tabLayout/network')()
+const TabLayoutNodesLazyRouteImport = createFileRoute('/_tabLayout/nodes')()
 const TabLayoutSecurityLazyRouteImport = createFileRoute(
-  "/_tabLayout/security"
-)();
+  '/_tabLayout/security',
+)()
 const TabLayoutSettingsLazyRouteImport = createFileRoute(
-  "/_tabLayout/settings"
-)();
-const TabLayoutUsbLazyRouteImport = createFileRoute("/_tabLayout/usb")();
+  '/_tabLayout/settings',
+)()
+const TabLayoutUsbLazyRouteImport = createFileRoute('/_tabLayout/usb')()
 
 const IndexLazyRoute = IndexLazyRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import("./routes/index.lazy").then((d) => d.Route));
+} as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
 const TabLayoutRoute = TabLayoutRouteImport.update({
-  id: "/_tabLayout",
+  id: '/_tabLayout',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const LoginRoute = LoginRouteImport.update({
-  id: "/login",
-  path: "/login",
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const TabLayoutAboutLazyRoute = TabLayoutAboutLazyRouteImport.update({
-  id: "/about",
-  path: "/about",
+  id: '/about',
+  path: '/about',
   getParentRoute: () => TabLayoutRoute,
 } as any).lazy(() =>
-  import("./routes/_tabLayout/about.lazy").then((d) => d.Route)
-);
+  import('./routes/_tabLayout/about.lazy').then((d) => d.Route),
+)
 const TabLayoutConsoleRoute = TabLayoutConsoleRouteImport.update({
-  id: "/console",
-  path: "/console",
+  id: '/console',
+  path: '/console',
   getParentRoute: () => TabLayoutRoute,
 } as any).lazy(() =>
-  import("./routes/_tabLayout/console.lazy").then((d) => d.Route)
-);
+  import('./routes/_tabLayout/console.lazy').then((d) => d.Route),
+)
 const TabLayoutFirmwareUpgradeLazyRoute =
   TabLayoutFirmwareUpgradeLazyRouteImport.update({
-    id: "/firmware-upgrade",
-    path: "/firmware-upgrade",
+    id: '/firmware-upgrade',
+    path: '/firmware-upgrade',
     getParentRoute: () => TabLayoutRoute,
   } as any).lazy(() =>
-    import("./routes/_tabLayout/firmware-upgrade.lazy").then((d) => d.Route)
-  );
+    import('./routes/_tabLayout/firmware-upgrade.lazy').then((d) => d.Route),
+  )
 const TabLayoutFlashNodeRoute = TabLayoutFlashNodeRouteImport.update({
-  id: "/flash-node",
-  path: "/flash-node",
+  id: '/flash-node',
+  path: '/flash-node',
   getParentRoute: () => TabLayoutRoute,
 } as any).lazy(() =>
-  import("./routes/_tabLayout/flash-node.lazy").then((d) => d.Route)
-);
+  import('./routes/_tabLayout/flash-node.lazy').then((d) => d.Route),
+)
 const TabLayoutInfoLazyRoute = TabLayoutInfoLazyRouteImport.update({
-  id: "/info",
-  path: "/info",
+  id: '/info',
+  path: '/info',
   getParentRoute: () => TabLayoutRoute,
 } as any).lazy(() =>
-  import("./routes/_tabLayout/info.lazy").then((d) => d.Route)
-);
+  import('./routes/_tabLayout/info.lazy').then((d) => d.Route),
+)
 const TabLayoutNetworkLazyRoute = TabLayoutNetworkLazyRouteImport.update({
-  id: "/network",
-  path: "/network",
+  id: '/network',
+  path: '/network',
   getParentRoute: () => TabLayoutRoute,
 } as any).lazy(() =>
-  import("./routes/_tabLayout/network.lazy").then((d) => d.Route)
-);
+  import('./routes/_tabLayout/network.lazy').then((d) => d.Route),
+)
 const TabLayoutNodesLazyRoute = TabLayoutNodesLazyRouteImport.update({
-  id: "/nodes",
-  path: "/nodes",
+  id: '/nodes',
+  path: '/nodes',
   getParentRoute: () => TabLayoutRoute,
 } as any).lazy(() =>
-  import("./routes/_tabLayout/nodes.lazy").then((d) => d.Route)
-);
+  import('./routes/_tabLayout/nodes.lazy').then((d) => d.Route),
+)
 const TabLayoutSecurityLazyRoute = TabLayoutSecurityLazyRouteImport.update({
-  id: "/security",
-  path: "/security",
+  id: '/security',
+  path: '/security',
   getParentRoute: () => TabLayoutRoute,
 } as any).lazy(() =>
-  import("./routes/_tabLayout/security.lazy").then((d) => d.Route)
-);
+  import('./routes/_tabLayout/security.lazy').then((d) => d.Route),
+)
 const TabLayoutSettingsLazyRoute = TabLayoutSettingsLazyRouteImport.update({
-  id: "/settings",
-  path: "/settings",
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => TabLayoutRoute,
 } as any).lazy(() =>
-  import("./routes/_tabLayout/settings.lazy").then((d) => d.Route)
-);
+  import('./routes/_tabLayout/settings.lazy').then((d) => d.Route),
+)
 const TabLayoutUsbLazyRoute = TabLayoutUsbLazyRouteImport.update({
-  id: "/usb",
-  path: "/usb",
+  id: '/usb',
+  path: '/usb',
   getParentRoute: () => TabLayoutRoute,
 } as any).lazy(() =>
-  import("./routes/_tabLayout/usb.lazy").then((d) => d.Route)
-);
+  import('./routes/_tabLayout/usb.lazy').then((d) => d.Route),
+)
 
 export interface FileRoutesByFullPath {
-  "/": typeof IndexLazyRoute;
-  "/login": typeof LoginRoute;
-  "/console": typeof TabLayoutConsoleRoute;
-  "/flash-node": typeof TabLayoutFlashNodeRoute;
-  "/about": typeof TabLayoutAboutLazyRoute;
-  "/firmware-upgrade": typeof TabLayoutFirmwareUpgradeLazyRoute;
-  "/info": typeof TabLayoutInfoLazyRoute;
-  "/network": typeof TabLayoutNetworkLazyRoute;
-  "/nodes": typeof TabLayoutNodesLazyRoute;
-  "/security": typeof TabLayoutSecurityLazyRoute;
-  "/settings": typeof TabLayoutSettingsLazyRoute;
-  "/usb": typeof TabLayoutUsbLazyRoute;
+  '/': typeof IndexLazyRoute
+  '/login': typeof LoginRoute
+  '/console': typeof TabLayoutConsoleRoute
+  '/flash-node': typeof TabLayoutFlashNodeRoute
+  '/about': typeof TabLayoutAboutLazyRoute
+  '/firmware-upgrade': typeof TabLayoutFirmwareUpgradeLazyRoute
+  '/info': typeof TabLayoutInfoLazyRoute
+  '/network': typeof TabLayoutNetworkLazyRoute
+  '/nodes': typeof TabLayoutNodesLazyRoute
+  '/security': typeof TabLayoutSecurityLazyRoute
+  '/settings': typeof TabLayoutSettingsLazyRoute
+  '/usb': typeof TabLayoutUsbLazyRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof IndexLazyRoute;
-  "/login": typeof LoginRoute;
-  "/console": typeof TabLayoutConsoleRoute;
-  "/flash-node": typeof TabLayoutFlashNodeRoute;
-  "/about": typeof TabLayoutAboutLazyRoute;
-  "/firmware-upgrade": typeof TabLayoutFirmwareUpgradeLazyRoute;
-  "/info": typeof TabLayoutInfoLazyRoute;
-  "/network": typeof TabLayoutNetworkLazyRoute;
-  "/nodes": typeof TabLayoutNodesLazyRoute;
-  "/security": typeof TabLayoutSecurityLazyRoute;
-  "/settings": typeof TabLayoutSettingsLazyRoute;
-  "/usb": typeof TabLayoutUsbLazyRoute;
+  '/': typeof IndexLazyRoute
+  '/login': typeof LoginRoute
+  '/console': typeof TabLayoutConsoleRoute
+  '/flash-node': typeof TabLayoutFlashNodeRoute
+  '/about': typeof TabLayoutAboutLazyRoute
+  '/firmware-upgrade': typeof TabLayoutFirmwareUpgradeLazyRoute
+  '/info': typeof TabLayoutInfoLazyRoute
+  '/network': typeof TabLayoutNetworkLazyRoute
+  '/nodes': typeof TabLayoutNodesLazyRoute
+  '/security': typeof TabLayoutSecurityLazyRoute
+  '/settings': typeof TabLayoutSettingsLazyRoute
+  '/usb': typeof TabLayoutUsbLazyRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  "/": typeof IndexLazyRoute;
-  "/_tabLayout": typeof TabLayoutRouteWithChildren;
-  "/login": typeof LoginRoute;
-  "/_tabLayout/console": typeof TabLayoutConsoleRoute;
-  "/_tabLayout/flash-node": typeof TabLayoutFlashNodeRoute;
-  "/_tabLayout/about": typeof TabLayoutAboutLazyRoute;
-  "/_tabLayout/firmware-upgrade": typeof TabLayoutFirmwareUpgradeLazyRoute;
-  "/_tabLayout/info": typeof TabLayoutInfoLazyRoute;
-  "/_tabLayout/network": typeof TabLayoutNetworkLazyRoute;
-  "/_tabLayout/nodes": typeof TabLayoutNodesLazyRoute;
-  "/_tabLayout/security": typeof TabLayoutSecurityLazyRoute;
-  "/_tabLayout/settings": typeof TabLayoutSettingsLazyRoute;
-  "/_tabLayout/usb": typeof TabLayoutUsbLazyRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexLazyRoute
+  '/_tabLayout': typeof TabLayoutRouteWithChildren
+  '/login': typeof LoginRoute
+  '/_tabLayout/console': typeof TabLayoutConsoleRoute
+  '/_tabLayout/flash-node': typeof TabLayoutFlashNodeRoute
+  '/_tabLayout/about': typeof TabLayoutAboutLazyRoute
+  '/_tabLayout/firmware-upgrade': typeof TabLayoutFirmwareUpgradeLazyRoute
+  '/_tabLayout/info': typeof TabLayoutInfoLazyRoute
+  '/_tabLayout/network': typeof TabLayoutNetworkLazyRoute
+  '/_tabLayout/nodes': typeof TabLayoutNodesLazyRoute
+  '/_tabLayout/security': typeof TabLayoutSecurityLazyRoute
+  '/_tabLayout/settings': typeof TabLayoutSettingsLazyRoute
+  '/_tabLayout/usb': typeof TabLayoutUsbLazyRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/"
-    | "/login"
-    | "/console"
-    | "/flash-node"
-    | "/about"
-    | "/firmware-upgrade"
-    | "/info"
-    | "/network"
-    | "/nodes"
-    | "/security"
-    | "/settings"
-    | "/usb";
-  fileRoutesByTo: FileRoutesByTo;
+    | '/'
+    | '/login'
+    | '/console'
+    | '/flash-node'
+    | '/about'
+    | '/firmware-upgrade'
+    | '/info'
+    | '/network'
+    | '/nodes'
+    | '/security'
+    | '/settings'
+    | '/usb'
+  fileRoutesByTo: FileRoutesByTo
   to:
-    | "/"
-    | "/login"
-    | "/console"
-    | "/flash-node"
-    | "/about"
-    | "/firmware-upgrade"
-    | "/info"
-    | "/network"
-    | "/nodes"
-    | "/security"
-    | "/settings"
-    | "/usb";
+    | '/'
+    | '/login'
+    | '/console'
+    | '/flash-node'
+    | '/about'
+    | '/firmware-upgrade'
+    | '/info'
+    | '/network'
+    | '/nodes'
+    | '/security'
+    | '/settings'
+    | '/usb'
   id:
-    | "__root__"
-    | "/"
-    | "/_tabLayout"
-    | "/login"
-    | "/_tabLayout/console"
-    | "/_tabLayout/flash-node"
-    | "/_tabLayout/about"
-    | "/_tabLayout/firmware-upgrade"
-    | "/_tabLayout/info"
-    | "/_tabLayout/network"
-    | "/_tabLayout/nodes"
-    | "/_tabLayout/security"
-    | "/_tabLayout/settings"
-    | "/_tabLayout/usb";
-  fileRoutesById: FileRoutesById;
+    | '__root__'
+    | '/'
+    | '/_tabLayout'
+    | '/login'
+    | '/_tabLayout/console'
+    | '/_tabLayout/flash-node'
+    | '/_tabLayout/about'
+    | '/_tabLayout/firmware-upgrade'
+    | '/_tabLayout/info'
+    | '/_tabLayout/network'
+    | '/_tabLayout/nodes'
+    | '/_tabLayout/security'
+    | '/_tabLayout/settings'
+    | '/_tabLayout/usb'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexLazyRoute: typeof IndexLazyRoute;
-  TabLayoutRoute: typeof TabLayoutRouteWithChildren;
-  LoginRoute: typeof LoginRoute;
+  IndexLazyRoute: typeof IndexLazyRoute
+  TabLayoutRoute: typeof TabLayoutRouteWithChildren
+  LoginRoute: typeof LoginRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/": {
-      id: "/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof IndexLazyRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/_tabLayout": {
-      id: "/_tabLayout";
-      path: "";
-      fullPath: "/";
-      preLoaderRoute: typeof TabLayoutRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/login": {
-      id: "/login";
-      path: "/login";
-      fullPath: "/login";
-      preLoaderRoute: typeof LoginRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/_tabLayout/about": {
-      id: "/_tabLayout/about";
-      path: "/about";
-      fullPath: "/about";
-      preLoaderRoute: typeof TabLayoutAboutLazyRouteImport;
-      parentRoute: typeof TabLayoutRoute;
-    };
-    "/_tabLayout/console": {
-      id: "/_tabLayout/console";
-      path: "/console";
-      fullPath: "/console";
-      preLoaderRoute: typeof TabLayoutConsoleRouteImport;
-      parentRoute: typeof TabLayoutRoute;
-    };
-    "/_tabLayout/firmware-upgrade": {
-      id: "/_tabLayout/firmware-upgrade";
-      path: "/firmware-upgrade";
-      fullPath: "/firmware-upgrade";
-      preLoaderRoute: typeof TabLayoutFirmwareUpgradeLazyRouteImport;
-      parentRoute: typeof TabLayoutRoute;
-    };
-    "/_tabLayout/flash-node": {
-      id: "/_tabLayout/flash-node";
-      path: "/flash-node";
-      fullPath: "/flash-node";
-      preLoaderRoute: typeof TabLayoutFlashNodeRouteImport;
-      parentRoute: typeof TabLayoutRoute;
-    };
-    "/_tabLayout/info": {
-      id: "/_tabLayout/info";
-      path: "/info";
-      fullPath: "/info";
-      preLoaderRoute: typeof TabLayoutInfoLazyRouteImport;
-      parentRoute: typeof TabLayoutRoute;
-    };
-    "/_tabLayout/network": {
-      id: "/_tabLayout/network";
-      path: "/network";
-      fullPath: "/network";
-      preLoaderRoute: typeof TabLayoutNetworkLazyRouteImport;
-      parentRoute: typeof TabLayoutRoute;
-    };
-    "/_tabLayout/nodes": {
-      id: "/_tabLayout/nodes";
-      path: "/nodes";
-      fullPath: "/nodes";
-      preLoaderRoute: typeof TabLayoutNodesLazyRouteImport;
-      parentRoute: typeof TabLayoutRoute;
-    };
-    "/_tabLayout/security": {
-      id: "/_tabLayout/security";
-      path: "/security";
-      fullPath: "/security";
-      preLoaderRoute: typeof TabLayoutSecurityLazyRouteImport;
-      parentRoute: typeof TabLayoutRoute;
-    };
-    "/_tabLayout/settings": {
-      id: "/_tabLayout/settings";
-      path: "/settings";
-      fullPath: "/settings";
-      preLoaderRoute: typeof TabLayoutSettingsLazyRouteImport;
-      parentRoute: typeof TabLayoutRoute;
-    };
-    "/_tabLayout/usb": {
-      id: "/_tabLayout/usb";
-      path: "/usb";
-      fullPath: "/usb";
-      preLoaderRoute: typeof TabLayoutUsbLazyRouteImport;
-      parentRoute: typeof TabLayoutRoute;
-    };
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_tabLayout': {
+      id: '/_tabLayout'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof TabLayoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_tabLayout/about': {
+      id: '/_tabLayout/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof TabLayoutAboutLazyRouteImport
+      parentRoute: typeof TabLayoutRoute
+    }
+    '/_tabLayout/console': {
+      id: '/_tabLayout/console'
+      path: '/console'
+      fullPath: '/console'
+      preLoaderRoute: typeof TabLayoutConsoleRouteImport
+      parentRoute: typeof TabLayoutRoute
+    }
+    '/_tabLayout/firmware-upgrade': {
+      id: '/_tabLayout/firmware-upgrade'
+      path: '/firmware-upgrade'
+      fullPath: '/firmware-upgrade'
+      preLoaderRoute: typeof TabLayoutFirmwareUpgradeLazyRouteImport
+      parentRoute: typeof TabLayoutRoute
+    }
+    '/_tabLayout/flash-node': {
+      id: '/_tabLayout/flash-node'
+      path: '/flash-node'
+      fullPath: '/flash-node'
+      preLoaderRoute: typeof TabLayoutFlashNodeRouteImport
+      parentRoute: typeof TabLayoutRoute
+    }
+    '/_tabLayout/info': {
+      id: '/_tabLayout/info'
+      path: '/info'
+      fullPath: '/info'
+      preLoaderRoute: typeof TabLayoutInfoLazyRouteImport
+      parentRoute: typeof TabLayoutRoute
+    }
+    '/_tabLayout/network': {
+      id: '/_tabLayout/network'
+      path: '/network'
+      fullPath: '/network'
+      preLoaderRoute: typeof TabLayoutNetworkLazyRouteImport
+      parentRoute: typeof TabLayoutRoute
+    }
+    '/_tabLayout/nodes': {
+      id: '/_tabLayout/nodes'
+      path: '/nodes'
+      fullPath: '/nodes'
+      preLoaderRoute: typeof TabLayoutNodesLazyRouteImport
+      parentRoute: typeof TabLayoutRoute
+    }
+    '/_tabLayout/security': {
+      id: '/_tabLayout/security'
+      path: '/security'
+      fullPath: '/security'
+      preLoaderRoute: typeof TabLayoutSecurityLazyRouteImport
+      parentRoute: typeof TabLayoutRoute
+    }
+    '/_tabLayout/settings': {
+      id: '/_tabLayout/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof TabLayoutSettingsLazyRouteImport
+      parentRoute: typeof TabLayoutRoute
+    }
+    '/_tabLayout/usb': {
+      id: '/_tabLayout/usb'
+      path: '/usb'
+      fullPath: '/usb'
+      preLoaderRoute: typeof TabLayoutUsbLazyRouteImport
+      parentRoute: typeof TabLayoutRoute
+    }
   }
 }
 
 interface TabLayoutRouteChildren {
-  TabLayoutConsoleRoute: typeof TabLayoutConsoleRoute;
-  TabLayoutFlashNodeRoute: typeof TabLayoutFlashNodeRoute;
-  TabLayoutAboutLazyRoute: typeof TabLayoutAboutLazyRoute;
-  TabLayoutFirmwareUpgradeLazyRoute: typeof TabLayoutFirmwareUpgradeLazyRoute;
-  TabLayoutInfoLazyRoute: typeof TabLayoutInfoLazyRoute;
-  TabLayoutNetworkLazyRoute: typeof TabLayoutNetworkLazyRoute;
-  TabLayoutNodesLazyRoute: typeof TabLayoutNodesLazyRoute;
-  TabLayoutSecurityLazyRoute: typeof TabLayoutSecurityLazyRoute;
-  TabLayoutSettingsLazyRoute: typeof TabLayoutSettingsLazyRoute;
-  TabLayoutUsbLazyRoute: typeof TabLayoutUsbLazyRoute;
+  TabLayoutConsoleRoute: typeof TabLayoutConsoleRoute
+  TabLayoutFlashNodeRoute: typeof TabLayoutFlashNodeRoute
+  TabLayoutAboutLazyRoute: typeof TabLayoutAboutLazyRoute
+  TabLayoutFirmwareUpgradeLazyRoute: typeof TabLayoutFirmwareUpgradeLazyRoute
+  TabLayoutInfoLazyRoute: typeof TabLayoutInfoLazyRoute
+  TabLayoutNetworkLazyRoute: typeof TabLayoutNetworkLazyRoute
+  TabLayoutNodesLazyRoute: typeof TabLayoutNodesLazyRoute
+  TabLayoutSecurityLazyRoute: typeof TabLayoutSecurityLazyRoute
+  TabLayoutSettingsLazyRoute: typeof TabLayoutSettingsLazyRoute
+  TabLayoutUsbLazyRoute: typeof TabLayoutUsbLazyRoute
 }
 
 const TabLayoutRouteChildren: TabLayoutRouteChildren = {
@@ -336,17 +334,17 @@ const TabLayoutRouteChildren: TabLayoutRouteChildren = {
   TabLayoutSecurityLazyRoute: TabLayoutSecurityLazyRoute,
   TabLayoutSettingsLazyRoute: TabLayoutSettingsLazyRoute,
   TabLayoutUsbLazyRoute: TabLayoutUsbLazyRoute,
-};
+}
 
 const TabLayoutRouteWithChildren = TabLayoutRoute._addFileChildren(
-  TabLayoutRouteChildren
-);
+  TabLayoutRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
   TabLayoutRoute: TabLayoutRouteWithChildren,
   LoginRoute: LoginRoute,
-};
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
+  ._addFileTypes<FileRouteTypes>()

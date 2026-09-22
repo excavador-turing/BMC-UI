@@ -126,6 +126,44 @@ jobs:
       - name: Measure
         run: npm run screens
 
+  # Every text box accepts typing.
+  #
+  # A controlled React input given `value` and no `onChange` is READ-ONLY:
+  # React reverts each keystroke, silently, and the markup looks perfect.
+  # The shared Input dropped `onChange` for `type="password"`, so all three
+  # boxes of the password form -- and the factory-password page a board
+  # shows before it will do anything else -- could not be typed into, from
+  # the Tailwind move until BMC-Firmware#48 was reported by a user.
+  #
+  # Nothing else could see it: it builds, it lints, it renders, and the
+  # screens gate measures height. So this types into every visible box of
+  # the demo build and reads the value back.
+  typing:
+    name: Every text box accepts typing
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          pip install websockets
+
+      - name: Type into every box
+        run: npm run type-test
+
   api-types:
     name: Generated API types match the pinned release
     runs-on: ubuntu-latest
