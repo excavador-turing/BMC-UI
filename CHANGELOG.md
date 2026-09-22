@@ -10,6 +10,38 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [v3.36.0] — 2026-09-22
+
+### Fixed
+
+- **The password form would not accept typing, in any of its three boxes.**
+  The shared `Input` dropped the caller's `onChange` for `type="password"`,
+  and a controlled React field with `value` and no way to report a change is
+  read-only: every keystroke was reverted, silently, with markup that looks
+  perfect. It hit the password card on Access **and the factory-password
+  page a board shows before it will do anything else** — so a board on its
+  shipped password could not be taken off it from the browser at all. Login
+  was unaffected, which is why this survived: it reads the DOM on submit
+  rather than holding state.
+
+  Reported as [BMC-Firmware#48](https://github.com/excavador-turing/BMC-Firmware/issues/48)
+  and present since the Tailwind move (#6). The file input keeps its own
+  handler for a real reason — the visible box is written by the hidden one
+  beside it — and password never belonged in that clause. `defaultValue` is
+  now passed only to an uncontrolled field, which is the same family of
+  mistake one step removed.
+
+### Added
+
+- **A gate that types.** `npm run type-test` drives the demo build over the
+  DevTools protocol, types into every visible text box on every tab, and
+  reads the value back; CI fails on a box that does not keep what was typed.
+  Nothing existing could have caught this — it builds, it lints, it renders,
+  and the screens gate measures height. Run against the unfixed component it
+  reports the three password boxes and nothing else; the probe types a value
+  each field can actually hold, because a `number` box refusing a word is
+  not a fault and a gate that cries wolf gets switched off.
+
 ## [v3.35.0] — 2026-09-22
 
 ### Added

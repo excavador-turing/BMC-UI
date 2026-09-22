@@ -45,15 +45,39 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     const isFileInput = type === "file";
     const isPasswordInput = type === "password";
 
+    // A FILE input keeps its own handler: the visible box shows the chosen
+    // file's name and is written by `handleFileChange` on the hidden input
+    // beside it, so passing the caller's `onChange` here would fire twice.
+    // A PASSWORD input was in that same clause and had no business being
+    // there -- the eye button only flips `type`, and nothing else about a
+    // password box is special. Dropping its `onChange` made every
+    // CONTROLLED password field read-only: React reverts each keystroke
+    // when a field has `value` and no way to report a change, silently, and
+    // the markup looks perfect. That is BMC-Firmware#48, "password setting
+    // form does not accept typing in any of the text widgets" -- all three
+    // boxes of the password form, and the factory-password page that a
+    // board shows before it will do anything else. Login was unaffected
+    // because it reads the DOM on submit rather than holding state, which
+    // is why this survived since the Tailwind move (#6).
+    //
+    // `scripts/type-test.py` types into every box the demo shows and fails
+    // the build on one that does not keep what was typed.
+    //
+    // `defaultValue` is passed only to an UNCONTROLLED field, for the same
+    // family of reasons: React warns when a field is given both, and the
+    // component used to hand every caller a `defaultValue` of "" whether
+    // they controlled the field or not.
+    const controlled = props.value !== undefined;
+
     return (
       <label className={`relative block ${className}`}>
         <input
           type={isFileInput || showPassword ? "text" : type}
           id={`${name}${isFileInput ? "-url" : ""}`}
           name={`${name}${isFileInput ? "-url" : ""}`}
-          defaultValue={defaultValue}
+          {...(controlled ? {} : { defaultValue })}
           disabled={disabled}
-          onChange={isFileInput || isPasswordInput ? undefined : onChange}
+          onChange={isFileInput ? undefined : onChange}
           placeholder=" "
           className="peer block w-full appearance-none rounded-md border border-neutral-200 px-4 pt-5 pb-1.5 text-sm font-semibold placeholder:text-transparent focus:border-transparent focus:ring-2 focus:ring-black focus:outline-hidden disabled:border-white disabled:bg-white disabled:pt-3 disabled:pb-3.5 dark:border-neutral-700 dark:bg-neutral-900 dark:focus:ring-white dark:disabled:border-neutral-800 dark:disabled:bg-neutral-900"
           ref={ref ?? inputRef}
