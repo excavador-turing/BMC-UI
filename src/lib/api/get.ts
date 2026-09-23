@@ -3,6 +3,7 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
+import axios from "axios";
 
 import { useAxiosWithAuth } from "./_core";
 import type { components } from "./schema";
@@ -1264,10 +1265,21 @@ export function useSwitchValidationQuery(document: SwitchDocument | null) {
     queryKey: ["switchValidate", key],
     enabled: document !== null,
     queryFn: async () => {
-      const { data } = await api.post<unknown>(
-        "/bmc/network/switch/validate",
-        document
-      );
+      let data: unknown;
+      try {
+        ({ data } = await api.post<unknown>(
+          "/bmc/network/switch/validate",
+          document
+        ));
+      } catch (error) {
+        // Two different failures used to look the same on the page: a daemon
+        // with no validate endpoint, and a daemon that HAS one and rejected
+        // the question as malformed. The second one says why in the body,
+        // and that sentence is the difference between "my board cannot do
+        // this" and "the request was wrong" (BMC-Firmware#59: a reader took
+        // the first reading, and it was the second).
+        throw new ValidationRefused(reasonFrom(error));
+      }
       if (!isSwitchVerdict(data)) {
         throw new Error("this daemon cannot check a switch document");
       }
@@ -1278,6 +1290,36 @@ export function useSwitchValidationQuery(document: SwitchDocument | null) {
     staleTime: Infinity,
     retry: false,
   });
+}
+
+/**
+ * The daemon answered the validate request with a refusal of the REQUEST
+ * (a 4xx with a reason in the body), as opposed to a verdict about the
+ * document. `reason` is null when there was no answer at all -- no
+ * endpoint, no network -- which is the only case that means "cannot check".
+ */
+export class ValidationRefused extends Error {
+  constructor(public readonly reason: string | null) {
+    super(reason ?? "the board did not answer");
+    this.name = "ValidationRefused";
+  }
+}
+
+/** The daemon's own words from an error response, if it gave any. */
+function reasonFrom(error: unknown): string | null {
+  if (!axios.isAxiosError(error) || !error.response) return null;
+  const body: unknown = error.response.data;
+  if (typeof body === "string" && body.trim() !== "") return body.trim();
+  if (body && typeof body === "object" && "response" in body) {
+    // The legacy envelope: { response: [{ result: "..." }] }
+    const inner = (body as { response?: unknown }).response;
+    if (Array.isArray(inner) && inner[0] && typeof inner[0] === "object") {
+      const result = (inner[0] as { result?: unknown }).result;
+      if (typeof result === "string" && result.trim() !== "")
+        return result.trim();
+    }
+  }
+  return null;
 }
 
 /* ---- the board's own address (daemon 2.38.0 and later) ------------------ */

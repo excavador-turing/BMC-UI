@@ -272,6 +272,8 @@ const translations = {
     unnamed: "naamloos",
     notNumbers: "Iets in de tabel is geen VLAN-nummer.",
     cannotCheck: "Dit board kan een configuratie niet vooraf controleren.",
+    refusedQuestion:
+      "The board refused the question rather than the layout: {{reason}}",
     windowLabel: "Bevestig binnen",
     windowRange: "s, {{min}}–{{max}}",
     tryIt: "Probeer het",

@@ -273,6 +273,8 @@ const translations = {
     notNumbers: "Algo en la tabla no es un número de VLAN.",
     cannotCheck:
       "Esta placa no puede comprobar una configuración antes de aplicarla.",
+    refusedQuestion:
+      "The board refused the question rather than the layout: {{reason}}",
     windowLabel: "Confirmar en",
     windowRange: "s, {{min}}–{{max}}",
     tryIt: "Pruébalo",

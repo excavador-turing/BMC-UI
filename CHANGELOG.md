@@ -10,6 +10,22 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [v3.38.0] — 2026-09-23
+
+### Changed
+
+- **A refused validate request shows the daemon's words, not "this board
+  cannot check".** The switch card showed one sentence for two different
+  failures: a daemon with no validate endpoint, and a daemon that has one and
+  rejected the request as malformed. Only the first means "cannot check"; the
+  second says why in its body. A reader who named a VLAN got the sentence
+  ([BMC-Firmware#59](https://github.com/excavador-turing/BMC-Firmware/issues/59))
+  and went looking at his board revision, when the daemon had refused the
+  request over how it reads names — fixed in bmcd 2.38.3. From now on a
+  rejected request reads *"The board refused the question rather than the
+  layout: …"* with the daemon's reason, so the next reader is told which it
+  was.
+
 ## [v3.37.0] — 2026-09-23
 
 ### Changed
