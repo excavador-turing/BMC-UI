@@ -274,6 +274,8 @@ const translations = {
     notNumbers: "Coś w tabeli nie jest numerem VLAN.",
     cannotCheck:
       "Ta płyta nie potrafi sprawdzić konfiguracji przed zastosowaniem.",
+    refusedQuestion:
+      "The board refused the question rather than the layout: {{reason}}",
     windowLabel: "Potwierdź w ciągu",
     windowRange: "s, {{min}}–{{max}}",
     tryIt: "Wypróbuj",

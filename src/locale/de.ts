@@ -274,6 +274,8 @@ const translations = {
     unnamed: "unbenannt",
     notNumbers: "Etwas in der Tabelle ist keine VLAN-Nummer.",
     cannotCheck: "Dieses Board kann eine Konfiguration nicht vorab prüfen.",
+    refusedQuestion:
+      "The board refused the question rather than the layout: {{reason}}",
     windowLabel: "Bestätigen in",
     windowRange: "s, {{min}}–{{max}}",
     tryIt: "Ausprobieren",

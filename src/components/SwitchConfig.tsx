@@ -7,6 +7,7 @@ import ConfirmationModal from "@/components/ConfirmationModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { ValidationRefused } from "@/lib/api/get";
 import {
   epochMillis,
   type SwitchDocument,
@@ -762,7 +763,12 @@ export default function SwitchConfig() {
 
           {verdict.isError && edits && (
             <div className="text-sm opacity-80">
-              {t("switchConfig.cannotCheck")}
+              {verdict.error instanceof ValidationRefused &&
+              verdict.error.reason !== null
+                ? t("switchConfig.refusedQuestion", {
+                    reason: verdict.error.reason,
+                  })
+                : t("switchConfig.cannotCheck")}
             </div>
           )}
 

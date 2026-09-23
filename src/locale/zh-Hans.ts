@@ -262,6 +262,8 @@ const translations = {
     unnamed: "未命名",
     notNumbers: "表格中有内容不是 VLAN 号。",
     cannotCheck: "本板卡无法在应用前检查配置。",
+    refusedQuestion:
+      "The board refused the question rather than the layout: {{reason}}",
     windowLabel: "确认时限",
     windowRange: "秒，{{min}}–{{max}}",
     tryIt: "试一下",
