@@ -76,13 +76,17 @@ export function BoardScope({
 
   const nav = useMemo(
     () => ({
-      href: (destination: NodeDestination, node: number) =>
-        toHash({ board: board.id, tab: destination, node }),
-      open: (destination: NodeDestination, node: number) => {
+      href: (destination: NodeDestination, node?: number) =>
+        toHash({
+          board: board.id,
+          tab: destination,
+          ...(destination === "usb" ? {} : { node }),
+        }),
+      open: (destination: NodeDestination, node?: number) => {
         window.location.hash = toHash({
           board: board.id,
           tab: destination,
-          node,
+          ...(destination === "usb" ? {} : { node }),
         });
       },
     }),

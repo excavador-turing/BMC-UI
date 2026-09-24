@@ -17,15 +17,15 @@ import { createContext, type ReactNode } from "react";
  * renders these buttons somewhere neither provider reaches should draw and do
  * nothing, not take the page down.
  */
-export type NodeDestination = "console" | "flash-node";
+export type NodeDestination = "console" | "flash-node" | "usb";
 
 export interface NodeNav {
   /** Where a button for this destination points, or null to render a plain
    *  button and rely on `open`. The board app returns a real href so the
    *  browser's own middle-click and copy-link behaviour keeps working. */
-  href(destination: NodeDestination, node: number): string | null;
+  href(destination: NodeDestination, node?: number): string | null;
   /** Go there. Called on click; the board app lets the link do the work. */
-  open(destination: NodeDestination, node: number): void;
+  open(destination: NodeDestination, node?: number): void;
 }
 
 const NOWHERE: NodeNav = {
