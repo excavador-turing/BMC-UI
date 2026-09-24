@@ -14,6 +14,10 @@ const translations = {
     firmwareUpgrade: "固件升级",
     flashNode: "刷写节点",
     about: "关于",
+    // The sidebar's three headings.
+    sectionBoard: "主板",
+    sectionConfiguration: "配置",
+    sectionSystem: "系统",
   },
   userNav: {
     language: "语言",

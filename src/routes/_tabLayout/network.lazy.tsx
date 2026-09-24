@@ -5,10 +5,17 @@ import { useTranslation } from "react-i18next";
 import AddressCard from "@/components/AddressCard";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import HostnameCard from "@/components/HostnameCard";
+import LoadingButton from "@/components/LoadingButton";
 import NetworkSkeleton from "@/components/skeletons/network";
 import SwitchConfig from "@/components/SwitchConfig";
 import TabView from "@/components/TabView";
-import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useInfoTabData } from "@/lib/api/get";
 import { useNetworkResetMutation } from "@/lib/api/set";
@@ -68,44 +75,49 @@ export function Network() {
           the certificate's subject-alternative names, and it is the mDNS
           name. It used to live on a different tab from the addresses it
           belongs with. */}
-      <div>
+      <div className="flex flex-col gap-6">
         <HostnameCard />
         <AddressCard />
 
-        <div className="mt-8 mb-4 text-lg font-bold">
-          {t("network.networkInterfaces")}
-        </div>
-        {/* One row per interface, not three. The device, its address and its
-            MAC are one fact about one thing, and three definition rows each
-            spent 150 px saying so. */}
-        <div className="space-y-2">
-          {data.ip.map((ip) => (
-            <div
-              key={ip.device}
-              className="flex flex-wrap items-baseline gap-x-4 text-sm"
-            >
-              <span className="w-16 shrink-0 font-semibold">{ip.device}</span>
-              <span className="font-mono">{ip.ip}</span>
-              <span className="font-mono opacity-60">{ip.mac}</span>
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("network.networkInterfaces")}</CardTitle>
+            {/* Red: consequential, and it confirms first. This resets the
+                switch CHIP -- every port drops for a moment -- and used to be
+                labelled "Reset network", which read as the address. The
+                address has its own card above, with a confirm window. */}
+            <CardAction>
+              <LoadingButton
+                type="button"
+                variant="destructive"
+                size="sm"
+                onClick={() => setConfirmReset(true)}
+                isLoading={resetNetworkPending}
+              >
+                {t("network.resetSwitchButton")}
+              </LoadingButton>
+            </CardAction>
+          </CardHeader>
+          <CardContent>
+            {/* One row per interface, not three. The device, its address and
+                its MAC are one fact about one thing, and three definition
+                rows each spent 150 px saying so. */}
+            <div className="flex flex-col gap-2">
+              {data.ip.map((ip) => (
+                <div
+                  key={ip.device}
+                  className="flex flex-wrap items-baseline gap-x-4 text-sm"
+                >
+                  <span className="w-16 shrink-0 font-medium">{ip.device}</span>
+                  <span className="font-mono">{ip.ip}</span>
+                  <span className="font-mono text-muted-foreground">
+                    {ip.mac}
+                  </span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <div className="mt-4">
-          {/* Red, not lime. One rule across the interface: lime is safe to
-              press, red is consequential and confirms first. This resets the
-              switch CHIP -- every port drops for a moment -- and used to be
-              labelled "Reset network", which read as the address. The
-              address has its own card above, with a confirm window. */}
-          <Button
-            type="button"
-            variant="destructive"
-            onClick={() => setConfirmReset(true)}
-            isLoading={resetNetworkPending}
-            disabled={resetNetworkPending}
-          >
-            {t("network.resetSwitchButton")}
-          </Button>
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
       <ConfirmationModal
@@ -122,9 +134,7 @@ export function Network() {
       {/* One panel, not two. Link state and VLAN membership are facts about
           the same seven ports, and answering "is node 3's cable in, and which
           network is it on" used to mean matching names between two tables. */}
-      <div>
-        <SwitchConfig />
-      </div>
+      <SwitchConfig />
     </TabView>
   );
 }

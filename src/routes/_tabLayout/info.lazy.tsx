@@ -3,10 +3,17 @@ import { filesize } from "filesize";
 import { useTranslation } from "react-i18next";
 
 import BoardHealth from "@/components/BoardHealth";
+import LoadingButton from "@/components/LoadingButton";
 import InfoSkeleton from "@/components/skeletons/info";
 import TabView from "@/components/TabView";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import UsageBar from "@/components/UsageBar";
 import { useToast } from "@/hooks/use-toast";
 import { useBackupMutation } from "@/lib/api/file";
 import { useInfoTabData } from "@/lib/api/get";
@@ -59,7 +66,7 @@ export function Info() {
           description: (
             <>
               <p>{t("info.backupSuccess")}</p>
-              <p className="mt-4 text-xs italic">{filename}</p>
+              <p className="mt-1 font-mono text-xs">{filename}</p>
             </>
           ),
         });
@@ -76,9 +83,11 @@ export function Info() {
 
   return (
     <TabView>
-      <div>
-        <div className="mb-6 text-lg font-bold">{t("info.userStorage")}</div>
-        <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("info.userStorage")}</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
           {data.storage.map((storage) => {
             const { usedPct, usedHuman, totalHuman } = progressData(
               storage.total_bytes,
@@ -87,32 +96,31 @@ export function Info() {
             return (
               <div
                 key={storage.name}
-                className="flex items-center justify-between"
+                className="flex items-center justify-between gap-4"
               >
-                <div className="w-1/4 font-semibold">{storage.name}</div>
-                <div className="relative w-1/2 lg:w-3/4">
-                  <Progress
-                    aria-label={t("info.ariaStorageUtilization")}
-                    value={usedPct}
-                    label={`${usedHuman} / ${totalHuman}`}
-                    warningOnHigh
-                  />
-                </div>
+                <div className="w-1/4 font-medium">{storage.name}</div>
+                <UsageBar
+                  className="w-1/2 lg:w-3/4"
+                  aria-label={t("info.ariaStorageUtilization")}
+                  value={usedPct}
+                  label={`${usedHuman} / ${totalHuman}`}
+                  warningOnHigh
+                />
               </div>
             );
           })}
-        </div>
-        <div className="mt-4">
-          <Button
+        </CardContent>
+        <CardFooter>
+          <LoadingButton
             type="button"
+            variant="outline"
             onClick={() => handleBackupSubmit()}
             isLoading={backupPending}
-            disabled={backupPending}
           >
             {t("info.backupButton")}
-          </Button>
-        </div>
-      </div>
+          </LoadingButton>
+        </CardFooter>
+      </Card>
 
       <BoardHealth />
     </TabView>

@@ -9,7 +9,16 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import ConfirmationModal from "@/components/ConfirmationModal";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   type FirmwareCandidate,
   type FirmwareSourceCatalog,
@@ -45,25 +54,25 @@ function TrustBadge({ trust }: { trust: FirmwareTrust }) {
   const { t } = useTranslation();
   if (trust === "verified") {
     return (
-      <span className="inline-flex items-center gap-1 text-xs text-green-700 dark:text-green-400">
-        <ShieldCheck className="size-3.5" />
+      <Badge variant="secondary">
+        <ShieldCheck data-icon="inline-start" />
         {t("firmwareUpgrade.trustVerified")}
-      </span>
+      </Badge>
     );
   }
   if (trust === "tls") {
     return (
-      <span className="inline-flex items-center gap-1 text-xs text-amber-700 dark:text-amber-400">
-        <ShieldQuestion className="size-3.5" />
+      <Badge variant="warning">
+        <ShieldQuestion data-icon="inline-start" />
         {t("firmwareUpgrade.trustTls")}
-      </span>
+      </Badge>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 text-xs text-amber-700 dark:text-amber-400">
-      <ShieldQuestion className="size-3.5" />
+    <Badge variant="warning">
+      <ShieldQuestion data-icon="inline-start" />
       {t("firmwareUpgrade.trustUnverified")}
-    </span>
+    </Badge>
   );
 }
 
@@ -112,31 +121,29 @@ function CandidateRow({
 
   return (
     <div className="flex items-center justify-between gap-4 border-b py-2 last:border-b-0">
-      <div className="flex flex-col gap-0.5">
-        <div className="flex items-center gap-2">
-          <span className="font-mono font-semibold">{candidate.version}</span>
+      <div className="flex flex-col items-start gap-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-mono font-medium">{candidate.version}</span>
           {candidate.relation === "current" && (
-            <span className="text-xs opacity-60">
+            <Badge variant="outline">
               {t("firmwareUpgrade.relationCurrent")}
-            </span>
+            </Badge>
           )}
           {candidate.relation === "newer" && (
-            <span className="text-xs font-semibold text-amber-600 dark:text-amber-500">
-              {t("firmwareUpgrade.relationNewer")}
-            </span>
+            <Badge>{t("firmwareUpgrade.relationNewer")}</Badge>
           )}
           {candidate.relation === "older" && (
-            <span className="text-xs opacity-60">
+            <span className="text-xs text-muted-foreground">
               {t("firmwareUpgrade.relationOlder")}
             </span>
           )}
           {candidate.relation === "unknown" && (
-            <span className="text-xs opacity-60">
+            <span className="text-xs text-muted-foreground">
               {t("firmwareUpgrade.relationUnknown")}
             </span>
           )}
           {candidate.prerelease && (
-            <span className="text-xs opacity-60">
+            <span className="text-xs text-muted-foreground">
               {t("firmwareUpgrade.prerelease")}
             </span>
           )}
@@ -147,11 +154,16 @@ function CandidateRow({
         {/* What changed, before deciding to install it. Only where a page
             exists: a mirror directory and an SD card have nothing to read. */}
         {notes && (
-          <Button asChild variant="bw" size="sm">
-            <a href={notes} target="_blank" rel="noreferrer noopener">
-              <ExternalLink className="mr-1.5 size-4" />
-              {t("firmwareUpgrade.releaseNotes")}
-            </a>
+          <Button
+            variant="outline"
+            size="sm"
+            nativeButton={false}
+            render={
+              <a href={notes} target="_blank" rel="noreferrer noopener" />
+            }
+          >
+            <ExternalLink data-icon="inline-start" />
+            {t("firmwareUpgrade.releaseNotes")}
           </Button>
         )}
         {/* A parked image can be installed now: the daemon takes it through
@@ -159,7 +171,7 @@ function CandidateRow({
             used to be refused. Only the running version is still not
             installable, and that is because there is nothing to do. */}
         <Button
-          variant="bw"
+          variant="outline"
           size="sm"
           disabled={busy || candidate.relation === "current"}
           onClick={() => onInstall(candidate)}
@@ -272,121 +284,125 @@ export default function FirmwareCandidates() {
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-4">
-        <h2 className="text-lg font-semibold">
-          {t("firmwareUpgrade.availableTitle")}
-        </h2>
-        {/* The spinner belongs on this control, not over the page: the list
+    <Card>
+      <CardHeader>
+        <CardTitle>{t("firmwareUpgrade.availableTitle")}</CardTitle>
+        {/* When it last looked. Without this the page asserts "current" from
+          data up to half an hour old, which is a claim about the present
+          tense made from the past. */}
+        {catalog.data && (
+          <CardDescription>
+            {catalog.data.refreshing
+              ? t("firmwareUpgrade.checking")
+              : t("firmwareUpgrade.checkedAt", {
+                  at: catalog.data.checked_at,
+                })}{" "}
+            ·{" "}
+            {t("firmwareUpgrade.runningIs", { version: catalog.data.running })}
+          </CardDescription>
+        )}
+        <CardAction>
+          {/* The spinner belongs on this control, not over the page: the list
             below stays readable and stays scrollable while the sources are
             re-polled. `refreshing` is the daemon still working after it
             answered; `checking` is our own request in flight. */}
-        <Button
-          variant="bw"
-          size="sm"
-          disabled={checking || catalog.data?.refreshing}
-          onClick={() => void checkNow()}
-        >
-          <RefreshCw
-            className={cn(
-              "mr-2 size-4",
-              (checking || catalog.data?.refreshing) && "animate-spin"
-            )}
-          />
-          {t("firmwareUpgrade.checkNow")}
-        </Button>
-      </div>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={checking || catalog.data?.refreshing}
+            onClick={() => void checkNow()}
+          >
+            <RefreshCw
+              data-icon="inline-start"
+              className={cn(
+                (checking || catalog.data?.refreshing) && "animate-spin"
+              )}
+            />
+            {t("firmwareUpgrade.checkNow")}
+          </Button>
+        </CardAction>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        {catalog.isError && (
+          <p className="text-sm text-destructive">
+            {t("firmwareUpgrade.availableError")}
+          </p>
+        )}
 
-      {/* When it last looked. Without this the page asserts "current" from
-          data up to half an hour old, which is a claim about the present
-          tense made from the past. */}
-      {catalog.data && (
-        <p className="text-sm opacity-60">
-          {catalog.data.refreshing
-            ? t("firmwareUpgrade.checking")
-            : t("firmwareUpgrade.checkedAt", {
-                at: catalog.data.checked_at,
-              })}{" "}
-          · {t("firmwareUpgrade.runningIs", { version: catalog.data.running })}
-        </p>
-      )}
+        {catalog.data?.sources.map((source) => {
+          // The newest, always -- not "the newest that is newer than what is
+          // running". Filtering by relation left a card with nothing in it but
+          // a "show 3 older" link the moment a board ran something no source
+          // offered yet, which is exactly the state right after a release is
+          // cut and before it is published. The relation badge on the row says
+          // what it is; hiding the row said nothing.
+          const isOpen = expanded.has(source.id);
+          const shown = isOpen
+            ? source.candidates
+            : source.candidates.slice(0, VISIBLE_PER_SOURCE);
+          const hidden = source.candidates.length - shown.length;
+          return (
+            <div key={source.id} className="rounded-lg border p-4">
+              <div className="mb-2 flex items-baseline justify-between gap-2">
+                <span className="font-medium">{source.label}</span>
+                <span className="font-mono text-xs text-muted-foreground">
+                  {source.location}
+                </span>
+              </div>
 
-      {catalog.isError && (
-        <p className="text-sm text-red-600 dark:text-red-400">
-          {t("firmwareUpgrade.availableError")}
-        </p>
-      )}
+              {/* An error is never rendered as "nothing new". */}
+              {source.error && (
+                <p className="flex items-start gap-2 text-sm text-destructive">
+                  <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+                  {t("firmwareUpgrade.sourceUnreadable", {
+                    reason: source.error,
+                  })}
+                </p>
+              )}
 
-      {catalog.data?.sources.map((source) => {
-        // The newest, always -- not "the newest that is newer than what is
-        // running". Filtering by relation left a card with nothing in it but
-        // a "show 3 older" link the moment a board ran something no source
-        // offered yet, which is exactly the state right after a release is
-        // cut and before it is published. The relation badge on the row says
-        // what it is; hiding the row said nothing.
-        const isOpen = expanded.has(source.id);
-        const shown = isOpen
-          ? source.candidates
-          : source.candidates.slice(0, VISIBLE_PER_SOURCE);
-        const hidden = source.candidates.length - shown.length;
-        return (
-          <div key={source.id} className="rounded-md border p-4">
-            <div className="mb-2 flex items-baseline justify-between gap-2">
-              <span className="font-semibold">{source.label}</span>
-              <span className="font-mono text-xs opacity-60">
-                {source.location}
-              </span>
+              {!source.error && source.candidates.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  {t("firmwareUpgrade.sourceEmpty")}
+                </p>
+              )}
+
+              {shown.map((c) => (
+                <CandidateRow
+                  key={`${source.id}-${c.version}`}
+                  source={source}
+                  candidate={c}
+                  busy={install.isPending}
+                  installing={
+                    install.isPending &&
+                    install.variables?.source === source.id &&
+                    install.variables?.version === c.version
+                  }
+                  onInstall={(candidate) =>
+                    setConfirming({ source, candidate })
+                  }
+                />
+              ))}
+
+              {(hidden > 0 || isOpen) && (
+                <Button
+                  type="button"
+                  variant="link"
+                  size="sm"
+                  className="mt-2 px-0 text-muted-foreground"
+                  onClick={() => toggle(source.id)}
+                >
+                  {isOpen
+                    ? t("firmwareUpgrade.showFewer")
+                    : t("firmwareUpgrade.showAll", {
+                        count: source.candidates.length,
+                      })}
+                </Button>
+              )}
             </div>
+          );
+        })}
 
-            {/* An error is never rendered as "nothing new". */}
-            {source.error && (
-              <p className="flex items-start gap-2 text-sm text-red-600 dark:text-red-400">
-                <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-                {t("firmwareUpgrade.sourceUnreadable", {
-                  reason: source.error,
-                })}
-              </p>
-            )}
-
-            {!source.error && source.candidates.length === 0 && (
-              <p className="text-sm opacity-60">
-                {t("firmwareUpgrade.sourceEmpty")}
-              </p>
-            )}
-
-            {shown.map((c) => (
-              <CandidateRow
-                key={`${source.id}-${c.version}`}
-                source={source}
-                candidate={c}
-                busy={install.isPending}
-                installing={
-                  install.isPending &&
-                  install.variables?.source === source.id &&
-                  install.variables?.version === c.version
-                }
-                onInstall={(candidate) => setConfirming({ source, candidate })}
-              />
-            ))}
-
-            {(hidden > 0 || isOpen) && (
-              <button
-                type="button"
-                className="mt-2 text-sm underline opacity-60 hover:opacity-100"
-                onClick={() => toggle(source.id)}
-              >
-                {isOpen
-                  ? t("firmwareUpgrade.showFewer")
-                  : t("firmwareUpgrade.showAll", {
-                      count: source.candidates.length,
-                    })}
-              </button>
-            )}
-          </div>
-        );
-      })}
-
-      {/* A MODAL, not a panel below the list.
+        {/* A MODAL, not a panel below the list.
 
           It used to render inline, after every candidate. With a long
           catalogue -- and a board with several sources has one -- pressing
@@ -395,69 +411,66 @@ export default function FirmwareCandidates() {
           The same modal the reboot and node-power confirmations use puts the
           question where the answer is expected, and its drawer form handles
           the phone case the inline panel was worst on. */}
-      <ConfirmationModal
-        isOpen={confirming !== null}
-        onClose={() => {
-          setConfirming(null);
-        }}
-        onConfirm={() => void doInstall()}
-        title={
-          confirming
-            ? t("firmwareUpgrade.confirmTitle", {
-                version: confirming.candidate.version,
-              })
-            : ""
-        }
-        message={
-          confirming ? (
-            <div className="flex flex-col gap-2">
-              <p>
-                {confirming.candidate.relation === "older"
-                  ? t("firmwareUpgrade.confirmDowngrade")
-                  : confirming.candidate.relation === "unknown"
-                    ? t("firmwareUpgrade.confirmUnknown")
-                    : t("firmwareUpgrade.confirmUpgrade")}
-              </p>
-              {confirming.candidate.trust !== "verified" && (
-                <p className="font-semibold text-amber-700 dark:text-amber-400">
-                  {t("firmwareUpgrade.confirmUnverified")}
+        <ConfirmationModal
+          isOpen={confirming !== null}
+          onClose={() => {
+            setConfirming(null);
+          }}
+          onConfirm={() => void doInstall()}
+          title={
+            confirming
+              ? t("firmwareUpgrade.confirmTitle", {
+                  version: confirming.candidate.version,
+                })
+              : ""
+          }
+          message={
+            confirming ? (
+              <div className="flex flex-col gap-2">
+                <p>
+                  {confirming.candidate.relation === "older"
+                    ? t("firmwareUpgrade.confirmDowngrade")
+                    : confirming.candidate.relation === "unknown"
+                      ? t("firmwareUpgrade.confirmUnknown")
+                      : t("firmwareUpgrade.confirmUpgrade")}
                 </p>
-              )}
-            </div>
-          ) : (
-            ""
-          )
-        }
-      />
+                {confirming.candidate.trust !== "verified" && (
+                  <p className="font-medium text-warning">
+                    {t("firmwareUpgrade.confirmUnverified")}
+                  </p>
+                )}
+              </div>
+            ) : (
+              ""
+            )
+          }
+        />
 
-      {install.isPending && (
-        <p
-          role="status"
-          aria-live="polite"
-          className="text-sm text-amber-700 dark:text-amber-400"
-        >
-          {installElapsed > EXPECTED_INSTALL_SECONDS
-            ? t("firmwareUpgrade.installingOverdue", {
-                version: install.variables?.version,
-                elapsed: installElapsed,
-              })
-            : t("firmwareUpgrade.installingNow", {
-                version: install.variables?.version,
-                expected: EXPECTED_INSTALL_SECONDS,
-                elapsed: installElapsed,
-              })}
-        </p>
-      )}
-      {install.isError && (
-        <p className="text-sm text-red-600 dark:text-red-400">
-          {t("firmwareUpgrade.installFailed")}
-        </p>
-      )}
-      {install.isSuccess && (
-        <p className="text-sm text-amber-700 dark:text-amber-400">
-          {t("firmwareUpgrade.installStaged")}
-        </p>
-      )}
-    </div>
+        {install.isPending && (
+          <p role="status" aria-live="polite" className="text-sm text-warning">
+            {installElapsed > EXPECTED_INSTALL_SECONDS
+              ? t("firmwareUpgrade.installingOverdue", {
+                  version: install.variables?.version,
+                  elapsed: installElapsed,
+                })
+              : t("firmwareUpgrade.installingNow", {
+                  version: install.variables?.version,
+                  expected: EXPECTED_INSTALL_SECONDS,
+                  elapsed: installElapsed,
+                })}
+          </p>
+        )}
+        {install.isError && (
+          <p className="text-sm text-destructive">
+            {t("firmwareUpgrade.installFailed")}
+          </p>
+        )}
+        {install.isSuccess && (
+          <p className="text-sm text-warning">
+            {t("firmwareUpgrade.installStaged")}
+          </p>
+        )}
+      </CardContent>
+    </Card>
   );
 }

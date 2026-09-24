@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -41,7 +42,8 @@ export default function NodeActions({ nodeId }: { nodeId: number }) {
   const isHolder = holder === nodeId;
   const mode = usb.data.mode;
 
-  const change = (next: string) => {
+  const change = (next: string | null) => {
+    if (next === null) return;
     setMode.mutate(
       { node: nodeId - 1, mode: Number.parseInt(next, 10) },
       {
@@ -60,36 +62,47 @@ export default function NodeActions({ nodeId }: { nodeId: number }) {
     );
   };
 
+  const usbItems = [
+    { value: "0", label: t("usb.mode.host") },
+    { value: "1", label: t("usb.mode.device") },
+    { value: "2", label: t("usb.mode.flash") },
+  ];
+
   return (
-    <div className="mt-3 flex flex-wrap items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       <NodeLink destination="console" node={nodeId}>
-        <TerminalSquare className="mr-2 size-4" />
+        <TerminalSquare data-icon="inline-start" />
         {t("nodes.openConsole")}
       </NodeLink>
 
       <NodeLink destination="flash-node" node={nodeId}>
-        <HardDriveDownload className="mr-2 size-4" />
+        <HardDriveDownload data-icon="inline-start" />
         {t("nodes.flashNode")}
       </NodeLink>
 
       <div className="flex items-center gap-2">
-        <Usb className="size-4 opacity-60" aria-hidden />
+        <Usb className="size-4 text-muted-foreground" aria-hidden />
         <Select
-          value={isHolder ? String(usbModeValue(mode)) : ""}
+          items={usbItems}
+          value={isHolder ? String(usbModeValue(mode)) : null}
           onValueChange={change}
           disabled={setMode.isPending}
         >
           <SelectTrigger
-            hideLabel
+            size="sm"
             className="w-44"
-            label={t("nodes.usbRouteLabel", { nodeId })}
+            aria-label={t("nodes.usbRouteLabel", { nodeId })}
           >
             <SelectValue placeholder={t("nodes.usbNotRouted")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="0">{t("usb.mode.host")}</SelectItem>
-            <SelectItem value="1">{t("usb.mode.device")}</SelectItem>
-            <SelectItem value="2">{t("usb.mode.flash")}</SelectItem>
+            <SelectGroup>
+              {usbItems.map((item) => (
+                <SelectItem key={item.value} value={item.value}>
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
           </SelectContent>
         </Select>
       </div>
@@ -98,7 +111,7 @@ export default function NodeActions({ nodeId }: { nodeId: number }) {
           not is the difference between a control that looks broken and one
           that explains itself. */}
       {!isHolder && (
-        <span className="text-sm opacity-60">
+        <span className="text-sm text-muted-foreground">
           {t("nodes.usbHeldBy", { nodeId: holder })}
         </span>
       )}
@@ -138,34 +151,39 @@ function NodeLink({
 
   if (href) {
     return (
-      <Button asChild variant="bw" size="sm">
-        <a
-          href={href}
-          onClick={(event) => {
-            // Let the browser handle the gestures that mean "somewhere else":
-            // a new tab is a new tab, and intercepting it is rude.
-            if (
-              event.defaultPrevented ||
-              event.metaKey ||
-              event.ctrlKey ||
-              event.shiftKey ||
-              event.button !== 0
-            ) {
-              return;
-            }
-            event.preventDefault();
-            nav.open(destination, node);
-          }}
-        >
-          {children}
-        </a>
+      <Button
+        variant="outline"
+        size="sm"
+        nativeButton={false}
+        render={
+          <a
+            href={href}
+            onClick={(event) => {
+              // Let the browser handle the gestures that mean "somewhere else":
+              // a new tab is a new tab, and intercepting it is rude.
+              if (
+                event.defaultPrevented ||
+                event.metaKey ||
+                event.ctrlKey ||
+                event.shiftKey ||
+                event.button !== 0
+              ) {
+                return;
+              }
+              event.preventDefault();
+              nav.open(destination, node);
+            }}
+          />
+        }
+      >
+        {children}
       </Button>
     );
   }
 
   return (
     <Button
-      variant="bw"
+      variant="outline"
       size="sm"
       onClick={() => {
         nav.open(destination, node);

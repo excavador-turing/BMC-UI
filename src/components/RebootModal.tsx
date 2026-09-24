@@ -1,25 +1,15 @@
 import { useTranslation } from "react-i18next";
 
-import { Button } from "@/components/ui/button";
+import LoadingButton from "@/components/LoadingButton";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
-import { useMediaQuery } from "@/hooks/use-media-query";
-import { cn } from "@/lib/utils";
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface RebootModalProps {
   isOpen: boolean;
@@ -30,6 +20,7 @@ interface RebootModalProps {
   isPending?: boolean;
 }
 
+/** The confirmation in front of a reboot: `ConfirmationModal`, with a spinner. */
 export default function RebootModal({
   isOpen,
   onClose,
@@ -39,68 +30,30 @@ export default function RebootModal({
   isPending = false,
 }: RebootModalProps) {
   const { t } = useTranslation();
-  const isDesktop = useMediaQuery("(min-width: 768px)");
-
-  if (isDesktop) {
-    return (
-      <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className={cn("modal-rounded", "p-6")}>
-          <DialogHeader>
-            <DialogTitle className="mb-4">{title}</DialogTitle>
-            {typeof message === "string" ? (
-              <DialogDescription>{message}</DialogDescription>
-            ) : (
-              message
-            )}
-          </DialogHeader>
-          <DialogFooter className="mt-2">
-            <Button type="button" variant="bw" onClick={onClose}>
-              {t("ui.cancel")}
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              onClick={onReboot}
-              disabled={isPending}
-              isLoading={isPending}
-            >
-              {t("ui.reboot")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    );
-  }
 
   return (
-    <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DrawerContent>
-        <DrawerHeader className="text-left">
-          <DrawerTitle className="mb-4">{title}</DrawerTitle>
-          {typeof message === "string" ? (
-            <DrawerDescription>{message}</DrawerDescription>
-          ) : (
-            message
-          )}
-        </DrawerHeader>
-        <DrawerFooter className="mt-2">
-          <DrawerClose asChild>
-            <Button type="button" variant="bw" size="lg">
-              {t("ui.cancel")}
-            </Button>
-          </DrawerClose>
-          <Button
+    <AlertDialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription
+            render={typeof message === "string" ? undefined : <div />}
+          >
+            {message}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{t("ui.cancel")}</AlertDialogCancel>
+          <LoadingButton
             type="button"
             variant="destructive"
-            size="lg"
             onClick={onReboot}
-            disabled={isPending}
             isLoading={isPending}
           >
             {t("ui.reboot")}
-          </Button>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
+          </LoadingButton>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

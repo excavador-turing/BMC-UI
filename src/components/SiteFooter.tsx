@@ -12,7 +12,7 @@
  */
 export default function SiteFooter() {
   return (
-    <footer className="flex flex-wrap justify-center gap-x-2 gap-y-1 py-4 text-center text-xs uppercase opacity-60">
+    <footer className="flex flex-wrap justify-center gap-x-2 gap-y-1 py-4 text-center text-xs text-muted-foreground">
       <span>© Turing Machines Inc.</span>
       <span aria-hidden>·</span>
       <span>

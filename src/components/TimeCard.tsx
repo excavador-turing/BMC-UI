@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import LoadingButton from "@/components/LoadingButton";
+import TextField from "@/components/TextField";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useNtpQuery } from "@/lib/api/get";
 import { useSetNtpMutation } from "@/lib/api/set";
@@ -90,97 +91,105 @@ export default function TimeCard() {
   })();
 
   return (
-    <div>
-      <div className="mb-6 text-lg font-bold">{t("settings.timeTitle")}</div>
-
-      {/* A list that is saved and never read is the one failure showing the
+    <Card>
+      <CardHeader>
+        <CardTitle>{t("settings.timeTitle")}</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        {/* A list that is saved and never read is the one failure showing the
           servers cannot reveal, so it is said outright. */}
-      {ntp.data?.configurable === false && (
-        <p className="mb-3 text-sm font-semibold text-red-700 dark:text-red-400">
-          {t("settings.timeNotConfigurable")}
+        {ntp.data?.configurable === false && (
+          <p className="mb-3 text-sm font-medium text-destructive">
+            {t("settings.timeNotConfigurable")}
+          </p>
+        )}
+
+        <div className="flex flex-wrap items-end gap-3">
+          <TextField
+            name="ntpServers"
+            label={t("settings.timeTitle")}
+          hideLabel
+            className="max-w-xl"
+            value={draft}
+            spellCheck={false}
+            autoCapitalize="none"
+            placeholder={t("settings.timePlaceholder")}
+            onChange={(e) => setDraft(e.target.value)}
+          />
+          <LoadingButton
+            type="button"
+            disabled={
+              !changed || save.isPending || ntp.data?.configurable === false
+            }
+            isLoading={save.isPending}
+            onClick={apply}
+          >
+            {t("ui.save")}
+          </LoadingButton>
+        </div>
+
+        <p className="mt-2 text-sm text-muted-foreground">
+          {t("settings.timeNote")}
         </p>
-      )}
+        {state && <p className="mt-1 text-sm font-medium">{state}</p>}
 
-      <div className="flex flex-wrap items-center gap-3">
-        <Input
-          name="ntpServers"
-          label={t("settings.timeTitle")}
-          className="max-w-xl"
-          value={draft}
-          spellCheck={false}
-          autoCapitalize="none"
-          placeholder={t("settings.timePlaceholder")}
-          onChange={(e) => setDraft(e.target.value)}
-        />
-        <Button
-          type="button"
-          disabled={
-            !changed || save.isPending || ntp.data?.configurable === false
-          }
-          isLoading={save.isPending}
-          onClick={apply}
-        >
-          {t("ui.save")}
-        </Button>
-      </div>
-
-      <p className="mt-2 text-sm opacity-60">{t("settings.timeNote")}</p>
-      {state && <p className="mt-1 text-sm font-semibold">{state}</p>}
-
-      {/* What chrony thinks of each source. "NOT synchronised" alone sent a
+        {/* What chrony thinks of each source. "NOT synchronised" alone sent a
           user to Discord with nothing to act on; chrony always knows why, and
           every line here is its own column put into words. */}
-      {sources.length > 0 && (
-        <div className="mt-3">
-          <div className="mb-1 text-sm font-semibold opacity-60">
-            {t("settings.timeSources")}
-          </div>
-          <ul className="space-y-0.5 text-sm">
-            {sources.map((source) => (
-              <li
-                key={`${source.kind}:${source.name}`}
-                className="flex flex-wrap gap-x-2"
-              >
-                <span className="font-mono">{source.name}</span>
-                <span
-                  className={
-                    source.state === "selected"
-                      ? "font-semibold"
-                      : source.state === "unreachable" ||
-                          source.state === "falseticker" ||
-                          source.state === "unresolved"
-                        ? "font-semibold text-amber-700 dark:text-amber-500"
-                        : "opacity-80"
-                  }
+        {sources.length > 0 && (
+          <div className="mt-3">
+            <div className="mb-1 text-sm font-medium text-muted-foreground">
+              {t("settings.timeSources")}
+            </div>
+            <ul className="flex flex-col gap-0.5 text-sm">
+              {sources.map((source) => (
+                <li
+                  key={`${source.kind}:${source.name}`}
+                  className="flex flex-wrap gap-x-2"
                 >
-                  {t(`settings.timeSourceState.${source.state}`)}
-                </span>
-                <span className="opacity-60">
-                  {t("settings.timeSourceReach", { reach: source.reach })}
-                  {" · "}
-                  {t("settings.timeSourceStratum", { stratum: source.stratum })}
-                  {source.state !== "unreachable" &&
-                    source.state !== "unresolved" && (
-                      <>
-                        {" · "}
-                        {t("settings.timeSourceOffset", {
-                          ms: (source.offset_seconds * 1000).toFixed(1),
-                        })}
-                      </>
-                    )}
-                  {source.configured &&
-                    ` · ${t("settings.timeSourceConfigured")}`}
-                </span>
-              </li>
-            ))}
-          </ul>
-          {!sources.some((source) => source.state === "selected") && (
-            <p className="mt-2 text-sm text-amber-700 dark:text-amber-500">
-              {t("settings.timeNoSourceSelected")}
-            </p>
-          )}
-        </div>
-      )}
-    </div>
+                  <span className="font-mono">{source.name}</span>
+                  <span
+                    className={
+                      source.state === "selected"
+                        ? "font-medium"
+                        : source.state === "unreachable" ||
+                            source.state === "falseticker" ||
+                            source.state === "unresolved"
+                          ? "font-medium text-warning"
+                          : "text-muted-foreground"
+                    }
+                  >
+                    {t(`settings.timeSourceState.${source.state}`)}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {t("settings.timeSourceReach", { reach: source.reach })}
+                    {" · "}
+                    {t("settings.timeSourceStratum", {
+                      stratum: source.stratum,
+                    })}
+                    {source.state !== "unreachable" &&
+                      source.state !== "unresolved" && (
+                        <>
+                          {" · "}
+                          {t("settings.timeSourceOffset", {
+                            ms: (source.offset_seconds * 1000).toFixed(1),
+                          })}
+                        </>
+                      )}
+                    {source.configured &&
+                      ` · ${t("settings.timeSourceConfigured")}`}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            {!sources.some((source) => source.state === "selected") && (
+              <p className="mt-2 text-sm text-warning">
+                {t("settings.timeNoSourceSelected")}
+              </p>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

@@ -8,6 +8,10 @@ const translations = {
     firmware: "Firmware",
     settings: "Settings",
     about: "About",
+    // The sidebar's three headings.
+    sectionBoard: "Board",
+    sectionConfiguration: "Configuration",
+    sectionSystem: "System",
     // Kept so a bookmark or an old link still renders a label. The tabs
     // themselves are the list above.
     info: "Info",

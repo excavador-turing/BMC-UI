@@ -1,12 +1,13 @@
 import { useTranslation } from "react-i18next";
 
-import { Button } from "@/components/ui/button";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 /** The four modules a Turing Pi 2 carries, as the API numbers them. */
 const NODE_VALUES = ["0", "1", "2", "3"] as const;
 
 /**
- * Which module a tab acts on: four pills in a row, the chosen one green.
+ * Which module a tab acts on: four toggles in a row, one pressed.
  *
  * It was a drop-down. A list that opens to show four fixed entries, one of
  * them already chosen, costs a click and a scan on every visit to Console,
@@ -31,25 +32,27 @@ export function NodePicker({
 }) {
   const { t } = useTranslation();
   return (
-    <div role="radiogroup" aria-label={label} className="space-y-1.5">
-      <span className="block text-sm font-semibold opacity-60">{label}</span>
-      <div className="flex flex-wrap gap-1">
+    <Field>
+      <FieldLabel>{label}</FieldLabel>
+      {/* One is always chosen: pressing the pressed one again would empty the
+          group, and "no module" is not an answer any of these forms take. */}
+      <ToggleGroup
+        aria-label={label}
+        variant="outline"
+        value={[value]}
+        onValueChange={(next: string[]) => {
+          if (next[0] !== undefined) onChange(next[0]);
+        }}
+        disabled={disabled}
+        className="flex-wrap"
+      >
         {NODE_VALUES.map((entry) => (
-          <Button
-            key={entry}
-            type="button"
-            role="radio"
-            aria-checked={entry === value}
-            size="sm"
-            variant={entry === value ? "turing-green" : "bw"}
-            disabled={disabled}
-            onClick={() => onChange(entry)}
-          >
+          <ToggleGroupItem key={entry} value={entry}>
             {t("nodes.node", { nodeId: Number.parseInt(entry) + 1 })}
-          </Button>
+          </ToggleGroupItem>
         ))}
-      </div>
+      </ToggleGroup>
       {name && <input type="hidden" name={name} value={value} />}
-    </div>
+    </Field>
   );
 }

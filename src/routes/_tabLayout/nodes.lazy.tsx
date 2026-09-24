@@ -1,16 +1,24 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
-import { Power, PowerOff } from "lucide-react";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import ConfirmationModal from "@/components/ConfirmationModal";
+import LoadingButton from "@/components/LoadingButton";
 import NodeActions from "@/components/NodeActions";
 import NodeLiveness, { NodeLivenessNotes } from "@/components/NodeLiveness";
 import NodesSkeleton from "@/components/skeletons/nodes";
 import TabView from "@/components/TabView";
+import TextField from "@/components/TextField";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useApiBase } from "@/hooks/useApiBase";
@@ -54,19 +62,16 @@ const ConfirmationCheckbox = (props: {
   const { t } = useTranslation();
 
   return (
-    <div className="flex items-center space-x-2 pt-4">
+    <Field orientation="horizontal" className="pt-4">
       <Checkbox
         id="skipConfirmation"
         checked={props.checked}
-        onCheckedChange={(checked) => props.onCheckedChange(checked as boolean)}
+        onCheckedChange={(checked) => props.onCheckedChange(checked)}
       />
-      <label
-        htmlFor="skipConfirmation"
-        className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-      >
+      <FieldLabel htmlFor="skipConfirmation" className="font-normal">
         {t("nodes.dontAskAgain")}
-      </label>
-    </div>
+      </FieldLabel>
+    </Field>
   );
 };
 
@@ -163,9 +168,10 @@ const NodeRow = (
 
   return (
     <>
-      <div className="rounded-lg border border-neutral-200 p-3 dark:border-neutral-700">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-          <div className="flex items-center gap-4">
+      <Card size="sm">
+        <CardHeader>
+          <CardTitle>{t("nodes.node", { nodeId: props.nodeId })}</CardTitle>
+          <CardAction className="flex items-center gap-3">
             <Switch
               name={`node-${props.nodeId}-power`}
               aria-label={t("nodes.ariaNodePowerToggle", {
@@ -174,10 +180,8 @@ const NodeRow = (
               disabled={isPendingPower}
               checked={powerOn}
               onCheckedChange={handlePowerClick}
-              onIcon={<Power size={16} />}
-              offIcon={<PowerOff size={16} />}
             />
-            <Button
+            <LoadingButton
               type="button"
               variant="destructive"
               onClick={handleResetClick}
@@ -185,10 +189,12 @@ const NodeRow = (
               isLoading={isPendingReset}
             >
               {t("nodes.restartButton")}
-            </Button>
-          </div>
-          <div className="flex flex-1 flex-wrap gap-3">
-            <Input
+            </LoadingButton>
+          </CardAction>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <div className="grid grid-cols-2 gap-3">
+            <TextField
               type="text"
               name={`node-${props.nodeId}-name`}
               label={t("nodes.nodeName")}
@@ -196,9 +202,8 @@ const NodeRow = (
                 props.name ?? t("nodes.node", { nodeId: props.nodeId })
               }
               disabled={!props.editMode}
-              className="flex-1"
             />
-            <Input
+            <TextField
               type="text"
               name={`node-${props.nodeId}-module-name`}
               label={t("nodes.moduleName")}
@@ -207,14 +212,16 @@ const NodeRow = (
                 t("nodes.module", { moduleId: props.nodeId })
               }
               disabled={!props.editMode}
-              className="flex-1"
             />
           </div>
-        </div>
 
-        <NodeLiveness nodeId={props.nodeId} powerOnTime={props.power_on_time} />
-        <NodeActions nodeId={props.nodeId} />
-      </div>
+          <NodeLiveness
+            nodeId={props.nodeId}
+            powerOnTime={props.power_on_time}
+          />
+          <NodeActions nodeId={props.nodeId} />
+        </CardContent>
+      </Card>
 
       <ConfirmationModal
         isOpen={showPowerDialog}
@@ -333,7 +340,7 @@ export function NodesTab() {
       <form onSubmit={handleSubmit} ref={formRef}>
         {/* Four modules, two by two. As a single column the page scrolled with
             a third of the width empty; a grid puts all four on one screen. */}
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           {data.map((node, index) => (
             <NodeRow
               key={index}
@@ -346,10 +353,10 @@ export function NodesTab() {
 
         <NodeLivenessNotes nodes={data} />
 
-        <div className="mt-6 flex justify-end gap-4">
+        <div className="mt-6 flex justify-end gap-2">
           <Button
             type="button"
-            variant="bw"
+            variant="outline"
             onClick={() => {
               if (editMode) {
                 formRef.current?.reset();
@@ -360,13 +367,13 @@ export function NodesTab() {
           >
             {editMode ? t("ui.cancel") : t("nodes.editButton")}
           </Button>
-          <Button
+          <LoadingButton
             type="submit"
             isLoading={isPending}
             disabled={!editMode || isPending}
           >
             {t("nodes.saveButton")}
-          </Button>
+          </LoadingButton>
         </div>
       </form>
     </TabView>

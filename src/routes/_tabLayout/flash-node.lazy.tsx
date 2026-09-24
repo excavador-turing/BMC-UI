@@ -3,13 +3,16 @@ import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import ConfirmationModal from "@/components/ConfirmationModal";
+import LoadingButton from "@/components/LoadingButton";
 import { NodePicker } from "@/components/NodePicker";
 import SdCardPicker from "@/components/SdCardPicker";
 import TabView from "@/components/TabView";
+import TextField from "@/components/TextField";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import UsageBar from "@/components/UsageBar";
 import { useFlash } from "@/hooks/use-flash";
 import type { SdCardEntry } from "@/lib/api/get";
 
@@ -74,109 +77,105 @@ export function FlashNode({ preselected }: { preselected?: number }) {
   };
 
   return (
-    <TabView title={t("flashNode.header")}>
-      <form ref={formRef}>
-        <div className="mb-4">
-          {/* Preselected from `?node=2` when the Nodes tab sent you here, so
+    <TabView>
+      <Card className="max-w-2xl">
+        <CardHeader>
+          <CardTitle>{t("flashNode.header")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form ref={formRef}>
+            <FieldGroup>
+              {/* Preselected from `?node=2` when the Nodes tab sent you here, so
               the node you were looking at is the node this flashes. */}
-          <NodePicker
-            label={t("flashNode.nodeSelect")}
-            name="node"
-            value={selectedNode}
-            onChange={setSelectedNode}
-          />
-        </div>
+              <NodePicker
+                label={t("flashNode.nodeSelect")}
+                name="node"
+                value={selectedNode}
+                onChange={setSelectedNode}
+              />
 
-        <div className="mb-4">
-          <Input
-            type="file"
-            name="file"
-            label={t("flashNode.fileInput")}
-            accept=".img,.bin,.xz,application/octet-stream"
-            disabled={fromCard !== null}
-          />
-        </div>
+              <TextField
+                type="file"
+                name="file"
+                label={t("flashNode.fileInput")}
+                accept=".img,.bin,.xz,application/octet-stream"
+                disabled={fromCard !== null}
+              />
 
-        {/* The other source: the board's own SD card. An image is usually
+              {/* The other source: the board's own SD card. An image is usually
             already there -- staged firmware lands on it, and anyone with
             physical access writes to it directly -- and before this, using
             one meant typing its path from memory. */}
-        <div className="mb-4 flex flex-wrap items-center gap-3">
-          <Button
-            type="button"
-            variant="bw"
-            onClick={() => setPicking(true)}
-            disabled={nodeUpdateMutation.isPending || isFlashing}
-          >
-            {t("sdCard.browse")}
-          </Button>
-          {fromCard && (
-            <span className="flex items-center gap-2 text-sm">
-              <span className="font-mono break-all">
-                {t("sdCard.chosen", { path: fromCard.path })}
-              </span>
-              <Button
-                type="button"
-                variant="bw"
-                size="sm"
-                onClick={() => setFromCard(null)}
-              >
-                {t("sdCard.clear")}
-              </Button>
-            </span>
-          )}
-        </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setPicking(true)}
+                  disabled={nodeUpdateMutation.isPending || isFlashing}
+                >
+                  {t("sdCard.browse")}
+                </Button>
+                {fromCard && (
+                  <span className="flex items-center gap-2 text-sm">
+                    <span className="font-mono break-all">
+                      {t("sdCard.chosen", { path: fromCard.path })}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFromCard(null)}
+                    >
+                      {t("sdCard.clear")}
+                    </Button>
+                  </span>
+                )}
+              </div>
 
-        <div className="mb-4">
-          <Input name="sha256" label={t("flashNode.shaInput")} />
-        </div>
+              <TextField name="sha256" label={t("flashNode.shaInput")} />
 
-        <div className="mb-4 flex flex-wrap items-center">
-          {/* Red, by the one colour rule this interface follows: lime means
+              <Field orientation="horizontal">
+                <Checkbox id="skipCrc" name="skipCrc" />
+                <FieldLabel htmlFor="skipCrc" className="font-normal">
+                  {t("flashNode.skipCrc")}
+                </FieldLabel>
+              </Field>
+
+              <div>
+                {/* Red, by the one colour rule this interface follows: lime means
               safe to press, red means consequential and confirm first. Writing
               an OS image overwrites whatever that module was booting from, and
               it is the single most destructive thing here. It was lime, which
               in this interface is the colour of Save. */}
-          <Button
-            type="button"
-            variant="destructive"
-            onClick={() => setConfirmFlashModal(true)}
-            disabled={nodeUpdateMutation.isPending || isFlashing}
-            isLoading={
-              nodeUpdateMutation.isPending ||
-              (isFlashing && flashType === "node")
-            }
-          >
-            {t("flashNode.submitButton")}
-          </Button>
-          <label className="flex cursor-pointer items-center pl-4">
-            <Checkbox
-              id="skipCrc"
-              name="skipCrc"
-              aria-label={t("flashNode.skipCrc")}
-            />
-            <label
-              htmlFor="skipCrc"
-              className="not-sr-only ml-2 text-sm font-semibold"
-            >
-              {t("flashNode.skipCrc")}
-            </label>
-          </label>
-        </div>
+                <LoadingButton
+                  type="button"
+                  variant="destructive"
+                  onClick={() => setConfirmFlashModal(true)}
+                  disabled={nodeUpdateMutation.isPending || isFlashing}
+                  isLoading={
+                    nodeUpdateMutation.isPending ||
+                    (isFlashing && flashType === "node")
+                  }
+                >
+                  {t("flashNode.submitButton")}
+                </LoadingButton>
+              </div>
 
-        {uploadProgress && flashType === "node" && (
-          <Progress
-            aria-label={t("flashNode.ariaProgress")}
-            className="mt-4"
-            value={uploadProgress.pct}
-            label={`${uploadProgress.transferred}${uploadProgress.total ? ` / ${uploadProgress.total}` : ""}`}
-            pulsing={nodeUpdateMutation.isPending || isFlashing}
-          />
-        )}
-        {flashType === "node" && statusMessage && (
-          <div className="mt-2 text-sm">{statusMessage}</div>
-        )}
-      </form>
+              {uploadProgress && flashType === "node" && (
+                <UsageBar
+                  aria-label={t("flashNode.ariaProgress")}
+                  value={uploadProgress.pct}
+                  label={`${uploadProgress.transferred}${uploadProgress.total ? ` / ${uploadProgress.total}` : ""}`}
+                  pulsing={nodeUpdateMutation.isPending || isFlashing}
+                />
+              )}
+              {flashType === "node" && statusMessage && (
+                <div className="text-sm">{statusMessage}</div>
+              )}
+            </FieldGroup>
+          </form>
+        </CardContent>
+      </Card>
       <SdCardPicker
         isOpen={picking}
         onClose={() => setPicking(false)}
