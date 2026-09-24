@@ -4,14 +4,20 @@ import { useTranslation } from "react-i18next";
 
 import ConfirmationModal from "@/components/ConfirmationModal";
 import LoadingButton from "@/components/LoadingButton";
-import { NodePicker } from "@/components/NodePicker";
 import SdCardPicker from "@/components/SdCardPicker";
 import TabView from "@/components/TabView";
 import TextField from "@/components/TextField";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import UsageBar from "@/components/UsageBar";
 import { useFlash } from "@/hooks/use-flash";
 import type { SdCardEntry } from "@/lib/api/get";
@@ -43,6 +49,10 @@ export function FlashNode({ preselected }: { preselected?: number }) {
     uploadProgress,
     handleNodeUpdate,
   } = useFlash();
+  const nodeItems = [0, 1, 2, 3].map((nodeIndex) => ({
+    value: String(nodeIndex),
+    label: t("nodes.node", { nodeId: nodeIndex + 1 }),
+  }));
 
   const handleSubmit = () => {
     if (formRef.current) {
@@ -77,22 +87,40 @@ export function FlashNode({ preselected }: { preselected?: number }) {
   };
 
   return (
-    <TabView>
-      <Card className="max-w-2xl">
-        <CardHeader>
-          <CardTitle>{t("flashNode.header")}</CardTitle>
-        </CardHeader>
-        <CardContent>
+    <TabView title={t("flashNode.header")}>
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-wrap items-end justify-between gap-4 border-b pb-4">
+          <Select
+            items={nodeItems}
+            value={selectedNode}
+            onValueChange={(value) => {
+              if (value !== null) setSelectedNode(value);
+            }}
+          >
+            <SelectTrigger
+              aria-label={t("flashNode.nodeSelect")}
+              className="w-36"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {nodeItems.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <p className="text-sm text-muted-foreground">
+            {t("flashNode.fileInput")}
+          </p>
+        </div>
+        <div className="flex flex-col gap-6">
           <form ref={formRef}>
-            <FieldGroup>
-              {/* Preselected from `?node=2` when the Nodes tab sent you here, so
-              the node you were looking at is the node this flashes. */}
-              <NodePicker
-                label={t("flashNode.nodeSelect")}
-                name="node"
-                value={selectedNode}
-                onChange={setSelectedNode}
-              />
+            <FieldGroup className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
+              <input type="hidden" name="node" value={selectedNode} />
 
               <TextField
                 type="file"
@@ -100,48 +128,54 @@ export function FlashNode({ preselected }: { preselected?: number }) {
                 label={t("flashNode.fileInput")}
                 accept=".img,.bin,.xz,application/octet-stream"
                 disabled={fromCard !== null}
+                className="lg:col-span-2"
               />
 
               {/* The other source: the board's own SD card. An image is usually
             already there -- staged firmware lands on it, and anyone with
             physical access writes to it directly -- and before this, using
             one meant typing its path from memory. */}
-              <div className="flex flex-wrap items-center gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setPicking(true)}
-                  disabled={nodeUpdateMutation.isPending || isFlashing}
-                >
-                  {t("sdCard.browse")}
-                </Button>
-                {fromCard && (
-                  <span className="flex items-center gap-2 text-sm">
-                    <span className="font-mono break-all">
-                      {t("sdCard.chosen", { path: fromCard.path })}
+              <div className="flex flex-col gap-2 rounded-lg border p-4 lg:col-span-2">
+                <p className="text-sm font-medium">{t("sdCard.browse")}</p>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setPicking(true)}
+                    disabled={nodeUpdateMutation.isPending || isFlashing}
+                  >
+                    {t("sdCard.browse")}
+                  </Button>
+                  {fromCard && (
+                    <span className="flex items-center gap-2 text-sm">
+                      <span className="font-mono break-all">
+                        {t("sdCard.chosen", { path: fromCard.path })}
+                      </span>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setFromCard(null)}
+                      >
+                        {t("sdCard.clear")}
+                      </Button>
                     </span>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setFromCard(null)}
-                    >
-                      {t("sdCard.clear")}
-                    </Button>
-                  </span>
-                )}
+                  )}
+                </div>
               </div>
 
-              <TextField name="sha256" label={t("flashNode.shaInput")} />
+              <div className="flex flex-col gap-3 rounded-lg border p-4">
+                <p className="text-sm font-medium">{t("flashNode.shaInput")}</p>
+                <TextField name="sha256" label={t("flashNode.shaInput")} />
+                <Field orientation="horizontal">
+                  <Checkbox id="skipCrc" name="skipCrc" />
+                  <FieldLabel htmlFor="skipCrc" className="font-normal">
+                    {t("flashNode.skipCrc")}
+                  </FieldLabel>
+                </Field>
+              </div>
 
-              <Field orientation="horizontal">
-                <Checkbox id="skipCrc" name="skipCrc" />
-                <FieldLabel htmlFor="skipCrc" className="font-normal">
-                  {t("flashNode.skipCrc")}
-                </FieldLabel>
-              </Field>
-
-              <div>
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-6 lg:col-span-2">
                 {/* Red, by the one colour rule this interface follows: lime means
               safe to press, red means consequential and confirm first. Writing
               an OS image overwrites whatever that module was booting from, and
@@ -159,23 +193,27 @@ export function FlashNode({ preselected }: { preselected?: number }) {
                 >
                   {t("flashNode.submitButton")}
                 </LoadingButton>
-              </div>
 
-              {uploadProgress && flashType === "node" && (
-                <UsageBar
-                  aria-label={t("flashNode.ariaProgress")}
-                  value={uploadProgress.pct}
-                  label={`${uploadProgress.transferred}${uploadProgress.total ? ` / ${uploadProgress.total}` : ""}`}
-                  pulsing={nodeUpdateMutation.isPending || isFlashing}
-                />
-              )}
-              {flashType === "node" && statusMessage && (
-                <div className="text-sm">{statusMessage}</div>
-              )}
+                {uploadProgress && flashType === "node" && (
+                  <UsageBar
+                    aria-label={t("flashNode.ariaProgress")}
+                    value={uploadProgress.pct}
+                    label={`${uploadProgress.transferred}${uploadProgress.total ? ` / ${uploadProgress.total}` : ""}`}
+                    pulsing={nodeUpdateMutation.isPending || isFlashing}
+                  />
+                )}
+                {flashType === "node" && statusMessage && (
+                  <div className="text-sm">{statusMessage}</div>
+                )}
+              </div>
             </FieldGroup>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          {t("flashNode.nodeSelect")}:{" "}
+          {t("nodes.node", { nodeId: Number(selectedNode) + 1 })}
+        </p>
+      </div>
       <SdCardPicker
         isOpen={picking}
         onClose={() => setPicking(false)}

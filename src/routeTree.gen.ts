@@ -33,6 +33,7 @@ const TabLayoutSecurityLazyRouteImport = createFileRoute(
 const TabLayoutSettingsLazyRouteImport = createFileRoute(
   '/_tabLayout/settings',
 )()
+const TabLayoutSwitchLazyRouteImport = createFileRoute('/_tabLayout/switch')()
 const TabLayoutUsbLazyRouteImport = createFileRoute('/_tabLayout/usb')()
 
 const IndexLazyRoute = IndexLazyRouteImport.update({
@@ -121,6 +122,13 @@ const TabLayoutSettingsLazyRoute = TabLayoutSettingsLazyRouteImport.update({
 } as any).lazy(() =>
   import('./routes/_tabLayout/settings.lazy').then((d) => d.Route),
 )
+const TabLayoutSwitchLazyRoute = TabLayoutSwitchLazyRouteImport.update({
+  id: '/switch',
+  path: '/switch',
+  getParentRoute: () => TabLayoutRoute,
+} as any).lazy(() =>
+  import('./routes/_tabLayout/switch.lazy').then((d) => d.Route),
+)
 const TabLayoutUsbLazyRoute = TabLayoutUsbLazyRouteImport.update({
   id: '/usb',
   path: '/usb',
@@ -142,6 +150,7 @@ export interface FileRoutesByFullPath {
   '/power-control': typeof TabLayoutPowerControlLazyRoute
   '/security': typeof TabLayoutSecurityLazyRoute
   '/settings': typeof TabLayoutSettingsLazyRoute
+  '/switch': typeof TabLayoutSwitchLazyRoute
   '/usb': typeof TabLayoutUsbLazyRoute
 }
 export interface FileRoutesByTo {
@@ -157,6 +166,7 @@ export interface FileRoutesByTo {
   '/power-control': typeof TabLayoutPowerControlLazyRoute
   '/security': typeof TabLayoutSecurityLazyRoute
   '/settings': typeof TabLayoutSettingsLazyRoute
+  '/switch': typeof TabLayoutSwitchLazyRoute
   '/usb': typeof TabLayoutUsbLazyRoute
 }
 export interface FileRoutesById {
@@ -174,6 +184,7 @@ export interface FileRoutesById {
   '/_tabLayout/power-control': typeof TabLayoutPowerControlLazyRoute
   '/_tabLayout/security': typeof TabLayoutSecurityLazyRoute
   '/_tabLayout/settings': typeof TabLayoutSettingsLazyRoute
+  '/_tabLayout/switch': typeof TabLayoutSwitchLazyRoute
   '/_tabLayout/usb': typeof TabLayoutUsbLazyRoute
 }
 export interface FileRouteTypes {
@@ -191,6 +202,7 @@ export interface FileRouteTypes {
     | '/power-control'
     | '/security'
     | '/settings'
+    | '/switch'
     | '/usb'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -206,6 +218,7 @@ export interface FileRouteTypes {
     | '/power-control'
     | '/security'
     | '/settings'
+    | '/switch'
     | '/usb'
   id:
     | '__root__'
@@ -222,6 +235,7 @@ export interface FileRouteTypes {
     | '/_tabLayout/power-control'
     | '/_tabLayout/security'
     | '/_tabLayout/settings'
+    | '/_tabLayout/switch'
     | '/_tabLayout/usb'
   fileRoutesById: FileRoutesById
 }
@@ -324,6 +338,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TabLayoutSettingsLazyRouteImport
       parentRoute: typeof TabLayoutRoute
     }
+    '/_tabLayout/switch': {
+      id: '/_tabLayout/switch'
+      path: '/switch'
+      fullPath: '/switch'
+      preLoaderRoute: typeof TabLayoutSwitchLazyRouteImport
+      parentRoute: typeof TabLayoutRoute
+    }
     '/_tabLayout/usb': {
       id: '/_tabLayout/usb'
       path: '/usb'
@@ -345,6 +366,7 @@ interface TabLayoutRouteChildren {
   TabLayoutPowerControlLazyRoute: typeof TabLayoutPowerControlLazyRoute
   TabLayoutSecurityLazyRoute: typeof TabLayoutSecurityLazyRoute
   TabLayoutSettingsLazyRoute: typeof TabLayoutSettingsLazyRoute
+  TabLayoutSwitchLazyRoute: typeof TabLayoutSwitchLazyRoute
   TabLayoutUsbLazyRoute: typeof TabLayoutUsbLazyRoute
 }
 
@@ -359,6 +381,7 @@ const TabLayoutRouteChildren: TabLayoutRouteChildren = {
   TabLayoutPowerControlLazyRoute: TabLayoutPowerControlLazyRoute,
   TabLayoutSecurityLazyRoute: TabLayoutSecurityLazyRoute,
   TabLayoutSettingsLazyRoute: TabLayoutSettingsLazyRoute,
+  TabLayoutSwitchLazyRoute: TabLayoutSwitchLazyRoute,
   TabLayoutUsbLazyRoute: TabLayoutUsbLazyRoute,
 }
 

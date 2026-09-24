@@ -4,11 +4,9 @@ import { type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import LoadingButton from "@/components/LoadingButton";
-import { NodePicker } from "@/components/NodePicker";
 import USBSkeleton from "@/components/skeletons/usb";
 import TabView from "@/components/TabView";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import {
@@ -51,13 +49,6 @@ const modeOptions: SelectOption[] = [
   { value: "2", label: "usb.mode.flash", serverValue: "Flash" },
 ];
 
-const nodeOptions: SelectOption[] = [
-  { value: "0", label: "Node 1" },
-  { value: "1", label: "Node 2" },
-  { value: "2", label: "Node 3" },
-  { value: "3", label: "Node 4" },
-];
-
 export function USB() {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -71,9 +62,12 @@ export function USB() {
   const [selectedMode, setSelectedMode] = useState(
     modeOptions.find((option) => option.serverValue === data.mode)?.value ?? ""
   );
-  const [selectedNode, setSelectedNode] = useState(
-    nodeOptions.find((option) => option.label === data.node)?.value ?? ""
-  );
+  const [selectedNode, setSelectedNode] = useState(() => {
+    const nodeId = Number.parseInt(data.node.replace(/\D/g, ""), 10);
+    return Number.isInteger(nodeId) && nodeId >= 1 && nodeId <= 4
+      ? String(nodeId - 1)
+      : "";
+  });
   const [isUsbNode1Checked, setIsUsbNode1Checked] = useState(usbNode1);
 
   // When the user chooses flash mode for node 1, the checkbox is forced off.
@@ -111,6 +105,10 @@ export function USB() {
     value: option.value,
     label: t(option.label),
   }));
+  const nodeItems = [0, 1, 2, 3].map((nodeIndex) => ({
+    value: String(nodeIndex),
+    label: t("nodes.node", { nodeId: nodeIndex + 1 }),
+  }));
 
   // What each mode means, behind a tooltip on its name: a list of three
   // definitions nobody needs twice.
@@ -121,53 +119,64 @@ export function USB() {
   ] as const;
 
   return (
-    <TabView>
-      <Card className="max-w-2xl">
-        <CardHeader>
-          <CardTitle>{t("usb.header")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={(e) => void handleSubmit(e)}>
-            <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="usb-mode">
-                  {t("usb.modeSelect")}
-                </FieldLabel>
-                <Select
-                  name="mode"
-                  items={modeItems}
-                  value={selectedMode}
-                  onValueChange={(value) => setSelectedMode(value ?? "")}
-                >
-                  <SelectTrigger id="usb-mode" className="w-full">
-                    <SelectValue placeholder={t("ui.selectPlaceholder")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {modeItems.map((item) => (
-                        <SelectItem key={item.value} value={item.value}>
-                          {item.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </Field>
-              <NodePicker
-                label={t("usb.nodeSelect")}
+    <TabView title={t("usb.header")}>
+      <div className="flex flex-col gap-6">
+        <form onSubmit={(e) => void handleSubmit(e)}>
+          <FieldGroup className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
+            <Field className="lg:col-span-2">
+              <FieldLabel htmlFor="usb-mode">{t("usb.modeSelect")}</FieldLabel>
+              <Select
+                name="mode"
+                items={modeItems}
+                value={selectedMode}
+                onValueChange={(value) => setSelectedMode(value ?? "")}
+              >
+                <SelectTrigger id="usb-mode" className="w-full">
+                  <SelectValue placeholder={t("ui.selectPlaceholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {modeItems.map((item) => (
+                      <SelectItem key={item.value} value={item.value}>
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field className="lg:col-span-2">
+              <FieldLabel htmlFor="usb-node">{t("usb.nodeSelect")}</FieldLabel>
+              <Select
                 name="node"
+                items={nodeItems}
                 value={selectedNode}
-                onChange={setSelectedNode}
-              />
-              {data.bus_type === "Usb hub" && (
-                <Field orientation="horizontal">
-                  <Checkbox
-                    id="usbHub"
-                    name="usbHub"
-                    checked={usbNode1Value}
-                    onCheckedChange={(checked) => setIsUsbNode1Checked(checked)}
-                    disabled={isNode1FlashMode}
-                  />
+                onValueChange={(value) => setSelectedNode(value ?? "")}
+              >
+                <SelectTrigger id="usb-node" className="w-full">
+                  <SelectValue placeholder={t("ui.selectPlaceholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {nodeItems.map((item) => (
+                      <SelectItem key={item.value} value={item.value}>
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </Field>
+            {data.bus_type === "Usb hub" && (
+              <Field orientation="horizontal">
+                <Checkbox
+                  id="usbHub"
+                  name="usbHub"
+                  checked={usbNode1Value}
+                  onCheckedChange={(checked) => setIsUsbNode1Checked(checked)}
+                  disabled={isNode1FlashMode}
+                />
+                <div className="flex items-center gap-1">
                   <FieldLabel
                     htmlFor="usbHub"
                     className="w-fit flex-none font-normal"
@@ -189,47 +198,45 @@ export function USB() {
                       </div>
                     </TooltipContent>
                   </Tooltip>
-                </Field>
-              )}
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <LoadingButton
-                  type="submit"
-                  isLoading={isPendingUSBMode || isPendingUSBNode1}
-                >
-                  {t("usb.submitButton")}
-                </LoadingButton>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
-                    {t("usb.mode.definitionsTitle")}
-                  </span>
-                  {definitions.map(([name, definition, usage]) => (
-                    <Tooltip key={name}>
-                      <TooltipTrigger
-                        render={
-                          <Badge variant="secondary" className="cursor-help" />
-                        }
-                      >
-                        {t(name)}
-                        <InfoIcon data-icon="inline-end" />
-                      </TooltipTrigger>
-                      <TooltipContent sideOffset={8} align="end">
-                        <div className="flex max-w-sm flex-col gap-1 text-pretty">
-                          <p className="font-medium">{t(name)}</p>
-                          <p>{t(definition)}</p>
-                          <p className="font-medium">
-                            {t("usb.mode.usageWord")}
-                          </p>
-                          <p>{t(usage)}</p>
-                        </div>
-                      </TooltipContent>
-                    </Tooltip>
-                  ))}
                 </div>
+              </Field>
+            )}
+            <div className="flex flex-wrap items-center justify-between gap-4 border-t pt-6 lg:col-span-2">
+              <LoadingButton
+                type="submit"
+                isLoading={isPendingUSBMode || isPendingUSBNode1}
+              >
+                {t("usb.submitButton")}
+              </LoadingButton>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm text-muted-foreground">
+                  {t("usb.mode.definitionsTitle")}
+                </span>
+                {definitions.map(([name, definition, usage]) => (
+                  <Tooltip key={name}>
+                    <TooltipTrigger
+                      render={
+                        <Badge variant="secondary" className="cursor-help" />
+                      }
+                    >
+                      {t(name)}
+                      <InfoIcon data-icon="inline-end" />
+                    </TooltipTrigger>
+                    <TooltipContent sideOffset={8} align="end">
+                      <div className="flex max-w-sm flex-col gap-1 text-pretty">
+                        <p className="font-medium">{t(name)}</p>
+                        <p>{t(definition)}</p>
+                        <p className="font-medium">{t("usb.mode.usageWord")}</p>
+                        <p>{t(usage)}</p>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
               </div>
-            </FieldGroup>
-          </form>
-        </CardContent>
-      </Card>
+            </div>
+          </FieldGroup>
+        </form>
+      </div>
     </TabView>
   );
 }

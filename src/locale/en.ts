@@ -6,6 +6,7 @@ const translations = {
     powerControl: "Power Control",
     console: "Console",
     network: "Network",
+    switch: "Switch",
     security: "Security",
     firmware: "Firmware",
     settings: "Settings",
@@ -167,6 +168,7 @@ const translations = {
     ariaFanStep: "Fan {{device}} cooling step",
     boardHealth: "Board Health",
     boardInfo: "Board info",
+    boardIp: "IP address",
     healthUptime: "Uptime",
     healthLoad: "Load",
     healthMemory: "Memory",
@@ -201,8 +203,12 @@ const translations = {
       "Duty is the PWM level the board's own cooling-levels table maps this step to, as the daemon reports that table. The step is the honest reading; the duty is what it commands. A board that reports no table shows the step alone.",
   },
   network: {
-    header: "The BMC's addresses and the on-board switch",
+    header: "Network",
     networkInterfaces: "Network Interfaces",
+    interface: "Interface",
+    ipAddress: "IP address",
+    macAddress: "MAC address",
+    switchHeader: "Switch configuration",
     resetNetworkButton: "Reset Network",
     resetSwitchButton: "Reset the switch chip",
     resetSwitchConfirm:
@@ -289,7 +295,7 @@ const translations = {
     cameBack: "The board came back in {{seconds}} seconds.",
   },
   addressCard: {
-    title: "The BMC's address",
+    title: "IP address",
     now: "Now:",
     noAddress: "no IPv4 address",
     via: "via",
@@ -340,15 +346,15 @@ const translations = {
       "The current static address was written by hand; a confirmed change replaces the file.",
   },
   switchConfig: {
-    title: "The on-board switch",
+    title: "Switch configuration",
     running: "What it is doing now",
     oneNetwork:
       "One network. Every module, the BMC and both uplinks share it, and the switch does not look at VLANs.",
     port: "Port",
     link: "Link",
     traffic: "Traffic",
-    showTraffic: "Show traffic and errors",
-    hideTraffic: "Hide traffic and errors",
+    showTraffic: "Show traffic",
+    hideTraffic: "Hide traffic",
     untagged: "Untagged",
     tagged: "Tagged",
     untaggedOn: "Untagged VLAN on {{port}}",
@@ -650,7 +656,7 @@ const translations = {
   settings: {
     hostnameTitle: "Hostname",
     hostnameNote:
-      "One DNS label: letters, digits and hyphens, no dots. It is what About reports, what the header shows, what the board advertises over mDNS, and the instance label on every metrics series.",
+      "Letters, digits, and hyphens only; no dots. Used as the hostname, mDNS name, and metrics instance label.",
     hostnameNextBoot: "after the next reboot: {{name}}",
     hostnameConfirmTitle: "Rename this board?",
     hostnameConfirm:
