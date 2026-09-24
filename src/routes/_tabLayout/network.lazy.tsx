@@ -7,7 +7,6 @@ import ConfirmationModal from "@/components/ConfirmationModal";
 import HostnameCard from "@/components/HostnameCard";
 import LoadingButton from "@/components/LoadingButton";
 import NetworkSkeleton from "@/components/skeletons/network";
-import SwitchConfig from "@/components/SwitchConfig";
 import TabView from "@/components/TabView";
 import {
   Card,
@@ -16,6 +15,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { useInfoTabData } from "@/lib/api/get";
 import { useNetworkResetMutation } from "@/lib/api/set";
@@ -69,16 +76,14 @@ export function Network() {
   };
 
   return (
-    <TabView title={t("network.header")} columns>
+    <TabView title={t("network.header")}>
       {/* What this board is called and where it answers, together. The name
           IS a network fact: it is how somebody reaches the board, it is in
           the certificate's subject-alternative names, and it is the mDNS
           name. It used to live on a different tab from the addresses it
           belongs with. */}
-      <div className="flex flex-col gap-6">
+      <div className="grid gap-6 md:grid-cols-2">
         <HostnameCard />
-        <AddressCard />
-
         <Card>
           <CardHeader>
             <CardTitle>{t("network.networkInterfaces")}</CardTitle>
@@ -99,25 +104,33 @@ export function Network() {
             </CardAction>
           </CardHeader>
           <CardContent>
-            {/* One row per interface, not three. The device, its address and
-                its MAC are one fact about one thing, and three definition
-                rows each spent 150 px saying so. */}
-            <div className="flex flex-col gap-2">
-              {data.ip.map((ip) => (
-                <div
-                  key={ip.device}
-                  className="flex flex-wrap items-baseline gap-x-4 text-sm"
-                >
-                  <span className="w-16 shrink-0 font-medium">{ip.device}</span>
-                  <span className="font-mono">{ip.ip}</span>
-                  <span className="font-mono text-muted-foreground">
-                    {ip.mac}
-                  </span>
-                </div>
-              ))}
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("network.interface")}</TableHead>
+                    <TableHead>{t("network.ipAddress")}</TableHead>
+                    <TableHead>{t("network.macAddress")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.ip.map((ip) => (
+                    <TableRow key={ip.device}>
+                      <TableCell className="font-medium">{ip.device}</TableCell>
+                      <TableCell className="font-mono">{ip.ip}</TableCell>
+                      <TableCell className="font-mono text-muted-foreground">
+                        {ip.mac}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           </CardContent>
         </Card>
+        <div className="md:col-span-2">
+          <AddressCard />
+        </div>
       </div>
 
       <ConfirmationModal
@@ -130,11 +143,6 @@ export function Network() {
         title={t("network.resetSwitchButton")}
         message={t("network.resetSwitchConfirm")}
       />
-
-      {/* One panel, not two. Link state and VLAN membership are facts about
-          the same seven ports, and answering "is node 3's cable in, and which
-          network is it on" used to mean matching names between two tables. */}
-      <SwitchConfig />
     </TabView>
   );
 }

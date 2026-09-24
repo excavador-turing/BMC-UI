@@ -3,10 +3,16 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import InfoNote from "@/components/InfoNote";
-import { NodePicker } from "@/components/NodePicker";
 import SerialConsole from "@/components/SerialConsole";
 import TabView from "@/components/TabView";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { type SerialReaderState, useSerialStatusQuery } from "@/lib/api/get";
 
 export const Route = createLazyFileRoute("/_tabLayout/console")({
@@ -77,19 +83,46 @@ export function SerialConsoleTab({ preselected }: { preselected?: number }) {
 
   const node = Number.parseInt(selectedNode);
   const readerState = readerStates?.[node];
+  const nodeItems = [0, 1, 2, 3].map((nodeIndex) => ({
+    value: String(nodeIndex),
+    label: t("nodes.node", { nodeId: nodeIndex + 1 }),
+  }));
 
   return (
     <TabView title={t("console.header")}>
-      <Card>
-        <CardContent className="flex flex-col gap-4">
-          <NodePicker
-            label={t("console.nodeSelect")}
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-wrap items-end gap-4 border-b pb-4">
+          <Select
+            items={nodeItems}
             value={selectedNode}
-            onChange={setSelectedNode}
-          />
+            onValueChange={(value) => {
+              if (value !== null) setSelectedNode(value);
+            }}
+          >
+            <SelectTrigger
+              aria-label={t("console.nodeSelect")}
+              className="w-36"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {nodeItems.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <span className="text-sm text-muted-foreground">
+            {t("console.nodeSelect")}
+          </span>
+        </div>
 
-          <div className="flex flex-wrap items-baseline gap-3">
-            <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <span className="inline-flex items-center gap-1 text-muted-foreground">
               {t("console.readerTask")}
               <InfoNote
                 text={t("console.readerNote")}
@@ -97,37 +130,35 @@ export function SerialConsoleTab({ preselected }: { preselected?: number }) {
                 label={t("console.readerTask")}
               />
             </span>
+            <span aria-hidden className="text-muted-foreground">
+              |
+            </span>
             {isError ? (
-              <span className="text-sm text-muted-foreground">
+              <span className="text-muted-foreground">
                 {t("console.readerUnavailable")}
               </span>
             ) : readerState === undefined ? (
-              <span className="text-sm text-muted-foreground">
+              <span className="text-muted-foreground">
                 {t("console.readerUnknown")}
               </span>
             ) : (
               <ReaderState state={readerState} />
             )}
           </div>
-
           <SerialConsole key={node} node={node} />
-        </CardContent>
-      </Card>
+        </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+        <section className="flex flex-col gap-4 border-t pt-6">
+          <h3 className="flex items-center gap-2 text-lg font-medium">
             {t("console.restTitle")}
             <InfoNote
               text={t("console.restCrlf")}
               path="/features/a-console-to-every-module/#two-ways-to-type-and-they-are-not-the-same"
               label={t("console.restTitle")}
             />
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-2 text-sm">
+          </h3>
           <p>{t("console.restIntro")}</p>
-          <ul className="flex flex-col gap-1">
+          <ul className="flex flex-col gap-2 text-sm">
             <li>
               <code className="rounded-sm bg-muted px-1 font-mono break-all">
                 GET /api/bmc?opt=get&amp;type=uart&amp;node=&lt;0..3&gt;
@@ -142,8 +173,8 @@ export function SerialConsoleTab({ preselected }: { preselected?: number }) {
               — {t("console.restWrite")}
             </li>
           </ul>
-        </CardContent>
-      </Card>
+        </section>
+      </div>
     </TabView>
   );
 }

@@ -1,5 +1,6 @@
 import {
   BookOpenIcon,
+  CableIcon,
   FanIcon,
   HardDriveDownloadIcon,
   InfoIcon,
@@ -95,6 +96,7 @@ export const navigation: NavSection[] = [
     title: "navigation.network",
     items: [
       { title: "navigation.network", url: "/network", icon: NetworkIcon },
+      { title: "navigation.switch", url: "/switch", icon: CableIcon },
     ],
   },
   {
@@ -147,7 +149,11 @@ export function trailFor(pathname: string): {
     for (const item of section.items) {
       if (item.external) continue;
       if (item.url && item.url === pathname) {
-        return { section, parent: null, page: { title: item.title, url: item.url } };
+        return {
+          section,
+          parent: null,
+          page: { title: item.title, url: item.url },
+        };
       }
       const child = item.items?.find((sub) => sub.url === pathname);
       if (child) return { section, parent: item, page: child };

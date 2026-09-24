@@ -6,15 +6,17 @@ import ConfirmationModal from "@/components/ConfirmationModal";
 import TextField from "@/components/TextField";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import {
   type AddressDocument,
@@ -197,39 +199,6 @@ export default function AddressCard() {
     <Card>
       <CardHeader>
         <CardTitle>{t("addressCard.title")}</CardTitle>
-        {/* What the bridge has right now, before any form: on a DHCP board this
-          is the lease, and it is the one line a person came to read. */}
-        <CardDescription>
-          <span className="text-muted-foreground">{t("addressCard.now")}</span>{" "}
-          <span className="font-mono">
-            {live.address ?? t("addressCard.noAddress")}
-          </span>
-          {live.gateway && (
-            <>
-              {" "}
-              <span className="text-muted-foreground">
-                {t("addressCard.via")}
-              </span>{" "}
-              <span className="font-mono">{live.gateway}</span>
-            </>
-          )}
-          {live.dns.length > 0 && (
-            <>
-              {" "}
-              <span className="text-muted-foreground">
-                {t("addressCard.dnsWord")}
-              </span>{" "}
-              <span className="font-mono">{live.dns.join(" ")}</span>
-            </>
-          )}{" "}
-          <span className="text-muted-foreground">
-            (
-            {live.mode === "dhcp"
-              ? t("addressCard.leased")
-              : t("addressCard.fixed")}
-            )
-          </span>
-        </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {pending && (
@@ -314,37 +283,50 @@ export default function AddressCard() {
             </p>
           )}
 
-        <ToggleGroup
-          aria-label={t("addressCard.mode")}
-          variant="outline"
-          value={[draft.mode]}
-          disabled={pending !== null}
-          onValueChange={(next: string[]) => {
-            const mode = next[0] as "dhcp" | "static" | undefined;
-            if (mode === undefined) return;
-            set(
-              mode === "dhcp"
-                ? { mode }
-                : {
-                    mode,
-                    // Start a static draft from what the bridge has now:
-                    // the address a person wants to fix is usually the one
-                    // the lease gave them.
-                    cidr: typedOr(draft.cidr, live.address),
-                    gateway: typedOr(draft.gateway, live.gateway),
-                    dns: typedOr(draft.dns, live.dns.join(", ")),
-                    search: typedOr(draft.search, live.search),
-                  }
-            );
-          }}
-        >
-          <ToggleGroupItem value="dhcp">
-            {t("addressCard.dhcp")}
-          </ToggleGroupItem>
-          <ToggleGroupItem value="static">
-            {t("addressCard.static")}
-          </ToggleGroupItem>
-        </ToggleGroup>
+        <Field className="max-w-sm">
+          <FieldLabel htmlFor="address-mode">
+            {t("addressCard.mode")}
+          </FieldLabel>
+          <Select
+            name="mode"
+            items={[
+              { value: "dhcp", label: t("addressCard.dhcp") },
+              { value: "static", label: t("addressCard.static") },
+            ]}
+            value={draft.mode}
+            disabled={pending !== null}
+            onValueChange={(value) => {
+              const mode = value;
+              if (mode === null) return;
+              set(
+                mode === "dhcp"
+                  ? { mode }
+                  : {
+                      mode,
+                      // Start a static draft from what the bridge has now:
+                      // the address a person wants to fix is usually the one
+                      // the lease gave them.
+                      cidr: typedOr(draft.cidr, live.address),
+                      gateway: typedOr(draft.gateway, live.gateway),
+                      dns: typedOr(draft.dns, live.dns.join(", ")),
+                      search: typedOr(draft.search, live.search),
+                    }
+              );
+            }}
+          >
+            <SelectTrigger id="address-mode" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="dhcp">{t("addressCard.dhcp")}</SelectItem>
+                <SelectItem value="static">
+                  {t("addressCard.static")}
+                </SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </Field>
 
         {draft.mode === "static" && (
           <div className="grid max-w-2xl gap-4 sm:grid-cols-2">
@@ -453,18 +435,18 @@ export default function AddressCard() {
           {edits && (
             <Button
               type="button"
-              variant="link"
+              variant="outline"
               onClick={() => setEdited(null)}
             >
               {t("addressCard.discard")}
             </Button>
           )}
         </div>
-        <p className="text-sm text-muted-foreground">
-          {edits
-            ? t("addressCard.tryItNote")
-            : t("addressCard.unchanged", { address: words(running!, t) })}
-        </p>
+        {edits && (
+          <p className="text-sm text-muted-foreground">
+            {t("addressCard.tryItNote")}
+          </p>
+        )}
 
         <ConfirmationModal
           isOpen={confirming}

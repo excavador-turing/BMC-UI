@@ -18,6 +18,7 @@ import {
   type HealthMemory,
   type HealthNand,
   useAboutTabData,
+  useAddressQuery,
   useHealthQuery,
   useThermalQuery,
   useUpdateCheckQuery,
@@ -228,6 +229,7 @@ function TemperatureReading() {
 export default function BoardHealth() {
   const { t } = useTranslation();
   const { data: about } = useAboutTabData();
+  const address = useAddressQuery();
   const update = useUpdateCheckQuery();
   const { data, isPending, isError } = useHealthQuery();
   const durationLabel = useDurationLabel();
@@ -274,6 +276,15 @@ export default function BoardHealth() {
                     </Link>
                   )}
                 </span>
+              </TableItem>
+              <TableItem term={t("info.boardIp")}>
+                {address.data?.live.address ? (
+                  <span className="font-medium">
+                    {address.data.live.address}
+                  </span>
+                ) : (
+                  <Absent />
+                )}
               </TableItem>
               <TableItem term={t("info.healthUptime")}>
                 {uptime === null ? (

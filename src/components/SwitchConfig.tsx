@@ -7,7 +7,6 @@ import ConfirmationModal from "@/components/ConfirmationModal";
 import TextField from "@/components/TextField";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -219,21 +218,12 @@ function TrafficCell({ port }: { port: SwitchPort | undefined }) {
   const { t } = useTranslation();
   if (!port?.present) return <span className="text-muted-foreground">—</span>;
 
-  const errors = (port.rx_errors ?? 0) + (port.tx_errors ?? 0);
   return (
     <span className="text-muted-foreground">
       {t("network.switchPortTraffic", {
         rx: human(port.rx_bytes ?? 0),
         tx: human(port.tx_bytes ?? 0),
       })}
-      {errors > 0 && (
-        <span className="ml-2 text-warning">
-          {t("network.switchPortErrors", {
-            rx: port.rx_errors,
-            tx: port.tx_errors,
-          })}
-        </span>
-      )}
     </span>
   );
 }
@@ -241,7 +231,6 @@ function TrafficCell({ port }: { port: SwitchPort | undefined }) {
 interface TableProps {
   draft: Draft;
   ports: SwitchPort[] | undefined;
-  showTraffic: boolean;
   /** Absent means the board cannot be configured from here: read-only. */
   onChange?: (next: Draft) => void;
   warningsFor: (port: string) => string[];
@@ -260,14 +249,7 @@ interface TableProps {
  * the board refuses such a document. Saying so with a disabled box is kinder
  * than saying it with a refusal after the fact.
  */
-function PortTable({
-  draft,
-  ports,
-  showTraffic,
-  onChange,
-  warningsFor,
-  bad,
-}: TableProps) {
+function PortTable({ draft, ports, onChange, warningsFor, bad }: TableProps) {
   const { t } = useTranslation();
   const byName = new Map((ports ?? []).map((port) => [port.name, port]));
   const editable = onChange !== undefined;
@@ -297,7 +279,7 @@ function PortTable({
           {t("switchConfig.oneNetwork")}
         </div>
       )}
-      <Table className="max-w-3xl">
+      <Table className="w-full">
         <TableHeader>
           <TableRow className="text-muted-foreground">
             <TableHead className={`${cell} font-normal`}>
@@ -306,11 +288,9 @@ function PortTable({
             <TableHead className={`${cell} font-normal`}>
               {t("switchConfig.link")}
             </TableHead>
-            {showTraffic && (
-              <TableHead className={`${cell} font-normal`}>
-                {t("switchConfig.traffic")}
-              </TableHead>
-            )}
+            <TableHead className={`${cell} font-normal`}>
+              {t("switchConfig.traffic")}
+            </TableHead>
             <TableHead className={`${cell} font-normal`}>
               {t("switchConfig.untagged")}
             </TableHead>
@@ -341,15 +321,13 @@ function PortTable({
                     <LinkCell port={byName.get(name)} />
                   )}
                 </TableCell>
-                {showTraffic && (
-                  <TableCell className={cell}>
-                    {isBmc ? (
-                      <span className="text-muted-foreground">—</span>
-                    ) : (
-                      <TrafficCell port={byName.get(name)} />
-                    )}
-                  </TableCell>
-                )}
+                <TableCell className={cell}>
+                  {isBmc ? (
+                    <span className="text-muted-foreground">—</span>
+                  ) : (
+                    <TrafficCell port={byName.get(name)} />
+                  )}
+                </TableCell>
                 <TableCell className={vlanCell}>
                   {editable ? (
                     <Input
@@ -435,7 +413,6 @@ export default function SwitchConfig() {
   const revert = useRevertSwitchMutation();
 
   const [edited, setEdited] = useState<Draft | null>(null);
-  const [showTraffic, setShowTraffic] = useState(false);
   /**
    * Seconds to confirm within, or null while the board's default stands.
    *
@@ -550,11 +527,8 @@ export default function SwitchConfig() {
   const vlans = proposed ? vlansOf(proposed) : [];
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("switchConfig.title")}</CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4">
         {portsQuery.isError && (
           <p className="text-sm text-muted-foreground">
             {t("network.switchPortsUnavailable")}
@@ -670,29 +644,14 @@ export default function SwitchConfig() {
           <PortTable
             draft={draft}
             ports={ports}
-            showTraffic={showTraffic}
             onChange={configurable ? setEdited : undefined}
             warningsFor={warningsFor}
             bad={bad}
           />
         )}
 
-        <div>
-          <Button
-            type="button"
-            variant="link"
-            size="sm"
-            className="px-0 text-muted-foreground"
-            onClick={() => setShowTraffic((shown) => !shown)}
-          >
-            {showTraffic
-              ? t("switchConfig.hideTraffic")
-              : t("switchConfig.showTraffic")}
-          </Button>
-        </div>
-
         {configurable && draft && (
-          <div className="flex max-w-3xl flex-col gap-4">
+          <div className="flex w-full flex-col gap-4">
             <div className="flex flex-col gap-3 xl:flex-row xl:gap-6">
               <Field orientation="horizontal">
                 <Checkbox
@@ -855,7 +814,7 @@ export default function SwitchConfig() {
             seconds: window_s ?? state.data?.default_window_s ?? 30,
           })}
         />
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
