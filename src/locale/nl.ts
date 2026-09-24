@@ -3,12 +3,14 @@ import { type OptionalTranslations } from "@/locale/en";
 const translations = {
   navigation: {
     overview: "Overzicht",
+    dashboard: "Dashboard",
     firmware: "Firmware",
     settings: "Instellingen",
     info: "Info",
     network: "Netwerk",
     security: "Beveiliging",
     nodes: "Nodes",
+    powerControl: "Stroomregeling",
     console: "Console",
     usb: "USB",
     firmwareUpgrade: "Firmware-upgrade",
@@ -16,8 +18,13 @@ const translations = {
     about: "Over",
     // The sidebar's three headings.
     sectionBoard: "Board",
-    sectionConfiguration: "Configuratie",
+    sectionNetworkAccess: "Netwerk & toegang",
     sectionSystem: "Systeem",
+    sectionOther: "Overig",
+    docs: "Documentatie",
+    github: "GitHub",
+    cooling: "Koeling",
+    maintenance: "Onderhoud",
   },
   userNav: {
     language: "Taal",
@@ -44,6 +51,15 @@ const translations = {
   // reviews it. These strings decide who can log in to hardware, and a
   // guessed translation of "stop trusting any proxy" is worse than a
   // sentence the reader can look up.
+  // The Dashboard (Overview) page.
+  dashboard: {
+    unnamed: "Geen naam",
+    stateOn: "Aan",
+    stateOff: "Uit",
+    poweredOnAgo: "{{duration}} geleden ingeschakeld",
+    offSinceUnknown: "Uit sinds: niet gemeld",
+    attnUpdate: "Firmware {{version}} is beschikbaar",
+  },
   info: {
     fanAboveTrip: "boven {{celsius}} °C",
     userStorage: "Gebruikersopslag",
@@ -81,9 +97,9 @@ const translations = {
       "Het board heeft {{device}} teruggezet naar {{cur}} van {{max}} nadat het op {{requested}} was gezet.",
     ariaFanStep: "Koelstand van ventilator {{device}}",
     boardHealth: "Boardconditie",
+    boardInfo: "Boardinformatie",
     healthUptime: "Bedrijfstijd",
     healthLoad: "Belasting",
-    healthLoadWindows: "1 / 5 / 15 min",
     healthMemory: "Geheugen",
     healthMemoryDetail: "vrij {{free}} · beschikbaar {{available}}",
     healthTemperatureTerm: "Temperatuur",
@@ -92,6 +108,7 @@ const translations = {
     healthFanTrip: "boven de drempel van {{celsius}} °C",
     healthNand: "NAND",
     healthNandFree: "{{available}} van {{total}} wisblokken vrij",
+    healthNandFreeBytes: "{{size}} vrij",
     healthNandBad: "{{blocks}} defect",
     healthNandReserved: "{{blocks}} gereserveerd",
     healthNandNote:
@@ -145,7 +162,6 @@ const translations = {
   },
   nodes: {
     powerOnTimeTerm: "Inschakeltijd",
-    openConsole: "Console",
     flashNode: "Flashen…",
     usbRouteLabel: "USB-route voor node {{nodeId}}",
     usbNotRouted: "niet hierheen gerouteerd",

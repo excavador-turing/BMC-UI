@@ -3,19 +3,11 @@ import { filesize } from "filesize";
 import { useTranslation } from "react-i18next";
 
 import BoardHealth from "@/components/BoardHealth";
-import LoadingButton from "@/components/LoadingButton";
+import NodeTiles from "@/components/dashboard/NodeTiles";
 import InfoSkeleton from "@/components/skeletons/info";
 import TabView from "@/components/TabView";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import UsageBar from "@/components/UsageBar";
-import { useToast } from "@/hooks/use-toast";
-import { useBackupMutation } from "@/lib/api/file";
 import { useInfoTabData } from "@/lib/api/get";
 
 /**
@@ -38,91 +30,57 @@ const progressData = (totalBytes: number, freeBytes: number) => {
 
 export const Route = createLazyFileRoute("/_tabLayout/info")({
   component: Info,
-  errorComponent: () => <div>Error loading Overview</div>,
+  errorComponent: () => <div>Error loading Dashboard</div>,
   pendingComponent: InfoSkeleton,
 });
 
+/**
+ * The Dashboard: the page a person lands on, answering "is the board all
+ * right" before any other question is asked.
+ *
+ * Kept simple: dashboard-01's section cards, one per module -- its name,
+ * whether it is on, and since when -- and below them the board's details
+ * and its storage.
+ */
 export function Info() {
   const { t } = useTranslation();
-  const { toast } = useToast();
   const { data } = useInfoTabData();
-  const { mutate: mutateBackup, isPending: backupPending } =
-    useBackupMutation();
-
-  const handleBackupSubmit = () => {
-    mutateBackup(undefined, {
-      onSuccess: (data) => {
-        const { blob, filename } = data;
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", filename);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
-        toast({
-          title: t("info.backupButton"),
-          description: (
-            <>
-              <p>{t("info.backupSuccess")}</p>
-              <p className="mt-1 font-mono text-xs">{filename}</p>
-            </>
-          ),
-        });
-      },
-      onError: (e) => {
-        toast({
-          title: t("info.backupFailed"),
-          description: e.message,
-          variant: "destructive",
-        });
-      },
-    });
-  };
 
   return (
     <TabView>
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("info.userStorage")}</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          {data.storage.map((storage) => {
-            const { usedPct, usedHuman, totalHuman } = progressData(
-              storage.total_bytes,
-              storage.bytes_free
-            );
-            return (
-              <div
-                key={storage.name}
-                className="flex items-center justify-between gap-4"
-              >
-                <div className="w-1/4 font-medium">{storage.name}</div>
-                <UsageBar
-                  className="w-1/2 lg:w-3/4"
-                  aria-label={t("info.ariaStorageUtilization")}
-                  value={usedPct}
-                  label={`${usedHuman} / ${totalHuman}`}
-                  warningOnHigh
-                />
-              </div>
-            );
-          })}
-        </CardContent>
-        <CardFooter>
-          <LoadingButton
-            type="button"
-            variant="outline"
-            onClick={() => handleBackupSubmit()}
-            isLoading={backupPending}
-          >
-            {t("info.backupButton")}
-          </LoadingButton>
-        </CardFooter>
-      </Card>
+      <div className="@container/main flex flex-col gap-4 md:gap-6">
+        <NodeTiles />
 
-      <BoardHealth />
+        <div className="grid gap-4 md:gap-6 xl:grid-cols-3 xl:items-start">
+          <div id="health" className="scroll-mt-4 xl:col-span-2">
+            <BoardHealth />
+          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("info.userStorage")}</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+              {data.storage.map((storage) => {
+                const { usedPct, usedHuman, totalHuman } = progressData(
+                  storage.total_bytes,
+                  storage.bytes_free
+                );
+                return (
+                  <div key={storage.name} className="flex flex-col gap-1.5">
+                    <span className="text-sm font-medium">{storage.name}</span>
+                    <UsageBar
+                      aria-label={t("info.ariaStorageUtilization")}
+                      value={usedPct}
+                      label={`${usedHuman} / ${totalHuman}`}
+                      warningOnHigh
+                    />
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </TabView>
   );
 }

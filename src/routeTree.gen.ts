@@ -18,12 +18,15 @@ import { Route as TabLayoutFlashNodeRouteImport } from './routes/_tabLayout/flas
 
 const IndexLazyRouteImport = createFileRoute('/')()
 const TabLayoutAboutLazyRouteImport = createFileRoute('/_tabLayout/about')()
+const TabLayoutCoolingLazyRouteImport = createFileRoute('/_tabLayout/cooling')()
 const TabLayoutFirmwareUpgradeLazyRouteImport = createFileRoute(
   '/_tabLayout/firmware-upgrade',
 )()
 const TabLayoutInfoLazyRouteImport = createFileRoute('/_tabLayout/info')()
 const TabLayoutNetworkLazyRouteImport = createFileRoute('/_tabLayout/network')()
-const TabLayoutNodesLazyRouteImport = createFileRoute('/_tabLayout/nodes')()
+const TabLayoutPowerControlLazyRouteImport = createFileRoute(
+  '/_tabLayout/power-control',
+)()
 const TabLayoutSecurityLazyRouteImport = createFileRoute(
   '/_tabLayout/security',
 )()
@@ -60,6 +63,13 @@ const TabLayoutConsoleRoute = TabLayoutConsoleRouteImport.update({
 } as any).lazy(() =>
   import('./routes/_tabLayout/console.lazy').then((d) => d.Route),
 )
+const TabLayoutCoolingLazyRoute = TabLayoutCoolingLazyRouteImport.update({
+  id: '/cooling',
+  path: '/cooling',
+  getParentRoute: () => TabLayoutRoute,
+} as any).lazy(() =>
+  import('./routes/_tabLayout/cooling.lazy').then((d) => d.Route),
+)
 const TabLayoutFirmwareUpgradeLazyRoute =
   TabLayoutFirmwareUpgradeLazyRouteImport.update({
     id: '/firmware-upgrade',
@@ -89,13 +99,14 @@ const TabLayoutNetworkLazyRoute = TabLayoutNetworkLazyRouteImport.update({
 } as any).lazy(() =>
   import('./routes/_tabLayout/network.lazy').then((d) => d.Route),
 )
-const TabLayoutNodesLazyRoute = TabLayoutNodesLazyRouteImport.update({
-  id: '/nodes',
-  path: '/nodes',
-  getParentRoute: () => TabLayoutRoute,
-} as any).lazy(() =>
-  import('./routes/_tabLayout/nodes.lazy').then((d) => d.Route),
-)
+const TabLayoutPowerControlLazyRoute =
+  TabLayoutPowerControlLazyRouteImport.update({
+    id: '/power-control',
+    path: '/power-control',
+    getParentRoute: () => TabLayoutRoute,
+  } as any).lazy(() =>
+    import('./routes/_tabLayout/power-control.lazy').then((d) => d.Route),
+  )
 const TabLayoutSecurityLazyRoute = TabLayoutSecurityLazyRouteImport.update({
   id: '/security',
   path: '/security',
@@ -124,10 +135,11 @@ export interface FileRoutesByFullPath {
   '/console': typeof TabLayoutConsoleRoute
   '/flash-node': typeof TabLayoutFlashNodeRoute
   '/about': typeof TabLayoutAboutLazyRoute
+  '/cooling': typeof TabLayoutCoolingLazyRoute
   '/firmware-upgrade': typeof TabLayoutFirmwareUpgradeLazyRoute
   '/info': typeof TabLayoutInfoLazyRoute
   '/network': typeof TabLayoutNetworkLazyRoute
-  '/nodes': typeof TabLayoutNodesLazyRoute
+  '/power-control': typeof TabLayoutPowerControlLazyRoute
   '/security': typeof TabLayoutSecurityLazyRoute
   '/settings': typeof TabLayoutSettingsLazyRoute
   '/usb': typeof TabLayoutUsbLazyRoute
@@ -138,10 +150,11 @@ export interface FileRoutesByTo {
   '/console': typeof TabLayoutConsoleRoute
   '/flash-node': typeof TabLayoutFlashNodeRoute
   '/about': typeof TabLayoutAboutLazyRoute
+  '/cooling': typeof TabLayoutCoolingLazyRoute
   '/firmware-upgrade': typeof TabLayoutFirmwareUpgradeLazyRoute
   '/info': typeof TabLayoutInfoLazyRoute
   '/network': typeof TabLayoutNetworkLazyRoute
-  '/nodes': typeof TabLayoutNodesLazyRoute
+  '/power-control': typeof TabLayoutPowerControlLazyRoute
   '/security': typeof TabLayoutSecurityLazyRoute
   '/settings': typeof TabLayoutSettingsLazyRoute
   '/usb': typeof TabLayoutUsbLazyRoute
@@ -154,10 +167,11 @@ export interface FileRoutesById {
   '/_tabLayout/console': typeof TabLayoutConsoleRoute
   '/_tabLayout/flash-node': typeof TabLayoutFlashNodeRoute
   '/_tabLayout/about': typeof TabLayoutAboutLazyRoute
+  '/_tabLayout/cooling': typeof TabLayoutCoolingLazyRoute
   '/_tabLayout/firmware-upgrade': typeof TabLayoutFirmwareUpgradeLazyRoute
   '/_tabLayout/info': typeof TabLayoutInfoLazyRoute
   '/_tabLayout/network': typeof TabLayoutNetworkLazyRoute
-  '/_tabLayout/nodes': typeof TabLayoutNodesLazyRoute
+  '/_tabLayout/power-control': typeof TabLayoutPowerControlLazyRoute
   '/_tabLayout/security': typeof TabLayoutSecurityLazyRoute
   '/_tabLayout/settings': typeof TabLayoutSettingsLazyRoute
   '/_tabLayout/usb': typeof TabLayoutUsbLazyRoute
@@ -170,10 +184,11 @@ export interface FileRouteTypes {
     | '/console'
     | '/flash-node'
     | '/about'
+    | '/cooling'
     | '/firmware-upgrade'
     | '/info'
     | '/network'
-    | '/nodes'
+    | '/power-control'
     | '/security'
     | '/settings'
     | '/usb'
@@ -184,10 +199,11 @@ export interface FileRouteTypes {
     | '/console'
     | '/flash-node'
     | '/about'
+    | '/cooling'
     | '/firmware-upgrade'
     | '/info'
     | '/network'
-    | '/nodes'
+    | '/power-control'
     | '/security'
     | '/settings'
     | '/usb'
@@ -199,10 +215,11 @@ export interface FileRouteTypes {
     | '/_tabLayout/console'
     | '/_tabLayout/flash-node'
     | '/_tabLayout/about'
+    | '/_tabLayout/cooling'
     | '/_tabLayout/firmware-upgrade'
     | '/_tabLayout/info'
     | '/_tabLayout/network'
-    | '/_tabLayout/nodes'
+    | '/_tabLayout/power-control'
     | '/_tabLayout/security'
     | '/_tabLayout/settings'
     | '/_tabLayout/usb'
@@ -251,6 +268,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TabLayoutConsoleRouteImport
       parentRoute: typeof TabLayoutRoute
     }
+    '/_tabLayout/cooling': {
+      id: '/_tabLayout/cooling'
+      path: '/cooling'
+      fullPath: '/cooling'
+      preLoaderRoute: typeof TabLayoutCoolingLazyRouteImport
+      parentRoute: typeof TabLayoutRoute
+    }
     '/_tabLayout/firmware-upgrade': {
       id: '/_tabLayout/firmware-upgrade'
       path: '/firmware-upgrade'
@@ -279,11 +303,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TabLayoutNetworkLazyRouteImport
       parentRoute: typeof TabLayoutRoute
     }
-    '/_tabLayout/nodes': {
-      id: '/_tabLayout/nodes'
-      path: '/nodes'
-      fullPath: '/nodes'
-      preLoaderRoute: typeof TabLayoutNodesLazyRouteImport
+    '/_tabLayout/power-control': {
+      id: '/_tabLayout/power-control'
+      path: '/power-control'
+      fullPath: '/power-control'
+      preLoaderRoute: typeof TabLayoutPowerControlLazyRouteImport
       parentRoute: typeof TabLayoutRoute
     }
     '/_tabLayout/security': {
@@ -314,10 +338,11 @@ interface TabLayoutRouteChildren {
   TabLayoutConsoleRoute: typeof TabLayoutConsoleRoute
   TabLayoutFlashNodeRoute: typeof TabLayoutFlashNodeRoute
   TabLayoutAboutLazyRoute: typeof TabLayoutAboutLazyRoute
+  TabLayoutCoolingLazyRoute: typeof TabLayoutCoolingLazyRoute
   TabLayoutFirmwareUpgradeLazyRoute: typeof TabLayoutFirmwareUpgradeLazyRoute
   TabLayoutInfoLazyRoute: typeof TabLayoutInfoLazyRoute
   TabLayoutNetworkLazyRoute: typeof TabLayoutNetworkLazyRoute
-  TabLayoutNodesLazyRoute: typeof TabLayoutNodesLazyRoute
+  TabLayoutPowerControlLazyRoute: typeof TabLayoutPowerControlLazyRoute
   TabLayoutSecurityLazyRoute: typeof TabLayoutSecurityLazyRoute
   TabLayoutSettingsLazyRoute: typeof TabLayoutSettingsLazyRoute
   TabLayoutUsbLazyRoute: typeof TabLayoutUsbLazyRoute
@@ -327,10 +352,11 @@ const TabLayoutRouteChildren: TabLayoutRouteChildren = {
   TabLayoutConsoleRoute: TabLayoutConsoleRoute,
   TabLayoutFlashNodeRoute: TabLayoutFlashNodeRoute,
   TabLayoutAboutLazyRoute: TabLayoutAboutLazyRoute,
+  TabLayoutCoolingLazyRoute: TabLayoutCoolingLazyRoute,
   TabLayoutFirmwareUpgradeLazyRoute: TabLayoutFirmwareUpgradeLazyRoute,
   TabLayoutInfoLazyRoute: TabLayoutInfoLazyRoute,
   TabLayoutNetworkLazyRoute: TabLayoutNetworkLazyRoute,
-  TabLayoutNodesLazyRoute: TabLayoutNodesLazyRoute,
+  TabLayoutPowerControlLazyRoute: TabLayoutPowerControlLazyRoute,
   TabLayoutSecurityLazyRoute: TabLayoutSecurityLazyRoute,
   TabLayoutSettingsLazyRoute: TabLayoutSettingsLazyRoute,
   TabLayoutUsbLazyRoute: TabLayoutUsbLazyRoute,

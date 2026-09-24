@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import ConfigBackup from "@/components/ConfigBackup";
-import FanControl from "@/components/FanControl";
 import LoadingButton from "@/components/LoadingButton";
 import RebootModal from "@/components/RebootModal";
 import InfoSkeleton from "@/components/skeletons/info";
@@ -28,7 +27,9 @@ export const Route = createLazyFileRoute("/_tabLayout/settings")({
 });
 
 /**
- * Everything that changes the board and is not about who may reach it.
+ * Maintenance: the BMC's clock, its backups, and the two buttons that touch
+ * the whole board. The sidebar calls it Maintenance; the address is still
+ * `/settings`, so a bookmark from before still lands here.
  *
  * Info was 1500 px of storage, health, a scrape credential, a fan slider and a
  * REBOOT button — three of those being settings or actions, and a destructive
@@ -41,9 +42,11 @@ export const Route = createLazyFileRoute("/_tabLayout/settings")({
  * tab and Firmware, the same editor twice, and it only ever belonged on the
  * one where the sources are used.
  *
- * What is left is time, the fan, backup and restore, and the two buttons that
- * touch the whole board. Reboot is last and red for the same reason it is not
- * on Overview: you should have to arrive here on purpose.
+ * What was left was time, the fan, backup and restore, and the two buttons
+ * that touch the whole board. The fan went to Cooling, beside the rest of the
+ * hardware, and the user-data backup came here from Overview, so both backups
+ * are in one card. Reboot is last and red for the same reason it is not on
+ * Overview: you should have to arrive here on purpose.
  */
 export function Settings() {
   const { t } = useTranslation();
@@ -106,7 +109,6 @@ export function Settings() {
   return (
     <TabView columns>
       <TimeCard />
-      <FanControl />
       <ConfigBackup />
 
       <Card>

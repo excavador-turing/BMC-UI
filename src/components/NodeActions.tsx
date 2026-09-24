@@ -1,5 +1,5 @@
 import { HardDriveDownload, TerminalSquare, Usb } from "lucide-react";
-import { type ReactNode } from "react";
+import { type ComponentProps, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -141,10 +141,16 @@ function NodeLink({
   destination,
   node,
   children,
+  variant = "outline",
+  size = "sm",
+  "aria-label": ariaLabel,
 }: {
   destination: NodeDestination;
   node: number;
   children: ReactNode;
+  variant?: ComponentProps<typeof Button>["variant"];
+  size?: ComponentProps<typeof Button>["size"];
+  "aria-label"?: string;
 }) {
   const nav = useNodeNav();
   const href = nav.href(destination, node);
@@ -152,8 +158,9 @@ function NodeLink({
   if (href) {
     return (
       <Button
-        variant="outline"
-        size="sm"
+        variant={variant}
+        size={size}
+        aria-label={ariaLabel}
         nativeButton={false}
         render={
           <a
@@ -183,8 +190,9 @@ function NodeLink({
 
   return (
     <Button
-      variant="outline"
-      size="sm"
+      variant={variant}
+      size={size}
+      aria-label={ariaLabel}
       onClick={() => {
         nav.open(destination, node);
       }}

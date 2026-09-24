@@ -13,7 +13,7 @@
  *
  *   #/                      the overview
  *   #/bmc-1                 that board, on its first tab
- *   #/bmc-1/nodes           that board, on Nodes
+ *   #/bmc-1/power-control   that board's power controls
  *   #/bmc-1/console?node=3  that board's console, module 3 selected
  */
 

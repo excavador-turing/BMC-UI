@@ -108,7 +108,7 @@ export default function TimeCard() {
           <TextField
             name="ntpServers"
             label={t("settings.timeTitle")}
-          hideLabel
+            hideLabel
             className="max-w-xl"
             value={draft}
             spellCheck={false}

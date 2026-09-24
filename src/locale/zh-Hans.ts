@@ -3,12 +3,14 @@ import { type OptionalTranslations } from "@/locale/en";
 const translations = {
   navigation: {
     overview: "概览",
+    dashboard: "仪表板",
     firmware: "固件",
     settings: "设置",
     info: "信息",
     network: "网络",
     security: "安全",
     nodes: "节点",
+    powerControl: "电源控制",
     console: "控制台",
     usb: "USB",
     firmwareUpgrade: "固件升级",
@@ -16,8 +18,13 @@ const translations = {
     about: "关于",
     // The sidebar's three headings.
     sectionBoard: "主板",
-    sectionConfiguration: "配置",
+    sectionNetworkAccess: "网络与访问",
     sectionSystem: "系统",
+    sectionOther: "其他",
+    docs: "文档",
+    github: "GitHub",
+    cooling: "散热",
+    maintenance: "维护",
   },
   userNav: {
     language: "语言",
@@ -44,6 +51,15 @@ const translations = {
   // reviews it. These strings decide who can log in to hardware, and a
   // guessed translation of "stop trusting any proxy" is worse than a
   // sentence the reader can look up.
+  // The Dashboard (Overview) page.
+  dashboard: {
+    unnamed: "未命名",
+    stateOn: "开",
+    stateOff: "关",
+    poweredOnAgo: "{{duration}}前开机",
+    offSinceUnknown: "关机时间：未报告",
+    attnUpdate: "固件 {{version}} 可用",
+  },
   info: {
     fanAboveTrip: "高于 {{celsius}} °C",
     userStorage: "用户存储",
@@ -81,9 +97,9 @@ const translations = {
       "在将 {{device}} 设为 {{requested}} 后，主板已将其重置为 {{cur}} / {{max}}。",
     ariaFanStep: "风扇 {{device}} 的散热档位",
     boardHealth: "主板状态",
+    boardInfo: "主板信息",
     healthUptime: "运行时间",
     healthLoad: "负载",
-    healthLoadWindows: "1 / 5 / 15 分钟",
     healthMemory: "内存",
     healthMemoryDetail: "空闲 {{free}} · 可用 {{available}}",
     healthTemperatureTerm: "温度",
@@ -92,6 +108,7 @@ const translations = {
     healthFanTrip: "高于 {{celsius}} °C 触发点",
     healthNand: "NAND",
     healthNandFree: "{{total}} 个擦除块中有 {{available}} 个空闲",
+    healthNandFreeBytes: "剩余 {{size}}",
     healthNandBad: "{{blocks}} 个坏块",
     healthNandReserved: "{{blocks}} 个保留",
     healthNandNote:
@@ -144,7 +161,6 @@ const translations = {
   },
   nodes: {
     powerOnTimeTerm: "开机时间",
-    openConsole: "控制台",
     flashNode: "烧录…",
     usbRouteLabel: "节点 {{nodeId}} 的 USB 路由",
     usbNotRouted: "未路由到此处",

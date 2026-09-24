@@ -6,8 +6,10 @@ import LoadingButton from "@/components/LoadingButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldLabel } from "@/components/ui/field";
+import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useAxiosWithAuth } from "@/lib/api/_core";
+import { useBackupMutation } from "@/lib/api/file";
 import { type ImportReport, useImportConfigMutation } from "@/lib/api/set";
 
 /**
@@ -35,6 +37,37 @@ export default function ConfigBackup() {
   const [report, setReport] = useState<ImportReport | null>(null);
   const [pending, setPending] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+  const userData = useBackupMutation();
+
+  const backUpUserData = () => {
+    userData.mutate(undefined, {
+      onSuccess: ({ blob, filename }) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = window.document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", filename);
+        window.document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+        toast({
+          title: t("info.backupButton"),
+          description: (
+            <>
+              <p>{t("info.backupSuccess")}</p>
+              <p className="mt-1 font-mono text-xs">{filename}</p>
+            </>
+          ),
+        });
+      },
+      onError: (e) =>
+        toast({
+          title: t("info.backupFailed"),
+          description: e.message,
+          variant: "destructive",
+        }),
+    });
+  };
 
   const doExport = async () => {
     setExporting(true);
@@ -166,6 +199,22 @@ export default function ConfigBackup() {
           <span className="text-sm text-muted-foreground">
             {t("settings.configNote")}
           </span>
+        </div>
+
+        {/* The other backup: the files on the BMC's user storage, not its
+            configuration. It was a button under the storage bars on
+            Overview, one page away from the backup it is usually confused
+            with; the two are side by side now, and each says which it is. */}
+        <Separator />
+        <div>
+          <LoadingButton
+            type="button"
+            variant="outline"
+            isLoading={userData.isPending}
+            onClick={backUpUserData}
+          >
+            {t("info.backupButton")}
+          </LoadingButton>
         </div>
 
         {/* Per field: the import is not transactional, and one "done" would hide
