@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import AboutSkeleton from "@/components/skeletons/about";
 import TableItem from "@/components/TableItem";
 import TabView from "@/components/TabView";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAboutTabData } from "@/lib/api/get";
 import { eepromLabel, EMPTY_VALUE, versionLabel } from "@/lib/format";
 
@@ -52,48 +53,60 @@ export function About() {
 
   return (
     <TabView>
-      <dl className="flex flex-col">
-        <TableItem term={t("about.boardModel")}>
-          {eepromLabel(data.board_model)} ({versionLabel(data.board_revision)})
-        </TableItem>
-        <TableItem term={t("about.boardSerial")}>
-          {eepromLabel(data.board_serial)}
-        </TableItem>
-        <TableItem term={t("about.hostname")}>{data.hostname}</TableItem>
-        {/* Two different things, and until now the first was shown under the
+      <Card className="max-w-3xl">
+        <CardHeader>
+          <CardTitle>{t("navigation.about")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <dl className="flex flex-col">
+            <TableItem term={t("about.boardModel")}>
+              {eepromLabel(data.board_model)} (
+              {versionLabel(data.board_revision)})
+            </TableItem>
+            <TableItem term={t("about.boardSerial")}>
+              {eepromLabel(data.board_serial)}
+            </TableItem>
+            <TableItem term={t("about.hostname")}>{data.hostname}</TableItem>
+            {/* Two different things, and until now the first was shown under the
             second's name while the second was not shown at all. */}
-        <TableItem term={t("about.firmwareVersion")}>
-          {versionLabel(data.version)}
-        </TableItem>
-        <TableItem term={t("about.daemonVersion")}>
-          {data.bmcd_version ? versionLabel(data.bmcd_version) : EMPTY_VALUE}
-        </TableItem>
-        <TableItem term={t("about.buildTime")}>
-          {data.buildtime.toLocaleString()} (
-          {timeAgo.format(new Date(data.buildtime))})
-        </TableItem>
-        {/* Ordinarily the same string as the daemon version, and a row that
+            <TableItem term={t("about.firmwareVersion")}>
+              {versionLabel(data.version)}
+            </TableItem>
+            <TableItem term={t("about.daemonVersion")}>
+              {data.bmcd_version
+                ? versionLabel(data.bmcd_version)
+                : EMPTY_VALUE}
+            </TableItem>
+            <TableItem term={t("about.buildTime")}>
+              {data.buildtime.toLocaleString()} (
+              {timeAgo.format(new Date(data.buildtime))})
+            </TableItem>
+            {/* Ordinarily the same string as the daemon version, and a row that
             repeats the one above it teaches nothing. Shown when they differ,
             which is what a hand-built daemon looks like. */}
-        {data.build_version !== data.bmcd_version && (
-          <TableItem term={t("about.buildVersion")}>
-            {versionLabel(data.build_version)}
-          </TableItem>
-        )}
-        <TableItem term={t("about.buildrootRelease")}>
-          {data.buildroot}
-        </TableItem>
-        {/* The one field an operator wants after a kernel bump. Older daemons
+            {data.build_version !== data.bmcd_version && (
+              <TableItem term={t("about.buildVersion")}>
+                {versionLabel(data.build_version)}
+              </TableItem>
+            )}
+            <TableItem term={t("about.buildrootRelease")}>
+              {data.buildroot}
+            </TableItem>
+            {/* The one field an operator wants after a kernel bump. Older daemons
             never sent it, so an absent value renders as absent rather than
             as an empty row. */}
-        <TableItem term={t("about.kernel")}>
-          {data.kernel ?? EMPTY_VALUE}
-        </TableItem>
-        <TableItem term={t("about.apiVersion")}>
-          {versionLabel(data.api)}
-        </TableItem>
-        <TableItem term={t("about.bmcUI")}>{versionLabel(version)}</TableItem>
-      </dl>
+            <TableItem term={t("about.kernel")}>
+              {data.kernel ?? EMPTY_VALUE}
+            </TableItem>
+            <TableItem term={t("about.apiVersion")}>
+              {versionLabel(data.api)}
+            </TableItem>
+            <TableItem term={t("about.bmcUI")}>
+              {versionLabel(version)}
+            </TableItem>
+          </dl>
+        </CardContent>
+      </Card>
     </TabView>
   );
 }

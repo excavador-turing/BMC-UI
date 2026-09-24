@@ -14,6 +14,10 @@ const translations = {
     firmwareUpgrade: "Firmware-upgrade",
     flashNode: "Flash-node",
     about: "Over",
+    // The sidebar's three headings.
+    sectionBoard: "Board",
+    sectionConfiguration: "Configuratie",
+    sectionSystem: "Systeem",
   },
   userNav: {
     language: "Taal",

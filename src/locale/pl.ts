@@ -15,6 +15,10 @@ const translations = {
     firmwareUpgrade: "Aktualizacja oprogramowania",
     flashNode: "Flashowanie węzła",
     about: "O programie",
+    // The sidebar's three headings.
+    sectionBoard: "Płyta",
+    sectionConfiguration: "Konfiguracja",
+    sectionSystem: "System",
   },
   userNav: {
     language: "Język",

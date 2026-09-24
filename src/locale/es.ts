@@ -14,6 +14,10 @@ const translations = {
     firmwareUpgrade: "Actualizar Firmware",
     flashNode: "Instalar SO",
     about: "Acerca de",
+    // The sidebar's three headings.
+    sectionBoard: "Placa",
+    sectionConfiguration: "Configuración",
+    sectionSystem: "Sistema",
   },
   userNav: {
     language: "Lenguaje",

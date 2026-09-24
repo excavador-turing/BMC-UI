@@ -3,7 +3,9 @@ import { useTranslation } from "react-i18next";
 
 import InfoNote from "@/components/InfoNote";
 import TableItem from "@/components/TableItem";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import UsageBar from "@/components/UsageBar";
 import { useDurationLabel } from "@/hooks/use-duration";
 import {
   type HealthClock,
@@ -34,9 +36,7 @@ function Absent() {
   const { t } = useTranslation();
 
   return (
-    <span className="font-semibold text-amber-600 dark:text-amber-500">
-      {t("info.healthAbsent")}
-    </span>
+    <span className="font-medium text-warning">{t("info.healthAbsent")}</span>
   );
 }
 
@@ -61,10 +61,12 @@ function LoadReading({ load }: { load: HealthLoad }) {
 
   return (
     <div className="flex flex-wrap justify-end gap-x-3 lg:justify-start">
-      <span className="font-semibold">
+      <span className="font-medium">
         {readings.map((value) => value.toFixed(2)).join(" · ")}
       </span>
-      <span className="opacity-60">{t("info.healthLoadWindows")}</span>
+      <span className="text-muted-foreground">
+        {t("info.healthLoadWindows")}
+      </span>
     </div>
   );
 }
@@ -100,14 +102,14 @@ function MemoryReading({ memory }: { memory: HealthMemory }) {
   const used = Math.max(total - available, 0);
 
   return (
-    <div className="space-y-1">
-      <Progress
+    <div className="flex flex-col gap-1">
+      <UsageBar
         aria-label={t("info.ariaMemoryUtilization")}
         value={Math.round((used / total) * 100)}
         label={`${human(used)} / ${human(total)}`}
         warningOnHigh
       />
-      <div className="text-sm opacity-60">
+      <div className="text-sm text-muted-foreground">
         {t("info.healthMemoryDetail", {
           free: isReading(memory.free_bytes)
             ? human(memory.free_bytes)
@@ -144,28 +146,28 @@ function NandReading({ nand }: { nand: HealthNand }) {
 
   return (
     <div className="flex flex-wrap justify-end gap-x-3 lg:justify-start">
-      <span className="font-semibold">
+      <span className="font-medium">
         {t("info.healthNandFree", {
           available: nand.available_eraseblocks,
           total: nand.total_eraseblocks,
         })}
       </span>
       {isReading(nand.available_bytes) && (
-        <span className="opacity-60">{human(nand.available_bytes)}</span>
+        <span className="text-muted-foreground">
+          {human(nand.available_bytes)}
+        </span>
       )}
       {isReading(nand.bad_eraseblocks) && (
         <span
           className={
-            nand.bad_eraseblocks > 0
-              ? "text-amber-600 dark:text-amber-500"
-              : "opacity-60"
+            nand.bad_eraseblocks > 0 ? "text-warning" : "text-muted-foreground"
           }
         >
           {t("info.healthNandBad", { blocks: nand.bad_eraseblocks })}
         </span>
       )}
       {isReading(nand.reserved_eraseblocks) && (
-        <span className="opacity-60">
+        <span className="text-muted-foreground">
           {t("info.healthNandReserved", {
             blocks: nand.reserved_eraseblocks,
           })}
@@ -212,27 +214,29 @@ function ClockReading({ clock }: { clock: HealthClock }) {
     <div className="flex flex-col items-end gap-0.5 lg:items-start">
       <div className="flex flex-wrap justify-end gap-x-3 lg:justify-start">
         {clock.synchronised === true && (
-          <span className="font-semibold">{t("info.healthClockSynced")}</span>
+          <span className="font-medium">{t("info.healthClockSynced")}</span>
         )}
         {clock.synchronised === false && (
-          <span className="font-semibold text-amber-600 dark:text-amber-500">
+          <span className="font-medium text-warning">
             {t("info.healthClockNotSynced")}
           </span>
         )}
         {clock.synchronised === null && (
-          <span className="opacity-60">{t("info.healthClockUnknown")}</span>
+          <span className="text-muted-foreground">
+            {t("info.healthClockUnknown")}
+          </span>
         )}
         {detail.length > 0 && (
-          <span className="opacity-60">{detail.join(" · ")}</span>
+          <span className="text-muted-foreground">{detail.join(" · ")}</span>
         )}
       </div>
       {clock.measured_by !== null && clock.measured_by !== "" && (
-        <span className="text-sm opacity-60">
+        <span className="text-sm text-muted-foreground">
           {t("info.healthClockMeasuredBy", { tool: clock.measured_by })}
         </span>
       )}
       {clock.rtc.length > 0 && (
-        <span className="text-sm opacity-60">
+        <span className="text-sm text-muted-foreground">
           {clock.rtc
             .map((rtc) =>
               rtc.name ? `${rtc.device} · ${rtc.name}` : rtc.device
@@ -246,13 +250,13 @@ function ClockReading({ clock }: { clock: HealthClock }) {
 
 function HealthSkeleton() {
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col gap-3">
       {[0, 1, 2, 3].map((row) => (
         <div key={row} className="flex flex-row py-1">
           <div className="w-1/2 lg:w-1/4">
-            <div className="h-6 w-20 animate-pulse bg-neutral-200 dark:bg-neutral-700"></div>
+            <Skeleton className="h-6 w-20" />
           </div>
-          <div className="h-6 w-40 animate-pulse bg-neutral-200 dark:bg-neutral-700"></div>
+          <Skeleton className="h-6 w-40" />
         </div>
       ))}
     </div>
@@ -308,7 +312,8 @@ function TemperatureReading() {
   const { data, isError } = useThermalQuery(15000);
 
   if (isError) return <Absent />;
-  if (!data) return <span className="opacity-60">{EMPTY_VALUE}</span>;
+  if (!data)
+    return <span className="text-muted-foreground">{EMPTY_VALUE}</span>;
 
   const hottest = hottestReading(data.sensors);
   if (hottest === null) return <Absent />;
@@ -318,11 +323,11 @@ function TemperatureReading() {
 
   return (
     <span className="inline-flex flex-wrap items-baseline gap-x-2">
-      <span className="font-semibold">
+      <span className="font-medium">
         {t("info.healthTemperature", { celsius: hottest.toFixed(1) })}
       </span>
       {fan && isReading(fan.cur_state) && isReading(fan.max_state) && (
-        <span className="opacity-60">
+        <span className="text-muted-foreground">
           {t("info.healthFanStep", {
             step: fan.cur_state,
             max: fan.max_state,
@@ -330,7 +335,7 @@ function TemperatureReading() {
         </span>
       )}
       {trip !== null && (
-        <span className="opacity-60">
+        <span className="text-muted-foreground">
           {t("info.healthFanTrip", { celsius: trip })}
         </span>
       )}
@@ -349,66 +354,71 @@ export default function BoardHealth() {
       : durationLabel(data.uptime_seconds);
 
   return (
-    <div>
-      <div className="mb-6 text-lg font-bold">{t("info.boardHealth")}</div>
+    <Card>
+      <CardHeader>
+        <CardTitle>{t("info.boardHealth")}</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        {isPending && <HealthSkeleton />}
 
-      {isPending && <HealthSkeleton />}
+        {isError && (
+          <p className="text-sm text-muted-foreground">
+            {t("info.healthUnavailable")}
+          </p>
+        )}
 
-      {isError && (
-        <p className="text-sm opacity-60">{t("info.healthUnavailable")}</p>
-      )}
-
-      {data && (
-        <>
-          <dl>
-            <TableItem term={t("info.healthUptime")}>
-              {uptime === null ? (
-                <Absent />
-              ) : (
-                <span className="font-semibold">{uptime}</span>
-              )}
-            </TableItem>
-            <TableItem term={t("info.healthLoad")}>
-              {data.load === null ? (
-                <Absent />
-              ) : (
-                <LoadReading load={data.load} />
-              )}
-            </TableItem>
-            <TableItem term={t("info.healthMemory")}>
-              {data.memory === null ? (
-                <Absent />
-              ) : (
-                <MemoryReading memory={data.memory} />
-              )}
-            </TableItem>
-            <TableItem term={t("info.healthTemperatureTerm")}>
-              <TemperatureReading />
-            </TableItem>
-            <TableItem term={t("info.healthNand")}>
-              {data.nand === null ? (
-                <Absent />
-              ) : (
-                <span className="inline-flex items-center gap-1">
-                  <NandReading nand={data.nand} />
-                  <InfoNote
-                    text={t("info.healthNandNote")}
-                    path="/reference/metrics/#nand"
-                    label={t("info.healthNand")}
-                  />
-                </span>
-              )}
-            </TableItem>
-            <TableItem term={t("info.healthClock")}>
-              {data.clock === null ? (
-                <Absent />
-              ) : (
-                <ClockReading clock={data.clock} />
-              )}
-            </TableItem>
-          </dl>
-        </>
-      )}
-    </div>
+        {data && (
+          <>
+            <dl>
+              <TableItem term={t("info.healthUptime")}>
+                {uptime === null ? (
+                  <Absent />
+                ) : (
+                  <span className="font-medium">{uptime}</span>
+                )}
+              </TableItem>
+              <TableItem term={t("info.healthLoad")}>
+                {data.load === null ? (
+                  <Absent />
+                ) : (
+                  <LoadReading load={data.load} />
+                )}
+              </TableItem>
+              <TableItem term={t("info.healthMemory")}>
+                {data.memory === null ? (
+                  <Absent />
+                ) : (
+                  <MemoryReading memory={data.memory} />
+                )}
+              </TableItem>
+              <TableItem term={t("info.healthTemperatureTerm")}>
+                <TemperatureReading />
+              </TableItem>
+              <TableItem term={t("info.healthNand")}>
+                {data.nand === null ? (
+                  <Absent />
+                ) : (
+                  <span className="inline-flex items-center gap-1">
+                    <NandReading nand={data.nand} />
+                    <InfoNote
+                      text={t("info.healthNandNote")}
+                      path="/reference/metrics/#nand"
+                      label={t("info.healthNand")}
+                    />
+                  </span>
+                )}
+              </TableItem>
+              <TableItem term={t("info.healthClock")}>
+                {data.clock === null ? (
+                  <Absent />
+                ) : (
+                  <ClockReading clock={data.clock} />
+                )}
+              </TableItem>
+            </dl>
+          </>
+        )}
+      </CardContent>
+    </Card>
   );
 }

@@ -1,72 +1,83 @@
-import { Indicator, Root } from "@radix-ui/react-progress";
-import { cva } from "class-variance-authority";
-import { forwardRef } from "react";
+"use client";
+
+import { Progress as ProgressPrimitive } from "@base-ui/react/progress";
 
 import { cn } from "@/lib/utils";
 
-const indicatorVariants = cva("size-full flex-1", {
-  variants: {
-    variant: {
-      info: "bg-neutral-400 dark:bg-neutral-600",
-      infoMedium: "bg-amber-300 dark:bg-amber-600",
-      infoHigh: "bg-red-400 dark:bg-red-500",
-    },
-  },
-  defaultVariants: {
-    variant: "info",
-  },
-});
-
-const getIndicatorVariant = (warningOnHigh = false, value: number) => {
-  if (warningOnHigh) {
-    if (value >= 90) {
-      return "infoHigh";
-    } else if (value >= 75) {
-      return "infoMedium";
-    }
-  }
-  return "info";
-};
-
-interface ProgressProps extends React.ComponentPropsWithoutRef<typeof Root> {
-  value: number;
-  label?: React.ReactNode;
-  warningOnHigh?: boolean;
-  pulsing?: boolean;
+function Progress({
+  className,
+  children,
+  value,
+  ...props
+}: ProgressPrimitive.Root.Props) {
+  return (
+    <ProgressPrimitive.Root
+      value={value}
+      data-slot="progress"
+      className={cn("flex flex-wrap gap-3", className)}
+      {...props}
+    >
+      {children}
+      <ProgressTrack>
+        <ProgressIndicator />
+      </ProgressTrack>
+    </ProgressPrimitive.Root>
+  );
 }
 
-const Progress = forwardRef<React.ElementRef<typeof Root>, ProgressProps>(
-  ({ className, value, label, warningOnHigh, pulsing, ...props }, ref) => {
-    return (
-      <div className="relative">
-        <Root
-          ref={ref}
-          className={cn(
-            "relative h-4 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800",
-            className
-          )}
-          {...props}
-        >
-          <Indicator
-            className={cn(
-              "bg-neutral-900 dark:bg-neutral-100",
-              indicatorVariants({
-                variant: getIndicatorVariant(warningOnHigh, value),
-              }),
-              pulsing && "animate-pulse duration-700"
-            )}
-            style={{ transform: `translateX(-${100 - (value ?? 0)}%)` }}
-          />
-          {label && (
-            <div className="absolute top-0 left-0 flex size-full items-center justify-center px-4 text-xs">
-              {label}
-            </div>
-          )}
-        </Root>
-      </div>
-    );
-  }
-);
-Progress.displayName = Root.displayName;
+function ProgressTrack({ className, ...props }: ProgressPrimitive.Track.Props) {
+  return (
+    <ProgressPrimitive.Track
+      className={cn(
+        "relative flex h-1 w-full items-center overflow-x-hidden rounded-full bg-muted",
+        className
+      )}
+      data-slot="progress-track"
+      {...props}
+    />
+  );
+}
 
-export { Progress };
+function ProgressIndicator({
+  className,
+  ...props
+}: ProgressPrimitive.Indicator.Props) {
+  return (
+    <ProgressPrimitive.Indicator
+      data-slot="progress-indicator"
+      className={cn("h-full bg-primary transition-all", className)}
+      {...props}
+    />
+  );
+}
+
+function ProgressLabel({ className, ...props }: ProgressPrimitive.Label.Props) {
+  return (
+    <ProgressPrimitive.Label
+      className={cn("text-sm font-medium", className)}
+      data-slot="progress-label"
+      {...props}
+    />
+  );
+}
+
+function ProgressValue({ className, ...props }: ProgressPrimitive.Value.Props) {
+  return (
+    <ProgressPrimitive.Value
+      className={cn(
+        "ml-auto text-sm text-muted-foreground tabular-nums",
+        className
+      )}
+      data-slot="progress-value"
+      {...props}
+    />
+  );
+}
+
+export {
+  Progress,
+  ProgressIndicator,
+  ProgressLabel,
+  ProgressTrack,
+  ProgressValue,
+};

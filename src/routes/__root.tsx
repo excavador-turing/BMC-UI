@@ -3,7 +3,6 @@ import "@/globals.css";
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
 
-import SiteFooter from "@/components/SiteFooter";
 import { type AuthContext } from "@/contexts/AuthContext";
 
 export interface RouterContext {
@@ -23,7 +22,7 @@ const TanStackRouterDevtools = import.meta.env.PROD
   ? () => null // Render nothing in production
   : lazy(() =>
       // Lazy load in development
-      import("@tanstack/router-devtools").then((res) => ({
+      import("@tanstack/react-router-devtools").then((res) => ({
         default: res.TanStackRouterDevtools,
       }))
     );
@@ -31,9 +30,11 @@ const TanStackRouterDevtools = import.meta.env.PROD
 export function RootComponent() {
   return (
     <>
-      <div className="flex min-h-screen w-full flex-col justify-between bg-turing-bg text-neutral-900 antialiased transition-all dark:bg-turing-bg-dark dark:text-neutral-100">
+      {/* No footer here: the sidebar is fixed to the side of the window, and
+          a footer at this level would run underneath it. Each layout places
+          its own. */}
+      <div className="flex min-h-svh w-full flex-col antialiased">
         <Outlet />
-        <SiteFooter />
       </div>
       <Suspense>
         <ReactQueryDevtools />

@@ -2,8 +2,10 @@ import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import ConfirmationModal from "@/components/ConfirmationModal";
-import { Button } from "@/components/ui/button";
+import LoadingButton from "@/components/LoadingButton";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { useToast } from "@/hooks/use-toast";
 import { useAxiosWithAuth } from "@/lib/api/_core";
 import { type ImportReport, useImportConfigMutation } from "@/lib/api/set";
@@ -105,92 +107,97 @@ export default function ConfigBackup() {
   };
 
   return (
-    <div>
-      <div className="mb-6 text-lg font-bold">{t("settings.configTitle")}</div>
+    <Card>
+      <CardHeader>
+        <CardTitle>{t("settings.configTitle")}</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <LoadingButton
+            type="button"
+            variant="outline"
+            isLoading={exporting}
+            disabled={exporting}
+            onClick={() => void doExport()}
+          >
+            {t("settings.configExport")}
+          </LoadingButton>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <Button
-          type="button"
-          variant="bw"
-          isLoading={exporting}
-          disabled={exporting}
-          onClick={() => void doExport()}
-        >
-          {t("settings.configExport")}
-        </Button>
-
-        <label className="flex items-center gap-2 text-sm">
-          <Checkbox
-            checked={withSecrets}
-            onCheckedChange={(v) => setWithSecrets(v === true)}
-          />
-          {t("settings.configWithSecrets")}
-        </label>
-      </div>
-
-      {/* Next to the control that causes it, not in the documentation. */}
-      {withSecrets && (
-        <p className="mt-2 text-sm font-semibold text-red-700 dark:text-red-400">
-          {t("settings.configSecretsWarning")}
-        </p>
-      )}
-
-      <div className="mt-6 flex flex-wrap items-center gap-3">
-        <input
-          ref={fileInput}
-          type="file"
-          accept="application/json,.json"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) chooseFile(file);
-            e.target.value = "";
-          }}
-        />
-        <Button
-          type="button"
-          variant="destructive"
-          isLoading={importConfig.isPending}
-          disabled={importConfig.isPending}
-          onClick={() => fileInput.current?.click()}
-        >
-          {t("settings.configImport")}
-        </Button>
-        <span className="text-sm opacity-60">{t("settings.configNote")}</span>
-      </div>
-
-      {/* Per field: the import is not transactional, and one "done" would hide
-          a hostname that took and sources that did not. */}
-      {report && (
-        <div className="mt-4 space-y-1 text-sm">
-          {report.failed.map((line) => (
-            <p
-              key={line}
-              className="font-semibold text-red-700 dark:text-red-400"
-            >
-              {t("settings.configFailed")} {line}
-            </p>
-          ))}
-          {report.applied.map((line) => (
-            <p key={line}>
-              {t("settings.configApplied")} {line}
-            </p>
-          ))}
-          {report.skipped.map((line) => (
-            <p key={line} className="opacity-60">
-              {t("settings.configSkipped")} {line}
-            </p>
-          ))}
+          <Field orientation="horizontal" className="w-auto">
+            <Checkbox
+              id="config-with-secrets"
+              checked={withSecrets}
+              onCheckedChange={(v) => setWithSecrets(v)}
+            />
+            <FieldLabel htmlFor="config-with-secrets" className="font-normal">
+              {t("settings.configWithSecrets")}
+            </FieldLabel>
+          </Field>
         </div>
-      )}
 
-      <ConfirmationModal
-        isOpen={pending !== null}
-        onClose={() => setPending(null)}
-        onConfirm={doImport}
-        title={t("settings.configImportConfirmTitle")}
-        message={t("settings.configImportConfirm")}
-      />
-    </div>
+        {/* Next to the control that causes it, not in the documentation. */}
+        {withSecrets && (
+          <p className="text-sm font-medium text-destructive">
+            {t("settings.configSecretsWarning")}
+          </p>
+        )}
+
+        <div className="flex flex-wrap items-center gap-3">
+          <input
+            ref={fileInput}
+            type="file"
+            accept="application/json,.json"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) chooseFile(file);
+              e.target.value = "";
+            }}
+          />
+          <LoadingButton
+            type="button"
+            variant="destructive"
+            isLoading={importConfig.isPending}
+            disabled={importConfig.isPending}
+            onClick={() => fileInput.current?.click()}
+          >
+            {t("settings.configImport")}
+          </LoadingButton>
+          <span className="text-sm text-muted-foreground">
+            {t("settings.configNote")}
+          </span>
+        </div>
+
+        {/* Per field: the import is not transactional, and one "done" would hide
+          a hostname that took and sources that did not. */}
+        {report && (
+          <div className="flex flex-col gap-1 text-sm">
+            {report.failed.map((line) => (
+              <p key={line} className="font-medium text-destructive">
+                {t("settings.configFailed")} {line}
+              </p>
+            ))}
+            {report.applied.map((line) => (
+              <p key={line}>
+                {t("settings.configApplied")} {line}
+              </p>
+            ))}
+            {report.skipped.map((line) => (
+              <p key={line} className="text-muted-foreground">
+                {t("settings.configSkipped")} {line}
+              </p>
+            ))}
+          </div>
+        )}
+
+        <ConfirmationModal
+          isOpen={pending !== null}
+          onClose={() => setPending(null)}
+          onConfirm={doImport}
+          title={t("settings.configImportConfirmTitle")}
+          message={t("settings.configImportConfirm")}
+        />
+      </CardContent>
+    </Card>
   );
 }

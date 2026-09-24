@@ -1,25 +1,15 @@
 import { useTranslation } from "react-i18next";
 
-import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
-import { useMediaQuery } from "@/hooks/use-media-query";
-import { cn } from "@/lib/utils";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -29,6 +19,14 @@ interface ConfirmationModalProps {
   message: string | React.ReactNode;
 }
 
+/**
+ * "Are you sure", before something consequential.
+ *
+ * An alert dialog rather than a dialog: it does not close on a click outside
+ * it, so a stray tap cannot be taken for either answer. It is the same on a
+ * phone -- the footer stacks its buttons -- so there is no second, drawer
+ * form of it to keep in step.
+ */
 export default function ConfirmationModal({
   isOpen,
   onClose,
@@ -37,72 +35,31 @@ export default function ConfirmationModal({
   message,
 }: ConfirmationModalProps) {
   const { t } = useTranslation();
-  const isDesktop = useMediaQuery("(min-width: 768px)");
-
-  const messageContent =
-    typeof message === "string" ? (
-      <DialogDescription>{message}</DialogDescription>
-    ) : (
-      <div className="text-sm text-neutral-500 dark:text-neutral-400">
-        {message}
-      </div>
-    );
-
-  if (isDesktop) {
-    return (
-      <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className={cn("modal-rounded", "p-6")}>
-          <DialogHeader>
-            <DialogTitle className="mb-4">{title}</DialogTitle>
-            {messageContent}
-          </DialogHeader>
-          <DialogFooter className="mt-2">
-            <Button type="button" variant="bw" onClick={onClose}>
-              {t("ui.cancel")}
-            </Button>
-            {/* Red at the point of commitment, like the reboot modal's. Every
-                caller of this modal is confirming something consequential --
-                flashing a module, resetting the network, restoring a config,
-                renaming the board -- which is why they ask at all. A lime
-                Continue is the colour this interface uses for Save. */}
-            <Button type="button" variant="destructive" onClick={onConfirm}>
-              {t("ui.continue")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    );
-  }
 
   return (
-    <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DrawerContent>
-        <DrawerHeader className="text-left">
-          <DrawerTitle className="mb-4">{title}</DrawerTitle>
-          {typeof message === "string" ? (
-            <DrawerDescription>{message}</DrawerDescription>
-          ) : (
-            <div className="text-sm text-neutral-500 dark:text-neutral-400">
-              {message}
-            </div>
-          )}
-        </DrawerHeader>
-        <DrawerFooter className="mt-2">
-          <DrawerClose asChild>
-            <Button type="button" variant="bw" size="lg">
-              {t("ui.cancel")}
-            </Button>
-          </DrawerClose>
-          <Button
-            type="button"
-            variant="destructive"
-            size="lg"
-            onClick={onConfirm}
+    <AlertDialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          {/* A message with its own paragraphs cannot sit inside the <p> a
+              description renders by default. */}
+          <AlertDialogDescription
+            render={typeof message === "string" ? undefined : <div />}
           >
+            {message}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{t("ui.cancel")}</AlertDialogCancel>
+          {/* Red at the point of commitment, like the reboot modal's. Every
+              caller of this modal is confirming something consequential --
+              flashing a module, resetting the network, restoring a config,
+              renaming the board -- which is why they ask at all. */}
+          <AlertDialogAction variant="destructive" onClick={onConfirm}>
             {t("ui.continue")}
-          </Button>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

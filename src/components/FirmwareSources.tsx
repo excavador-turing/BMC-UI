@@ -3,6 +3,25 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { type FirmwareSource, useFirmwareSourcesQuery } from "@/lib/api/get";
 import { useSetFirmwareSourcesMutation } from "@/lib/api/set";
 
@@ -59,80 +78,111 @@ export default function FirmwareSources() {
       },
     ]);
 
+  const kinds = [
+    { value: "github", label: "github" },
+    { value: "http", label: "http" },
+    { value: "local", label: "local" },
+  ];
+
   return (
-    <div className="flex flex-col gap-4">
-      <h2 className="text-lg font-semibold">
-        {t("firmwareUpgrade.sourcesTitle")}
-      </h2>
-      <p className="text-sm opacity-70">
-        {t("firmwareUpgrade.sourcesDescription")}
-      </p>
-
-      {sources.map((source, index) => (
-        <div key={index} className="flex flex-col gap-2 rounded-md border p-3">
-          {/* At 390 px this row used to break: the location field's 16rem
-              minimum forced it onto its own line, and the delete button
-              orphaned below it. So stack deliberately on small screens -- one
-              field per row, with delete as a trailing icon on the label's row
-              -- and let `sm:contents` dissolve the wrapper above that width so
-              the desktop layout is exactly the single flex row it always was. */}
-          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-            <div className="flex items-center gap-2 sm:contents">
-              <input
-                className="h-9 min-w-0 flex-1 rounded-md border bg-transparent px-2 text-sm sm:w-40 sm:flex-none"
-                aria-label={t("firmwareUpgrade.sourceLabel")}
-                placeholder={t("firmwareUpgrade.sourceLabel")}
-                value={source.label}
-                onChange={(e) => update(index, { label: e.target.value })}
-              />
-              <Button
-                variant="bwSquare"
-                size="icon"
-                className="shrink-0 sm:order-last"
-                aria-label={t("firmwareUpgrade.sourceRemove")}
-                onClick={() => setDraft(sources.filter((_, i) => i !== index))}
+    <Card>
+      <CardHeader>
+        <CardTitle>{t("firmwareUpgrade.sourcesTitle")}</CardTitle>
+        <CardDescription>
+          {t("firmwareUpgrade.sourcesDescription")}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        {sources.map((source, index) => (
+          <div
+            key={index}
+            className="flex flex-col gap-2 rounded-lg border p-3"
+          >
+            {/* At 390 px this row used to break: the location field's 16rem
+                minimum forced it onto its own line, and the delete button
+                orphaned below it. So stack deliberately on small screens --
+                one field per row, with delete as a trailing icon on the
+                label's row -- and let `sm:contents` dissolve the wrapper above
+                that width so the desktop layout is the single flex row it
+                always was. */}
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+              <div className="flex items-center gap-2 sm:contents">
+                <Input
+                  className="min-w-0 flex-1 sm:w-40 sm:flex-none"
+                  aria-label={t("firmwareUpgrade.sourceLabel")}
+                  placeholder={t("firmwareUpgrade.sourceLabel")}
+                  value={source.label}
+                  onChange={(e) => update(index, { label: e.target.value })}
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="shrink-0 sm:order-last"
+                  aria-label={t("firmwareUpgrade.sourceRemove")}
+                  onClick={() =>
+                    setDraft(sources.filter((_, i) => i !== index))
+                  }
+                >
+                  <Trash2 />
+                </Button>
+              </div>
+              <Select
+                items={kinds}
+                value={source.kind}
+                onValueChange={(kind) => {
+                  if (kind !== null) update(index, { kind: kind });
+                }}
               >
-                <Trash2 className="size-4" />
-              </Button>
-            </div>
-            <select
-              className="h-9 rounded-md border bg-transparent px-2 text-sm"
-              aria-label={t("firmwareUpgrade.sourceKind")}
-              value={source.kind}
-              onChange={(e) =>
-                update(index, {
-                  kind: e.target.value as FirmwareSource["kind"],
-                })
-              }
-            >
-              <option value="github">github</option>
-              <option value="http">http</option>
-              <option value="local">local</option>
-            </select>
-            <input
-              className="h-9 w-full min-w-0 rounded-md border bg-transparent px-2 font-mono text-sm sm:w-auto sm:min-w-64 sm:flex-1"
-              aria-label={t("firmwareUpgrade.sourceLocation")}
-              placeholder={KIND_PLACEHOLDER[source.kind]}
-              value={source.location}
-              onChange={(e) => update(index, { location: e.target.value })}
-            />
-            <label className="flex items-center gap-1 text-sm">
-              <input
-                type="checkbox"
-                checked={source.enabled}
-                onChange={(e) => update(index, { enabled: e.target.checked })}
+                <SelectTrigger aria-label={t("firmwareUpgrade.sourceKind")}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {kinds.map((kind) => (
+                      <SelectItem key={kind.value} value={kind.value}>
+                        {kind.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              <Input
+                className="w-full min-w-0 font-mono sm:w-auto sm:min-w-64 sm:flex-1"
+                aria-label={t("firmwareUpgrade.sourceLocation")}
+                placeholder={KIND_PLACEHOLDER[source.kind]}
+                value={source.location}
+                onChange={(e) => update(index, { location: e.target.value })}
               />
-              {t("firmwareUpgrade.sourceEnabled")}
-            </label>
+              <Field orientation="horizontal" className="w-auto">
+                <Checkbox
+                  id={`source-enabled-${index}`}
+                  checked={source.enabled}
+                  onCheckedChange={(enabled) => update(index, { enabled })}
+                />
+                <FieldLabel
+                  htmlFor={`source-enabled-${index}`}
+                  className="font-normal"
+                >
+                  {t("firmwareUpgrade.sourceEnabled")}
+                </FieldLabel>
+              </Field>
+            </div>
+            {/* The layout this kind expects, spelled out. */}
+            <p className="text-xs text-muted-foreground">
+              {t(KIND_HELP[source.kind])}
+            </p>
           </div>
-          {/* The layout this kind expects, spelled out. */}
-          <p className="text-xs opacity-60">{t(KIND_HELP[source.kind])}</p>
-        </div>
-      ))}
+        ))}
 
-      <div className="flex gap-2">
-        <Button variant="bw" onClick={add}>
-          <Plus className="mr-2 size-4" />
+        {save.isError && (
+          <p className="text-sm text-destructive">
+            {t("firmwareUpgrade.sourcesRejected")}
+          </p>
+        )}
+      </CardContent>
+      <CardFooter className="gap-2">
+        <Button variant="outline" onClick={add}>
+          <Plus data-icon="inline-start" />
           {t("firmwareUpgrade.sourceAdd")}
         </Button>
         <Button
@@ -143,19 +193,13 @@ export default function FirmwareSources() {
         </Button>
         {dirty && (
           <Button
-            variant="bw"
+            variant="outline"
             onClick={() => setDraft(query.data?.sources ?? [])}
           >
             {t("ui.cancel")}
           </Button>
         )}
-      </div>
-
-      {save.isError && (
-        <p className="text-sm text-red-600 dark:text-red-400">
-          {t("firmwareUpgrade.sourcesRejected")}
-        </p>
-      )}
-    </div>
+      </CardFooter>
+    </Card>
   );
 }

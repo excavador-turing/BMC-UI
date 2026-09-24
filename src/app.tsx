@@ -5,7 +5,7 @@ import { ThemeProvider } from "next-themes";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { FlashProvider } from "@/contexts/FlashContext";
@@ -53,11 +53,16 @@ if (isFleet) {
           identity is added in front of it.
         */}
         <AuthProvider>
-          <Fleet />
           {/* Without this every toast a shared control raises in the fleet
               fires into the void -- the controls report success and failure
-              the same way the board's do, and nothing was listening. */}
-          <Toaster />
+              the same way the board's do, and nothing was listening. Three at
+              once, because the fleet drives several boards at a time and a
+              second result must not silently replace the first. */}
+          <Toaster limit={3}>
+            <TooltipProvider>
+              <Fleet />
+            </TooltipProvider>
+          </Toaster>
         </AuthProvider>
       </ThemeProvider>
     </StrictMode>
@@ -70,10 +75,11 @@ if (isFleet) {
         <AuthProvider>
           <QueryClientProvider client={queryClient}>
             <FlashProvider>
-              <TooltipProvider delayDuration={0}>
-                <InnerApp />
-                <Toaster />
-              </TooltipProvider>
+              <Toaster limit={3}>
+                <TooltipProvider>
+                  <InnerApp />
+                </TooltipProvider>
+              </Toaster>
             </FlashProvider>
           </QueryClientProvider>
         </AuthProvider>

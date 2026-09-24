@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import TextField from "@/components/TextField";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useSetPasswordMutation } from "@/lib/api/set";
 
@@ -75,7 +75,7 @@ export default function PasswordForm({
 
   return (
     <div className="flex max-w-md flex-col gap-2">
-      <Input
+      <TextField
         name="current-password"
         label={t("access.currentPassword")}
         type="password"
@@ -83,7 +83,7 @@ export default function PasswordForm({
         value={current}
         onChange={(e) => setCurrent(e.target.value)}
       />
-      <Input
+      <TextField
         name="new-password"
         label={t("access.newPassword")}
         type="password"
@@ -91,7 +91,7 @@ export default function PasswordForm({
         value={next}
         onChange={(e) => setNext(e.target.value)}
       />
-      <Input
+      <TextField
         name="repeat-password"
         label={t("access.repeatPassword")}
         type="password"
@@ -103,10 +103,14 @@ export default function PasswordForm({
           about: a rule shown before the first keystroke reads as an error the
           operator has already made. */}
       {next !== "" && !longEnough && (
-        <div className="text-sm opacity-80">{t("access.tooShort")}</div>
+        <div className="text-sm text-muted-foreground">
+          {t("access.tooShort")}
+        </div>
       )}
       {again !== "" && !matches && (
-        <div className="text-sm opacity-80">{t("access.noMatch")}</div>
+        <div className="text-sm text-muted-foreground">
+          {t("access.noMatch")}
+        </div>
       )}
       <div>
         <Button
@@ -117,7 +121,9 @@ export default function PasswordForm({
           {t("access.changePassword")}
         </Button>
       </div>
-      <div className="text-sm opacity-80">{t("access.sessionsNote")}</div>
+      <div className="text-sm text-muted-foreground">
+        {t("access.sessionsNote")}
+      </div>
     </div>
   );
 }

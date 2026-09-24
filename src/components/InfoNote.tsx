@@ -1,6 +1,12 @@
 import { Info } from "lucide-react";
-import { useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 /** Where the long version of every note now lives. */
 const DOCS = "https://turing.excavador.xyz";
@@ -22,6 +28,9 @@ const DOCS = "https://turing.excavador.xyz";
  * information needed at the moment of deciding, and putting them behind a
  * click would be hiding them. This is for the standing explanation beside a
  * reading, not for the consequence of a button.
+ *
+ * A shadcn `Popover`: it closes on Escape and on a click anywhere else, and
+ * flips to stay on screen at the edge of a 390 px row.
  */
 export default function InfoNote({
   text,
@@ -36,69 +45,35 @@ export default function InfoNote({
   label: string;
 }) {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
-  const panelId = useId();
-  const container = useRef<HTMLSpanElement>(null);
-  const button = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setOpen(false);
-        button.current?.focus();
-      }
-    };
-    // pointerdown, not click: a click that starts inside and ends outside
-    // should not count as dismissing it.
-    const onPointerDown = (event: PointerEvent) => {
-      if (!container.current?.contains(event.target as Node)) setOpen(false);
-    };
-
-    document.addEventListener("keydown", onKey);
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.removeEventListener("pointerdown", onPointerDown);
-    };
-  }, [open]);
 
   return (
-    <span ref={container} className="relative inline-flex align-middle">
-      <button
-        ref={button}
-        type="button"
-        aria-expanded={open}
-        aria-controls={open ? panelId : undefined}
-        aria-label={t("ui.aboutThis", { subject: label })}
-        onClick={() => setOpen((was) => !was)}
-        className="inline-flex size-5 items-center justify-center rounded-full opacity-60 transition-opacity hover:opacity-100 focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+    <Popover>
+      <PopoverTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            className="rounded-full text-muted-foreground"
+            aria-label={t("ui.aboutThis", { subject: label })}
+          />
+        }
       >
-        <Info className="size-4" aria-hidden />
-      </button>
-
-      {open && (
-        <span
-          id={panelId}
-          role="dialog"
-          aria-label={t("ui.aboutThis", { subject: label })}
-          // Anchored to the right so a note at the edge of a row opens
-          // inwards instead of off the page; max-w keeps it inside a 390px
-          // screen, where these rows are already tight.
-          className="absolute top-7 right-0 z-20 w-max max-w-[min(20rem,calc(100vw-2rem))] rounded-md border border-neutral-300 bg-white p-3 text-left text-sm font-normal text-neutral-900 normal-case shadow-lg dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+        <Info aria-hidden />
+      </PopoverTrigger>
+      <PopoverContent
+        align="end"
+        className="w-max max-w-[min(20rem,calc(100vw-2rem))] text-sm font-normal normal-case"
+      >
+        <p>{text}</p>
+        <a
+          className="text-primary underline underline-offset-4"
+          href={`${DOCS}${path}`}
+          target="_blank"
+          rel="noreferrer noopener"
         >
-          <span className="block">{text}</span>
-          <a
-            className="mt-2 block underline"
-            href={`${DOCS}${path}`}
-            target="_blank"
-            rel="noreferrer noopener"
-          >
-            {t("ui.readMore")}
-          </a>
-        </span>
-      )}
-    </span>
+          {t("ui.readMore")}
+        </a>
+      </PopoverContent>
+    </Popover>
   );
 }

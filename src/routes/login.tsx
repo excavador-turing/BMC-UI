@@ -3,9 +3,17 @@ import { type AxiosError } from "axios";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Button } from "@/components/ui/button";
+import LoadingButton from "@/components/LoadingButton";
+import SiteFooter from "@/components/SiteFooter";
+import TextField from "@/components/TextField";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { useAuth } from "@/hooks/useAuth";
 import { useLoginMutation } from "@/lib/api/set";
 
@@ -58,62 +66,52 @@ export function Login() {
   };
 
   return (
-    <div className="flex h-128 w-full items-center justify-center md:h-220">
-      <main className="size-full rounded-md bg-white p-10 pt-20 shadow-md md:h-auto md:w-96 md:pt-10 dark:bg-neutral-900">
-        <h3 className="mb-8 text-center text-3xl font-bold">
-          {t("login.header")}
-        </h3>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <Input
-              type="text"
-              autoCorrect="off"
-              autoCapitalize="off"
-              autoComplete="username"
-              name="username"
-              label={t("login.username")}
-            />
-          </div>
-          <div className="mb-4">
-            <Input
-              type="password"
-              autoCorrect="off"
-              autoCapitalize="off"
-              autoComplete="current-password"
-              name="password"
-              label={t("login.password")}
-            />
-          </div>
-          <div className="mb-4 flex items-center">
-            <Checkbox
-              id="rememberMe"
-              name="rememberMe"
-              aria-label={t("login.remember")}
-            />
-            <label
-              htmlFor="rememberMe"
-              className="not-sr-only ml-2 text-sm font-semibold"
-            >
-              {t("login.remember")}
-            </label>
-          </div>
-          <div className="mb-4">
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isPending}
-              isLoading={isPending}
-            >
-              {t("login.submit")}
-            </Button>
-          </div>
-          <div className="mb-4">
-            <p className="text-sm text-red-500" id="responseMessage">
-              {message}
-            </p>
-          </div>
-        </form>
+    <>
+      <main className="flex flex-1 items-center justify-center p-4">
+        <Card className="w-full max-w-sm">
+          <CardHeader>
+            <CardTitle className="text-xl">{t("login.header")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit}>
+              <FieldGroup>
+                <TextField
+                  type="text"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  autoComplete="username"
+                  name="username"
+                  label={t("login.username")}
+                />
+                <TextField
+                  type="password"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  autoComplete="current-password"
+                  name="password"
+                  label={t("login.password")}
+                />
+                <Field orientation="horizontal">
+                  <Checkbox id="rememberMe" name="rememberMe" />
+                  <FieldLabel htmlFor="rememberMe" className="font-normal">
+                    {t("login.remember")}
+                  </FieldLabel>
+                </Field>
+                <LoadingButton
+                  type="submit"
+                  size="lg"
+                  className="w-full"
+                  isLoading={isPending}
+                >
+                  {t("login.submit")}
+                </LoadingButton>
+                <FieldError id="responseMessage">{message}</FieldError>
+              </FieldGroup>
+            </form>
+          </CardContent>
+        </Card>
       </main>
-    </div>
+      <SiteFooter />
+    </>
   );
 }

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Logo from "@/assets/logo-light.svg?react";
 import SiteFooter from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserNav } from "@/components/user-nav";
 
 import { BoardCard } from "./BoardCard";
@@ -10,6 +11,9 @@ import { BoardScope } from "./BoardScope";
 import { BoardTabs } from "./BoardTabs";
 import { EMPTY_CONFIG, type FleetConfig, loadConfig } from "./config";
 import { OVERVIEW } from "./route";
+
+/** The switcher's own value for "no board": not a name a board can have. */
+const OVERVIEW_TAB = "\u0000overview";
 import { useFleetRoute } from "./useFleetRoute";
 
 /**
@@ -72,12 +76,14 @@ export function Fleet() {
           page that exists to watch several boards could not say which
           version of itself it was -- and sat two releases behind with
           nothing on screen to show it. */}
-      <div className="mb-4 flex items-center gap-3 border-b border-neutral-200 pb-3 dark:border-neutral-700">
-        <Logo className="size-8 shrink-0 dark:fill-neutral-100" />
-        <span className="text-lg font-bold whitespace-nowrap">
+      <div className="mb-4 flex items-center gap-3 border-b pb-3">
+        <Logo className="size-8 shrink-0 fill-foreground" />
+        <span className="text-lg font-medium whitespace-nowrap">
           Turing fleet
         </span>
-        <span className="font-mono text-xs opacity-60">{version}</span>
+        <span className="font-mono text-xs text-muted-foreground">
+          {version}
+        </span>
         <div className="ml-auto">
           <UserNav signOutHref="/oauth2/sign_out" name="operator" />
         </div>
@@ -86,13 +92,13 @@ export function Fleet() {
       <main className="flex-1">
         <header className="mb-4 flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
+            <h1 className="text-xl font-medium tracking-tight sm:text-2xl">
               {selected ? (selected.name ?? selected.id) : "Every board"}
             </h1>
             {/* The subtitle is orientation, not instruction, and on a phone it
               is three lines of it above the boards. Kept where there is room
               for it. */}
-            <p className="hidden text-sm text-neutral-500 sm:block dark:text-neutral-400">
+            <p className="hidden text-sm text-muted-foreground sm:block">
               {selected
                 ? (selected.note ??
                   "Everything this board's own interface can do.")
@@ -103,7 +109,7 @@ export function Fleet() {
           {selected ? (
             <Button
               size="sm"
-              variant="bw"
+              variant="outline"
               onClick={() => {
                 go(OVERVIEW);
               }}
@@ -124,33 +130,30 @@ export function Fleet() {
           to look at. A wrapped row also moves the tab you were about to press
           when a board is added. */}
         {config.boards.length > 1 ? (
-          <nav className="mb-4 flex gap-1 overflow-x-auto pb-1">
-            <Button
-              size="sm"
-              variant={selected ? "bw" : "turing-green"}
-              onClick={() => {
-                go(OVERVIEW);
-              }}
-            >
-              Overview
-            </Button>
-            {config.boards.map((board) => (
-              <Button
-                key={board.id}
-                size="sm"
-                variant={selected?.id === board.id ? "turing-green" : "bw"}
-                onClick={() => {
-                  go({ board: board.id, tab: route.tab });
-                }}
-              >
-                {board.name ?? board.id}
-              </Button>
-            ))}
-          </nav>
+          <Tabs
+            value={selected?.id ?? OVERVIEW_TAB}
+            onValueChange={(next: string) => {
+              go(
+                next === OVERVIEW_TAB
+                  ? OVERVIEW
+                  : { board: next, tab: route.tab }
+              );
+            }}
+            className="mb-4 overflow-x-auto pb-1"
+          >
+            <TabsList>
+              <TabsTrigger value={OVERVIEW_TAB}>Overview</TabsTrigger>
+              {config.boards.map((board) => (
+                <TabsTrigger key={board.id} value={board.id}>
+                  {board.name ?? board.id}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
         ) : null}
 
         {error ? (
-          <p className="rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-900 dark:bg-red-950 dark:text-red-200">
+          <p className="mb-4 rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
             Could not read the fleet&apos;s configuration: {error}. The chart
             writes <code>config.json</code> into the pod; without it this page
             has no list of boards to show.
@@ -158,7 +161,7 @@ export function Fleet() {
         ) : null}
 
         {missing ? (
-          <p className="rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+          <p className="mb-4 rounded-lg border border-warning/50 bg-warning/10 px-3 py-2 text-sm text-foreground">
             No board here is called <code>{route.board}</code>. It may have been
             removed from the fleet&apos;s configuration since this link was
             made.
@@ -166,7 +169,7 @@ export function Fleet() {
         ) : null}
 
         {loaded && !error && config.boards.length === 0 ? (
-          <p className="text-sm text-neutral-500 dark:text-neutral-400">
+          <p className="text-sm text-muted-foreground">
             The configuration lists no boards.
           </p>
         ) : null}

@@ -1,3 +1,5 @@
+import { Skeleton } from "@/components/ui/skeleton";
+
 import TabView from "../TabView";
 
 /**
@@ -11,27 +13,27 @@ export default function NetworkSkeleton() {
   return (
     <TabView>
       <div>
-        <div className="mb-8 h-7 w-2/5 animate-pulse bg-neutral-200 dark:bg-neutral-700"></div>
-        <div className="mb-6 h-7 w-40 animate-pulse bg-neutral-200 dark:bg-neutral-700"></div>
-        <div className="flex flex-row border-b border-neutral-200 pb-3 dark:border-neutral-700">
+        <Skeleton className="mb-8 h-7 w-2/5" />
+        <Skeleton className="mb-6 h-7 w-40" />
+        <div className="flex flex-row border-b pb-3">
           <div className="w-1/2 lg:w-1/4">
-            <div className="h-6 w-10 animate-pulse bg-neutral-200 dark:bg-neutral-700"></div>
+            <Skeleton className="h-6 w-10" />
           </div>
         </div>
-        <div className="flex flex-row border-b border-neutral-200 py-3 dark:border-neutral-700">
+        <div className="flex flex-row border-b py-3">
           <div className="w-1/2 lg:w-1/4">
-            <div className="h-6 w-10 animate-pulse bg-neutral-200 dark:bg-neutral-700"></div>
+            <Skeleton className="h-6 w-10" />
           </div>
-          <div className="h-6 w-48 animate-pulse bg-neutral-200 dark:bg-neutral-700"></div>
+          <Skeleton className="h-6 w-48" />
         </div>
         <div className="flex flex-row py-3">
           <div className="w-1/2 lg:w-1/4">
-            <div className="h-6 w-10 animate-pulse bg-neutral-200 dark:bg-neutral-700"></div>
+            <Skeleton className="h-6 w-10" />
           </div>
-          <div className="h-6 w-48 animate-pulse bg-neutral-200 dark:bg-neutral-700"></div>
+          <Skeleton className="h-6 w-48" />
         </div>
         <div className="mt-4">
-          <div className="h-9 w-36 animate-pulse rounded-full bg-neutral-200 dark:bg-neutral-700"></div>
+          <Skeleton className="h-9 w-36" />
         </div>
       </div>
     </TabView>

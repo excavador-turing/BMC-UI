@@ -10,6 +10,39 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **The interface is stock shadcn/ui now, on Base UI, with a sidebar.** It
+  was shadcn in name only: the generated components had been rewritten into
+  pill-shaped lime buttons, colours were written out by hand (about 250
+  `neutral-*`, `amber-*` and `dark:` classes), and cards, tables, callouts and
+  tabs were bare `div`s. Now:
+  - **Theme.** shadcn's neutral theme as CSS variables, so light and dark come
+    from one set of tokens, plus one colour of our own, `warning`, for the
+    amber facts that are neither an error nor nothing. Inter is still
+    self-hosted: the CLI's Google-font import was taken back out.
+  - **Components.** Every `ui/` component is the `base-nova` registry version
+    on `@base-ui/react`; all eleven `@radix-ui/*` packages and `vaul` are gone.
+    Sections are `Card`s, warnings are `Alert`s, statuses are `Badge`s, and
+    confirmations are `AlertDialog`s, which on a phone are the same dialog
+    rather than a second, drawer form of it.
+  - **Navigation** is shadcn's `sidebar-03` block: Board, Configuration and
+    System, with a breadcrumb above every page. It replaces the three-width
+    header and the tab strip, and is a sheet on a phone. The fleet keeps its
+    own layout, with its board and tab rows as `Tabs`.
+  - **Kept on purpose.** Field names (every form reads its values by `name`),
+    the fix for [BMC-Firmware#48](https://github.com/excavador-turing/BMC-Firmware/issues/48)
+    (a controlled password box must pass `onChange` through; see
+    `TextField.tsx`), the fleet's board prefix on toasts, and three toasts at
+    once.
+  - **One behaviour change.** The "confirm within N s" box on the address and
+    switch cards appears once there is an edit to time, not before.
+  - **Size.** `dist/` is 1,796,200 B, up from 1,648,790 (+8.9 %). JS
+    +90 KB, because Base UI and floating-ui weigh more than the Radix
+    packages they replace. CSS 60 KB → 117 KB (18 KB gzipped), from shadcn's
+    class vocabulary across thirty components. `npm run screens`: no new
+    faults. `npm run type-test`: 30 inputs, every one keeps what is typed.
+
 ## [v3.38.0] — 2026-09-23
 
 ### Changed

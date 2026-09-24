@@ -6,6 +6,7 @@ import InfoNote from "@/components/InfoNote";
 import { NodePicker } from "@/components/NodePicker";
 import SerialConsole from "@/components/SerialConsole";
 import TabView from "@/components/TabView";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type SerialReaderState, useSerialStatusQuery } from "@/lib/api/get";
 
 export const Route = createLazyFileRoute("/_tabLayout/console")({
@@ -25,12 +26,12 @@ function ReaderState({ state }: { state: SerialReaderState }) {
   const { t } = useTranslation();
 
   if (state === "Running") {
-    return <span className="font-semibold">{t("console.readerRunning")}</span>;
+    return <span className="font-medium">{t("console.readerRunning")}</span>;
   }
 
   if (state === "Initialized") {
     return (
-      <span className="font-semibold text-amber-600 dark:text-amber-500">
+      <span className="font-medium text-warning">
         {t("console.readerInitialized")}
       </span>
     );
@@ -38,13 +39,13 @@ function ReaderState({ state }: { state: SerialReaderState }) {
 
   if (state === "Stopped") {
     return (
-      <span className="font-semibold text-red-600 dark:text-red-400">
+      <span className="font-medium text-destructive">
         {t("console.readerStopped")}
       </span>
     );
   }
 
-  return <span className="font-semibold">{state}</span>;
+  return <span className="font-medium">{state}</span>;
 }
 
 /**
@@ -79,66 +80,70 @@ export function SerialConsoleTab({ preselected }: { preselected?: number }) {
 
   return (
     <TabView title={t("console.header")}>
-      <div className="space-y-4">
-        <NodePicker
-          label={t("console.nodeSelect")}
-          value={selectedNode}
-          onChange={setSelectedNode}
-        />
-
-        <div className="flex flex-wrap items-baseline gap-3">
-          <span className="inline-flex items-center gap-1 text-sm font-semibold opacity-60">
-            {t("console.readerTask")}
-            <InfoNote
-              text={t("console.readerNote")}
-              path="/features/a-console-to-every-module/#reader-running-is-about-the-bmc-not-the-module"
-              label={t("console.readerTask")}
-            />
-          </span>
-          {isError ? (
-            <span className="text-sm opacity-60">
-              {t("console.readerUnavailable")}
-            </span>
-          ) : readerState === undefined ? (
-            <span className="text-sm opacity-60">
-              {t("console.readerUnknown")}
-            </span>
-          ) : (
-            <ReaderState state={readerState} />
-          )}
-        </div>
-      </div>
-
-      <SerialConsole key={node} node={node} />
-
-      <div>
-        <div className="mb-6 flex items-center gap-2 text-lg font-bold">
-          {t("console.restTitle")}
-          <InfoNote
-            text={t("console.restCrlf")}
-            path="/features/a-console-to-every-module/#two-ways-to-type-and-they-are-not-the-same"
-            label={t("console.restTitle")}
+      <Card>
+        <CardContent className="flex flex-col gap-4">
+          <NodePicker
+            label={t("console.nodeSelect")}
+            value={selectedNode}
+            onChange={setSelectedNode}
           />
-        </div>
-        <div className="space-y-2 text-sm">
+
+          <div className="flex flex-wrap items-baseline gap-3">
+            <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+              {t("console.readerTask")}
+              <InfoNote
+                text={t("console.readerNote")}
+                path="/features/a-console-to-every-module/#reader-running-is-about-the-bmc-not-the-module"
+                label={t("console.readerTask")}
+              />
+            </span>
+            {isError ? (
+              <span className="text-sm text-muted-foreground">
+                {t("console.readerUnavailable")}
+              </span>
+            ) : readerState === undefined ? (
+              <span className="text-sm text-muted-foreground">
+                {t("console.readerUnknown")}
+              </span>
+            ) : (
+              <ReaderState state={readerState} />
+            )}
+          </div>
+
+          <SerialConsole key={node} node={node} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            {t("console.restTitle")}
+            <InfoNote
+              text={t("console.restCrlf")}
+              path="/features/a-console-to-every-module/#two-ways-to-type-and-they-are-not-the-same"
+              label={t("console.restTitle")}
+            />
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-2 text-sm">
           <p>{t("console.restIntro")}</p>
-          <ul className="space-y-1">
+          <ul className="flex flex-col gap-1">
             <li>
-              <code className="rounded-xs bg-turing-bg px-1 break-all dark:bg-turing-bg-dark">
+              <code className="rounded-sm bg-muted px-1 font-mono break-all">
                 GET /api/bmc?opt=get&amp;type=uart&amp;node=&lt;0..3&gt;
               </code>{" "}
               — {t("console.restRead")}
             </li>
             <li>
-              <code className="rounded-xs bg-turing-bg px-1 break-all dark:bg-turing-bg-dark">
+              <code className="rounded-sm bg-muted px-1 font-mono break-all">
                 POST
                 /api/bmc?opt=set&amp;type=uart&amp;node=&lt;0..3&gt;&amp;cmd=&lt;text&gt;
               </code>{" "}
               — {t("console.restWrite")}
             </li>
           </ul>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </TabView>
   );
 }

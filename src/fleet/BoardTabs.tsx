@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type FleetBoard } from "@/fleet/config";
 import { type FleetRoute } from "@/fleet/route";
 import { DEFAULT_TAB, findTab, FLEET_TABS } from "@/fleet/tabs";
@@ -33,20 +33,21 @@ export function BoardTabs({
           four lines at 390px. A wrapped row also moves every tab sideways
           when one is added, which is how somebody ends up on Settings having
           aimed at Network. */}
-      <nav className="mb-4 flex gap-1 overflow-x-auto border-b border-neutral-200 pb-2 whitespace-nowrap dark:border-neutral-700">
-        {FLEET_TABS.map((entry) => (
-          <Button
-            key={entry.id}
-            size="sm"
-            variant={entry.id === active ? "turing-green" : "bw"}
-            onClick={() => {
-              go({ board: board.id, tab: entry.id });
-            }}
-          >
-            {entry.label}
-          </Button>
-        ))}
-      </nav>
+      <Tabs
+        value={active}
+        onValueChange={(next: string) => {
+          go({ board: board.id, tab: next });
+        }}
+        className="mb-4 overflow-x-auto border-b pb-2"
+      >
+        <TabsList variant="line">
+          {FLEET_TABS.map((entry) => (
+            <TabsTrigger key={entry.id} value={entry.id}>
+              {entry.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       {/* Per tab, not per board: a tab that throws should cost that tab, and
           the board's other tabs stay reachable from the bar above. */}
@@ -54,7 +55,7 @@ export function BoardTabs({
         key={`${board.id}:${active}`}
         label={`fleet:${board.id}:${active}`}
         fallback={
-          <p className="text-sm text-red-700 dark:text-red-400">
+          <p className="text-sm text-destructive">
             This tab could not be shown for {board.name ?? board.id}. The board
             may be rebooting, or off the management network.
           </p>
@@ -62,7 +63,7 @@ export function BoardTabs({
       >
         <Suspense
           fallback={
-            <p className="text-sm text-neutral-500">
+            <p className="text-sm text-muted-foreground">
               Reaching {board.name ?? board.id}…
             </p>
           }

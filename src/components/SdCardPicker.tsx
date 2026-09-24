@@ -7,9 +7,18 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   type SdCardEntry,
   useSdCardFilesQuery,
@@ -70,9 +79,9 @@ export default function SdCardPicker({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="modal-rounded max-h-[80vh] overflow-hidden p-6 sm:max-w-2xl">
+      <DialogContent className="max-h-[80vh] overflow-hidden sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="mb-2">{t("sdCard.pickerTitle")}</DialogTitle>
+          <DialogTitle>{t("sdCard.pickerTitle")}</DialogTitle>
           <DialogDescription>
             {usage.data
               ? t("sdCard.usage", {
@@ -83,7 +92,7 @@ export default function SdCardPicker({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="mt-2 max-h-[52vh] overflow-y-auto">
+        <div className="max-h-[52vh] overflow-y-auto">
           {files.isPending && (
             <div className="py-6 text-sm">{t("sdCard.loading")}</div>
           )}
@@ -102,43 +111,34 @@ export default function SdCardPicker({
           )}
 
           {rows.length > 0 && (
-            <table className="w-full text-left text-sm">
-              <thead className="text-xs text-neutral-500 dark:text-neutral-400">
-                <tr>
-                  <th className="py-1 pr-2 font-semibold">
-                    {t("sdCard.colName")}
-                  </th>
-                  <th className="py-1 pr-2 font-semibold">
-                    {t("sdCard.colSize")}
-                  </th>
-                  <th className="py-1 pr-2 font-semibold">
-                    {t("sdCard.colState")}
-                  </th>
-                  <th className="py-1" />
-                </tr>
-              </thead>
-              <tbody>
+            <Table>
+              <TableHeader className="text-muted-foreground">
+                <TableRow>
+                  <TableHead>{t("sdCard.colName")}</TableHead>
+                  <TableHead>{t("sdCard.colSize")}</TableHead>
+                  <TableHead>{t("sdCard.colState")}</TableHead>
+                  <TableHead />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {rows.map((entry) => (
-                  <tr
-                    key={entry.path}
-                    className="border-t border-neutral-200 dark:border-neutral-700"
-                  >
-                    <td className="py-2 pr-2 font-mono break-all">
+                  <TableRow key={entry.path}>
+                    <TableCell className="font-mono break-all">
                       {entry.path}
-                    </td>
-                    <td className="py-2 pr-2 whitespace-nowrap tabular-nums">
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap tabular-nums">
                       {human(entry.size)}
-                    </td>
-                    <td className="py-2 pr-2 text-neutral-500 dark:text-neutral-400">
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
                       {entry.flashable
                         ? t("sdCard.flashable")
                         : (entry.reason ?? t("sdCard.notFlashable"))}
-                    </td>
-                    <td className="py-2 text-right">
+                    </TableCell>
+                    <TableCell className="text-right">
                       <Button
                         type="button"
                         size="sm"
-                        variant="bw"
+                        variant="outline"
                         disabled={!entry.flashable}
                         onClick={() => {
                           onChoose(entry);
@@ -147,21 +147,21 @@ export default function SdCardPicker({
                       >
                         {t("sdCard.choose")}
                       </Button>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           )}
         </div>
 
-        <div className="mt-3 flex items-center justify-between">
+        <DialogFooter className="sm:justify-between">
           {/* Everything on the card, not only what can be flashed: an image
               the daemon rejected is exactly what an operator wants to see,
               with the reason beside it. */}
           <Button
             type="button"
-            variant="bw"
+            variant="outline"
             size="sm"
             onClick={() => setShowAll((value) => !value)}
             disabled={!files.isSuccess}
@@ -170,10 +170,10 @@ export default function SdCardPicker({
               ? t("sdCard.showFlashable", { count: flashableCount })
               : t("sdCard.showAll")}
           </Button>
-          <Button type="button" variant="bw" onClick={onClose}>
+          <Button type="button" variant="outline" onClick={onClose}>
             {t("ui.cancel")}
           </Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

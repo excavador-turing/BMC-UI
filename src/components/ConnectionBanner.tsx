@@ -25,7 +25,7 @@ export default function ConnectionBanner() {
     // Said once, after the reload that followed a reboot. It is also how the
     // number on the upgrade guide gets checked by every person who updates.
     return (
-      <div className="w-full bg-emerald-50 px-3 py-2 text-center text-sm text-emerald-900 dark:bg-emerald-950 dark:text-emerald-100">
+      <div className="w-full bg-muted px-3 py-2 text-center text-sm text-foreground">
         {t("connection.cameBack", { seconds: cameBackIn })}
       </div>
     );
@@ -37,7 +37,7 @@ export default function ConnectionBanner() {
     <div
       role="status"
       aria-live="polite"
-      className="w-full bg-amber-50 px-3 py-2 text-center text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-100"
+      className="w-full bg-warning/15 px-3 py-2 text-center text-sm text-foreground"
     >
       {state === "rebooting"
         ? overdue

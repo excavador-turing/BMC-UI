@@ -6,10 +6,12 @@ import ConfirmationModal from "@/components/ConfirmationModal";
 import FirmwareCandidates from "@/components/FirmwareCandidates";
 import FirmwareSlots from "@/components/FirmwareSlots";
 import FirmwareSources from "@/components/FirmwareSources";
+import LoadingButton from "@/components/LoadingButton";
 import TabView from "@/components/TabView";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
+import TextField from "@/components/TextField";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FieldGroup } from "@/components/ui/field";
+import UsageBar from "@/components/UsageBar";
 import { useFlash } from "@/hooks/use-flash";
 
 export const Route = createLazyFileRoute("/_tabLayout/firmware-upgrade")({
@@ -64,49 +66,53 @@ export function FirmwareUpgrade() {
       <FirmwareCandidates />
       <FirmwareSources />
 
-      <form ref={formRef} onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <Input
-            type="file"
-            name="file"
-            label={t("firmwareUpgrade.fileInput")}
-            accept=".tpu,.tpu.xz,application/octet-stream"
-          />
-        </div>
-        <div className="mb-4">
-          <Input
-            type="text"
-            name="sha256"
-            label={t("firmwareUpgrade.shaInput")}
-          />
-        </div>
-        <div>
-          <Button
-            type="submit"
-            disabled={firmwareUpdateMutation.isPending || isFlashing}
-            isLoading={
-              firmwareUpdateMutation.isPending ||
-              (isFlashing && flashType === "firmware")
-            }
-          >
-            {t("firmwareUpgrade.parkButton")}
-          </Button>
-        </div>
-        {uploadProgress && flashType === "firmware" && (
-          <Progress
-            aria-label={t("firmwareUpgrade.ariaProgress")}
-            className="mt-4"
-            value={uploadProgress.pct}
-            label={`${uploadProgress.transferred}${
-              uploadProgress.total ? ` / ${uploadProgress.total}` : ""
-            }`}
-            pulsing={firmwareUpdateMutation.isPending || isFlashing}
-          />
-        )}
-        {flashType === "firmware" && statusMessage && (
-          <div className="mt-4 text-sm">{statusMessage}</div>
-        )}
-      </form>
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("firmwareUpgrade.parkButton")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form ref={formRef} onSubmit={handleSubmit}>
+            <FieldGroup>
+              <TextField
+                type="file"
+                name="file"
+                label={t("firmwareUpgrade.fileInput")}
+                accept=".tpu,.tpu.xz,application/octet-stream"
+              />
+              <TextField
+                type="text"
+                name="sha256"
+                label={t("firmwareUpgrade.shaInput")}
+              />
+              <div>
+                <LoadingButton
+                  type="submit"
+                  disabled={firmwareUpdateMutation.isPending || isFlashing}
+                  isLoading={
+                    firmwareUpdateMutation.isPending ||
+                    (isFlashing && flashType === "firmware")
+                  }
+                >
+                  {t("firmwareUpgrade.parkButton")}
+                </LoadingButton>
+              </div>
+              {uploadProgress && flashType === "firmware" && (
+                <UsageBar
+                  aria-label={t("firmwareUpgrade.ariaProgress")}
+                  value={uploadProgress.pct}
+                  label={`${uploadProgress.transferred}${
+                    uploadProgress.total ? ` / ${uploadProgress.total}` : ""
+                  }`}
+                  pulsing={firmwareUpdateMutation.isPending || isFlashing}
+                />
+              )}
+              {flashType === "firmware" && statusMessage && (
+                <div className="text-sm">{statusMessage}</div>
+              )}
+            </FieldGroup>
+          </form>
+        </CardContent>
+      </Card>
       <ConfirmationModal
         isOpen={confirmFlashModal}
         onClose={() => setConfirmFlashModal(false)}

@@ -1,196 +1,43 @@
-// Inspired by react-hot-toast library
-import { useCallback, useContext, useEffect, useState } from "react";
+import { type ReactNode, useCallback, useContext } from "react";
 
-import type { ToastActionElement, ToastProps } from "@/components/ui/toast";
+import { toast as manager } from "@/components/ui/toast";
 import { ToastScopeContext } from "@/contexts/ToastScopeContext";
 
-// Three, not one. On a board, one action at a time meant one toast was
-// enough. The fleet drives several boards at once -- power a node here, start
-// a flash there -- and a cap of one means the second result silently replaces
-// the first, so an operator sees a success for something they did not watch
-// and never learns about the failure underneath it.
-const TOAST_LIMIT = 3;
-const TOAST_REMOVE_DELAY = 1000000;
-
-type ToasterToast = ToastProps & {
-  id: string;
-  title?: React.ReactNode;
-  description?: React.ReactNode;
-  action?: ToastActionElement;
-};
-
-interface ActionType {
-  ADD_TOAST: "ADD_TOAST";
-  UPDATE_TOAST: "UPDATE_TOAST";
-  DISMISS_TOAST: "DISMISS_TOAST";
-  REMOVE_TOAST: "REMOVE_TOAST";
+/**
+ * The one way this interface raises a toast.
+ *
+ * Fifty call sites say `toast({ title, description, variant })`. The toasts
+ * themselves are shadcn's Base UI ones now, driven by the manager
+ * `ui/toast.tsx` exports; this keeps the call sites' shape so none of them
+ * had to change, and keeps the fleet's board prefix in the one place it
+ * belongs (see `ToastScopeContext`).
+ *
+ * How many show at once is the `<Toaster limit>` in `app.tsx`.
+ */
+interface ToastOptions {
+  title?: string;
+  description?: ReactNode;
+  /** `destructive` is an error: it gets the error icon and colour. */
+  variant?: "default" | "destructive";
 }
 
-let count = 0;
-
-function genId() {
-  count = (count + 1) % Number.MAX_SAFE_INTEGER;
-  return count.toString();
-}
-
-type Action =
-  | {
-      type: ActionType["ADD_TOAST"];
-      toast: ToasterToast;
-    }
-  | {
-      type: ActionType["UPDATE_TOAST"];
-      toast: Partial<ToasterToast>;
-    }
-  | {
-      type: ActionType["DISMISS_TOAST"];
-      toastId?: ToasterToast["id"];
-    }
-  | {
-      type: ActionType["REMOVE_TOAST"];
-      toastId?: ToasterToast["id"];
-    };
-
-interface State {
-  toasts: ToasterToast[];
-}
-
-const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>();
-
-const addToRemoveQueue = (toastId: string) => {
-  if (toastTimeouts.has(toastId)) {
-    return;
-  }
-
-  const timeout = setTimeout(() => {
-    toastTimeouts.delete(toastId);
-    dispatch({
-      type: "REMOVE_TOAST",
-      toastId: toastId,
-    });
-  }, TOAST_REMOVE_DELAY);
-
-  toastTimeouts.set(toastId, timeout);
-};
-
-export const reducer = (state: State, action: Action): State => {
-  switch (action.type) {
-    case "ADD_TOAST":
-      return {
-        ...state,
-        toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT),
-      };
-
-    case "UPDATE_TOAST":
-      return {
-        ...state,
-        toasts: state.toasts.map((t) =>
-          t.id === action.toast.id ? { ...t, ...action.toast } : t
-        ),
-      };
-
-    case "DISMISS_TOAST": {
-      const { toastId } = action;
-
-      // ! Side effects ! - This could be extracted into a dismissToast() action,
-      // but I'll keep it here for simplicity
-      if (toastId) {
-        addToRemoveQueue(toastId);
-      } else {
-        state.toasts.forEach((toast) => {
-          addToRemoveQueue(toast.id);
-        });
-      }
-
-      return {
-        ...state,
-        toasts: state.toasts.map((t) =>
-          t.id === toastId || toastId === undefined
-            ? {
-                ...t,
-                open: false,
-              }
-            : t
-        ),
-      };
-    }
-    case "REMOVE_TOAST":
-      if (action.toastId === undefined) {
-        return {
-          ...state,
-          toasts: [],
-        };
-      }
-      return {
-        ...state,
-        toasts: state.toasts.filter((t) => t.id !== action.toastId),
-      };
-  }
-};
-
-const listeners: ((state: State) => void)[] = [];
-
-let memoryState: State = { toasts: [] };
-
-function dispatch(action: Action) {
-  memoryState = reducer(memoryState, action);
-  listeners.forEach((listener) => {
-    listener(memoryState);
+function toast({ title, description, variant }: ToastOptions) {
+  const id = manager.add({
+    title,
+    description,
+    type: variant === "destructive" ? "error" : undefined,
   });
-}
-
-type Toast = Omit<ToasterToast, "id">;
-
-function toast({ ...props }: Toast) {
-  const id = genId();
-
-  const update = (props: ToasterToast) =>
-    dispatch({
-      type: "UPDATE_TOAST",
-      toast: { ...props, id },
-    });
-  const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id });
-
-  dispatch({
-    type: "ADD_TOAST",
-    toast: {
-      ...props,
-      id,
-      open: true,
-      onOpenChange: (open) => {
-        if (!open) dismiss();
-      },
-    },
-  });
-
-  return {
-    id: id,
-    dismiss,
-    update,
-  };
+  return { id, dismiss: () => manager.close(id) };
 }
 
 function useToast() {
-  const [state, setState] = useState<State>(memoryState);
   // Which board, if we are inside one. Null on the board interface, where a
   // prefix would only add noise to an unambiguous message.
   const scope = useContext(ToastScopeContext);
 
-  useEffect(() => {
-    listeners.push(setState);
-    return () => {
-      const index = listeners.indexOf(setState);
-      if (index > -1) {
-        listeners.splice(index, 1);
-      }
-    };
-  }, [state]);
-
   const scoped = useCallback(
-    (props: Toast) => {
+    (props: ToastOptions) => {
       if (scope === null) return toast(props);
-      // `title` is a string here, not a ReactNode: ToastProps narrows it, so
-      // there is no element case to compose around.
       const title =
         props.title === undefined ? scope : `${scope}: ${props.title}`;
       return toast({ ...props, title });
@@ -198,11 +45,7 @@ function useToast() {
     [scope]
   );
 
-  return {
-    ...state,
-    toast: scoped,
-    dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
-  };
+  return { toast: scoped };
 }
 
 export { toast, useToast };
