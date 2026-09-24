@@ -21,26 +21,6 @@ export default function SiteFooter() {
           oleg@tsarev.id
         </a>
       </span>
-      <span aria-hidden>·</span>
-      <a
-        className="underline"
-        href="https://github.com/excavador-turing"
-        target="_blank"
-        rel="noreferrer noopener"
-      >
-        excavador-turing
-      </a>
-      <span aria-hidden>·</span>
-      {/* turingpi.xyz, not turing.excavador.xyz. That name is dead and this
-          link had been pointing at it. */}
-      <a
-        className="underline"
-        href="https://turingpi.xyz"
-        target="_blank"
-        rel="noreferrer noopener"
-      >
-        docs
-      </a>
     </footer>
   );
 }

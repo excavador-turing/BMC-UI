@@ -16,8 +16,7 @@
    shadcn CLI -- some 3,600 lockfile lines -- a dependency of a stylesheet.
    These nine are the part of that file this interface uses. The CLI's
    versions also match Radix's `data-state="open"`; nothing here is Radix any
-   more, and that second selector doubled every rule that used one -- about
-   25 KB of the stylesheet. */
+   more, and that second selector was repeated in every rule that used one. */
 @custom-variant data-open {
   &:where([data-open]:not([data-open="false"])) {
     @slot;
@@ -79,10 +78,12 @@
     "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
-/* shadcn's stock neutral theme, plus one colour of our own: `warning`.
+/* shadcn's stock neutral theme, plus two colours of our own. `warning`:
    shadcn has none, and this interface has a real use for one -- a half-duplex
    port, a fan at its limit, a certificate near expiry -- that is neither an
-   error nor nothing. */
+   error nor nothing. `success`: a state that is on and well, such as a
+   powered module. Green-700 in light mode, not 600, so small text on it
+   stays readable (about 5:1 against the card); green-400 in dark mode. */
 @theme inline {
   --font-heading: var(--font-sans);
   --color-background: var(--background);
@@ -101,6 +102,7 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-warning: var(--warning);
+  --color-success: var(--success);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -144,6 +146,7 @@
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --warning: oklch(0.666 0.179 58.318);
+  --success: oklch(0.448 0.119 151.328);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
@@ -179,6 +182,7 @@
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --warning: oklch(0.828 0.189 84.429);
+  --success: oklch(0.792 0.209 151.711);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);

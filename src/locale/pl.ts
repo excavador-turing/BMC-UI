@@ -4,12 +4,14 @@ import { type OptionalTranslations } from "@/locale/en";
 const translations = {
   navigation: {
     overview: "Przegląd",
+    dashboard: "Pulpit",
     firmware: "Firmware",
     settings: "Ustawienia",
     info: "Informacje",
     network: "Sieć",
     security: "Bezpieczeństwo",
     nodes: "Węzły",
+    powerControl: "Sterowanie zasilaniem",
     console: "Konsola",
     usb: "USB",
     firmwareUpgrade: "Aktualizacja oprogramowania",
@@ -17,8 +19,13 @@ const translations = {
     about: "O programie",
     // The sidebar's three headings.
     sectionBoard: "Płyta",
-    sectionConfiguration: "Konfiguracja",
+    sectionNetworkAccess: "Sieć i dostęp",
     sectionSystem: "System",
+    sectionOther: "Inne",
+    docs: "Dokumentacja",
+    github: "GitHub",
+    cooling: "Chłodzenie",
+    maintenance: "Konserwacja",
   },
   userNav: {
     language: "Język",
@@ -45,6 +52,15 @@ const translations = {
   // reviews it. These strings decide who can log in to hardware, and a
   // guessed translation of "stop trusting any proxy" is worse than a
   // sentence the reader can look up.
+  // The Dashboard (Overview) page.
+  dashboard: {
+    unnamed: "Bez nazwy",
+    stateOn: "Wł.",
+    stateOff: "Wył.",
+    poweredOnAgo: "Włączony {{duration}} temu",
+    offSinceUnknown: "Wyłączony od: brak danych",
+    attnUpdate: "Dostępne firmware {{version}}",
+  },
   info: {
     fanAboveTrip: "powyżej {{celsius}} °C",
     userStorage: "Pamięć użytkownika",
@@ -82,9 +98,9 @@ const translations = {
       "Płyta przywróciła {{device}} do {{cur}} z {{max}} po ustawieniu na {{requested}}.",
     ariaFanStep: "Stopień chłodzenia wentylatora {{device}}",
     boardHealth: "Kondycja płyty",
+    boardInfo: "Informacje o płycie",
     healthUptime: "Czas pracy",
     healthLoad: "Obciążenie",
-    healthLoadWindows: "1 / 5 / 15 min",
     healthMemory: "Pamięć",
     healthMemoryDetail: "wolne {{free}} · dostępne {{available}}",
     healthTemperatureTerm: "Temperatura",
@@ -93,6 +109,7 @@ const translations = {
     healthFanTrip: "powyżej progu {{celsius}} °C",
     healthNand: "NAND",
     healthNandFree: "{{available}} z {{total}} bloków kasowania wolnych",
+    healthNandFreeBytes: "{{size}} wolne",
     healthNandBad: "{{blocks}} uszkodzonych",
     healthNandReserved: "{{blocks}} zarezerwowanych",
     healthNandNote:
@@ -146,7 +163,6 @@ const translations = {
   },
   nodes: {
     powerOnTimeTerm: "Czas włączenia",
-    openConsole: "Konsola",
     flashNode: "Wgraj…",
     usbRouteLabel: "Trasa USB dla węzła {{nodeId}}",
     usbNotRouted: "nie skierowane tutaj",

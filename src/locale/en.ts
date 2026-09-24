@@ -1,7 +1,9 @@
 const translations = {
   navigation: {
     overview: "Overview",
+    dashboard: "Dashboard",
     nodes: "Nodes",
+    powerControl: "Power Control",
     console: "Console",
     network: "Network",
     security: "Security",
@@ -10,8 +12,13 @@ const translations = {
     about: "About",
     // The sidebar's three headings.
     sectionBoard: "Board",
-    sectionConfiguration: "Configuration",
+    sectionNetworkAccess: "Network & Access",
     sectionSystem: "System",
+    sectionOther: "Other",
+    docs: "Docs",
+    github: "GitHub",
+    cooling: "Cooling",
+    maintenance: "Maintenance",
     // Kept so a bookmark or an old link still renders a label. The tabs
     // themselves are the list above.
     info: "Info",
@@ -114,6 +121,15 @@ const translations = {
     cannotRemoveFromHere:
       "You are authenticated by this CA, so removing it here would end your own session. Do it from the board's own interface with a password.",
   },
+  // The Dashboard (Overview) page.
+  dashboard: {
+    unnamed: "No name",
+    stateOn: "On",
+    stateOff: "Off",
+    poweredOnAgo: "Powered on {{duration}} ago",
+    offSinceUnknown: "Off since: not reported",
+    attnUpdate: "Firmware {{version}} is available",
+  },
   info: {
     userStorage: "User Storage",
     ariaStorageUtilization: "Storage utilization",
@@ -150,9 +166,9 @@ const translations = {
       "The board reset {{device}} to {{cur}} of {{max}} after it was set to {{requested}}.",
     ariaFanStep: "Fan {{device}} cooling step",
     boardHealth: "Board Health",
+    boardInfo: "Board info",
     healthUptime: "Uptime",
     healthLoad: "Load",
-    healthLoadWindows: "1 / 5 / 15 min",
     healthMemory: "Memory",
     healthMemoryDetail: "free {{free}} · available {{available}}",
     healthTemperatureTerm: "Temperature",
@@ -161,6 +177,7 @@ const translations = {
     healthFanTrip: "above the {{celsius}} °C trip",
     healthNand: "NAND",
     healthNandFree: "{{available}} of {{total}} eraseblocks free",
+    healthNandFreeBytes: "{{size}} free",
     healthNandBad: "{{blocks}} bad",
     healthNandReserved: "{{blocks}} reserved",
     healthNandNote:
@@ -215,7 +232,6 @@ const translations = {
   },
   nodes: {
     powerOnTimeTerm: "Power-on time",
-    openConsole: "Console",
     flashNode: "Flash\u2026",
     usbRouteLabel: "USB route for node {{nodeId}}",
     usbNotRouted: "not routed here",

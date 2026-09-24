@@ -55,6 +55,7 @@ TABS = [
     "info",
     "nodes",
     "console",
+    "cooling",
     "network",
     "security",
     "firmware-upgrade",

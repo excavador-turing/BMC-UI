@@ -6,6 +6,9 @@ import ConfirmationModal from "@/components/ConfirmationModal";
 import LoadingButton from "@/components/LoadingButton";
 import NodeActions from "@/components/NodeActions";
 import NodeLiveness, { NodeLivenessNotes } from "@/components/NodeLiveness";
+import NodePowerSwitch, {
+  ConfirmationCheckbox,
+} from "@/components/NodePowerSwitch";
 import NodesSkeleton from "@/components/skeletons/nodes";
 import TabView from "@/components/TabView";
 import TextField from "@/components/TextField";
@@ -17,63 +20,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Field, FieldLabel } from "@/components/ui/field";
-import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { useApiBase } from "@/hooks/useApiBase";
+import { useSkipNodeConfirmation } from "@/hooks/useSkipNodeConfirmation";
 import { type NodeInfoResponse, useNodesTabData } from "@/lib/api/get";
-import {
-  usePowerNodeMutation,
-  useResetNodeMutation,
-  useSetNodeInfoMutation,
-} from "@/lib/api/set";
+import { useResetNodeMutation, useSetNodeInfoMutation } from "@/lib/api/set";
 
-export const Route = createLazyFileRoute("/_tabLayout/nodes")({
+export const Route = createLazyFileRoute("/_tabLayout/power-control")({
   component: NodesTab,
   // Every page on this route reads through a suspense query. `pendingComponent`
   // covers a request that is still in flight; a request that FAILS throws
   // during render and passes straight through Suspense, so without this it
   // unwound to the root -- which has no boundary either -- and blanked the
   // application. Info and Network already had one; these three did not.
-  errorComponent: () => <div>Error loading Nodes</div>,
+    errorComponent: () => <div>Error loading Power Control</div>,
   pendingComponent: NodesSkeleton,
 });
-
-/**
- * "Don't ask again", scoped to the board it was agreed for.
- *
- * It used to be one key for everything. In a fleet that means dismissing the
- * confirmation on one board silences it on all of them -- a setting about
- * cutting power to compute modules, applied to machines the operator never
- * agreed to. The base URL is what distinguishes a board here, since it is
- * what every request already goes to.
- */
-function powerConfirmationKey(base: string) {
-  return base === "/api"
-    ? "skipNodeConfirmation"
-    : `skipNodeConfirmation:${base}`;
-}
-
-const ConfirmationCheckbox = (props: {
-  checked: boolean;
-  onCheckedChange: (checked: boolean) => void;
-}) => {
-  const { t } = useTranslation();
-
-  return (
-    <Field orientation="horizontal" className="pt-4">
-      <Checkbox
-        id="skipConfirmation"
-        checked={props.checked}
-        onCheckedChange={(checked) => props.onCheckedChange(checked)}
-      />
-      <FieldLabel htmlFor="skipConfirmation" className="font-normal">
-        {t("nodes.dontAskAgain")}
-      </FieldLabel>
-    </Field>
-  );
-};
 
 const NodeRow = (
   props: NodeInfoResponse & {
@@ -83,48 +44,13 @@ const NodeRow = (
 ) => {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const [powerOn, setPowerOn] = useState(props.power_on_time !== null);
-  const [showPowerDialog, setShowPowerDialog] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
-  // Scoped to this board: see powerConfirmationKey.
-  const { base } = useApiBase();
-  const confirmationKey = powerConfirmationKey(base);
-  const [skipConfirmation, setSkipConfirmation] = useState(
-    localStorage.getItem(confirmationKey) === "true"
-  );
+  // Shared with the power switch, and scoped to this board.
+  const [skipConfirmation, rememberSkip] = useSkipNodeConfirmation();
   const [tempSkipConfirmation, setTempSkipConfirmation] = useState(false);
 
-  const { mutate: mutatePowerNode, isPending: isPendingPower } =
-    usePowerNodeMutation();
   const { mutate: mutateResetNode, isPending: isPendingReset } =
     useResetNodeMutation();
-
-  const togglePower = () => {
-    mutatePowerNode({ nodeId: props.nodeId, powerOn: !powerOn });
-    setPowerOn(!powerOn);
-    toast({
-      title: t("nodes.powerManagement"),
-      description: powerOn
-        ? t("nodes.nodeOff", { nodeId: props.nodeId })
-        : t("nodes.nodeOn", { nodeId: props.nodeId }),
-    });
-    setShowPowerDialog(false);
-
-    // Only update localStorage if the checkbox was checked
-    if (tempSkipConfirmation) {
-      localStorage.setItem(confirmationKey, "true");
-      setSkipConfirmation(true);
-    }
-  };
-
-  const handlePowerClick = () => {
-    if (skipConfirmation) {
-      togglePower();
-    } else {
-      setTempSkipConfirmation(false); // Reset temporary state
-      setShowPowerDialog(true);
-    }
-  };
 
   const handleResetClick = () => {
     if (skipConfirmation) {
@@ -144,11 +70,8 @@ const NodeRow = (
           description: t("nodes.nodeRestarted", { nodeId: props.nodeId }),
         });
 
-        // Only update localStorage if the checkbox was checked
-        if (tempSkipConfirmation) {
-          localStorage.setItem(confirmationKey, "true");
-          setSkipConfirmation(true);
-        }
+        // Only remembered if the box was ticked.
+        if (tempSkipConfirmation) rememberSkip();
       },
       onError: (e) => {
         toast({
@@ -161,7 +84,6 @@ const NodeRow = (
   };
 
   const handleCloseDialog = () => {
-    setShowPowerDialog(false);
     setShowResetDialog(false);
     setTempSkipConfirmation(false);
   };
@@ -172,14 +94,9 @@ const NodeRow = (
         <CardHeader>
           <CardTitle>{t("nodes.node", { nodeId: props.nodeId })}</CardTitle>
           <CardAction className="flex items-center gap-3">
-            <Switch
-              name={`node-${props.nodeId}-power`}
-              aria-label={t("nodes.ariaNodePowerToggle", {
-                nodeId: props.nodeId,
-              })}
-              disabled={isPendingPower}
-              checked={powerOn}
-              onCheckedChange={handlePowerClick}
+            <NodePowerSwitch
+              nodeId={props.nodeId}
+              powerOnTime={props.power_on_time}
             />
             <LoadingButton
               type="button"
@@ -222,36 +139,6 @@ const NodeRow = (
           <NodeActions nodeId={props.nodeId} />
         </CardContent>
       </Card>
-
-      <ConfirmationModal
-        isOpen={showPowerDialog}
-        onClose={handleCloseDialog}
-        title={t(
-          powerOn ? "nodes.powerOffConfirmTitle" : "nodes.powerOnConfirmTitle",
-          {
-            nodeId: props.nodeId,
-          }
-        )}
-        message={
-          <>
-            <p>
-              {t(
-                powerOn
-                  ? "nodes.powerOffConfirmDescription"
-                  : "nodes.powerOnConfirmDescription",
-                {
-                  nodeId: props.nodeId,
-                }
-              )}
-            </p>
-            <ConfirmationCheckbox
-              checked={tempSkipConfirmation}
-              onCheckedChange={setTempSkipConfirmation}
-            />
-          </>
-        }
-        onConfirm={togglePower}
-      />
 
       <ConfirmationModal
         isOpen={showResetDialog}

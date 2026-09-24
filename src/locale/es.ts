@@ -3,12 +3,14 @@ import { type OptionalTranslations } from "@/locale/en";
 const translations = {
   navigation: {
     overview: "Resumen",
+    dashboard: "Panel",
     firmware: "Firmware",
     settings: "Ajustes",
     info: "Información",
     network: "Red",
     security: "Seguridad",
     nodes: "Nodos",
+    powerControl: "Control de energía",
     console: "Consola",
     usb: "USB",
     firmwareUpgrade: "Actualizar Firmware",
@@ -16,8 +18,13 @@ const translations = {
     about: "Acerca de",
     // The sidebar's three headings.
     sectionBoard: "Placa",
-    sectionConfiguration: "Configuración",
+    sectionNetworkAccess: "Red y acceso",
     sectionSystem: "Sistema",
+    sectionOther: "Otros",
+    docs: "Documentación",
+    github: "GitHub",
+    cooling: "Refrigeración",
+    maintenance: "Mantenimiento",
   },
   userNav: {
     language: "Lenguaje",
@@ -44,6 +51,15 @@ const translations = {
   // reviews it. These strings decide who can log in to hardware, and a
   // guessed translation of "stop trusting any proxy" is worse than a
   // sentence the reader can look up.
+  // The Dashboard (Overview) page.
+  dashboard: {
+    unnamed: "Sin nombre",
+    stateOn: "Encendido",
+    stateOff: "Apagado",
+    poweredOnAgo: "Encendido hace {{duration}}",
+    offSinceUnknown: "Apagado desde: no informado",
+    attnUpdate: "Firmware {{version}} disponible",
+  },
   info: {
     fanAboveTrip: "por encima de {{celsius}} °C",
     userStorage: "Almacenamiento de Usuario",
@@ -82,9 +98,9 @@ const translations = {
       "La placa restableció {{device}} a {{cur}} de {{max}} después de ajustarlo a {{requested}}.",
     ariaFanStep: "Nivel de refrigeración del ventilador {{device}}",
     boardHealth: "Estado de la placa",
+    boardInfo: "Información de la placa",
     healthUptime: "Tiempo activo",
     healthLoad: "Carga",
-    healthLoadWindows: "1 / 5 / 15 min",
     healthMemory: "Memoria",
     healthMemoryDetail: "libre {{free}} · disponible {{available}}",
     healthTemperatureTerm: "Temperatura",
@@ -93,6 +109,7 @@ const translations = {
     healthFanTrip: "por encima del umbral de {{celsius}} °C",
     healthNand: "NAND",
     healthNandFree: "{{available}} de {{total}} bloques de borrado libres",
+    healthNandFreeBytes: "{{size}} libres",
     healthNandBad: "{{blocks}} defectuosos",
     healthNandReserved: "{{blocks}} reservados",
     healthNandNote:
@@ -146,7 +163,6 @@ const translations = {
   },
   nodes: {
     powerOnTimeTerm: "Hora de encendido",
-    openConsole: "Consola",
     flashNode: "Flashear…",
     usbRouteLabel: "Ruta USB del nodo {{nodeId}}",
     usbNotRouted: "no enrutado aquí",

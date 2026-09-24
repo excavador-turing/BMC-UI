@@ -1,5 +1,6 @@
 import {
   createFileRoute,
+  Link,
   Outlet,
   redirect,
   useLocation,
@@ -15,6 +16,7 @@ import SiteFooter from "@/components/SiteFooter";
 import {
   Breadcrumb,
   BreadcrumbItem,
+  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
@@ -79,7 +81,7 @@ export function AppLayoutComponent() {
               {/* Above the page, full width: an outage is not a property of
                   the page you happen to be on. */}
               <ConnectionBanner />
-              <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+              <header className="flex h-12 shrink-0 items-center gap-2 border-b px-4">
                 <SidebarTrigger className="-ml-1" />
                 <Separator
                   orientation="vertical"
@@ -99,7 +101,10 @@ export function AppLayoutComponent() {
   );
 }
 
-/** Section › page, from the same list the sidebar draws. */
+/**
+ * Section › page, or section › parent › page, from the list the sidebar
+ * draws.
+ */
 function Trail() {
   const { t } = useTranslation();
   const { pathname } = useLocation();
@@ -108,12 +113,28 @@ function Trail() {
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        <BreadcrumbItem className="hidden md:block">
-          {t(trail.section)}
-        </BreadcrumbItem>
-        <BreadcrumbSeparator className="hidden md:block" />
+        {/* The section is a heading in the sidebar, not a page, so it is not
+            a link here either. */}
+        {trail.section.title && (
+          <>
+            <BreadcrumbItem className="hidden md:block">
+              {t(trail.section.title)}
+            </BreadcrumbItem>
+            <BreadcrumbSeparator className="hidden md:block" />
+          </>
+        )}
+        {trail.parent && (
+          <>
+            <BreadcrumbItem>
+              <BreadcrumbLink render={<Link to={trail.parent.url} />}>
+                {t(trail.parent.title)}
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+          </>
+        )}
         <BreadcrumbItem>
-          <BreadcrumbPage>{t(trail.page)}</BreadcrumbPage>
+          <BreadcrumbPage>{t(trail.page.title)}</BreadcrumbPage>
         </BreadcrumbItem>
       </BreadcrumbList>
     </Breadcrumb>

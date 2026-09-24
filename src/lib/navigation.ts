@@ -1,66 +1,164 @@
+import {
+  BookOpenIcon,
+  FanIcon,
+  HardDriveDownloadIcon,
+  InfoIcon,
+  LayoutDashboardIcon,
+  type LucideIcon,
+  NetworkIcon,
+  PowerIcon,
+  ShieldCheckIcon,
+  TerminalIcon,
+  UsbIcon,
+  WrenchIcon,
+} from "lucide-react";
+import { type ComponentType, type SVGProps } from "react";
+
+import { GithubIcon } from "@/components/icons/github";
+
+export interface NavPage {
+  /** A translation key. */
+  title: string;
+  url: string;
+}
+
+export interface NavItem extends Omit<NavPage, "url"> {
+  url?: string;
+  /** A lucide icon, or one drawn to match (see `icons/github.tsx`). */
+  icon: LucideIcon | ComponentType<SVGProps<SVGSVGElement>>;
+  /** Pages that belong to this one, listed beneath it. */
+  items?: NavPage[];
+  /** Somewhere else entirely, opened in a new tab. */
+  external?: boolean;
+}
+
+export interface NavSection {
+  /**
+   * A translation key. Absent for the Dashboard, which stands above the
+   * groups.
+   */
+  title?: string;
+  items: NavItem[];
+}
+
 /**
- * The pages, in the order a person moves through them, in three groups: the
- * board and what runs on it, how it is reached and secured, and the board's
- * own firmware and identity.
+ * The pages, grouped by what they are about rather than by when they were
+ * written.
  *
- * What you look at first, then the things you act on, then what changes the
- * board, then what identifies it. The old order mixed the two -- Info, Network
- * and About are things you read, while Nodes, Console, USB, Firmware Upgrade
- * and Flash Node are things you do -- and four of those were about the same
- * four objects with no path between them.
+ * The **Dashboard** stands above the groups: it is where you land, and it
+ * answers "is the board all right" before anything else is asked. **Board**
+ * is the machine and what runs on it: the four modules and everything done to
+ * one of them, and how it keeps cool.
+ * **Network & Access** is how it is reached and who may reach it. **System**
+ * is the BMC's own firmware, clock, backups and identity.
  *
- * The sidebar draws this, and the breadcrumb above every page reads it to say
- * where you are. `hidden` pages are not in the sidebar -- they are reached
- * from a node's actions -- but still need a place in the breadcrumb.
+ * Two things moved to get there. The fan was on Settings between the clock
+ * and the backup, a cooling tool among housekeeping; it is Cooling now. And
+ * Settings was the name of a page holding a clock, a backup and a reboot --
+ * Maintenance says what those have in common. Its address is still
+ * `/settings`, so a bookmark still lands.
+ *
+ * Flash OS and USB are under Nodes. They were reachable only from a button on
+ * a node card, while the fleet listed both as tabs of their own.
+ *
+ * The sidebar draws this, and the breadcrumb above every page reads it.
  */
-export const navigation = [
+export const navigation: NavSection[] = [
+  // First and on its own, above every group: where you land.
   {
-    title: "navigation.sectionBoard",
     items: [
-      { to: "/info", label: "navigation.overview" },
-      { to: "/nodes", label: "navigation.nodes" },
-      { to: "/console", label: "navigation.console" },
-    ],
-    hidden: [
-      { to: "/flash-node", label: "navigation.flashNode" },
-      { to: "/usb", label: "navigation.usb" },
+      {
+        title: "navigation.dashboard",
+        url: "/info",
+        icon: LayoutDashboardIcon,
+      },
     ],
   },
   {
-    title: "navigation.sectionConfiguration",
+    title: "navigation.nodes",
     items: [
-      { to: "/network", label: "navigation.network" },
-      { to: "/security", label: "navigation.security" },
-      { to: "/settings", label: "navigation.settings" },
+      {
+        title: "navigation.powerControl",
+        url: "/power-control",
+        icon: PowerIcon,
+      },
+      { title: "navigation.console", url: "/console", icon: TerminalIcon },
+      {
+        title: "navigation.flashNode",
+        url: "/flash-node",
+        icon: HardDriveDownloadIcon,
+      },
+      { title: "navigation.usb", url: "/usb", icon: UsbIcon },
     ],
-    hidden: [],
+  },
+  {
+    title: "navigation.network",
+    items: [
+      { title: "navigation.network", url: "/network", icon: NetworkIcon },
+    ],
   },
   {
     title: "navigation.sectionSystem",
     items: [
-      { to: "/firmware-upgrade", label: "navigation.firmware" },
-      { to: "/about", label: "navigation.about" },
+      { title: "navigation.cooling", url: "/cooling", icon: FanIcon },
+      {
+        title: "navigation.firmware",
+        url: "/firmware-upgrade",
+        icon: HardDriveDownloadIcon,
+      },
+      {
+        title: "navigation.maintenance",
+        url: "/settings",
+        icon: WrenchIcon,
+      },
+      { title: "navigation.security", url: "/security", icon: ShieldCheckIcon },
+      { title: "navigation.about", url: "/about", icon: InfoIcon },
     ],
-    hidden: [],
   },
-] as const;
+  {
+    title: "navigation.sectionOther",
+    items: [
+      {
+        title: "navigation.docs",
+        url: "https://turingpi.xyz",
+        icon: BookOpenIcon,
+        external: true,
+      },
+      {
+        title: "navigation.github",
+        url: "https://github.com/excavador-turing",
+        icon: GithubIcon,
+        external: true,
+      },
+    ],
+  },
+];
 
-/** The section and page a path belongs to, for the breadcrumb. */
-export function trailFor(pathname: string) {
+/**
+ * Where a path sits, for the breadcrumb: its section, the page it belongs
+ * under if it is a sub-page, and the page itself.
+ */
+export function trailFor(pathname: string): {
+  section: NavSection;
+  parent: NavItem | null;
+  page: NavPage;
+} | null {
   for (const section of navigation) {
-    const pages: readonly { to: string; label: string }[] = [
-      ...section.items,
-      ...section.hidden,
-    ];
-    const page = pages.find((item) => item.to === pathname);
-    if (page) return { section: section.title, page: page.label };
+    for (const item of section.items) {
+      if (item.external) continue;
+      if (item.url && item.url === pathname) {
+        return { section, parent: null, page: { title: item.title, url: item.url } };
+      }
+      const child = item.items?.find((sub) => sub.url === pathname);
+      if (child) return { section, parent: item, page: child };
+    }
   }
   return null;
 }
 
 /**
- * Whether a page's entry pulses: flashing a node happens from the Nodes page,
- * not a page of its own, and the pulse follows the work.
+ * Whether a page's entry pulses while a flash runs: the work is started from
+ * Nodes or Flash OS for a module, and from Firmware for the BMC.
  */
 export function pulses(
   to: string,
@@ -69,7 +167,8 @@ export function pulses(
 ) {
   if (!isFlashing) return false;
   return (
-    (flashType === "node" && to === "/nodes") ||
+    (flashType === "node" &&
+      (to === "/power-control" || to === "/flash-node")) ||
     (flashType === "firmware" && to === "/firmware-upgrade")
   );
 }
