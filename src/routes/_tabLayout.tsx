@@ -58,10 +58,14 @@ export function AppLayoutComponent() {
   // node cards ask and do not care which.
   const nav = useMemo(
     () => ({
-      href: (destination: NodeDestination, node: number) =>
-        `/${destination}?node=${String(node)}`,
-      open: (destination: NodeDestination, node: number) => {
-        void navigate({ to: `/${destination}`, search: { node } });
+      href: (destination: NodeDestination, node?: number) =>
+        destination === "usb" ? "/usb" : `/${destination}?node=${String(node)}`,
+      open: (destination: NodeDestination, node?: number) => {
+        if (destination === "usb") {
+          void navigate({ to: "/usb" });
+        } else {
+          void navigate({ to: `/${destination}`, search: { node } });
+        }
       },
     }),
     [navigate]
