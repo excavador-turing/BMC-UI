@@ -6,6 +6,14 @@ import InfoNote from "@/components/InfoNote";
 import SerialConsole from "@/components/SerialConsole";
 import TabView from "@/components/TabView";
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Field, FieldLabel } from "@/components/ui/field";
+import {
   Select,
   SelectContent,
   SelectGroup,
@@ -89,75 +97,80 @@ export function SerialConsoleTab({ preselected }: { preselected?: number }) {
   }));
 
   return (
-    <TabView title={t("console.header")}>
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-wrap items-end gap-4 border-b pb-4">
-          <Select
-            items={nodeItems}
-            value={selectedNode}
-            onValueChange={(value) => {
-              if (value !== null) setSelectedNode(value);
-            }}
-          >
-            <SelectTrigger
-              aria-label={t("console.nodeSelect")}
-              className="w-36"
+    <TabView>
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("console.header")}</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <Field>
+            <FieldLabel htmlFor="console-node">
+              {t("console.nodeSelect")}
+            </FieldLabel>
+            <Select
+              items={nodeItems}
+              value={selectedNode}
+              onValueChange={(value) => {
+                if (value !== null) setSelectedNode(value);
+              }}
             >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {nodeItems.map((item) => (
-                  <SelectItem key={item.value} value={item.value}>
-                    {item.label}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          <span className="text-sm text-muted-foreground">
-            {t("console.nodeSelect")}
-          </span>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-wrap items-center gap-2 text-sm">
-            <span className="inline-flex items-center gap-1 text-muted-foreground">
-              {t("console.readerTask")}
-              <InfoNote
-                text={t("console.readerNote")}
-                path="/features/a-console-to-every-module/#reader-running-is-about-the-bmc-not-the-module"
-                label={t("console.readerTask")}
-              />
-            </span>
-            <span aria-hidden className="text-muted-foreground">
-              |
-            </span>
-            {isError ? (
-              <span className="text-muted-foreground">
-                {t("console.readerUnavailable")}
+              <SelectTrigger id="console-node" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {nodeItems.map((item) => (
+                    <SelectItem key={item.value} value={item.value}>
+                      {item.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </Field>
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              <span className="inline-flex items-center gap-1 text-muted-foreground">
+                {t("console.readerTask")}
+                <InfoNote
+                  text={t("console.readerNote")}
+                  path="/features/a-console-to-every-module/#reader-running-is-about-the-bmc-not-the-module"
+                  label={t("console.readerTask")}
+                />
               </span>
-            ) : readerState === undefined ? (
-              <span className="text-muted-foreground">
-                {t("console.readerUnknown")}
+              <span aria-hidden className="text-muted-foreground">
+                |
               </span>
-            ) : (
-              <ReaderState state={readerState} />
-            )}
+              {isError ? (
+                <span className="text-muted-foreground">
+                  {t("console.readerUnavailable")}
+                </span>
+              ) : readerState === undefined ? (
+                <span className="text-muted-foreground">
+                  {t("console.readerUnknown")}
+                </span>
+              ) : (
+                <ReaderState state={readerState} />
+              )}
+            </div>
+            <SerialConsole key={node} node={node} />
           </div>
-          <SerialConsole key={node} node={node} />
-        </div>
+        </CardContent>
+      </Card>
 
-        <section className="flex flex-col gap-4 border-t pt-6">
-          <h3 className="flex items-center gap-2 text-lg font-medium">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
             {t("console.restTitle")}
             <InfoNote
               text={t("console.restCrlf")}
               path="/features/a-console-to-every-module/#two-ways-to-type-and-they-are-not-the-same"
               label={t("console.restTitle")}
             />
-          </h3>
-          <p>{t("console.restIntro")}</p>
+          </CardTitle>
+          <CardDescription>{t("console.restIntro")}</CardDescription>
+        </CardHeader>
+        <CardContent>
           <ul className="flex flex-col gap-2 text-sm">
             <li>
               <code className="rounded-sm bg-muted px-1 font-mono break-all">
@@ -173,8 +186,8 @@ export function SerialConsoleTab({ preselected }: { preselected?: number }) {
               — {t("console.restWrite")}
             </li>
           </ul>
-        </section>
-      </div>
+        </CardContent>
+      </Card>
     </TabView>
   );
 }
