@@ -2,6 +2,7 @@ import { Suspense, useState } from "react";
 
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -49,29 +50,29 @@ export function BoardCard({ board, range, onOpen }: Props) {
   };
 
   return (
-    <div className="rounded-lg border border-neutral-200 p-4 dark:border-neutral-700">
-      <BoardScope board={board} client={client}>
-        <ErrorBoundary
-          key={attempt}
-          label={`board:${board.id}`}
-          fallback={<Unreachable board={board} onRetry={retry} />}
-        >
-          <Suspense fallback={<Reaching board={board} />}>
-            <BoardBody board={board} range={range} onOpen={onOpen} />
-          </Suspense>
-        </ErrorBoundary>
-      </BoardScope>
-    </div>
+    <Card>
+      <CardContent>
+        <BoardScope board={board} client={client}>
+          <ErrorBoundary
+            key={attempt}
+            label={`board:${board.id}`}
+            fallback={<Unreachable board={board} onRetry={retry} />}
+          >
+            <Suspense fallback={<Reaching board={board} />}>
+              <BoardBody board={board} range={range} onOpen={onOpen} />
+            </Suspense>
+          </ErrorBoundary>
+        </BoardScope>
+      </CardContent>
+    </Card>
   );
 }
 
 function Title({ board, sub }: { board: FleetBoard; sub?: string }) {
   return (
     <div>
-      <h2 className="text-base font-bold">{board.name ?? board.id}</h2>
-      {sub ? (
-        <p className="text-xs text-neutral-500 dark:text-neutral-400">{sub}</p>
-      ) : null}
+      <h2 className="text-base font-medium">{board.name ?? board.id}</h2>
+      {sub ? <p className="text-xs text-muted-foreground">{sub}</p> : null}
     </div>
   );
 }
@@ -93,13 +94,15 @@ function Unreachable({
         board={board}
         sub="did not answer. It may be rebooting, or off the management network."
       />
-      <button
+      <Button
         type="button"
+        size="sm"
+        variant="outline"
+        className="shrink-0"
         onClick={onRetry}
-        className="shrink-0 rounded-full border-2 border-neutral-900 px-3 py-1 text-xs font-semibold dark:border-neutral-200"
       >
         Try again
-      </button>
+      </Button>
     </div>
   );
 }
@@ -128,16 +131,13 @@ function BoardBody({ board, range, onOpen }: Props) {
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <Title board={board} sub={board.note ?? about.hostname} />
-        <div className="flex items-center gap-3 text-xs text-neutral-500 dark:text-neutral-400">
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <span>
-            firmware{" "}
-            <b className="text-neutral-900 dark:text-neutral-100">
-              {about.version ?? "—"}
-            </b>
+            firmware <b className="text-foreground">{about.version ?? "—"}</b>
             {bmcd ? <> · bmcd {bmcd}</> : null}
           </span>
           {onOpen ? (
-            <Button size="sm" variant="bw" onClick={onOpen}>
+            <Button size="sm" variant="outline" onClick={onOpen}>
               Open
             </Button>
           ) : null}
@@ -145,7 +145,7 @@ function BoardBody({ board, range, onOpen }: Props) {
       </div>
 
       {warning ? (
-        <p className="rounded border border-amber-400 bg-amber-50 px-2 py-1 text-xs text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+        <p className="rounded-md border border-warning/50 bg-warning/10 px-2 py-1 text-xs text-foreground">
           {warning}. Readings may be incomplete; nothing here is a lie, but some
           of it may be absent.
         </p>
@@ -156,21 +156,12 @@ function BoardBody({ board, range, onOpen }: Props) {
           const on = node.power_on_time != null;
           const port = ports.data?.find((p) => p.name === `node${i + 1}`);
           return (
-            <div
-              key={i}
-              className="rounded border border-neutral-200 px-2 py-1 text-xs dark:border-neutral-700"
-            >
-              <div className="font-semibold">Node {i + 1}</div>
-              <div
-                className={
-                  on ? "text-lime-700 dark:text-lime-400" : "text-neutral-400"
-                }
-              >
+            <div key={i} className="rounded-md border px-2 py-1 text-xs">
+              <div className="font-medium">Node {i + 1}</div>
+              <div className={on ? "text-foreground" : "text-muted-foreground"}>
                 {on ? `on ${formatUptime(node.power_on_time)}` : "off"}
               </div>
-              <div className="text-neutral-500 dark:text-neutral-400">
-                {portWord(port)}
-              </div>
+              <div className="text-muted-foreground">{portWord(port)}</div>
               {/* The one control worth having on a summary. Everything else
                   wants the context of a full tab; "that node is wedged, cut
                   its power" does not, and making an operator open two views
@@ -213,7 +204,7 @@ function BoardBody({ board, range, onOpen }: Props) {
 function Fact({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-neutral-500 dark:text-neutral-400">{label}</dt>
+      <dt className="text-muted-foreground">{label}</dt>
       <dd className="font-medium">{value}</dd>
     </div>
   );

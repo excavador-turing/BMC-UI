@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { type AxiosError, type AxiosProgressEvent } from "axios";
 import { filesize } from "filesize";
 import React, {
@@ -59,6 +60,7 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
   // it is about is the least useful of all of them.
   const { toast } = useToast();
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [flashType, setFlashType] = useState<FlashType>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isFlashing, setIsFlashing] = useState(false);
@@ -231,6 +233,11 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
             t("firmwareUpgrade.success"),
             t("firmwareUpgrade.successMessage")
           );
+          // The parked image is a new candidate under the SD-card source;
+          // without this the list stays as it was until the next check.
+          void queryClient.invalidateQueries({
+            queryKey: ["firmwareAvailable"],
+          });
         }
       }
     }
@@ -244,6 +251,7 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
     handleError,
     handleTransferProgress,
     handleSuccess,
+    queryClient,
     t,
   ]);
   /* eslint-enable react-hooks/set-state-in-effect */

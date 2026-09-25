@@ -83,7 +83,7 @@ const LIGHT_THEME = {
   selectionBackground: "#d4d4d4",
 };
 
-/** The same, for dark: `bg-neutral-900` on `text-neutral-100`. */
+/** The same, for dark: the dark theme's `--card`, oklch(0.205 0 0). */
 const DARK_THEME = {
   background: "#171717",
   foreground: "#f5f5f5",
@@ -489,23 +489,23 @@ export default function SerialConsole({ node }: { node: number }) {
         <div className="flex flex-wrap items-baseline gap-3">
           <span
             className={cn(
-              "font-semibold",
-              shown === "connecting" && "opacity-60",
-              shown === "closed" && "text-amber-600 dark:text-amber-500",
-              shown === "failed" && "text-red-600 dark:text-red-400"
+              "font-medium",
+              shown === "connecting" && "text-muted-foreground",
+              shown === "closed" && "text-warning",
+              shown === "failed" && "text-destructive"
             )}
           >
             {stateLabel[shown]}
           </span>
 
           {shown === "open" && protocol !== null && (
-            <span className="text-sm opacity-60">
+            <span className="text-sm text-muted-foreground">
               {t("console.negotiated", { protocol })}
             </span>
           )}
 
           {(shown === "closed" || shown === "failed") && closeInfo !== null && (
-            <span className="text-sm opacity-60">
+            <span className="text-sm text-muted-foreground">
               {closeInfo.reason === ""
                 ? t("console.closeCode", { code: closeInfo.code })
                 : t("console.closeCodeReason", {
@@ -516,10 +516,10 @@ export default function SerialConsole({ node }: { node: number }) {
           )}
         </div>
 
-        <div className="flex gap-4">
+        <div className="flex flex-wrap gap-2">
           <Button
             type="button"
-            variant="bw"
+            variant="outline"
             onClick={() => {
               terminalRef.current?.clear();
               // Nothing is on screen now, so nothing counts as shown. A later
@@ -531,7 +531,7 @@ export default function SerialConsole({ node }: { node: number }) {
           </Button>
           <Button
             type="button"
-            variant="bw"
+            variant="outline"
             onClick={() => {
               // Clear, then write the daemon's buffer back. Redraw means "show
               // me what the module's screen actually says", so it replaces the
@@ -560,7 +560,7 @@ export default function SerialConsole({ node }: { node: number }) {
       </div>
 
       {!usable && (
-        <p className="mb-4 text-sm text-red-600 dark:text-red-400">
+        <p className="mb-4 text-sm text-destructive">
           {t("console.noSession")}
         </p>
       )}
@@ -576,9 +576,11 @@ export default function SerialConsole({ node }: { node: number }) {
       {shown === "failed" &&
         usable &&
         (diagnosis === null ? (
-          <p className="mb-4 text-sm opacity-60">{t("console.failedHint")}</p>
+          <p className="mb-4 text-sm text-muted-foreground">
+            {t("console.failedHint")}
+          </p>
         ) : (
-          <p className="mb-4 text-sm opacity-60">
+          <p className="mb-4 text-sm text-muted-foreground">
             {t(`console.failed.${diagnosis}`)}
           </p>
         ))}
@@ -587,10 +589,10 @@ export default function SerialConsole({ node }: { node: number }) {
         ref={containerRef}
         role="region"
         aria-label={t("console.ariaTerminal", { nodeId: node + 1 })}
-        className="h-96 w-full overflow-hidden rounded-md border border-neutral-200 bg-white p-2 dark:border-neutral-700 dark:bg-neutral-900"
+        className="h-96 w-full overflow-hidden rounded-lg border bg-card p-2"
       />
 
-      <p className="mt-2 flex items-center gap-1 text-sm opacity-60">
+      <p className="mt-2 flex items-center gap-1 text-sm text-muted-foreground">
         {t("console.inputTerm")}
         <InfoNote
           text={t("console.inputNote")}

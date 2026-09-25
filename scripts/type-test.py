@@ -156,8 +156,13 @@ PROBE = r"""
     return r.width > 0 && r.height > 0;
   };
   const out = [];
+  // `aria-hidden` inputs are not boxes a person types into: Base UI's Select
+  // keeps one beside its trigger, out of the tab order, only to carry the
+  // chosen value into a form.
   const inputs = [...document.querySelectorAll('input')].filter(
-    (i) => !['checkbox', 'radio', 'file', 'range', 'submit', 'button'].includes(i.type)
+    (i) =>
+      !['checkbox', 'radio', 'file', 'range', 'submit', 'button'].includes(i.type) &&
+      i.getAttribute('aria-hidden') !== 'true'
   );
   for (const el of inputs) {
     if (!visible(el) || el.disabled || el.readOnly) continue;

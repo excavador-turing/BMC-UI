@@ -1,9 +1,22 @@
+import { TriangleAlert } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import ConfirmationModal from "@/components/ConfirmationModal";
+import TextField from "@/components/TextField";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import {
   type AddressDocument,
@@ -183,135 +196,108 @@ export default function AddressCard() {
   const set = (patch: Partial<Draft>) => setEdited({ ...draft, ...patch });
 
   return (
-    <div className="mt-8">
-      <div className="mb-2 text-lg font-bold">{t("addressCard.title")}</div>
-
-      {/* What the bridge has right now, before any form: on a DHCP board this
-          is the lease, and it is the one line a person came to read. */}
-      <p className="mb-4 text-sm">
-        <span className="opacity-60">{t("addressCard.now")}</span>{" "}
-        <span className="font-mono">
-          {live.address ?? t("addressCard.noAddress")}
-        </span>
-        {live.gateway && (
-          <>
-            {" "}
-            <span className="opacity-60">{t("addressCard.via")}</span>{" "}
-            <span className="font-mono">{live.gateway}</span>
-          </>
-        )}
-        {live.dns.length > 0 && (
-          <>
-            {" "}
-            <span className="opacity-60">{t("addressCard.dnsWord")}</span>{" "}
-            <span className="font-mono">{live.dns.join(" ")}</span>
-          </>
-        )}{" "}
-        <span className="opacity-60">
-          (
-          {live.mode === "dhcp"
-            ? t("addressCard.leased")
-            : t("addressCard.fixed")}
-          )
-        </span>
-      </p>
-
-      {pending && (
-        <div className="mb-4 rounded-md border border-amber-500 p-3 text-sm">
-          <div className="font-semibold text-amber-700 dark:text-amber-500">
-            {t("addressCard.pendingTitle", {
-              address: words(pending.document, t),
-            })}
-          </div>
-          <div className="mt-1">
-            {remaining === null
-              ? t("addressCard.pendingNoClock")
-              : t("addressCard.countdown", { seconds: remaining })}
-          </div>
-          {tried && (
-            <div className="mt-1 opacity-80">{t("addressCard.tryingNow")}</div>
-          )}
-          <div className="mt-3 flex gap-4">
-            <Button
-              type="button"
-              disabled={confirm.isPending}
-              onClick={() =>
-                confirm.mutate(pending.token, {
-                  onSuccess: () => {
-                    setTried(false);
-                    toast({ title: t("addressCard.confirmed") });
-                  },
-                  onError: (e: Error) =>
-                    toast({
-                      title: t("addressCard.confirmFailed"),
-                      description: e.message,
-                      variant: "destructive",
-                    }),
-                })
-              }
-            >
-              {t("addressCard.confirm")}
-            </Button>
-            <Button
-              type="button"
-              variant="bw"
-              disabled={revert.isPending}
-              onClick={() => revert.mutate()}
-            >
-              {t("addressCard.revertNow")}
-            </Button>
-          </div>
-          {/* The one thing this card must say: a confirmation only counts
+    <Card>
+      <CardHeader>
+        <CardTitle>{t("addressCard.title")}</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        {pending && (
+          <Alert variant="warning">
+            <TriangleAlert />
+            <AlertTitle>
+              {t("addressCard.pendingTitle", {
+                address: words(pending.document, t),
+              })}
+            </AlertTitle>
+            <AlertDescription className="flex flex-col gap-3">
+              <p>
+                {remaining === null
+                  ? t("addressCard.pendingNoClock")
+                  : t("addressCard.countdown", { seconds: remaining })}
+                {tried && <> {t("addressCard.tryingNow")}</>}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  disabled={confirm.isPending}
+                  onClick={() =>
+                    confirm.mutate(pending.token, {
+                      onSuccess: () => {
+                        setTried(false);
+                        toast({ title: t("addressCard.confirmed") });
+                      },
+                      onError: (e: Error) =>
+                        toast({
+                          title: t("addressCard.confirmFailed"),
+                          description: e.message,
+                          variant: "destructive",
+                        }),
+                    })
+                  }
+                >
+                  {t("addressCard.confirm")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={revert.isPending}
+                  onClick={() => revert.mutate()}
+                >
+                  {t("addressCard.revertNow")}
+                </Button>
+              </div>
+              {/* The one thing this card must say: a confirmation only counts
               from the new address. This page, reached at the old one, is
               about to stop answering. */}
-          <div className="mt-2 text-xs opacity-80">
-            {t("addressCard.confirmFromThere")}
-          </div>
-        </div>
-      )}
-
-      {!pending && state.data.last_revert?.reason === "not_confirmed" && (
-        <div className="mb-4 text-sm text-amber-700 dark:text-amber-500">
-          {t("addressCard.wasReverted", {
-            at: new Date(
-              epochMillis(state.data.last_revert.at) ?? 0
-            ).toLocaleTimeString(),
-          })}
-        </div>
-      )}
-      {!pending && state.data.last_revert?.reason === "apply_failed" && (
-        <div className="mb-4 text-sm text-red-700 dark:text-red-400">
-          {t("addressCard.applyFailedRevert")}
-        </div>
-      )}
-
-      {state.data.file === "unreadable" && (
-        <p className="mb-3 text-sm text-amber-700 dark:text-amber-500">
-          {t("addressCard.fileUnreadable")}
-        </p>
-      )}
-      {state.data.file === "hand_edited" &&
-        state.data.configured?.mode === "static" && (
-          <p className="mb-3 text-sm opacity-70">
-            {t("addressCard.fileHandEdited")}
-          </p>
+              <p className="text-xs text-muted-foreground">
+                {t("addressCard.confirmFromThere")}
+              </p>
+            </AlertDescription>
+          </Alert>
         )}
 
-      <div
-        role="radiogroup"
-        aria-label={t("addressCard.mode")}
-        className="mb-3 flex gap-1"
-      >
-        {(["dhcp", "static"] as const).map((mode) => (
-          <Button
-            key={mode}
-            type="button"
-            role="radio"
-            aria-checked={draft.mode === mode}
-            size="sm"
-            variant={draft.mode === mode ? "turing-green" : "bw"}
+        {!pending && state.data.last_revert?.reason === "not_confirmed" && (
+          <div className="text-sm text-warning">
+            {t("addressCard.wasReverted", {
+              at: new Date(
+                epochMillis(state.data.last_revert.at) ?? 0
+              ).toLocaleTimeString(),
+            })}
+          </div>
+        )}
+        {!pending && state.data.last_revert?.reason === "apply_failed" && (
+          <div className="text-sm text-destructive">
+            {t("addressCard.applyFailedRevert")}
+          </div>
+        )}
+
+        {state.data.file === "unreadable" && (
+          <p className="text-sm text-warning">
+            {t("addressCard.fileUnreadable")}
+          </p>
+        )}
+        {state.data.file === "hand_edited" &&
+          state.data.configured?.mode === "static" && (
+            <p className="text-sm text-muted-foreground">
+              {t("addressCard.fileHandEdited")}
+            </p>
+          )}
+
+        <Field className="max-w-sm">
+          <FieldLabel htmlFor="address-mode">
+            {t("addressCard.mode")}
+          </FieldLabel>
+          <Select
+            name="mode"
+            items={[
+              { value: "dhcp", label: t("addressCard.dhcp") },
+              { value: "static", label: t("addressCard.static") },
+            ]}
+            value={draft.mode}
             disabled={pending !== null}
-            onClick={() =>
+            onValueChange={(value) => {
+              const mode = value;
+              if (mode === null) return;
               set(
                 mode === "dhcp"
                   ? { mode }
@@ -325,148 +311,156 @@ export default function AddressCard() {
                       dns: typedOr(draft.dns, live.dns.join(", ")),
                       search: typedOr(draft.search, live.search),
                     }
-              )
-            }
+              );
+            }}
           >
-            {mode === "dhcp" ? t("addressCard.dhcp") : t("addressCard.static")}
-          </Button>
-        ))}
-      </div>
+            <SelectTrigger id="address-mode" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="dhcp">{t("addressCard.dhcp")}</SelectItem>
+                <SelectItem value="static">
+                  {t("addressCard.static")}
+                </SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </Field>
 
-      {draft.mode === "static" && (
-        <div className="mb-3 grid max-w-2xl gap-3 sm:grid-cols-2">
-          <Input
-            name="address"
-            label={t("addressCard.addressLabel")}
-            value={draft.cidr}
-            spellCheck={false}
-            placeholder="192.168.1.20/24"
-            disabled={pending !== null}
-            onChange={(e) => set({ cidr: e.target.value })}
-          />
-          <Input
-            name="gateway"
-            label={t("addressCard.gatewayLabel")}
-            value={draft.gateway}
-            spellCheck={false}
-            placeholder="192.168.1.1"
-            disabled={pending !== null}
-            onChange={(e) => set({ gateway: e.target.value })}
-          />
-          <Input
-            name="dns"
-            label={t("addressCard.dnsLabel")}
-            value={draft.dns}
-            spellCheck={false}
-            placeholder="192.168.1.1, 1.1.1.1"
-            disabled={pending !== null}
-            onChange={(e) => set({ dns: e.target.value })}
-          />
-          <Input
-            name="search"
-            label={t("addressCard.searchLabel")}
-            value={draft.search}
-            spellCheck={false}
-            placeholder="home.lan"
-            disabled={pending !== null}
-            onChange={(e) => set({ search: e.target.value })}
-          />
-        </div>
-      )}
-
-      {/* The board's verdict, as the board words it. */}
-      {edits && proposed === null && draft.mode === "static" && (
-        <div className="mb-2 text-sm opacity-60">
-          {t("addressCard.incomplete")}
-        </div>
-      )}
-      {verdict.data?.refusal && (
-        <div className="mb-2 text-sm font-semibold text-red-700 dark:text-red-400">
-          {verdict.data.refusal.reason}
-        </div>
-      )}
-      {verdict.data?.refusal == null &&
-        verdict.data?.warnings.map((w) => (
-          <div
-            key={w.reason}
-            className="mb-2 text-sm text-amber-700 dark:text-amber-500"
-          >
-            {w.reason}
-          </div>
-        ))}
-      {verdict.isError && (
-        <div className="mb-2 text-sm opacity-80">
-          {t("addressCard.cannotCheck")}
-        </div>
-      )}
-
-      <div className="flex flex-wrap items-center gap-3">
-        <Button
-          type="button"
-          disabled={!canApply}
-          onClick={() => setConfirming(true)}
-        >
-          {t("addressCard.apply")}
-        </Button>
-        <Button
-          type="button"
-          variant="bw"
-          disabled={!canApply}
-          onClick={() => send("try")}
-        >
-          {t("addressCard.tryIt")}
-        </Button>
-        {limits && (
-          <label className="flex items-center gap-2 text-sm">
-            {t("addressCard.windowLabel")}
-            <input
-              type="number"
-              className="w-16 border border-neutral-300 bg-transparent px-1 py-0.5 dark:border-neutral-600"
-              min={limits.window_min_s}
-              max={limits.window_max_s}
-              step={5}
-              value={window_s ?? limits.window_default_s}
-              onChange={(e) => {
-                const next = Number(e.target.value);
-                setWindow(Number.isFinite(next) ? next : null);
-              }}
+        {draft.mode === "static" && (
+          <div className="grid max-w-2xl gap-4 sm:grid-cols-2">
+            <TextField
+              name="address"
+              label={t("addressCard.addressLabel")}
+              value={draft.cidr}
+              spellCheck={false}
+              placeholder="192.168.1.20/24"
+              disabled={pending !== null}
+              onChange={(e) => set({ cidr: e.target.value })}
             />
-            <span className="whitespace-nowrap opacity-60">
-              {t("addressCard.windowRange", {
-                min: limits.window_min_s,
-                max: limits.window_max_s,
-              })}
-            </span>
-          </label>
+            <TextField
+              name="gateway"
+              label={t("addressCard.gatewayLabel")}
+              value={draft.gateway}
+              spellCheck={false}
+              placeholder="192.168.1.1"
+              disabled={pending !== null}
+              onChange={(e) => set({ gateway: e.target.value })}
+            />
+            <TextField
+              name="dns"
+              label={t("addressCard.dnsLabel")}
+              value={draft.dns}
+              spellCheck={false}
+              placeholder="192.168.1.1, 1.1.1.1"
+              disabled={pending !== null}
+              onChange={(e) => set({ dns: e.target.value })}
+            />
+            <TextField
+              name="search"
+              label={t("addressCard.searchLabel")}
+              value={draft.search}
+              spellCheck={false}
+              placeholder="home.lan"
+              disabled={pending !== null}
+              onChange={(e) => set({ search: e.target.value })}
+            />
+          </div>
         )}
-        {edits && (
-          <button
-            type="button"
-            className="text-sm underline opacity-80"
-            onClick={() => setEdited(null)}
-          >
-            {t("addressCard.discard")}
-          </button>
-        )}
-      </div>
-      <p className="mt-2 text-sm opacity-60">
-        {edits
-          ? t("addressCard.tryItNote")
-          : t("addressCard.unchanged", { address: words(running!, t) })}
-      </p>
 
-      <ConfirmationModal
-        isOpen={confirming}
-        onClose={() => setConfirming(false)}
-        onConfirm={() => {
-          setConfirming(false);
-          send("apply");
-        }}
-        title={t("addressCard.apply")}
-        message={t("addressCard.applyWarning", {
-          seconds: window_s ?? state.data.default_window_s,
-        })}
-      />
-    </div>
+        {/* The board's verdict, as the board words it. */}
+        {edits && proposed === null && draft.mode === "static" && (
+          <div className="text-sm text-muted-foreground">
+            {t("addressCard.incomplete")}
+          </div>
+        )}
+        {verdict.data?.refusal && (
+          <div className="text-sm font-medium text-destructive">
+            {verdict.data.refusal.reason}
+          </div>
+        )}
+        {verdict.data?.refusal == null &&
+          verdict.data?.warnings.map((w) => (
+            <div key={w.reason} className="text-sm text-warning">
+              {w.reason}
+            </div>
+          ))}
+        {verdict.isError && (
+          <div className="text-sm text-muted-foreground">
+            {t("addressCard.cannotCheck")}
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            type="button"
+            disabled={!canApply}
+            onClick={() => setConfirming(true)}
+          >
+            {t("addressCard.apply")}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={!canApply}
+            onClick={() => send("try")}
+          >
+            {t("addressCard.tryIt")}
+          </Button>
+          {/* The window only times an edit, so it waits for one. */}
+          {limits && edits && (
+            <label className="flex items-center gap-2 text-sm">
+              {t("addressCard.windowLabel")}
+              <Input
+                type="number"
+                className="h-7 w-20"
+                min={limits.window_min_s}
+                max={limits.window_max_s}
+                step={5}
+                value={window_s ?? limits.window_default_s}
+                onChange={(e) => {
+                  const next = Number(e.target.value);
+                  setWindow(Number.isFinite(next) ? next : null);
+                }}
+              />
+              <span className="whitespace-nowrap text-muted-foreground">
+                {t("addressCard.windowRange", {
+                  min: limits.window_min_s,
+                  max: limits.window_max_s,
+                })}
+              </span>
+            </label>
+          )}
+          {edits && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setEdited(null)}
+            >
+              {t("addressCard.discard")}
+            </Button>
+          )}
+        </div>
+        {edits && (
+          <p className="text-sm text-muted-foreground">
+            {t("addressCard.tryItNote")}
+          </p>
+        )}
+
+        <ConfirmationModal
+          isOpen={confirming}
+          onClose={() => setConfirming(false)}
+          onConfirm={() => {
+            setConfirming(false);
+            send("apply");
+          }}
+          title={t("addressCard.apply")}
+          message={t("addressCard.applyWarning", {
+            seconds: window_s ?? state.data.default_window_s,
+          })}
+        />
+      </CardContent>
+    </Card>
   );
 }

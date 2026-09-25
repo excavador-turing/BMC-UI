@@ -3,12 +3,18 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import ConfigBackup from "@/components/ConfigBackup";
-import FanControl from "@/components/FanControl";
+import LoadingButton from "@/components/LoadingButton";
 import RebootModal from "@/components/RebootModal";
 import InfoSkeleton from "@/components/skeletons/info";
 import TabView from "@/components/TabView";
 import TimeCard from "@/components/TimeCard";
-import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useConnection } from "@/hooks/useConnection";
 import { useFirmwareSlotsQuery } from "@/lib/api/get";
@@ -21,7 +27,9 @@ export const Route = createLazyFileRoute("/_tabLayout/settings")({
 });
 
 /**
- * Everything that changes the board and is not about who may reach it.
+ * Maintenance: the BMC's clock, its backups, and the two buttons that touch
+ * the whole board. The sidebar calls it Maintenance; the address is still
+ * `/settings`, so a bookmark from before still lands here.
  *
  * Info was 1500 px of storage, health, a scrape credential, a fan slider and a
  * REBOOT button — three of those being settings or actions, and a destructive
@@ -34,9 +42,11 @@ export const Route = createLazyFileRoute("/_tabLayout/settings")({
  * tab and Firmware, the same editor twice, and it only ever belonged on the
  * one where the sources are used.
  *
- * What is left is time, the fan, backup and restore, and the two buttons that
- * touch the whole board. Reboot is last and red for the same reason it is not
- * on Overview: you should have to arrive here on purpose.
+ * What was left was time, the fan, backup and restore, and the two buttons
+ * that touch the whole board. The fan went to Cooling, beside the rest of the
+ * hardware, and the user-data backup came here from Overview, so both backups
+ * are in one card. Reboot is last and red for the same reason it is not on
+ * Overview: you should have to arrive here on purpose.
  */
 export function Settings() {
   const { t } = useTranslation();
@@ -98,47 +108,54 @@ export function Settings() {
 
   return (
     <TabView columns>
-      <TimeCard />
-      <FanControl />
-      <ConfigBackup />
+      {/* Two stacks rather than the grid's row order. Filled row by row, the
+        tall Time card sat beside Backup and pushed the BMC card -- the one
+        people open this page for -- to the bottom left. The short action
+        cards go together on the left, BMC first; Time takes the right. On a
+        phone that reads BMC, backup, time. */}
+      <div className="flex flex-col gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("info.bmc")}</CardTitle>
+            {/* The reboot cuts the BMC, not the compute modules. People assume
+              otherwise and hesitate over a button that is safe, so say it. */}
+            <CardDescription>{t("settings.rebootNote")}</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <div className="flex flex-wrap gap-2">
+              <LoadingButton
+                type="button"
+                variant="destructive"
+                onClick={() => setRebootModalOpened(true)}
+                isLoading={rebootPending}
+              >
+                {t("info.rebootButton")}
+              </LoadingButton>
+              <LoadingButton
+                type="button"
+                variant="outline"
+                onClick={() => handleReloadBMC()}
+                isLoading={reloadPending}
+              >
+                {t("info.reloadDaemonButton")}
+              </LoadingButton>
+            </div>
 
-      <div>
-        <div className="mb-6 text-lg font-bold">{t("info.bmc")}</div>
-        <div className="flex gap-4">
-          <Button
-            type="button"
-            variant="destructive"
-            onClick={() => setRebootModalOpened(true)}
-            isLoading={rebootPending}
-            disabled={rebootPending}
-          >
-            {t("info.rebootButton")}
-          </Button>
-          <Button
-            type="button"
-            variant="bw"
-            onClick={() => handleReloadBMC()}
-            isLoading={reloadPending}
-            disabled={reloadPending}
-          >
-            {t("info.reloadDaemonButton")}
-          </Button>
-        </div>
-        {/* The reboot cuts the BMC, not the compute modules. People assume
-            otherwise and hesitate over a button that is safe, so say it. */}
-        <p className="mt-2 text-sm opacity-60">{t("settings.rebootNote")}</p>
-
-        {/* Amber, like the same fact on the Firmware tab, and for the same
-            reason: a staged update is not a fault, but it does change what
-            this button does. */}
-        {staged && (
-          <p className="mt-2 text-sm font-semibold text-amber-700 dark:text-amber-500">
-            {stagedVersion
-              ? t("settings.rebootStagedNamed", { version: stagedVersion })
-              : t("settings.rebootStaged")}
-          </p>
-        )}
+            {/* Amber, like the same fact on the Firmware tab, and for the same
+              reason: a staged update is not a fault, but it does change what
+              this button does. */}
+            {staged && (
+              <p className="text-sm font-medium text-warning">
+                {stagedVersion
+                  ? t("settings.rebootStagedNamed", { version: stagedVersion })
+                  : t("settings.rebootStaged")}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+        <ConfigBackup />
       </div>
+      <TimeCard />
 
       <RebootModal
         isOpen={rebootModalOpened}
@@ -149,7 +166,7 @@ export function Settings() {
           <>
             <p>{t("settings.rebootModalDescription")}</p>
             {staged && (
-              <p className="mt-3 font-semibold">
+              <p className="mt-3 font-medium">
                 {stagedVersion
                   ? t("settings.rebootStagedNamed", { version: stagedVersion })
                   : t("settings.rebootStaged")}

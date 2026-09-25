@@ -2,18 +2,23 @@ import { type OptionalTranslations } from "@/locale/en";
 
 const translations = {
   navigation: {
-    overview: "Übersicht",
+    dashboard: "Dashboard",
     firmware: "Firmware",
-    settings: "Einstellungen",
-    info: "Info",
     network: "Netzwerk",
+    switch: "Switch",
     security: "Sicherheit",
     nodes: "Knoten",
+    powerControl: "Leistungssteuerung",
     console: "Konsole",
     usb: "USB",
-    firmwareUpgrade: "Firmware-Upgrade",
     flashNode: "Knoten flashen",
-    about: "Über",
+    // The sidebar's three headings.
+    sectionSystem: "System",
+    sectionOther: "Andere",
+    docs: "Dokumentation",
+    github: "GitHub",
+    cooling: "Kühlung",
+    maintenance: "Wartung",
   },
   userNav: {
     language: "Sprache",
@@ -41,9 +46,18 @@ const translations = {
   // reviews it. These strings decide who can log in to hardware, and a
   // guessed translation of "stop trusting any proxy" is worse than a
   // sentence the reader can look up.
+  // The Dashboard (Overview) page.
+  dashboard: {
+    unnamed: "Kein Name",
+    stateOn: "An",
+    stateOff: "Aus",
+    poweredOnAgo: "Vor {{duration}} eingeschaltet",
+    offSinceUnknown: "Aus seit: nicht gemeldet",
+    attnUpdate: "Firmware {{version}} ist verfügbar",
+  },
   info: {
     fanAboveTrip: "über {{celsius}} °C",
-    userStorage: "Benutzerspeicher",
+    bmcStorage: "BMC-Speicher",
     ariaStorageUtilization: "Speicherauslastung",
     backupButton: "Benutzerdaten sichern",
     fanControl: "Lüftersteuerung",
@@ -64,11 +78,17 @@ const translations = {
       "Dieses Board meldet keinen Temperatursensor, es gibt also keine Temperatur zu lesen. Der Lüfter läuft mit dem zuletzt gesetzten Wert, ohne dass etwas geregelt wird.",
     fanAutomatic: "automatisch",
     fanStep: "{{cur}} von {{max}}",
-    fanRequested: "gesetzt {{value}}",
+    fanStepLabel: "Stufe {{cur}} von {{max}}",
     fanGovernorNote:
       "Der Kernel regelt diesen Lüfter anhand der Board-Temperatur. Dieser Daemon kann ihn nicht anhalten, daher wird eine Einstellung hier bei der nächsten Abfrage des Reglers wenige Sekunden später wieder aufgehoben.",
     fanHeld: "Regler angehalten",
-    fanOverride: "Übersteuern",
+    fanModeAutomatic: "Automatisch",
+    fanModeManual: "Manuell",
+    fanNotApplied: "Die Lüftereinstellung wurde nicht übernommen",
+    fanTrips: "Lüfter schaltet hoch bei",
+    tripCritical: "{{celsius}} °C",
+    fanOverrideOff:
+      "Den Lüfter auf einer gewählten Stufe halten, statt ihn vom Board regeln zu lassen.",
     fanOverrideOn:
       "Der Regler ist angehalten. Dieser Lüfter hält die hier gesetzte Stufe, bis Übersteuern ausgeschaltet wird oder das Board neu startet.",
     fanOverrideCeiling:
@@ -77,61 +97,42 @@ const translations = {
     fanReverted:
       "Das Board hat {{device}} auf {{cur}} von {{max}} zurückgesetzt, nachdem es auf {{requested}} gestellt wurde.",
     ariaFanStep: "Kühlstufe des Lüfters {{device}}",
-    boardHealth: "Board-Zustand",
+    boardInfo: "Board-Info",
+    boardIp: "IP-Adresse",
     healthUptime: "Laufzeit",
     healthLoad: "Last",
-    healthLoadWindows: "1 / 5 / 15 Min",
     healthMemory: "Arbeitsspeicher",
-    healthMemoryDetail: "frei {{free}} · verfügbar {{available}}",
     healthTemperatureTerm: "Temperatur",
     healthTemperature: "{{celsius}} °C",
-    healthFanStep: "Lüfterstufe {{step}} von {{max}}",
-    healthFanTrip: "über dem Schwellwert von {{celsius}} °C",
     healthNand: "NAND",
     healthNandFree: "{{available}} von {{total}} Löschblöcken frei",
+    healthNandFreeBytes: "{{size}} frei",
     healthNandBad: "{{blocks}} defekt",
-    healthNandReserved: "{{blocks}} reserviert",
-    healthNandNote:
-      "Löschblöcke werden so gezählt, wie UBI sie meldet. Ein niedriger Freistand wird nicht eingefärbt, weil hier niemand weiß, wie viel Reserve dieses Volume braucht — aber es ist die Zahl, die auf einem so oft neu geflashten Board ausgeht, und ein defekter Löschblock kommt nie zurück.",
     healthClock: "Uhr",
     healthClockSynced: "synchronisiert",
     healthClockNotSynced: "nicht synchronisiert",
     healthClockUnknown: "Synchronisationsstatus unbekannt",
-    healthClockSource: "Quelle {{source}}",
-    healthClockStratum: "Stratum {{stratum}}",
-    healthClockOffsetSeconds: "Abweichung {{value}} s",
-    healthClockOffsetMillis: "Abweichung {{value}} ms",
-    healthClockOffsetMicros: "Abweichung {{value}} µs",
-    healthClockMeasuredBy: "gemessen mit {{tool}}",
     healthAbsent: "nicht erkannt",
     healthUnavailable: "Dieser BMC-Daemon meldet keinen Board-Zustand.",
     ariaMemoryUtilization: "Speicherauslastung des Arbeitsspeichers",
     fanDuty: "{{value}} % Tastgrad",
     fanDutyNote:
-      "Der Tastgrad ist der PWM-Wert, den die bordeigene cooling-levels-Tabelle dieser Stufe zuordnet, so wie der Daemon diese Tabelle meldet. Die Stufe ist der ehrliche Messwert, der Tastgrad das, was sie ansteuert. Ein Board, das keine Tabelle meldet, zeigt nur die Stufe.",
+      "Die Leistung ist der Anteil, mit dem der Lüfter läuft, aus der Stufentabelle des Boards. Ein Board ohne Tabelle zeigt stattdessen die Stufe.",
   },
   network: {
-    resetNetworkConfirm:
-      "Dies verwirft die Netzwerkkonfiguration des Boards und setzt die Standardwerte. Wenn Sie das Board über dieses Netzwerk erreichen, verlieren Sie diese Sitzung und brauchen womöglich physischen Zugriff.",
-    header: "Die Adressen des BMC und der integrierte Switch",
     networkInterfaces: "Netzwerkschnittstellen",
-    resetNetworkButton: "Netzwerk zurücksetzen",
+    interface: "Schnittstelle",
+    ipAddress: "IP-Adresse",
+    macAddress: "MAC-Adresse",
     resetSwitchButton: "Switch-Chip zurücksetzen",
     resetSwitchConfirm:
       "Das setzt den integrierten Switch-Chip zurück, nicht die Adresse des BMC. Jeder Port fällt kurz aus: die Rechenmodule verlieren einige Sekunden lang die Verbindung, der BMC womöglich auch.",
     resetNetworkSuccess: "Netzwerk erfolgreich zurückgesetzt.",
-    switchPorts: "Switch-Ports",
-    switchNodePorts: "Node-Ports",
-    switchUplinkPorts: "Uplink-Ports",
-    switchOtherPorts: "Andere Ports",
     switchPortUp: "verbunden",
     switchPortDown: "getrennt",
     switchPortAbsent: "nicht erkannt",
-    switchPortSpeed: "{{speed}} Mb/s",
-    switchPortDuplexFull: "Vollduplex",
     switchPortDuplexHalf: "Halbduplex",
     switchPortTraffic: "rx {{rx}} · tx {{tx}}",
-    switchPortErrors: "Fehler: {{rx}} rx / {{tx}} tx",
     switchNotProbed: "Switch-Ports nicht erkannt",
     switchNotProbedDescription:
       "Der Switch-Treiber des BMC hat die unten markierten Ports nicht erkannt. Ein Compute-Modul hinter einem nicht erkannten Node-Port hat überhaupt kein Netzwerk, während das BMC selbst erreichbar bleibt, sodass nichts anderes auf dieser Seite falsch aussieht.",
@@ -142,14 +143,10 @@ const translations = {
   },
   nodes: {
     powerOnTimeTerm: "Einschaltzeit",
-    openConsole: "Konsole",
     flashNode: "Flashen…",
-    usbRouteLabel: "USB-Route für Knoten {{nodeId}}",
-    usbNotRouted: "nicht hierher geroutet",
-    usbHeldBy: "der Bus liegt auf Knoten {{nodeId}}",
-    usbRouted: "der USB-Bus liegt jetzt auf Knoten {{nodeId}}",
-    header: "Stromversorgung der verbundenen Knoten steuern",
     restartButton: "Neu starten",
+    openConsole: "Konsole öffnen",
+    moreActions: "Weitere Aktionen",
     editButton: "Bearbeiten",
     saveButton: "Speichern",
     ariaNodePowerToggle: "Stromversorgung von Knoten {{nodeId}} umschalten",
@@ -194,13 +191,7 @@ const translations = {
     cameBack: "Das Board war nach {{seconds}} Sekunden wieder da.",
   },
   addressCard: {
-    title: "Die Adresse des BMC",
-    now: "Jetzt:",
-    noAddress: "keine IPv4-Adresse",
-    via: "über",
-    dnsWord: "DNS",
-    leased: "per DHCP bezogen",
-    fixed: "fest",
+    title: "IP-Adresse",
     mode: "Adressmodus",
     dhcp: "DHCP",
     static: "Statisch",
@@ -217,8 +208,6 @@ const translations = {
     discard: "Änderungen verwerfen",
     tryItNote:
       "Ausprobieren setzt die Adresse auf dem Board und nimmt sie von selbst zurück, sofern Sie nicht bestätigen — von dieser Seite, neu geladen unter der neuen Adresse.",
-    unchanged:
-      "Das läuft gerade auf dem Board: {{address}}. Ändern Sie es, um etwas anderes vorzuschlagen.",
     applyWarning:
       "Das ändert die Adresse, unter der Sie das Board gerade erreichen. Diese Seite antwortet hier dann nicht mehr. Öffnen Sie sie unter der neuen Adresse und bestätigen Sie innerhalb von {{seconds}} Sekunden, sonst stellt das Board die alte Adresse von selbst wieder her.",
     applied: "Angewendet, noch nicht übernommen",
@@ -246,15 +235,16 @@ const translations = {
       "Die aktuelle statische Adresse wurde von Hand eingetragen; eine bestätigte Änderung ersetzt die Datei.",
   },
   switchConfig: {
-    title: "Der Onboard-Switch",
-    running: "Was er gerade tut",
+    title: "Switch",
+    badgeFilteringOn: "VLAN-Filter an",
+    badgeFilteringOff: "VLAN-Filter aus",
+    badgeStpOn: "STP an",
+    badgeStpOff: "STP aus",
     oneNetwork:
-      "Ein Netzwerk. Alle Module, der BMC und beide Uplinks teilen es, und der Switch beachtet keine VLANs.",
+      "Alle Ports teilen ein Netzwerk. Die VLAN-Spalten gelten erst mit aktivem Filter.",
     port: "Port",
     link: "Verbindung",
     traffic: "Datenverkehr",
-    showTraffic: "Datenverkehr und Fehler anzeigen",
-    hideTraffic: "Datenverkehr und Fehler ausblenden",
     untaggedOn: "Untagged-VLAN auf {{port}}",
     taggedOn: "Tagged-VLANs auf {{port}}",
     none: "keins",
@@ -262,9 +252,6 @@ const translations = {
     bmcUntaggedOnly:
       "Dieses Board liest nur untagged Frames; ein Tag hier wäre Verkehr, den es nicht sehen kann.",
     startFrom: "Ausgehen von",
-    discard: "Meine Änderungen verwerfen",
-    unchanged:
-      "Das ist, was das Board gerade fährt. Ändern Sie eine Zelle, um etwas anderes vorzuschlagen.",
     filtering:
       "VLANs beachten (aus heißt ein flaches Netzwerk, was auch immer in der Tabelle steht)",
     spanningTree:
@@ -278,31 +265,11 @@ const translations = {
       "The board refused the question rather than the layout: {{reason}}",
     windowLabel: "Bestätigen in",
     windowRange: "s, {{min}}–{{max}}",
-    tryIt: "Ausprobieren",
-    tryItNote:
-      "Ausprobieren wendet die Änderung an und behält sie nicht: Beobachten Sie, worüber Sie dieses Board erreichen, und lassen Sie sie zurückgehen.",
-    triedNote:
-      "Beobachten Sie, was Sie beobachten müssen, und lassen Sie es zurückgehen — oder behalten Sie es doch.",
-    tryingNow:
-      "Sie haben das mit Ausprobieren gestartet. Nichts zu tun ist der Plan: Das Board stellt die vorherige Konfiguration wieder her.",
     confirmFromHere:
       "Bestätigen Sie von dem Browser oder Rechner aus, über den Sie dieses Board erreichen — das ist der Beweis. Eine Bestätigung aus einer Shell auf dem Board selbst beweist nichts, und das Board weist sie ab.",
     untagged: "Untagged",
     tagged: "Tagged",
     thisBoard: "dieses Board",
-    nothingConfirmed:
-      "Nichts wurde bestätigt, ein Neustart kehrt also hierher zurück.",
-    change: "Ändern",
-    showTable: "Tabelle anzeigen",
-    hideTable: "Tabelle ausblenden",
-    trunkNote:
-      "Diese beiden Nummern gehören Ihnen: Ihr Router muss dieselben verwenden, und nur Sie wissen, was dort frei ist.",
-    managementVid: "VLAN für dieses Board",
-    nodeVid: "VLAN für die Module",
-    redundant:
-      "Zweiter Uplink führt dieselben VLANs; Spanning Tree entscheidet, welcher weiterleitet",
-    trunkNumbers:
-      "Beide Nummern müssen zwischen {{min}} und {{max}} liegen und sich unterscheiden.",
     apply: "Anwenden",
     applyWarning:
       "Dies ändert den Switch, über den Sie verbunden sind. Die Änderung wird angewendet, aber NICHT behalten: Erreicht diese Seite das Board nicht innerhalb von etwa {{seconds}} Sekunden, stellt das Board die vorherige Konfiguration selbst wieder her. Dann ist nichts kaputt — neu laden und erneut versuchen.",
@@ -322,11 +289,16 @@ const translations = {
       "Ihre Änderung um {{at}} wurde zurückgesetzt, weil sie nicht rechtzeitig bestätigt wurde.",
     oneAtATime:
       "Bestätigen oder verwerfen Sie die wartende Änderung, bevor Sie eine weitere anwenden.",
+    edit: "Bearbeiten",
+    filteringShort: "VLAN-Filterung",
+    stpShort: "Spanning Tree (STP)",
+    filteringOnNote: "Jeder Port erreicht nur die bei ihm aufgeführten VLANs.",
+    presetPlaceholder: "Mit einer Vorlage beginnen…",
   },
   console: {
     inputTerm: "Eingabe hier",
-    header: "Serielle Konsole für ein Compute-Modul",
-    nodeSelect: "Modul",
+    header: "Serielle Konsole",
+    nodeSelect: "Knoten",
     readerTask: "Lese-Task",
     readerRunning: "läuft",
     readerInitialized: "nicht gestartet",
@@ -361,15 +333,13 @@ const translations = {
     failedHint:
       "Ein Browser sagt nicht, warum ein WebSocket-Handshake fehlgeschlagen ist; alle Ursachen erscheinen hier als Schließen ohne Grund. Wenn der Rest dieser Seite funktioniert, liegt es meist am Zertifikat des Boards: ein Browser öffnet keinen WebSocket zu einem Zertifikat, dem er nicht vertraut, und das Akzeptieren der Warnung gilt für diese Verbindung NICHT. Vertrauen Sie der Zertifizierungsstelle des Boards, oder nutzen Sie die Flotte, wo TLS auf einem bereits vertrauten Zertifikat endet. Die anderen beiden Ursachen sind ein abgelehntes Sitzungstoken und ein zu alter Daemon.",
     inputNote:
-      "Klicken Sie in das Terminal, um darin zu tippen. Tastenanschläge gehen unverändert an das Modul, ohne dass etwas angehängt wird — einschließlich Strg-C, Tab-Vervollständigung und Pfeiltasten.",
+      "Tasten gehen genau wie getippt an das Modul, auch Strg-C, Tab und die Pfeiltasten. Der HTTP-Schreiber unten hängt immer ein Zeilenende an und kann diese daher nicht senden: für Skripte, nicht für einen Boot-Prompt.",
     ariaTerminal: "Serielle Konsole für Knoten {{nodeId}}",
     restTitle: "Die zeilenorientierte Alternative",
     restIntro:
       "Dieselbe UART ist auch über einfaches HTTP erreichbar, ohne WebSocket:",
     restRead: "gibt den gesamten 16-KiB-Puffer des Knotens zurück.",
     restWrite: "schreibt eine Zeile.",
-    restCrlf:
-      "Der Schreibzugriff hängt immer CRLF an und kann daher kein einzelnes Steuerzeichen senden: kein Strg-C, keine Tab-Vervollständigung, keine Pfeiltasten. Für ein Shell-Skript ist das das richtige Werkzeug, an einem Boot-Prompt das falsche.",
   },
   usb: {
     header: "USB-Route",
@@ -403,7 +373,6 @@ const translations = {
     },
   },
   firmwareUpgrade: {
-    showAll: "Alle {{count}} anzeigen",
     showFewer: "weniger anzeigen",
     releaseNotes: "Hinweise",
     parkButton: "Auf die SD-Karte hochladen",
@@ -414,22 +383,30 @@ const translations = {
     rebootToApplyConfirm:
       "Der BMC startet neu und bootet das bereitgestellte Image. Die Compute-Module laufen dabei weiter. Kommt das neue Image nicht sauber hoch, bootet das Board zurück auf das jetzige.",
     firmwareSlots: "Firmware-Slots",
+    promotionPassed: "Bestanden",
+    promotionRolledBack: "Zurückgesetzt",
+    promotionUnknown: "Aufgezeichnet",
+    statusCurrent: "Aktuell",
+    statusUpdate: "Update verfügbar · {{version}}",
+    uploadButton: ".tpu hochladen",
+    sourcesButton: "Quellen",
+    colVersion: "Version",
+    colSource: "Quelle",
+    colChecksum: "Prüfsumme",
+    showAllVersions: "Alle {{count}} Versionen anzeigen",
+    slotNothingStaged: "nichts vorgemerkt",
     slotRunning: "Laufend",
     slotRollback: "Rollback",
     slotVolumeId: "id {{id}}",
     slotVersionUnreadable: "Version nicht lesbar",
     slotMissing: "nicht gemeldet",
     slotNextboot: "Nächster Start",
-    slotStaged: "Update vorgemerkt",
-    slotStagedYes: "ja",
-    slotStagedNo: "nein",
     slotStagedUnknown: "nicht lesbar",
     slotStagedTitle: "Ein Update ist vorgemerkt",
     slotStagedDescription:
       "Der nächste Neustart startet den anderen Slot. Bis dahin läuft auf dem Board weiterhin die unten aufgeführte Firmware.",
     slotStagedDescriptionNamed:
       "Der nächste Neustart startet {{version}}. Bis dahin läuft auf dem Board die unten aufgeführte Firmware.",
-    slotStagedVersion: "Bereitgestellte Version",
     slotStagedUnnamed: "ohne Namen aufgezeichnet",
     availableTitle: "Available firmware",
     checkNow: "Check now",
@@ -440,7 +417,6 @@ const translations = {
     sourceUnreadable: "This source returned nothing usable: {{reason}}",
     sourceEmpty: "This source offers nothing.",
     install: "Install",
-    installLocalHint: "Install a local image with the upload form below.",
     installFailed: "The install was refused. Nothing has been staged.",
     installStaged:
       "Staged. Reboot when you are ready; the board checks the image before keeping it.",
@@ -452,7 +428,6 @@ const translations = {
     relationCurrent: "running now",
     relationNewer: "newer",
     relationOlder: "older",
-    relationUnknown: "cannot be compared",
     prerelease: "pre-release",
     trustVerified: "checksum verified",
     trustTls: "no checksum published \u2014 TLS only",
@@ -486,9 +461,6 @@ const translations = {
       "An absolute path scanned for .tpu files. Uploads land here. The filename supplies the version.",
     updateStable: "Stabiler Kanal",
     updateEdge: "Edge-Kanal",
-    updateCheck: "Update-Prüfung",
-    updateAvailable: "ein Update ist verfügbar",
-    updateCurrent: "dieses Board ist aktuell",
     updateUnavailable:
       "konnte nicht geprüft werden — das Board hat möglicherweise keine Route zu GitHub",
     slotPromotion: "Letzte Übernahme",
@@ -499,14 +471,9 @@ const translations = {
       "Das Rollback-Volume ist nicht eingebunden, daher kann seine Version auf einem laufenden System nicht gelesen werden. Das Volume und seine Größe sind alles, was das Board darüber meldet.",
     slotPromotionNote:
       "Die Übernahme ist das Urteil der bordeigenen Startprüfung beim letzten Start. Ein Board, das seine Prüfungen nicht bestanden hat und auf die vorherige Firmware zurückgekehrt ist, sagt das hier und sonst nirgends.",
-    header: "BMC-Firmware aktualisieren",
     fileInput: ".tpu-Datei (Remote oder lokal):",
     shaInput: "SHA-256 (optional):",
-    submitButton: "Aktualisieren",
     ariaProgress: "Fortschritt der Firmware-Aktualisierung",
-    flashModalTitle: "Firmware aktualisieren?",
-    flashModalDescription:
-      "Ein Neustart ist erforderlich, um den Aktualisierungsvorgang abzuschließen.",
     uploading: "BMC-Firmware wird hochgeladen...",
     writing: "Firmware wird auf das BMC geschrieben...",
     success: "Image auf der SD-Karte abgelegt",
@@ -517,11 +484,10 @@ const translations = {
     error: "Ein Fehler ist aufgetreten",
   },
   flashNode: {
-    header:
-      "Installieren Sie ein Betriebssystemabbild auf einem ausgewählten Knoten",
-    nodeSelect: "Ausgewählter Knoten:",
-    fileInput: "Datei (Remote oder lokal):",
-    shaInput: "SHA-256 (optional):",
+    header: "Knoten flashen",
+    nodeSelect: "Knoten",
+    fileInput: "Datei (Remote oder lokal)",
+    shaInput: "SHA-256 (optional)",
     skipCrc: "CRC überspringen",
     submitButton: "Betriebssystem installieren",
     ariaProgress: "Fortschritt beim Flashen",
@@ -540,7 +506,6 @@ const translations = {
     boardModel: "Board-Modell",
     boardSerial: "Board-Seriennummer",
     hostname: "Hostname",
-    firmware: "Firmware",
     firmwareVersion: "Firmware-Version",
     daemonVersion: "Daemon-Version",
     unavailable: "Version nicht verfügbar",
@@ -550,6 +515,9 @@ const translations = {
     kernel: "Linux-Kernel",
     apiVersion: "API-Version",
     bmcUI: "BMC UI",
+    software: "Software",
+    ariaCopy: "{{value}} kopieren",
+    copied: "Kopiert",
   },
   ui: {
     aboutThis: "Über {{subject}}",
@@ -559,12 +527,10 @@ const translations = {
     continue: "Fortfahren",
     reboot: "Neu starten",
     selectPlaceholder: "Auswählen...",
-    navigation: "Navigation",
     pageNotFound: "Seite nicht gefunden",
     backToHome: "Zurück zur Startseite",
     ariaPasswordVisibility: "Passwort-Sichtbarkeit umschalten",
     ariaUploadFile: "Datei hochladen",
-    ariaSliderThumb: "Schieberegler-Daumen",
     durationDays: "{{value}} T",
     durationHours: "{{value}} Std",
     durationMinutes: "{{value}} Min",

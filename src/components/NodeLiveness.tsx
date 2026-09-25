@@ -71,9 +71,9 @@ export default function NodeLiveness({
   const uptime = powerOnTime === null ? null : durationLabel(powerOnTime);
 
   return (
-    <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
       {armed && (
-        <span className="flex items-center gap-1 text-red-600 dark:text-red-400">
+        <span className="flex items-center gap-1 text-destructive">
           {t("nodes.usbBootArmed")}
           <InfoNote
             text={t("nodes.usbBootArmedNote")}
@@ -83,39 +83,40 @@ export default function NodeLiveness({
         </span>
       )}
 
-      {powerOnTime === null && (
-        <span className="opacity-60">{t("nodes.powerOff")}</span>
-      )}
+      {powerOnTime === null && <span>{t("nodes.powerOff")}</span>}
 
       {powerOnTime !== null && uptime === null && (
-        <span className="opacity-60">{t("nodes.powerOnUnreadable")}</span>
+        <span>{t("nodes.powerOnUnreadable")}</span>
       )}
 
       {uptime !== null && (
         <span>{t("nodes.powerOnFor", { duration: uptime })}</span>
       )}
 
-      {port && !port.present && (
-        <span className="text-red-600 dark:text-red-400">
-          {t("nodes.linkAbsent")}
-        </span>
-      )}
+      {port && (
+        <>
+          <span aria-hidden className="text-muted-foreground">
+            |
+          </span>
+          {!port.present && (
+            <span className="text-destructive">{t("nodes.linkAbsent")}</span>
+          )}
 
-      {port?.present && port.link && (
-        <span className="flex flex-wrap gap-x-2">
-          <span>{t("nodes.linkUp")}</span>
-          {port.speed_mbps !== null && isReading(port.speed_mbps) && (
-            <span className="opacity-60">
-              {t("nodes.linkSpeed", { speed: port.speed_mbps })}
+          {port.present && port.link && (
+            <span>
+              {t("nodes.linkUp")}
+              {port.speed_mbps !== null && isReading(port.speed_mbps) && (
+                <span className="text-muted-foreground">
+                  {` ${t("nodes.linkSpeed", { speed: port.speed_mbps })}`}
+                </span>
+              )}
             </span>
           )}
-        </span>
-      )}
 
-      {port?.present && !port.link && (
-        <span className="text-amber-600 dark:text-amber-500">
-          {t("nodes.linkDown")}
-        </span>
+          {port.present && !port.link && (
+            <span className="text-warning">{t("nodes.linkDown")}</span>
+          )}
+        </>
       )}
     </div>
   );
@@ -149,7 +150,7 @@ export function NodeLivenessNotes({ nodes }: { nodes: NodeInfoResponse[] }) {
   if (!nodes.some((node) => node.power_on_time !== null)) return null;
 
   return (
-    <div className="mt-6 flex items-center gap-1 text-sm opacity-60">
+    <div className="mt-6 flex items-center gap-1 text-sm text-muted-foreground">
       <span>{t("nodes.powerOnTimeTerm")}</span>
       <InfoNote
         text={t("nodes.powerOnTimeNote")}

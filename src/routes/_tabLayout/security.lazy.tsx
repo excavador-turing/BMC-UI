@@ -1,7 +1,7 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
 
-import AccessCard from "@/components/AccessCard";
 import CertificateCard from "@/components/CertificateCard";
+import PasswordCard from "@/components/PasswordCard";
 import InfoSkeleton from "@/components/skeletons/info";
 import TabView from "@/components/TabView";
 
@@ -30,10 +30,11 @@ export const Route = createLazyFileRoute("/_tabLayout/security")({
 export function Security() {
   return (
     <TabView columns>
-      <AccessCard />
-      {/* Beside the access card, because both answer "who can reach this
-          board and on what terms" -- and because the trust anchor there and
-          the certificate here are the two halves people confuse. */}
+      {/* Split by subject: how people sign in, and which certificates the
+          board presents and accepts. The trusted proxy is a certificate the
+          board accepts, so it sits with the one it serves -- not under the
+          password form, where it used to be. */}
+      <PasswordCard />
       <CertificateCard />
     </TabView>
   );

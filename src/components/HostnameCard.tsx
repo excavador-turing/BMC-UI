@@ -2,8 +2,9 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import ConfirmationModal from "@/components/ConfirmationModal";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import LoadingButton from "@/components/LoadingButton";
+import TextField from "@/components/TextField";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useHostnameQuery } from "@/lib/api/get";
 import { useSetHostnameMutation } from "@/lib/api/set";
@@ -68,48 +69,52 @@ export default function HostnameCard() {
   };
 
   return (
-    <div>
-      <div className="mb-6 text-lg font-bold">
-        {t("settings.hostnameTitle")}
-      </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>{t("settings.hostnameTitle")}</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        <div className="flex items-end gap-2">
+          <TextField
+            name="hostname"
+            label={t("settings.hostnameTitle")}
+            hideLabel
+            className="max-w-xs min-w-0 flex-1"
+            value={draft}
+            spellCheck={false}
+            autoCapitalize="none"
+            onChange={(e) => setDraft(e.target.value)}
+          />
+          <LoadingButton
+            type="button"
+            disabled={!changed || rename.isPending}
+            isLoading={rename.isPending}
+            onClick={() => setConfirming(true)}
+          >
+            {t("ui.save")}
+          </LoadingButton>
+        </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <Input
-          name="hostname"
-          label={t("settings.hostnameTitle")}
-          className="max-w-xs"
-          value={draft}
-          spellCheck={false}
-          autoCapitalize="none"
-          onChange={(e) => setDraft(e.target.value)}
-        />
-        <Button
-          type="button"
-          disabled={!changed || rename.isPending}
-          isLoading={rename.isPending}
-          onClick={() => setConfirming(true)}
-        >
-          {t("ui.save")}
-        </Button>
-      </div>
-
-      {/* Only when they disagree, which means someone has run `hostname` by
+        {/* Only when they disagree, which means someone has run `hostname` by
           hand. Saying it on every board would be noise. */}
-      {disagrees && (
-        <p className="mt-2 text-sm opacity-60">
-          {t("settings.hostnameNextBoot", { name: nextBoot })}
+        {disagrees && (
+          <p className="text-sm text-muted-foreground">
+            {t("settings.hostnameNextBoot", { name: nextBoot })}
+          </p>
+        )}
+
+        <p className="text-sm text-muted-foreground">
+          {t("settings.hostnameNote")}
         </p>
-      )}
 
-      <p className="mt-2 text-sm opacity-60">{t("settings.hostnameNote")}</p>
-
-      <ConfirmationModal
-        isOpen={confirming}
-        onClose={() => setConfirming(false)}
-        onConfirm={apply}
-        title={t("settings.hostnameConfirmTitle")}
-        message={t("settings.hostnameConfirm", { name: draft.trim() })}
-      />
-    </div>
+        <ConfirmationModal
+          isOpen={confirming}
+          onClose={() => setConfirming(false)}
+          onConfirm={apply}
+          title={t("settings.hostnameConfirmTitle")}
+          message={t("settings.hostnameConfirm", { name: draft.trim() })}
+        />
+      </CardContent>
+    </Card>
   );
 }

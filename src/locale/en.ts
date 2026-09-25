@@ -1,18 +1,23 @@
 const translations = {
   navigation: {
-    overview: "Overview",
+    dashboard: "Dashboard",
     nodes: "Nodes",
+    powerControl: "Power Control",
     console: "Console",
     network: "Network",
+    switch: "Switch",
     security: "Security",
     firmware: "Firmware",
-    settings: "Settings",
-    about: "About",
+    // The sidebar's three headings.
+    sectionSystem: "System",
+    sectionOther: "Other",
+    docs: "Docs",
+    github: "GitHub",
+    cooling: "Cooling",
+    maintenance: "Maintenance",
     // Kept so a bookmark or an old link still renders a label. The tabs
     // themselves are the list above.
-    info: "Info",
     usb: "USB",
-    firmwareUpgrade: "Firmware Upgrade",
     flashNode: "Flash Node",
   },
   userNav: {
@@ -33,7 +38,8 @@ const translations = {
     errorUnknown: "An error has occurred. Please try again later.",
   },
   certificate: {
-    title: "The certificate this board serves",
+    title: "Certificates",
+    served: "This board's certificate",
     issuedBy: "Issued by {{issuer}}",
     expires: "Valid until {{date}}",
     key: "Key: {{key}}",
@@ -42,8 +48,8 @@ const translations = {
       "The board issued this certificate itself and reissues it 30 days before it expires, so it never serves an expired one. A browser will warn about it, because nothing else has any reason to trust it \u2014 and the serial console will refuse to connect, since a click-through exception does not cover its WebSocket.",
     sourceInstalled:
       "This certificate was installed, so the board will not touch it \u2014 including when it expires. Renewing it is yours to remember.",
-    installHide: "Hide the install form",
     installHeading: "Install your own",
+    installTitle: "Install your own certificate",
     installNote:
       "For a certificate from your own authority. A browser that already trusts that authority opens this board with no warning, and the serial console works.",
     certPlaceholder:
@@ -73,11 +79,12 @@ const translations = {
       "This is one account: the new password is also the SSH password for this board.",
   },
   access: {
-    title: "Who may reach this board",
-    youAre: "You are here as {{name}}, authenticated by {{scheme}}.",
+    passwordTitle: "Password",
+    passwordAccount:
+      "For the {{account}} account; it is also the SSH password.",
+    youAreGateway: "Signed in as {{name}} through the fleet gateway.",
     viaGatewayNote:
       "The gateway vouched for you with a certificate this board trusts; you are not holding its password.",
-    passwordFor: "Password for {{account}}",
     currentPassword: "Current password",
     newPassword: "New password",
     repeatPassword: "Repeat the new password",
@@ -89,6 +96,7 @@ const translations = {
     sessionsNote:
       "The current password is required even when a gateway vouched for you. Sessions already open keep working \u2014 sign them out separately if that matters.",
     trustedProxy: "Trusted proxy",
+    trustedProxyActive: "active",
     noTrustAnchor:
       "No client certificate authority. Nothing may name an operator on this board's behalf, so only a password or a session token gets in.",
     caExpires: "Expires {{date}}",
@@ -110,8 +118,17 @@ const translations = {
     cannotRemoveFromHere:
       "You are authenticated by this CA, so removing it here would end your own session. Do it from the board's own interface with a password.",
   },
+  // The Dashboard (Overview) page.
+  dashboard: {
+    unnamed: "No name",
+    stateOn: "On",
+    stateOff: "Off",
+    poweredOnAgo: "Powered on {{duration}} ago",
+    offSinceUnknown: "Off since: not reported",
+    attnUpdate: "Firmware {{version}} is available",
+  },
   info: {
-    userStorage: "User Storage",
+    bmcStorage: "BMC storage",
     ariaStorageUtilization: "Storage utilization",
     backupButton: "Backup User Data",
     fanControl: "Fan Control",
@@ -132,11 +149,17 @@ const translations = {
       "This board reports no thermal sensor, so there is no temperature to read. The fan runs at whatever it was last set to, with nothing to regulate against.",
     fanAutomatic: "automatic",
     fanStep: "{{cur}} of {{max}}",
-    fanRequested: "set {{value}}",
+    fanStepLabel: "Step {{cur}} of {{max}}",
     fanGovernorNote:
       "The kernel regulates this fan from the board temperature. This daemon cannot pause it, so a setting here is undone at the governor's next poll, a few seconds later.",
     fanHeld: "governor paused",
-    fanOverride: "Override",
+    fanModeAutomatic: "Automatic",
+    fanModeManual: "Manual",
+    fanNotApplied: "The fan setting was not applied",
+    fanTrips: "Fan steps up at",
+    tripCritical: "{{celsius}} °C critical",
+    fanOverrideOff:
+      "Hold the fan at a step you choose instead of letting the board regulate it.",
     fanOverrideOn:
       "The governor is paused. This fan will hold the step set here until Override is switched off or the board reboots.",
     fanOverrideCeiling:
@@ -145,62 +168,43 @@ const translations = {
     fanReverted:
       "The board reset {{device}} to {{cur}} of {{max}} after it was set to {{requested}}.",
     ariaFanStep: "Fan {{device}} cooling step",
-    boardHealth: "Board Health",
+    boardInfo: "Board info",
+    boardIp: "IP address",
     healthUptime: "Uptime",
     healthLoad: "Load",
-    healthLoadWindows: "1 / 5 / 15 min",
     healthMemory: "Memory",
-    healthMemoryDetail: "free {{free}} · available {{available}}",
     healthTemperatureTerm: "Temperature",
     healthTemperature: "{{celsius}} °C",
-    healthFanStep: "fan step {{step}} of {{max}}",
-    healthFanTrip: "above the {{celsius}} °C trip",
     healthNand: "NAND",
     healthNandFree: "{{available}} of {{total}} eraseblocks free",
+    healthNandFreeBytes: "{{size}} free",
     healthNandBad: "{{blocks}} bad",
-    healthNandReserved: "{{blocks}} reserved",
-    healthNandNote:
-      "Eraseblocks are counted as UBI reports them. A low free count is not coloured, because nothing here knows how much headroom this volume needs — but it is the number that runs out on a board reflashed as often as this one, and a bad eraseblock never comes back.",
     healthClock: "Clock",
     healthClockSynced: "synchronised",
     healthClockNotSynced: "not synchronised",
     healthClockUnknown: "sync state unknown",
-    healthClockSource: "source {{source}}",
-    healthClockStratum: "stratum {{stratum}}",
-    healthClockOffsetSeconds: "offset {{value}} s",
-    healthClockOffsetMillis: "offset {{value}} ms",
-    healthClockOffsetMicros: "offset {{value}} µs",
-    healthClockMeasuredBy: "measured by {{tool}}",
     healthAbsent: "not detected",
     healthUnavailable: "This BMC daemon does not report board health.",
     ariaMemoryUtilization: "Memory utilization",
     fanDuty: "{{value}} % duty",
     fanAboveTrip: "above {{celsius}} °C",
     fanDutyNote:
-      "Duty is the PWM level the board's own cooling-levels table maps this step to, as the daemon reports that table. The step is the honest reading; the duty is what it commands. A board that reports no table shows the step alone.",
+      "Duty is the fan's power, from the board's own table of step levels. A board that reports no table shows the step instead.",
   },
   network: {
-    header: "The BMC's addresses and the on-board switch",
     networkInterfaces: "Network Interfaces",
-    resetNetworkButton: "Reset Network",
+    interface: "Interface",
+    ipAddress: "IP address",
+    macAddress: "MAC address",
     resetSwitchButton: "Reset the switch chip",
     resetSwitchConfirm:
       "This resets the on-board switch chip, not the BMC's address. Every port drops for a moment: the compute modules lose their link for a few seconds, and so may the BMC.",
-    resetNetworkConfirm:
-      "This drops the board's network configuration and re-applies the defaults. If you are reaching the board over that network, you will lose this session and may need physical access to get it back.",
     resetNetworkSuccess: "Network reset successful.",
-    switchPorts: "Switch Ports",
-    switchNodePorts: "Node ports",
-    switchUplinkPorts: "Uplink ports",
-    switchOtherPorts: "Other ports",
     switchPortUp: "up",
     switchPortDown: "down",
     switchPortAbsent: "not detected",
-    switchPortSpeed: "{{speed}} Mb/s",
-    switchPortDuplexFull: "full duplex",
     switchPortDuplexHalf: "half duplex",
     switchPortTraffic: "rx {{rx}} · tx {{tx}}",
-    switchPortErrors: "errors: {{rx}} rx / {{tx}} tx",
     switchNotProbed: "Switch ports not detected",
     switchNotProbedDescription:
       "The BMC's switch driver did not probe the ports marked below. A compute module behind an unprobed node port has no network at all, while the BMC itself stays reachable, so nothing else on this page will look wrong.",
@@ -211,14 +215,10 @@ const translations = {
   },
   nodes: {
     powerOnTimeTerm: "Power-on time",
-    openConsole: "Console",
     flashNode: "Flash\u2026",
-    usbRouteLabel: "USB route for node {{nodeId}}",
-    usbNotRouted: "not routed here",
-    usbHeldBy: "the bus is on node {{nodeId}}",
-    usbRouted: "the USB bus is now on node {{nodeId}}",
-    header: "Control the power supply of connected nodes",
     restartButton: "Restart",
+    openConsole: "Open console",
+    moreActions: "More actions",
     editButton: "Edit",
     saveButton: "Save",
     ariaNodePowerToggle: "Toggle node {{nodeId}} power",
@@ -263,13 +263,7 @@ const translations = {
     cameBack: "The board came back in {{seconds}} seconds.",
   },
   addressCard: {
-    title: "The BMC's address",
-    now: "Now:",
-    noAddress: "no IPv4 address",
-    via: "via",
-    dnsWord: "dns",
-    leased: "leased over DHCP",
-    fixed: "fixed",
+    title: "IP address",
     mode: "Address mode",
     dhcp: "DHCP",
     static: "Static",
@@ -286,8 +280,6 @@ const translations = {
     discard: "discard changes",
     tryItNote:
       "Try it puts the address on the board and takes it back by itself unless you confirm — from this page, reloaded at the new address.",
-    unchanged:
-      "This is what the board is running: {{address}}. Change it to propose something else.",
     applyWarning:
       "This changes the address you are reaching the board at. This page will stop answering here. Open it at the new address and confirm within {{seconds}} seconds, or the board puts the old address back by itself.",
     applied: "Applied, and not yet kept",
@@ -314,15 +306,16 @@ const translations = {
       "The current static address was written by hand; a confirmed change replaces the file.",
   },
   switchConfig: {
-    title: "The on-board switch",
-    running: "What it is doing now",
+    title: "Switch",
+    badgeFilteringOn: "VLAN filtering on",
+    badgeFilteringOff: "VLAN filtering off",
+    badgeStpOn: "STP on",
+    badgeStpOff: "STP off",
     oneNetwork:
-      "One network. Every module, the BMC and both uplinks share it, and the switch does not look at VLANs.",
+      "All ports share one network. The VLAN columns apply once filtering is on.",
     port: "Port",
     link: "Link",
     traffic: "Traffic",
-    showTraffic: "Show traffic and errors",
-    hideTraffic: "Hide traffic and errors",
     untagged: "Untagged",
     tagged: "Tagged",
     untaggedOn: "Untagged VLAN on {{port}}",
@@ -332,13 +325,7 @@ const translations = {
     bmcUntaggedOnly:
       "This board reads untagged frames only, so a tag here would be traffic it cannot see.",
     thisBoard: "this board",
-    nothingConfirmed:
-      "Nothing has been confirmed, so a reboot comes back to this.",
-    change: "Change it",
     startFrom: "Start from",
-    discard: "Discard my changes",
-    unchanged:
-      "This is what the board is running. Change a cell to propose something else.",
     filtering:
       "Look at VLANs (off means one flat network, whatever the table says)",
     spanningTree:
@@ -353,25 +340,8 @@ const translations = {
       "The board refused the question rather than the layout: {{reason}}",
     windowLabel: "Confirm within",
     windowRange: "s, {{min}}–{{max}}",
-    tryIt: "Try it",
-    tryItNote:
-      "Try it applies the change and does not keep it: watch what you reach this board by, then let it go back.",
-    triedNote:
-      "Watch what you need to watch, then let it go back — or keep it after all.",
-    tryingNow:
-      "You started this with Try it. Doing nothing is the plan: the board will put the previous configuration back.",
     confirmFromHere:
       "Confirm from the browser or machine you reach this board with — that is the proof. A confirmation sent from a shell on the board itself proves nothing, and the board refuses it.",
-    showTable: "Show the table",
-    hideTable: "Hide the table",
-    trunkNote:
-      "These two numbers are yours: your router has to use the same ones, and only you know what is free there.",
-    managementVid: "VLAN for this board",
-    nodeVid: "VLAN for the modules",
-    redundant:
-      "Second uplink carries the same VLANs, with spanning tree deciding which one forwards",
-    trunkNumbers:
-      "Both numbers must be between {{min}} and {{max}}, and they must differ.",
     apply: "Apply",
     applyWarning:
       "This changes the switch you are connected through. The change is applied but NOT kept: if this page cannot reach the board within about {{seconds}} seconds, the board puts the previous configuration back by itself. If that happens, nothing is broken — reload and try again.",
@@ -389,11 +359,16 @@ const translations = {
     wasReverted:
       "Your change at {{at}} was put back because it was not confirmed in time.",
     oneAtATime: "Confirm or revert the waiting change before applying another.",
+    edit: "Edit",
+    filteringShort: "VLAN filtering",
+    stpShort: "Spanning tree (STP)",
+    filteringOnNote: "Each port only reaches the VLANs listed on it.",
+    presetPlaceholder: "Start from a preset…",
   },
   console: {
     inputTerm: "Typing here",
-    header: "Serial console for a compute module",
-    nodeSelect: "Module",
+    header: "Serial console",
+    nodeSelect: "Node",
     readerTask: "Reader task",
     readerRunning: "running",
     readerInitialized: "not started",
@@ -427,15 +402,13 @@ const translations = {
     failedHint:
       "A browser does not say why a WebSocket handshake failed, so all of these arrive here as a close with no reason. If the rest of this page works, the usual cause is the board's certificate: a browser will not open a WebSocket to a certificate it does not trust, and accepting the warning on the page does NOT extend to this connection. Trust the board's authority, or reach it through the fleet, where TLS ends on a certificate your browser already trusts. The other two causes are a rejected session token and a daemon too old to serve this endpoint.",
     inputNote:
-      "Click the terminal to type into it. Keystrokes go to the module exactly as typed, with nothing appended — Ctrl-C, tab completion and the arrow keys included.",
+      "Keys go to the module exactly as typed, including Ctrl-C, Tab and the arrow keys. The HTTP writer below always adds a line ending, so it cannot send those: use it from scripts, not at a boot prompt.",
     ariaTerminal: "Serial console for node {{nodeId}}",
     restTitle: "The line-oriented alternative",
     restIntro:
       "The same UART is reachable over plain HTTP, without a WebSocket:",
     restRead: "returns the node's whole 16 KiB buffer.",
     restWrite: "writes one line.",
-    restCrlf:
-      "The writer always appends CRLF, so it cannot send a bare control character: no Ctrl-C, no tab completion, no arrow keys. It is the right tool from a shell script and the wrong one at a boot prompt.",
   },
   usb: {
     header: "USB route",
@@ -468,22 +441,30 @@ const translations = {
   },
   firmwareUpgrade: {
     firmwareSlots: "Firmware Slots",
+    promotionPassed: "Passed",
+    promotionRolledBack: "Rolled back",
+    promotionUnknown: "Recorded",
+    statusCurrent: "Up to date",
+    statusUpdate: "Update available · {{version}}",
+    uploadButton: "Upload .tpu",
+    sourcesButton: "Sources",
+    colVersion: "Version",
+    colSource: "Source",
+    colChecksum: "Checksum",
+    showAllVersions: "Show all {{count}} versions",
+    slotNothingStaged: "nothing staged",
     slotRunning: "Running",
     slotRollback: "Rollback",
     slotVolumeId: "id {{id}}",
     slotVersionUnreadable: "version not readable",
     slotMissing: "not reported",
     slotNextboot: "Next boot",
-    slotStaged: "Update staged",
-    slotStagedYes: "yes",
-    slotStagedNo: "no",
     slotStagedUnknown: "could not be read",
     slotStagedTitle: "An update is staged",
     slotStagedDescription:
       "The next reboot will start the other slot. Until then the board keeps running the firmware listed below.",
     slotStagedDescriptionNamed:
       "The next reboot will start {{version}}. Until then the board keeps running the firmware listed below.",
-    slotStagedVersion: "Staged version",
     slotStagedUnnamed: "recorded without a name",
     availableTitle: "Available firmware",
     checkNow: "Check now",
@@ -501,10 +482,8 @@ const translations = {
     availableError: "The available firmware could not be read from this board.",
     sourceUnreadable: "This source returned nothing usable: {{reason}}",
     sourceEmpty: "This source offers nothing.",
-    showAll: "Show all {{count}}",
     showFewer: "show fewer",
     install: "Install",
-    installLocalHint: "Install a local image with the upload form below.",
     installFailed: "The install was refused. Nothing has been staged.",
     installStaged:
       "Staged. Reboot when you are ready; the board checks the image before keeping it.",
@@ -516,7 +495,6 @@ const translations = {
     relationCurrent: "running now",
     relationNewer: "newer",
     relationOlder: "older",
-    relationUnknown: "cannot be compared",
     prerelease: "pre-release",
     trustVerified: "checksum verified",
     trustTls: "no checksum published \u2014 TLS only",
@@ -550,9 +528,6 @@ const translations = {
       "An absolute path scanned for .tpu files. Uploads land here. The filename supplies the version.",
     updateStable: "Stable channel",
     updateEdge: "Edge channel",
-    updateCheck: "Update check",
-    updateAvailable: "an update is available",
-    updateCurrent: "this board is current",
     updateUnavailable:
       "could not be checked — the board may have no route to GitHub",
     slotPromotion: "Last promotion",
@@ -563,14 +538,9 @@ const translations = {
       "The rollback volume is not mounted, so its version cannot be read from a running system. The volume and its size are everything the board reports about it.",
     slotPromotionNote:
       "Promotion is the verdict the board's own health gate reached the last time it booted. A board that failed its checks and put itself back on the previous firmware says so here and nowhere else.",
-    header: "Upgrade BMC firmware",
     fileInput: ".tpu file (remote or local):",
     shaInput: "SHA-256 (optional):",
-    submitButton: "Upgrade",
     ariaProgress: "Firmware upgrade progress",
-    flashModalTitle: "Upgrade Firmware?",
-    flashModalDescription:
-      "A reboot is required to finalise the upgrade process.",
     uploading: "Uploading BMC firmware...",
     writing: "Writing firmware to BMC...",
     success: "Image parked on the SD card",
@@ -604,10 +574,10 @@ const translations = {
     clear: "Clear",
   },
   flashNode: {
-    header: "Install an OS image on a selected node",
-    nodeSelect: "Selected node:",
-    fileInput: "File (remote or local):",
-    shaInput: "SHA-256 (optional):",
+    header: "Flash a node",
+    nodeSelect: "Node",
+    fileInput: "File (remote or local)",
+    shaInput: "SHA-256 (optional)",
     skipCrc: "Skip CRC",
     submitButton: "Install OS",
     ariaProgress: "Flashing progress",
@@ -624,42 +594,28 @@ const translations = {
   settings: {
     hostnameTitle: "Hostname",
     hostnameNote:
-      "One DNS label: letters, digits and hyphens, no dots. It is what About reports, what the header shows, what the board advertises over mDNS, and the instance label on every metrics series.",
+      "Letters, digits, and hyphens only; no dots. Used as the hostname, mDNS name, and metrics instance label.",
     hostnameNextBoot: "after the next reboot: {{name}}",
     hostnameConfirmTitle: "Rename this board?",
     hostnameConfirm:
       "Renaming to {{name}} changes the instance label on every metrics series, so a Prometheus history will not follow this board across the rename. Renaming back does not undo it.",
     hostnameRenamed: "renamed to {{name}}",
     timeTitle: "Time",
+    timeServers: "NTP servers",
+    timeBoardTime: "Board time",
+    timeBadgeSynced: "Synchronised",
+    timeBadgeNotSynced: "Not synchronised",
+    timeBadgeUnknown: "Unknown",
     timeNote:
       "Comma-separated, in preference order; the first is preferred. Leave empty for the pool the firmware ships with.",
     timePlaceholder: "192.168.1.1, pool.ntp.org",
     timeNotConfigurable:
       "This firmware cannot take a server list: its chrony configuration has no sourcedir. Upgrade the firmware first.",
-    timeSynchronised: "synchronised",
-    timeNotSynchronised: "NOT synchronised",
     timeUnknown: "the clock's state could not be read",
     timeStratum: "stratum {{stratum}}",
     timeOffset: "offset {{ms}} ms",
     timeSaved: "time servers saved",
     timeCleared: "cleared; back to the pool this firmware ships with",
-    timeSources: "What chrony thinks of each source",
-    timeSourceState: {
-      selected: "selected",
-      combined: "combined in",
-      excluded: "excluded",
-      unreachable: "unreachable",
-      falseticker: "refused: reports itself unsynchronised",
-      too_variable: "too variable",
-      unresolved: "unresolved: the board could not look this name up",
-      unknown: "unknown",
-    },
-    timeSourceReach: "{{reach}} of the last 8 polls answered",
-    timeSourceStratum: "stratum {{stratum}}",
-    timeSourceOffset: "offset {{ms}} ms",
-    timeSourceConfigured: "yours",
-    timeNoSourceSelected:
-      "No source is selected. “unresolved” means the board could not look the name up — it has no working resolver; give it one on the Network tab, or use the server's address instead of its name. “unreachable” means it never answered — check the address, a firewall, or whether that device serves NTP at all. “refused” is a server that reports itself unsynchronised (stratum 16), which chrony will not take time from.",
     configTitle: "Backup and restore",
     configExport: "Back up",
     configImport: "Restore…",
@@ -679,14 +635,12 @@ const translations = {
     rebootStaged: "A firmware update is staged. This reboot will start it.",
     rebootStagedNamed:
       "A firmware update is staged: this reboot will start {{version}}.",
-    rebootNote:
-      "Rebooting the BMC does not cut power to the compute modules; they keep running throughout.",
+    rebootNote: "Compute modules keep running during a BMC reboot.",
   },
   about: {
     boardModel: "Board model",
     boardSerial: "Board serial",
     hostname: "Hostname",
-    firmware: "firmware",
     firmwareVersion: "Firmware version",
     daemonVersion: "Daemon version",
     unavailable: "version unavailable",
@@ -696,6 +650,9 @@ const translations = {
     kernel: "Linux kernel",
     apiVersion: "API version",
     bmcUI: "BMC UI",
+    software: "Software",
+    ariaCopy: "Copy {{value}}",
+    copied: "Copied",
   },
   ui: {
     aboutThis: "About {{subject}}",
@@ -705,12 +662,10 @@ const translations = {
     continue: "Continue",
     reboot: "Reboot",
     selectPlaceholder: "Select...",
-    navigation: "Navigation",
     pageNotFound: "Page Not Found",
     backToHome: "Back to home",
     ariaPasswordVisibility: "Toggle password visibility",
     ariaUploadFile: "Upload file",
-    ariaSliderThumb: "Slider thumb",
     durationDays: "{{value}} d",
     durationHours: "{{value}} h",
     durationMinutes: "{{value}} m",

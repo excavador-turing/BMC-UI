@@ -1,11 +1,51 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import LoadingButton from "@/components/LoadingButton";
+import TextField from "@/components/TextField";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useNtpQuery } from "@/lib/api/get";
 import { useSetNtpMutation } from "@/lib/api/set";
+
+/**
+ * The board's own time, ticking: this browser's clock plus the offset the
+ * daemon measured. Shown so a clock that is wrong reads as wrong at a glance,
+ * not only as "not synchronised".
+ */
+function BoardTime({ offsetSeconds }: { offsetSeconds: number }) {
+  const {
+    i18n: { language },
+  } = useTranslation();
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const board = new Date(now + offsetSeconds * 1000);
+
+  // The time large and the date beside it quietly: date and time together at
+  // this size wrapped onto two lines on a phone.
+  return (
+    <span className="flex flex-wrap items-baseline gap-x-3">
+      <span className="text-xl font-semibold tabular-nums">
+        {board.toLocaleTimeString(language)}
+      </span>
+      <span className="text-sm text-muted-foreground">
+        {board.toLocaleDateString(language, { dateStyle: "medium" })}
+      </span>
+    </span>
+  );
+}
 
 /**
  * Which time sources the board uses, and how its clock is doing on them.
@@ -69,118 +109,91 @@ export default function TimeCard() {
   };
 
   const clock = ntp.data?.clock;
-  const sources = ntp.data?.sources ?? [];
-  const state = (() => {
-    if (!clock) return null;
-    if (clock.synchronised === true) {
-      const parts = [t("settings.timeSynchronised")];
-      if (clock.source) parts.push(clock.source);
-      if (clock.stratum != null)
-        parts.push(t("settings.timeStratum", { stratum: clock.stratum }));
-      if (clock.offset_seconds != null)
-        parts.push(
-          t("settings.timeOffset", {
-            ms: (clock.offset_seconds * 1000).toFixed(1),
-          })
-        );
-      return parts.join(" · ");
-    }
-    if (clock.synchronised === false) return t("settings.timeNotSynchronised");
-    return t("settings.timeUnknown");
-  })();
+  // What the clock is on, as one quiet line under the time: the source it
+  // follows and how far off it is. The yes/no is the badge in the header.
+  const detail = [
+    clock?.source ?? null,
+    clock?.stratum != null
+      ? t("settings.timeStratum", { stratum: clock.stratum })
+      : null,
+    clock?.offset_seconds != null
+      ? t("settings.timeOffset", {
+          ms: (clock.offset_seconds * 1000).toFixed(1),
+        })
+      : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
-    <div>
-      <div className="mb-6 text-lg font-bold">{t("settings.timeTitle")}</div>
-
-      {/* A list that is saved and never read is the one failure showing the
-          servers cannot reveal, so it is said outright. */}
-      {ntp.data?.configurable === false && (
-        <p className="mb-3 text-sm font-semibold text-red-700 dark:text-red-400">
-          {t("settings.timeNotConfigurable")}
-        </p>
-      )}
-
-      <div className="flex flex-wrap items-center gap-3">
-        <Input
-          name="ntpServers"
-          label={t("settings.timeTitle")}
-          className="max-w-xl"
-          value={draft}
-          spellCheck={false}
-          autoCapitalize="none"
-          placeholder={t("settings.timePlaceholder")}
-          onChange={(e) => setDraft(e.target.value)}
-        />
-        <Button
-          type="button"
-          disabled={
-            !changed || save.isPending || ntp.data?.configurable === false
-          }
-          isLoading={save.isPending}
-          onClick={apply}
-        >
-          {t("ui.save")}
-        </Button>
-      </div>
-
-      <p className="mt-2 text-sm opacity-60">{t("settings.timeNote")}</p>
-      {state && <p className="mt-1 text-sm font-semibold">{state}</p>}
-
-      {/* What chrony thinks of each source. "NOT synchronised" alone sent a
-          user to Discord with nothing to act on; chrony always knows why, and
-          every line here is its own column put into words. */}
-      {sources.length > 0 && (
-        <div className="mt-3">
-          <div className="mb-1 text-sm font-semibold opacity-60">
-            {t("settings.timeSources")}
+    <Card>
+      <CardHeader>
+        <CardTitle>{t("settings.timeTitle")}</CardTitle>
+        {clock && (
+          <CardAction>
+            {clock.synchronised === true ? (
+              <Badge variant="success">{t("settings.timeBadgeSynced")}</Badge>
+            ) : clock.synchronised === false ? (
+              <Badge variant="warning">
+                {t("settings.timeBadgeNotSynced")}
+              </Badge>
+            ) : (
+              <Badge variant="outline" title={t("settings.timeUnknown")}>
+                {t("settings.timeBadgeUnknown")}
+              </Badge>
+            )}
+          </CardAction>
+        )}
+      </CardHeader>
+      <CardContent className="flex flex-col gap-6">
+        {clock?.offset_seconds != null && (
+          <div className="flex flex-col gap-1">
+            <span className="text-sm text-muted-foreground">
+              {t("settings.timeBoardTime")}
+            </span>
+            <BoardTime offsetSeconds={clock.offset_seconds} />
+            {detail !== "" && (
+              <span className="text-sm text-muted-foreground">{detail}</span>
+            )}
           </div>
-          <ul className="space-y-0.5 text-sm">
-            {sources.map((source) => (
-              <li
-                key={`${source.kind}:${source.name}`}
-                className="flex flex-wrap gap-x-2"
-              >
-                <span className="font-mono">{source.name}</span>
-                <span
-                  className={
-                    source.state === "selected"
-                      ? "font-semibold"
-                      : source.state === "unreachable" ||
-                          source.state === "falseticker" ||
-                          source.state === "unresolved"
-                        ? "font-semibold text-amber-700 dark:text-amber-500"
-                        : "opacity-80"
-                  }
-                >
-                  {t(`settings.timeSourceState.${source.state}`)}
-                </span>
-                <span className="opacity-60">
-                  {t("settings.timeSourceReach", { reach: source.reach })}
-                  {" · "}
-                  {t("settings.timeSourceStratum", { stratum: source.stratum })}
-                  {source.state !== "unreachable" &&
-                    source.state !== "unresolved" && (
-                      <>
-                        {" · "}
-                        {t("settings.timeSourceOffset", {
-                          ms: (source.offset_seconds * 1000).toFixed(1),
-                        })}
-                      </>
-                    )}
-                  {source.configured &&
-                    ` · ${t("settings.timeSourceConfigured")}`}
-                </span>
-              </li>
-            ))}
-          </ul>
-          {!sources.some((source) => source.state === "selected") && (
-            <p className="mt-2 text-sm text-amber-700 dark:text-amber-500">
-              {t("settings.timeNoSourceSelected")}
-            </p>
-          )}
+        )}
+
+        {/* A list that is saved and never read is the one failure showing the
+          servers cannot reveal, so it is said outright. */}
+        {ntp.data?.configurable === false && (
+          <p className="text-sm font-medium text-destructive">
+            {t("settings.timeNotConfigurable")}
+          </p>
+        )}
+
+        <div className="flex flex-col gap-2">
+          <div className="flex items-end gap-2">
+            <TextField
+              name="ntpServers"
+              label={t("settings.timeServers")}
+              className="flex-1"
+              value={draft}
+              spellCheck={false}
+              autoCapitalize="none"
+              placeholder={t("settings.timePlaceholder")}
+              onChange={(e) => setDraft(e.target.value)}
+            />
+            <LoadingButton
+              type="button"
+              disabled={
+                !changed || save.isPending || ntp.data?.configurable === false
+              }
+              isLoading={save.isPending}
+              onClick={apply}
+            >
+              {t("ui.save")}
+            </LoadingButton>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {t("settings.timeNote")}
+          </p>
         </div>
-      )}
-    </div>
+      </CardContent>
+    </Card>
   );
 }

@@ -43,10 +43,10 @@ function named(
 
 export const FLEET_TABS: FleetTab[] = [
   {
-    id: "nodes",
-    label: "Nodes",
+    id: "power-control",
+    label: "Power Control",
     Component: named(
-      () => import("@/routes/_tabLayout/nodes.lazy"),
+      () => import("@/routes/_tabLayout/power-control.lazy"),
       "NodesTab"
     ),
   },
@@ -75,8 +75,16 @@ export const FLEET_TABS: FleetTab[] = [
   },
   {
     id: "info",
-    label: "Overview",
+    label: "Dashboard",
     Component: named(() => import("@/routes/_tabLayout/info.lazy"), "Info"),
+  },
+  {
+    id: "cooling",
+    label: "Cooling",
+    Component: named(
+      () => import("@/routes/_tabLayout/cooling.lazy"),
+      "Cooling"
+    ),
   },
   {
     id: "network",
@@ -104,16 +112,11 @@ export const FLEET_TABS: FleetTab[] = [
   },
   {
     id: "settings",
-    label: "Settings",
+    label: "Maintenance",
     Component: named(
       () => import("@/routes/_tabLayout/settings.lazy"),
       "Settings"
     ),
-  },
-  {
-    id: "about",
-    label: "About",
-    Component: named(() => import("@/routes/_tabLayout/about.lazy"), "About"),
   },
 ];
 

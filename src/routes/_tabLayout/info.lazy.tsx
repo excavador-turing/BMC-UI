@@ -1,120 +1,38 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
-import { filesize } from "filesize";
-import { useTranslation } from "react-i18next";
 
 import BoardHealth from "@/components/BoardHealth";
+import NodeTiles from "@/components/dashboard/NodeTiles";
 import InfoSkeleton from "@/components/skeletons/info";
+import SoftwareCard from "@/components/SoftwareCard";
 import TabView from "@/components/TabView";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { useToast } from "@/hooks/use-toast";
-import { useBackupMutation } from "@/lib/api/file";
-import { useInfoTabData } from "@/lib/api/get";
-
-/**
- * Calculates the progress data based on the total bytes and free bytes.
- *
- * @param totalBytes - The total number of bytes.
- * @param freeBytes - The number of free bytes.
- * @returns An object containing the human-readable used bytes, total bytes, and used percentage.
- */
-const progressData = (totalBytes: number, freeBytes: number) => {
-  const usedBytes = totalBytes - freeBytes;
-  const usedPct = (usedBytes / totalBytes) * 100;
-
-  return {
-    usedHuman: filesize(usedBytes, { standard: "jedec" }),
-    totalHuman: filesize(totalBytes, { standard: "jedec" }),
-    usedPct: Math.round(usedPct),
-  };
-};
 
 export const Route = createLazyFileRoute("/_tabLayout/info")({
   component: Info,
-  errorComponent: () => <div>Error loading Overview</div>,
+  errorComponent: () => <div>Error loading Dashboard</div>,
   pendingComponent: InfoSkeleton,
 });
 
+/**
+ * The Dashboard: the page a person lands on, answering "is the board all
+ * right" before any other question is asked.
+ *
+ * Kept simple: dashboard-01's section cards, one per module -- its name,
+ * whether it is on, and since when -- and below them the board itself
+ * (what it is and how it is doing) beside the software it runs.
+ */
 export function Info() {
-  const { t } = useTranslation();
-  const { toast } = useToast();
-  const { data } = useInfoTabData();
-  const { mutate: mutateBackup, isPending: backupPending } =
-    useBackupMutation();
-
-  const handleBackupSubmit = () => {
-    mutateBackup(undefined, {
-      onSuccess: (data) => {
-        const { blob, filename } = data;
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", filename);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
-        toast({
-          title: t("info.backupButton"),
-          description: (
-            <>
-              <p>{t("info.backupSuccess")}</p>
-              <p className="mt-4 text-xs italic">{filename}</p>
-            </>
-          ),
-        });
-      },
-      onError: (e) => {
-        toast({
-          title: t("info.backupFailed"),
-          description: e.message,
-          variant: "destructive",
-        });
-      },
-    });
-  };
-
   return (
     <TabView>
-      <div>
-        <div className="mb-6 text-lg font-bold">{t("info.userStorage")}</div>
-        <div className="space-y-4">
-          {data.storage.map((storage) => {
-            const { usedPct, usedHuman, totalHuman } = progressData(
-              storage.total_bytes,
-              storage.bytes_free
-            );
-            return (
-              <div
-                key={storage.name}
-                className="flex items-center justify-between"
-              >
-                <div className="w-1/4 font-semibold">{storage.name}</div>
-                <div className="relative w-1/2 lg:w-3/4">
-                  <Progress
-                    aria-label={t("info.ariaStorageUtilization")}
-                    value={usedPct}
-                    label={`${usedHuman} / ${totalHuman}`}
-                    warningOnHigh
-                  />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        <div className="mt-4">
-          <Button
-            type="button"
-            onClick={() => handleBackupSubmit()}
-            isLoading={backupPending}
-            disabled={backupPending}
-          >
-            {t("info.backupButton")}
-          </Button>
+      <div className="@container/main flex flex-col gap-4 md:gap-6">
+        <NodeTiles />
+
+        <div className="grid gap-4 md:gap-6 xl:grid-cols-2 xl:items-start">
+          <div id="health" className="scroll-mt-4">
+            <BoardHealth />
+          </div>
+          <SoftwareCard />
         </div>
       </div>
-
-      <BoardHealth />
     </TabView>
   );
 }

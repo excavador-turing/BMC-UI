@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""How tall is every tab, and does the header still fit in one bar.
+"""How tall is every tab, and does the top bar still fit in one row.
 
 The site has had a screen gate since its rework: every page measured at nine
 viewports on every pull request, and the front page went from 467 faults to
@@ -55,6 +55,7 @@ TABS = [
     "info",
     "nodes",
     "console",
+    "cooling",
     "network",
     "security",
     "firmware-upgrade",
@@ -66,8 +67,9 @@ TABS = [
 
 VIEWPORTS = [("laptop", 1280, 800), ("phone", 390, 844)]
 
-# One bar, logo and tabs and avatar together. 64 is what that costs with room
-# to spare; it was 182 before the bar and the strip became one thing.
+# The bar above every page: the sidebar toggle and the breadcrumb, one row.
+# The pages themselves moved into the sidebar, so this is 56 and 64 is room to
+# spare; it was 182 when the logo block and the tab strip sat above each page.
 MAX_HEADER = 64
 
 # A tab may be two screens. Not one -- Settings and Firmware have real content
@@ -84,7 +86,7 @@ MEASURE = """
 (() => {
   const header = document.querySelector('header');
   const main = document.querySelector('main');
-  const cards = [...document.querySelectorAll('main .text-lg.font-bold')]
+  const cards = [...document.querySelectorAll('main [data-slot=card-title]')]
     .map(e => e.textContent.trim()).filter(Boolean);
   const h = e => e ? Math.round(e.getBoundingClientRect().height) : 0;
   return {

@@ -1,42 +1,40 @@
 import { filesize } from "filesize";
+import { CircleCheckIcon, TriangleAlertIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import InfoNote from "@/components/InfoNote";
+import CopyButton from "@/components/CopyButton";
 import TableItem from "@/components/TableItem";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import UsageBar from "@/components/UsageBar";
 import { useDurationLabel } from "@/hooks/use-duration";
 import {
   type HealthClock,
   type HealthLoad,
   type HealthMemory,
   type HealthNand,
+  useAboutTabData,
+  useAddressQuery,
   useHealthQuery,
+  useInfoTabData,
   useThermalQuery,
 } from "@/lib/api/get";
 import {
+  eepromLabel,
   EMPTY_VALUE,
   isReading,
-  offsetReading,
-  type OffsetUnit,
+  versionLabel,
 } from "@/lib/format";
-import { governorReason, hottestReading } from "@/lib/thermal";
+import { hottestReading } from "@/lib/thermal";
 
 const human = (bytes: number) => filesize(bytes, { standard: "jedec" });
-
-const OFFSET_KEYS: Record<OffsetUnit, string> = {
-  s: "info.healthClockOffsetSeconds",
-  ms: "info.healthClockOffsetMillis",
-  us: "info.healthClockOffsetMicros",
-};
 
 /** What a section that reported `present: false` renders as. */
 function Absent() {
   const { t } = useTranslation();
 
   return (
-    <span className="font-semibold text-amber-600 dark:text-amber-500">
-      {t("info.healthAbsent")}
-    </span>
+    <span className="font-medium text-warning">{t("info.healthAbsent")}</span>
   );
 }
 
@@ -49,8 +47,6 @@ function Absent() {
  * should not print `NaN`.
  */
 function LoadReading({ load }: { load: HealthLoad }) {
-  const { t } = useTranslation();
-
   const values = [load.one_minute, load.five_minutes, load.fifteen_minutes];
   // `filter` rather than `some`, so the readings are narrowed to numbers for
   // the render below instead of merely checked here.
@@ -61,10 +57,9 @@ function LoadReading({ load }: { load: HealthLoad }) {
 
   return (
     <div className="flex flex-wrap justify-end gap-x-3 lg:justify-start">
-      <span className="font-semibold">
+      <span className="font-medium">
         {readings.map((value) => value.toFixed(2)).join(" · ")}
       </span>
-      <span className="opacity-60">{t("info.healthLoadWindows")}</span>
     </div>
   );
 }
@@ -100,159 +95,102 @@ function MemoryReading({ memory }: { memory: HealthMemory }) {
   const used = Math.max(total - available, 0);
 
   return (
-    <div className="space-y-1">
-      <Progress
-        aria-label={t("info.ariaMemoryUtilization")}
-        value={Math.round((used / total) * 100)}
-        label={`${human(used)} / ${human(total)}`}
-        warningOnHigh
-      />
-      <div className="text-sm opacity-60">
-        {t("info.healthMemoryDetail", {
-          free: isReading(memory.free_bytes)
-            ? human(memory.free_bytes)
-            : EMPTY_VALUE,
-          available: human(available),
-        })}
-      </div>
-    </div>
+    <UsageBar
+      aria-label={t("info.ariaMemoryUtilization")}
+      value={Math.round((used / total) * 100)}
+      label={`${human(used)} / ${human(total)}`}
+      warningOnHigh
+    />
   );
 }
 
 /**
- * NAND, in eraseblocks, with no bar and no threshold.
- *
- * Free eraseblocks are the number that runs out on a board reflashed as often
- * as this one, and on this board they are down to single digits out of two
- * thousand. They are still not coloured: how much headroom a UBI volume needs
- * before it is in trouble is not something any endpoint reports, and a red
- * bar drawn from a guess would be the fan percentage all over again.
- *
- * Bad eraseblocks are coloured, and that is not a threshold: zero and
- * non-zero are different kinds of fact. A bad block never comes back.
+ * NAND, as the space left on it. Bad eraseblocks are named only when there
+ * are some -- that is the one detail worth an operator's attention here.
  */
 function NandReading({ nand }: { nand: HealthNand }) {
   const { t } = useTranslation();
 
-  if (
-    !nand.present ||
-    !isReading(nand.total_eraseblocks) ||
-    !isReading(nand.available_eraseblocks)
-  ) {
-    return <Absent />;
-  }
+  if (!nand.present) return <Absent />;
 
-  return (
-    <div className="flex flex-wrap justify-end gap-x-3 lg:justify-start">
-      <span className="font-semibold">
-        {t("info.healthNandFree", {
+  const free = isReading(nand.available_bytes)
+    ? t("info.healthNandFreeBytes", { size: human(nand.available_bytes) })
+    : isReading(nand.available_eraseblocks) && isReading(nand.total_eraseblocks)
+      ? t("info.healthNandFree", {
           available: nand.available_eraseblocks,
           total: nand.total_eraseblocks,
-        })}
-      </span>
-      {isReading(nand.available_bytes) && (
-        <span className="opacity-60">{human(nand.available_bytes)}</span>
-      )}
-      {isReading(nand.bad_eraseblocks) && (
-        <span
-          className={
-            nand.bad_eraseblocks > 0
-              ? "text-amber-600 dark:text-amber-500"
-              : "opacity-60"
-          }
-        >
+        })
+      : null;
+  if (free === null) return <Absent />;
+
+  return (
+    <span className="inline-flex flex-wrap items-baseline gap-x-2">
+      <span className="font-medium">{free}</span>
+      {isReading(nand.bad_eraseblocks) && nand.bad_eraseblocks > 0 && (
+        <span className="text-warning">
           {t("info.healthNandBad", { blocks: nand.bad_eraseblocks })}
         </span>
       )}
-      {isReading(nand.reserved_eraseblocks) && (
-        <span className="opacity-60">
-          {t("info.healthNandReserved", {
-            blocks: nand.reserved_eraseblocks,
-          })}
-        </span>
-      )}
-    </div>
+    </span>
   );
 }
 
+/** The user storage volumes, one row each, in the order the daemon lists them. */
+function StorageRows() {
+  const { t } = useTranslation();
+  const { data } = useInfoTabData();
+
+  return data.storage.map((storage) => {
+    const used = Math.max(storage.total_bytes - storage.bytes_free, 0);
+    return (
+      <TableItem
+        key={storage.name}
+        term={storage.name === "BMC" ? t("info.bmcStorage") : storage.name}
+      >
+        <UsageBar
+          aria-label={t("info.ariaStorageUtilization")}
+          value={Math.round((used / storage.total_bytes) * 100)}
+          label={`${human(used)} / ${human(storage.total_bytes)}`}
+          warningOnHigh
+        />
+      </TableItem>
+    );
+  });
+}
+
 /**
- * The clock, its source, and how far off it is.
- *
- * `synchronised` has three states and they say three different things. True
- * is plain, false is amber -- a BMC whose clock has drifted stamps every log
- * line and every power-on time with the wrong moment -- and **null is muted
- * prose**: chrony could not be reached, so nothing here knows either way, and
- * drawing that as "not synchronised" would be an accusation the daemon never
- * made.
- *
- * `measured_by` is carried through rather than dropped. It says where the
- * offset came from, and an offset with no provenance is a number to be
- * believed rather than checked.
+ * Whether the clock is synchronised: yes, no, or the daemon cannot say. The
+ * board's time itself is on the Time card.
  */
 function ClockReading({ clock }: { clock: HealthClock }) {
   const { t } = useTranslation();
 
-  const offset = isReading(clock.offset_seconds)
-    ? offsetReading(clock.offset_seconds)
-    : null;
-
-  const detail = [
-    clock.source === null || clock.source === ""
-      ? null
-      : t("info.healthClockSource", { source: clock.source }),
-    isReading(clock.stratum)
-      ? t("info.healthClockStratum", { stratum: clock.stratum })
-      : null,
-    offset === null
-      ? null
-      : t(OFFSET_KEYS[offset.unit], { value: offset.value }),
-  ].filter(Boolean);
-
-  return (
-    <div className="flex flex-col items-end gap-0.5 lg:items-start">
-      <div className="flex flex-wrap justify-end gap-x-3 lg:justify-start">
-        {clock.synchronised === true && (
-          <span className="font-semibold">{t("info.healthClockSynced")}</span>
-        )}
-        {clock.synchronised === false && (
-          <span className="font-semibold text-amber-600 dark:text-amber-500">
-            {t("info.healthClockNotSynced")}
-          </span>
-        )}
-        {clock.synchronised === null && (
-          <span className="opacity-60">{t("info.healthClockUnknown")}</span>
-        )}
-        {detail.length > 0 && (
-          <span className="opacity-60">{detail.join(" · ")}</span>
-        )}
-      </div>
-      {clock.measured_by !== null && clock.measured_by !== "" && (
-        <span className="text-sm opacity-60">
-          {t("info.healthClockMeasuredBy", { tool: clock.measured_by })}
-        </span>
-      )}
-      {clock.rtc.length > 0 && (
-        <span className="text-sm opacity-60">
-          {clock.rtc
-            .map((rtc) =>
-              rtc.name ? `${rtc.device} · ${rtc.name}` : rtc.device
-            )
-            .join(" · ")}
-        </span>
-      )}
-    </div>
+  return clock.synchronised === true ? (
+    <span className="inline-flex items-center gap-1.5 font-medium">
+      <CircleCheckIcon className="size-4" />
+      {t("info.healthClockSynced")}
+    </span>
+  ) : clock.synchronised === false ? (
+    <span className="inline-flex items-center gap-1.5 font-medium text-warning">
+      <TriangleAlertIcon className="size-4" />
+      {t("info.healthClockNotSynced")}
+    </span>
+  ) : (
+    <span className="text-muted-foreground">
+      {t("info.healthClockUnknown")}
+    </span>
   );
 }
 
 function HealthSkeleton() {
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col gap-3">
       {[0, 1, 2, 3].map((row) => (
         <div key={row} className="flex flex-row py-1">
           <div className="w-1/2 lg:w-1/4">
-            <div className="h-6 w-20 animate-pulse bg-neutral-200 dark:bg-neutral-700"></div>
+            <Skeleton className="h-6 w-20" />
           </div>
-          <div className="h-6 w-40 animate-pulse bg-neutral-200 dark:bg-neutral-700"></div>
+          <Skeleton className="h-6 w-40" />
         </div>
       ))}
     </div>
@@ -287,19 +225,7 @@ function HealthSkeleton() {
  * page untouched.
  */
 
-/**
- * Temperature, and what the fan is doing about it.
- *
- * This is a READING. The slider that commands the fan stays on Settings; what
- * belongs here is the number, because someone asking "is this board hot?"
- * opens the tab called Board Health. Until 2026-09-12 they found five other
- * health numbers and no temperature at all, while the board answered 55.1 °C
- * to anyone who asked the API (SQU-202).
- *
- * The trip point is included because it is what explains the step: the
- * governor is responding to the hottest active trip the board is above, and
- * a step with no reason beside it reads as arbitrary.
- */
+/** The hottest sensor. The fan and its trips are on the Cooling page. */
 function TemperatureReading() {
   const { t } = useTranslation();
   // Fifteen seconds, not the fan card's five. This tab is the one the
@@ -308,38 +234,23 @@ function TemperatureReading() {
   const { data, isError } = useThermalQuery(15000);
 
   if (isError) return <Absent />;
-  if (!data) return <span className="opacity-60">{EMPTY_VALUE}</span>;
+  if (!data)
+    return <span className="text-muted-foreground">{EMPTY_VALUE}</span>;
 
   const hottest = hottestReading(data.sensors);
   if (hottest === null) return <Absent />;
 
-  const fan = data.cooling.find((device) => device.present) ?? null;
-  const trip = governorReason(data.sensors);
-
   return (
-    <span className="inline-flex flex-wrap items-baseline gap-x-2">
-      <span className="font-semibold">
-        {t("info.healthTemperature", { celsius: hottest.toFixed(1) })}
-      </span>
-      {fan && isReading(fan.cur_state) && isReading(fan.max_state) && (
-        <span className="opacity-60">
-          {t("info.healthFanStep", {
-            step: fan.cur_state,
-            max: fan.max_state,
-          })}
-        </span>
-      )}
-      {trip !== null && (
-        <span className="opacity-60">
-          {t("info.healthFanTrip", { celsius: trip })}
-        </span>
-      )}
+    <span className="font-medium">
+      {t("info.healthTemperature", { celsius: hottest.toFixed(1) })}
     </span>
   );
 }
 
 export default function BoardHealth() {
   const { t } = useTranslation();
+  const { data: about } = useAboutTabData();
+  const address = useAddressQuery();
   const { data, isPending, isError } = useHealthQuery();
   const durationLabel = useDurationLabel();
 
@@ -347,68 +258,94 @@ export default function BoardHealth() {
     data?.uptime_seconds === null || data?.uptime_seconds === undefined
       ? null
       : durationLabel(data.uptime_seconds);
+  const ip = address.data?.live.address;
+  const serial = eepromLabel(about.board_serial);
 
   return (
-    <div>
-      <div className="mb-6 text-lg font-bold">{t("info.boardHealth")}</div>
-
-      {isPending && <HealthSkeleton />}
-
-      {isError && (
-        <p className="text-sm opacity-60">{t("info.healthUnavailable")}</p>
-      )}
-
-      {data && (
-        <>
-          <dl>
-            <TableItem term={t("info.healthUptime")}>
-              {uptime === null ? (
-                <Absent />
-              ) : (
-                <span className="font-semibold">{uptime}</span>
-              )}
-            </TableItem>
-            <TableItem term={t("info.healthLoad")}>
-              {data.load === null ? (
-                <Absent />
-              ) : (
-                <LoadReading load={data.load} />
-              )}
-            </TableItem>
-            <TableItem term={t("info.healthMemory")}>
-              {data.memory === null ? (
-                <Absent />
-              ) : (
-                <MemoryReading memory={data.memory} />
-              )}
-            </TableItem>
-            <TableItem term={t("info.healthTemperatureTerm")}>
-              <TemperatureReading />
-            </TableItem>
-            <TableItem term={t("info.healthNand")}>
-              {data.nand === null ? (
-                <Absent />
-              ) : (
-                <span className="inline-flex items-center gap-1">
+    <Card>
+      <CardHeader>
+        <CardTitle>{t("info.boardInfo")}</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        <dl>
+          <TableItem term={t("about.boardModel")}>
+            <span className="font-medium">
+              {eepromLabel(about.board_model)} (
+              {versionLabel(about.board_revision)})
+            </span>
+          </TableItem>
+          <TableItem term={t("about.boardSerial")}>
+            <span className="inline-flex items-center gap-1 font-medium">
+              {serial}
+              {serial !== EMPTY_VALUE && <CopyButton value={serial} />}
+            </span>
+          </TableItem>
+          <TableItem term={t("about.hostname")}>
+            <span className="font-medium">{about.hostname || EMPTY_VALUE}</span>
+          </TableItem>
+          <TableItem term={t("info.boardIp")}>
+            {ip ? (
+              <span className="inline-flex items-center gap-1 font-medium">
+                {ip}
+                <CopyButton value={ip} />
+              </span>
+            ) : (
+              <Absent />
+            )}
+          </TableItem>
+          {data && (
+            <>
+              <TableItem term={t("info.healthUptime")}>
+                {uptime === null ? (
+                  <Absent />
+                ) : (
+                  <span className="font-medium">{uptime}</span>
+                )}
+              </TableItem>
+              <TableItem term={t("info.healthLoad")}>
+                {data.load === null ? (
+                  <Absent />
+                ) : (
+                  <LoadReading load={data.load} />
+                )}
+              </TableItem>
+              <TableItem term={t("info.healthMemory")}>
+                {data.memory === null ? (
+                  <Absent />
+                ) : (
+                  <MemoryReading memory={data.memory} />
+                )}
+              </TableItem>
+              <TableItem term={t("info.healthTemperatureTerm")}>
+                <TemperatureReading />
+              </TableItem>
+              <TableItem term={t("info.healthNand")}>
+                {data.nand === null ? (
+                  <Absent />
+                ) : (
                   <NandReading nand={data.nand} />
-                  <InfoNote
-                    text={t("info.healthNandNote")}
-                    path="/reference/metrics/#nand"
-                    label={t("info.healthNand")}
-                  />
-                </span>
-              )}
-            </TableItem>
-            <TableItem term={t("info.healthClock")}>
-              {data.clock === null ? (
-                <Absent />
-              ) : (
-                <ClockReading clock={data.clock} />
-              )}
-            </TableItem>
-          </dl>
-        </>
-      )}
-    </div>
+                )}
+              </TableItem>
+              <StorageRows />
+              <TableItem term={t("info.healthClock")}>
+                {data.clock === null ? (
+                  <Absent />
+                ) : (
+                  <ClockReading clock={data.clock} />
+                )}
+              </TableItem>
+            </>
+          )}
+        </dl>
+
+        {isPending && <HealthSkeleton />}
+
+        {isError && (
+          <p className="text-sm text-muted-foreground">
+            {t("info.healthUnavailable")}
+          </p>
+        )}
+      </CardContent>
+    </Card>
   );
 }

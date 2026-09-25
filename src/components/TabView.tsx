@@ -10,7 +10,7 @@ interface TabViewProps {
    * empty. Measured on bmc-2: Network 1149 px, Access 1670 px, both against
    * 744 px of usable height.
    *
-   * Only at `xl`, where `main` is 1200 px and a column is still wide enough
+   * Only at `xl`, where a column beside the sidebar is still wide enough
    * for a form. Below that it stacks exactly as before — two columns at
    * 768 px would be two cramped columns.
    *
@@ -24,11 +24,15 @@ interface TabViewProps {
 
 export default function TabView({ title, columns, children }: TabViewProps) {
   return (
-    <section>
-      {title && <h2 className="mb-8 text-lg font-bold">{title}</h2>}
+    <section className="flex flex-col gap-6">
+      {title && (
+        <h2 className="text-2xl font-medium tracking-tight">{title}</h2>
+      )}
       <div
         className={
-          columns ? "grid gap-8 xl:grid-cols-2 xl:items-start" : "space-y-8"
+          columns
+            ? "grid gap-6 xl:grid-cols-2 xl:items-start"
+            : "flex flex-col gap-6"
         }
       >
         {children}
