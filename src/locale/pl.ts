@@ -278,15 +278,11 @@ const translations = {
       "Obecny adres statyczny wpisano ręcznie; potwierdzona zmiana zastąpi plik.",
   },
   switchConfig: {
-    title: "Przełącznik na płycie",
-    running: "Co robi teraz",
     oneNetwork:
       "Jedna sieć. Wszystkie moduły, BMC i oba łącza dzielą ją, a przełącznik nie patrzy na VLAN-y.",
     port: "Port",
     link: "Łącze",
     traffic: "Ruch",
-    showTraffic: "Pokaż ruch",
-    hideTraffic: "Ukryj ruch",
     untaggedOn: "VLAN bez tagu na {{port}}",
     taggedOn: "VLAN-y z tagiem na {{port}}",
     none: "brak",
@@ -294,9 +290,6 @@ const translations = {
     bmcUntaggedOnly:
       "Ta płyta czyta tylko ramki bez tagu, więc tag tutaj byłby ruchem, którego nie widzi.",
     startFrom: "Zacznij od",
-    discard: "Odrzuć moje zmiany",
-    unchanged:
-      "To jest to, co płyta ma teraz. Zmień komórkę, aby zaproponować coś innego.",
     filtering:
       "Patrz na VLAN-y (wyłączone oznacza jedną płaską sieć, cokolwiek mówi tabela)",
     spanningTree:
@@ -311,31 +304,11 @@ const translations = {
       "The board refused the question rather than the layout: {{reason}}",
     windowLabel: "Potwierdź w ciągu",
     windowRange: "s, {{min}}–{{max}}",
-    tryIt: "Wypróbuj",
-    tryItNote:
-      "Wypróbuj stosuje zmianę i jej nie zachowuje: obserwuj to, czym docierasz do tej płyty, i pozwól jej wrócić.",
-    triedNote:
-      "Obejrzyj, co masz obejrzeć, i pozwól temu wrócić — albo jednak to zachowaj.",
-    tryingNow:
-      "Zacząłeś to przez Wypróbuj. Nicnierobienie jest planem: płyta przywróci poprzednią konfigurację.",
     confirmFromHere:
       "Potwierdź z przeglądarki lub maszyny, którą docierasz do tej płyty — to jest dowód. Potwierdzenie wysłane z powłoki na samej płycie niczego nie dowodzi i płyta je odrzuci.",
     untagged: "Bez znacznika",
     tagged: "Ze znacznikiem",
     thisBoard: "ta płyta",
-    nothingConfirmed:
-      "Nic nie zostało potwierdzone, więc restart wróci do tego stanu.",
-    change: "Zmień",
-    showTable: "Pokaż tabelę",
-    hideTable: "Ukryj tabelę",
-    trunkNote:
-      "Te dwa numery są twoje: router po drugiej stronie musi używać tych samych, a tylko ty wiesz, które są wolne.",
-    managementVid: "VLAN dla tej płyty",
-    nodeVid: "VLAN dla modułów",
-    redundant:
-      "Drugie łącze niesie te same VLAN-y; spanning tree decyduje, które przekazuje",
-    trunkNumbers:
-      "Oba numery muszą mieścić się między {{min}} a {{max}} i muszą się różnić.",
     apply: "Zastosuj",
     applyWarning:
       "To zmienia przełącznik, przez który jesteś połączony. Zmiana zostanie zastosowana, ale NIE zachowana: jeśli ta strona nie dosięgnie płyty w ciągu około {{seconds}} sekund, płyta sama przywróci poprzednią konfigurację. Wtedy nic nie jest zepsute — odśwież i spróbuj ponownie.",
@@ -354,6 +327,15 @@ const translations = {
       "Twoja zmiana z {{at}} została cofnięta, bo nie potwierdzono jej na czas.",
     oneAtATime:
       "Potwierdź lub cofnij oczekującą zmianę przed zastosowaniem kolejnej.",
+    ports: "Porty",
+    vlans: "VLAN-y",
+    edit: "Edytuj",
+    filteringShort: "Filtrowanie VLAN",
+    stpShort: "Spanning tree (STP)",
+    filteringOnNote: "Każdy port widzi tylko VLAN-y przypisane do niego.",
+    on: "wł.",
+    off: "wył.",
+    presetPlaceholder: "Zacznij od szablonu…",
   },
   console: {
     inputTerm: "Pisanie tutaj",
@@ -576,6 +558,10 @@ const translations = {
     kernel: "Jądro Linux",
     apiVersion: "Wersja API",
     bmcUI: "BMC UI",
+    software: "Oprogramowanie",
+    ariaCopy: "Kopiuj {{value}}",
+    copied: "Skopiowano",
+    boardTime: "czas płyty {{time}}",
   },
   ui: {
     aboutThis: "O: {{subject}}",

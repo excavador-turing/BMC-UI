@@ -347,15 +347,11 @@ const translations = {
       "The current static address was written by hand; a confirmed change replaces the file.",
   },
   switchConfig: {
-    title: "Switch configuration",
-    running: "What it is doing now",
     oneNetwork:
       "One network. Every module, the BMC and both uplinks share it, and the switch does not look at VLANs.",
     port: "Port",
     link: "Link",
     traffic: "Traffic",
-    showTraffic: "Show traffic",
-    hideTraffic: "Hide traffic",
     untagged: "Untagged",
     tagged: "Tagged",
     untaggedOn: "Untagged VLAN on {{port}}",
@@ -365,13 +361,7 @@ const translations = {
     bmcUntaggedOnly:
       "This board reads untagged frames only, so a tag here would be traffic it cannot see.",
     thisBoard: "this board",
-    nothingConfirmed:
-      "Nothing has been confirmed, so a reboot comes back to this.",
-    change: "Change it",
     startFrom: "Start from",
-    discard: "Discard my changes",
-    unchanged:
-      "This is what the board is running. Change a cell to propose something else.",
     filtering:
       "Look at VLANs (off means one flat network, whatever the table says)",
     spanningTree:
@@ -386,25 +376,8 @@ const translations = {
       "The board refused the question rather than the layout: {{reason}}",
     windowLabel: "Confirm within",
     windowRange: "s, {{min}}–{{max}}",
-    tryIt: "Try it",
-    tryItNote:
-      "Try it applies the change and does not keep it: watch what you reach this board by, then let it go back.",
-    triedNote:
-      "Watch what you need to watch, then let it go back — or keep it after all.",
-    tryingNow:
-      "You started this with Try it. Doing nothing is the plan: the board will put the previous configuration back.",
     confirmFromHere:
       "Confirm from the browser or machine you reach this board with — that is the proof. A confirmation sent from a shell on the board itself proves nothing, and the board refuses it.",
-    showTable: "Show the table",
-    hideTable: "Hide the table",
-    trunkNote:
-      "These two numbers are yours: your router has to use the same ones, and only you know what is free there.",
-    managementVid: "VLAN for this board",
-    nodeVid: "VLAN for the modules",
-    redundant:
-      "Second uplink carries the same VLANs, with spanning tree deciding which one forwards",
-    trunkNumbers:
-      "Both numbers must be between {{min}} and {{max}}, and they must differ.",
     apply: "Apply",
     applyWarning:
       "This changes the switch you are connected through. The change is applied but NOT kept: if this page cannot reach the board within about {{seconds}} seconds, the board puts the previous configuration back by itself. If that happens, nothing is broken — reload and try again.",
@@ -422,6 +395,15 @@ const translations = {
     wasReverted:
       "Your change at {{at}} was put back because it was not confirmed in time.",
     oneAtATime: "Confirm or revert the waiting change before applying another.",
+    ports: "Ports",
+    vlans: "VLANs",
+    edit: "Edit",
+    filteringShort: "VLAN filtering",
+    stpShort: "Spanning tree (STP)",
+    filteringOnNote: "Each port only reaches the VLANs listed on it.",
+    on: "on",
+    off: "off",
+    presetPlaceholder: "Start from a preset…",
   },
   console: {
     inputTerm: "Typing here",
@@ -729,6 +711,10 @@ const translations = {
     kernel: "Linux kernel",
     apiVersion: "API version",
     bmcUI: "BMC UI",
+    software: "Software",
+    ariaCopy: "Copy {{value}}",
+    copied: "Copied",
+    boardTime: "board time {{time}}",
   },
   ui: {
     aboutThis: "About {{subject}}",

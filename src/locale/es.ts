@@ -277,15 +277,11 @@ const translations = {
       "La dirección estática actual se escribió a mano; un cambio confirmado reemplaza el archivo.",
   },
   switchConfig: {
-    title: "El conmutador de la placa",
-    running: "Lo que hace ahora",
     oneNetwork:
       "Una sola red. Todos los módulos, el BMC y ambos enlaces la comparten, y el conmutador no mira las VLAN.",
     port: "Puerto",
     link: "Enlace",
     traffic: "Tráfico",
-    showTraffic: "Mostrar tráfico",
-    hideTraffic: "Ocultar tráfico",
     untaggedOn: "VLAN sin etiqueta en {{port}}",
     taggedOn: "VLAN etiquetadas en {{port}}",
     none: "ninguna",
@@ -293,9 +289,6 @@ const translations = {
     bmcUntaggedOnly:
       "Esta placa solo lee tramas sin etiqueta, así que una etiqueta aquí sería tráfico que no puede ver.",
     startFrom: "Partir de",
-    discard: "Descartar mis cambios",
-    unchanged:
-      "Esto es lo que la placa está ejecutando. Cambia una celda para proponer otra cosa.",
     filtering:
       "Mirar las VLAN (desactivado significa una sola red plana, diga lo que diga la tabla)",
     spanningTree:
@@ -310,31 +303,11 @@ const translations = {
       "The board refused the question rather than the layout: {{reason}}",
     windowLabel: "Confirmar en",
     windowRange: "s, {{min}}–{{max}}",
-    tryIt: "Pruébalo",
-    tryItNote:
-      "Pruébalo aplica el cambio y no lo conserva: observa aquello por lo que llegas a esta placa y deja que vuelva atrás.",
-    triedNote:
-      "Observa lo que tengas que observar y deja que vuelva atrás — o consérvalo después de todo.",
-    tryingNow:
-      "Empezaste esto con Pruébalo. No hacer nada es el plan: la placa restaurará la configuración anterior.",
     confirmFromHere:
       "Confirma desde el navegador o la máquina con la que llegas a esta placa: esa es la prueba. Una confirmación enviada desde un shell en la propia placa no prueba nada, y la placa la rechaza.",
     untagged: "Sin etiqueta",
     tagged: "Con etiqueta",
     thisBoard: "esta placa",
-    nothingConfirmed:
-      "No se ha confirmado nada, así que un reinicio vuelve a esto.",
-    change: "Cambiarlo",
-    showTable: "Ver la tabla",
-    hideTable: "Ocultar la tabla",
-    trunkNote:
-      "Estos dos números son suyos: su router debe usar los mismos, y solo usted sabe cuáles están libres.",
-    managementVid: "VLAN de esta placa",
-    nodeVid: "VLAN de los módulos",
-    redundant:
-      "El segundo enlace lleva las mismas VLAN; el spanning tree decide cuál reenvía",
-    trunkNumbers:
-      "Ambos números deben estar entre {{min}} y {{max}}, y deben ser distintos.",
     apply: "Aplicar",
     applyWarning:
       "Esto cambia el conmutador por el que está conectado. El cambio se aplica pero NO se conserva: si esta página no alcanza la placa en unos {{seconds}} segundos, la placa restaura por sí misma la configuración anterior. Si ocurre, no se ha roto nada — recargue e inténtelo otra vez.",
@@ -353,6 +326,15 @@ const translations = {
       "Su cambio de las {{at}} se restauró porque no se confirmó a tiempo.",
     oneAtATime:
       "Confirme o revierta el cambio pendiente antes de aplicar otro.",
+    ports: "Puertos",
+    vlans: "VLAN",
+    edit: "Editar",
+    filteringShort: "Filtrado de VLAN",
+    stpShort: "Spanning tree (STP)",
+    filteringOnNote: "Cada puerto solo alcanza las VLAN que tiene asignadas.",
+    on: "activado",
+    off: "desactivado",
+    presetPlaceholder: "Empezar desde un preajuste…",
   },
   console: {
     inputTerm: "Escribir aquí",
@@ -577,6 +559,10 @@ const translations = {
     kernel: "Núcleo de Linux",
     apiVersion: "Versión de API",
     bmcUI: "BMC UI",
+    software: "Software",
+    ariaCopy: "Copiar {{value}}",
+    copied: "Copiado",
+    boardTime: "hora de la placa {{time}}",
   },
   ui: {
     aboutThis: "Acerca de {{subject}}",

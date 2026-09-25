@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import TimeAgo from "javascript-time-ago";
 import de from "javascript-time-ago/locale/de";
 import en from "javascript-time-ago/locale/en";
@@ -5,13 +6,14 @@ import es from "javascript-time-ago/locale/es";
 import nl from "javascript-time-ago/locale/nl";
 import pl from "javascript-time-ago/locale/pl";
 import zh from "javascript-time-ago/locale/zh";
+import { ArrowUpCircleIcon } from "lucide-react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import TableItem from "@/components/TableItem";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAboutTabData } from "@/lib/api/get";
-import { eepromLabel, EMPTY_VALUE, versionLabel } from "@/lib/format";
+import { useAboutTabData, useUpdateCheckQuery } from "@/lib/api/get";
+import { EMPTY_VALUE, versionLabel } from "@/lib/format";
 
 import { version as packageVersion } from "../../package.json";
 
@@ -29,46 +31,63 @@ TimeAgo.addLocale(pl);
 TimeAgo.addLocale(zh);
 
 /**
- * What this board and its software are. Once a page of its own, now a card
- * on the Dashboard beside Board info.
- *
- * The firmware version is not repeated here: Board info already shows it,
- * with the update hint beside it.
+ * What the board runs. Once the About page; now a card on the Dashboard
+ * beside the Board card, which has the hardware and the live readings.
  */
-export default function AboutCard() {
+export default function SoftwareCard() {
   const {
     t,
     i18n: { language },
   } = useTranslation();
   const { data } = useAboutTabData();
+  const update = useUpdateCheckQuery();
 
   const timeAgo = useMemo(() => new TimeAgo(language), [language]);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("navigation.about")}</CardTitle>
+        <CardTitle>{t("about.software")}</CardTitle>
       </CardHeader>
       <CardContent>
         <dl className="flex flex-col">
-          <TableItem term={t("about.boardModel")}>
-            {eepromLabel(data.board_model)} ({versionLabel(data.board_revision)}
-            )
+          <TableItem term={t("about.firmwareVersion")}>
+            <span className="inline-flex items-center gap-1.5 font-medium">
+              {versionLabel(data.version)}
+              {/* A newer stable release, by the daemon's own check -- the
+                  same one the Firmware tile and page read. */}
+              {update.data?.stable?.update_available && (
+                <Link
+                  to="/firmware-upgrade"
+                  title={t("dashboard.attnUpdate", {
+                    version: update.data.stable.target,
+                  })}
+                  aria-label={t("dashboard.attnUpdate", {
+                    version: update.data.stable.target,
+                  })}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <ArrowUpCircleIcon className="size-4" />
+                </Link>
+              )}
+            </span>
           </TableItem>
-          <TableItem term={t("about.boardSerial")}>
-            {eepromLabel(data.board_serial)}
-          </TableItem>
-          <TableItem term={t("about.hostname")}>{data.hostname}</TableItem>
           <TableItem term={t("about.daemonVersion")}>
             {data.bmcd_version ? versionLabel(data.bmcd_version) : EMPTY_VALUE}
+          </TableItem>
+          {/* The one field an operator wants after a kernel bump. Older daemons
+          never sent it, so an absent value renders as absent rather than
+          as an empty row. */}
+          <TableItem term={t("about.kernel")}>
+            {data.kernel ?? EMPTY_VALUE}
           </TableItem>
           <TableItem term={t("about.buildTime")}>
             {data.buildtime.toLocaleString()} (
             {timeAgo.format(new Date(data.buildtime))})
           </TableItem>
-          {/* Ordinarily the same string as the daemon version, and a row that
-          repeats the one above it teaches nothing. Shown when they differ,
-          which is what a hand-built daemon looks like. */}
+          {/* Ordinarily the same string as the daemon version, and a row
+              that repeats the one above it teaches nothing. Shown when they
+              differ, which is what a hand-built daemon looks like. */}
           {data.build_version !== data.bmcd_version && (
             <TableItem term={t("about.buildVersion")}>
               {versionLabel(data.build_version)}
@@ -76,12 +95,6 @@ export default function AboutCard() {
           )}
           <TableItem term={t("about.buildrootRelease")}>
             {data.buildroot}
-          </TableItem>
-          {/* The one field an operator wants after a kernel bump. Older daemons
-          never sent it, so an absent value renders as absent rather than
-          as an empty row. */}
-          <TableItem term={t("about.kernel")}>
-            {data.kernel ?? EMPTY_VALUE}
           </TableItem>
           <TableItem term={t("about.apiVersion")}>
             {versionLabel(data.api)}

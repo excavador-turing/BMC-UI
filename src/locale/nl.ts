@@ -277,15 +277,11 @@ const translations = {
       "Het huidige statische adres is met de hand ingesteld; een bevestigde wijziging vervangt het bestand.",
   },
   switchConfig: {
-    title: "De switch op het bord",
-    running: "Wat hij nu doet",
     oneNetwork:
       "Eén netwerk. Alle modules, de BMC en beide uplinks delen het, en de switch kijkt niet naar VLAN's.",
     port: "Poort",
     link: "Verbinding",
     traffic: "Verkeer",
-    showTraffic: "Verkeer tonen",
-    hideTraffic: "Verkeer verbergen",
     untaggedOn: "Untagged VLAN op {{port}}",
     taggedOn: "Tagged VLAN's op {{port}}",
     none: "geen",
@@ -293,9 +289,6 @@ const translations = {
     bmcUntaggedOnly:
       "Dit board leest alleen untagged frames, dus een tag hier zou verkeer zijn dat het niet kan zien.",
     startFrom: "Begin met",
-    discard: "Mijn wijzigingen weggooien",
-    unchanged:
-      "Dit is wat het board draait. Wijzig een cel om iets anders voor te stellen.",
     filtering:
       "Naar VLAN's kijken (uit betekent één plat netwerk, wat de tabel ook zegt)",
     spanningTree:
@@ -309,31 +302,11 @@ const translations = {
       "The board refused the question rather than the layout: {{reason}}",
     windowLabel: "Bevestig binnen",
     windowRange: "s, {{min}}–{{max}}",
-    tryIt: "Probeer het",
-    tryItNote:
-      "Probeer het past de wijziging toe en houdt hem niet: kijk waarmee je dit board bereikt en laat hem terugdraaien.",
-    triedNote:
-      "Kijk wat je moet bekijken en laat het terugdraaien — of houd het alsnog.",
-    tryingNow:
-      "Je bent hiermee begonnen via Probeer het. Niets doen is het plan: het board zet de vorige configuratie terug.",
     confirmFromHere:
       "Bevestig vanaf de browser of machine waarmee je dit board bereikt — dat is het bewijs. Een bevestiging vanuit een shell op het board zelf bewijst niets, en het board weigert hem.",
     untagged: "Untagged",
     tagged: "Tagged",
     thisBoard: "dit bord",
-    nothingConfirmed:
-      "Er is niets bevestigd, dus een herstart komt hierop terug.",
-    change: "Wijzigen",
-    showTable: "Toon de tabel",
-    hideTable: "Verberg de tabel",
-    trunkNote:
-      "Deze twee nummers zijn van u: uw router moet dezelfde gebruiken, en alleen u weet wat daar vrij is.",
-    managementVid: "VLAN voor dit bord",
-    nodeVid: "VLAN voor de modules",
-    redundant:
-      "Tweede uplink draagt dezelfde VLAN's; spanning tree bepaalt welke doorstuurt",
-    trunkNumbers:
-      "Beide nummers moeten tussen {{min}} en {{max}} liggen en van elkaar verschillen.",
     apply: "Toepassen",
     applyWarning:
       "Dit wijzigt de switch waardoor u verbonden bent. De wijziging wordt toegepast maar NIET behouden: kan deze pagina het bord niet binnen ongeveer {{seconds}} seconden bereiken, dan zet het bord de vorige configuratie zelf terug. Er is dan niets stuk — herlaad en probeer opnieuw.",
@@ -353,6 +326,15 @@ const translations = {
       "Uw wijziging van {{at}} is teruggezet omdat die niet op tijd is bevestigd.",
     oneAtATime:
       "Bevestig of draai de wachtende wijziging terug voordat u een volgende toepast.",
+    ports: "Poorten",
+    vlans: "VLAN's",
+    edit: "Bewerken",
+    filteringShort: "VLAN-filtering",
+    stpShort: "Spanning tree (STP)",
+    filteringOnNote: "Elke poort bereikt alleen de VLAN's die erbij staan.",
+    on: "aan",
+    off: "uit",
+    presetPlaceholder: "Begin met een voorinstelling…",
   },
   console: {
     inputTerm: "Hier typen",
@@ -577,6 +559,10 @@ const translations = {
     kernel: "Linux-kernel",
     apiVersion: "API-versie",
     bmcUI: "BMC UI",
+    software: "Software",
+    ariaCopy: "{{value}} kopiëren",
+    copied: "Gekopieerd",
+    boardTime: "boardtijd {{time}}",
   },
   ui: {
     aboutThis: "Over {{subject}}",

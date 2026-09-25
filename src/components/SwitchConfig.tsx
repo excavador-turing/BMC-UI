@@ -1,15 +1,38 @@
 import { filesize } from "filesize";
-import { TriangleAlert } from "lucide-react";
+import { PencilIcon, TriangleAlert } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import ConfirmationModal from "@/components/ConfirmationModal";
 import TextField from "@/components/TextField";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Field, FieldLabel } from "@/components/ui/field";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -34,6 +57,7 @@ import {
   useConfirmSwitchMutation,
   useRevertSwitchMutation,
 } from "@/lib/api/set";
+import { cn } from "@/lib/utils";
 
 /** The ports, in the order they sit on the board. */
 const PORT_ORDER = ["node1", "node2", "node3", "node4", "bmc", "ge0", "ge1"];
@@ -228,31 +252,102 @@ function TrafficCell({ port }: { port: SwitchPort | undefined }) {
   );
 }
 
-interface TableProps {
+/** The port's name, with the BMC's own port marked. */
+function PortName({ name }: { name: string }) {
+  const { t } = useTranslation();
+
+  return (
+    <>
+      <span className="font-mono">{name}</span>
+      {name === BMC_PORT && (
+        <span className="ml-2 text-xs whitespace-nowrap text-muted-foreground">
+          {t("switchConfig.thisBoard")}
+        </span>
+      )}
+    </>
+  );
+}
+
+/**
+ * What each port's cable is doing. Read-only, and shown even on a board whose
+ * daemon has no switch configuration at all: link state is the older, smaller
+ * feature and the one people arrive looking for.
+ */
+function PortsCard({ ports }: { ports: SwitchPort[] | undefined }) {
+  const { t } = useTranslation();
+  const byName = new Map((ports ?? []).map((port) => [port.name, port]));
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{t("switchConfig.ports")}</CardTitle>
+      </CardHeader>
+      <CardContent className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t("switchConfig.port")}</TableHead>
+              <TableHead>{t("switchConfig.link")}</TableHead>
+              <TableHead>{t("switchConfig.traffic")}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {PORT_ORDER.map((name) => (
+              <TableRow key={name}>
+                <TableCell>
+                  <PortName name={name} />
+                </TableCell>
+                <TableCell>
+                  {name === BMC_PORT ? (
+                    <span className="text-muted-foreground">—</span>
+                  ) : (
+                    <LinkCell port={byName.get(name)} />
+                  )}
+                </TableCell>
+                <TableCell>
+                  {name === BMC_PORT ? (
+                    <span className="text-muted-foreground">—</span>
+                  ) : (
+                    <TrafficCell port={byName.get(name)} />
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
+}
+
+/** One VLAN as a badge, with its name when it has one. */
+function VlanBadge({ vid, name }: { vid: string; name?: string }) {
+  return (
+    <Badge variant="outline" className="font-mono">
+      {vid}
+      {name && <span className="font-sans text-muted-foreground">{name}</span>}
+    </Badge>
+  );
+}
+
+interface VlanTableProps {
   draft: Draft;
-  ports: SwitchPort[] | undefined;
-  /** Absent means the board cannot be configured from here: read-only. */
+  /** Absent means the table is read-only: the view mode. */
   onChange?: (next: Draft) => void;
   warningsFor: (port: string) => string[];
   bad: Set<string>;
 }
 
 /**
- * The seven ports, one row each, and the row is where you change them.
+ * Which VLANs each port is on. Read-only badges until Edit, boxes after.
  *
- * One table rather than two. Link state and VLAN membership used to be
- * separate panels about the same seven things, and answering "is node 3's
- * cable in, and which network is it on" meant matching names between them.
- *
- * The BMC's row is marked and its tagged cell cannot be typed in: this board
- * reads untagged frames only, so a tag there is traffic it cannot see, and
- * the board refuses such a document. Saying so with a disabled box is kinder
- * than saying it with a refusal after the fact.
+ * The BMC's tagged cell cannot be typed in: this board reads untagged frames
+ * only, so a tag there is traffic it cannot see, and the board refuses such a
+ * document. Saying so with a disabled box is kinder than saying it with a
+ * refusal after the fact.
  */
-function PortTable({ draft, ports, onChange, warningsFor, bad }: TableProps) {
+function VlanTable({ draft, onChange, warningsFor, bad }: VlanTableProps) {
   const { t } = useTranslation();
-  const byName = new Map((ports ?? []).map((port) => [port.name, port]));
-  const editable = onChange !== undefined;
 
   const set = (name: string, field: keyof PortDraft, value: string) => {
     if (!onChange) return;
@@ -265,38 +360,35 @@ function PortTable({ draft, ports, onChange, warningsFor, bad }: TableProps) {
     });
   };
 
-  const cell = "align-top";
-  // With filtering off the switch does not read this table at all. It is
-  // still editable -- setting a layout up and then turning filtering on is
-  // the sane order -- but showing it at full strength would be showing
-  // numbers that mean nothing yet.
-  const vlanCell = draft.filtering ? cell : `${cell} opacity-50`;
+  const badges = (text: string) => {
+    const vids = text
+      .split(",")
+      .map((piece) => piece.trim())
+      .filter((piece) => piece !== "");
+    if (vids.length === 0) {
+      return <span className="text-muted-foreground">—</span>;
+    }
+    return (
+      <span className="flex flex-wrap gap-1">
+        {vids.map((v) => (
+          <VlanBadge key={v} vid={v} name={draft.names[v]} />
+        ))}
+      </span>
+    );
+  };
 
   return (
-    <div className="overflow-x-auto">
-      {!draft.filtering && (
-        <div className="mb-2 max-w-3xl text-sm text-muted-foreground">
-          {t("switchConfig.oneNetwork")}
-        </div>
-      )}
-      <Table className="w-full">
+    // With filtering off the switch does not read this table at all. It is
+    // still editable -- setting a layout up and then turning filtering on is
+    // the sane order -- but showing it at full strength would be showing
+    // numbers that mean nothing yet.
+    <div className={cn("overflow-x-auto", !draft.filtering && "opacity-50")}>
+      <Table>
         <TableHeader>
-          <TableRow className="text-muted-foreground">
-            <TableHead className={`${cell} font-normal`}>
-              {t("switchConfig.port")}
-            </TableHead>
-            <TableHead className={`${cell} font-normal`}>
-              {t("switchConfig.link")}
-            </TableHead>
-            <TableHead className={`${cell} font-normal`}>
-              {t("switchConfig.traffic")}
-            </TableHead>
-            <TableHead className={`${cell} font-normal`}>
-              {t("switchConfig.untagged")}
-            </TableHead>
-            <TableHead className={`${cell} font-normal`}>
-              {t("switchConfig.tagged")}
-            </TableHead>
+          <TableRow>
+            <TableHead>{t("switchConfig.port")}</TableHead>
+            <TableHead>{t("switchConfig.untagged")}</TableHead>
+            <TableHead>{t("switchConfig.tagged")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -306,30 +398,11 @@ function PortTable({ draft, ports, onChange, warningsFor, bad }: TableProps) {
             const isBmc = name === BMC_PORT;
             return (
               <TableRow key={name}>
-                <TableCell className={`${cell} font-mono`}>
-                  {name}
-                  {isBmc && (
-                    <span className="ml-2 font-sans text-xs whitespace-nowrap text-muted-foreground">
-                      {t("switchConfig.thisBoard")}
-                    </span>
-                  )}
+                <TableCell className="align-top">
+                  <PortName name={name} />
                 </TableCell>
-                <TableCell className={cell}>
-                  {isBmc ? (
-                    <span className="text-muted-foreground">—</span>
-                  ) : (
-                    <LinkCell port={byName.get(name)} />
-                  )}
-                </TableCell>
-                <TableCell className={cell}>
-                  {isBmc ? (
-                    <span className="text-muted-foreground">—</span>
-                  ) : (
-                    <TrafficCell port={byName.get(name)} />
-                  )}
-                </TableCell>
-                <TableCell className={vlanCell}>
-                  {editable ? (
+                <TableCell className="align-top">
+                  {onChange ? (
                     <Input
                       className="h-7 w-20 font-mono"
                       aria-invalid={bad.has(`${name}.untagged`)}
@@ -339,16 +412,16 @@ function PortTable({ draft, ports, onChange, warningsFor, bad }: TableProps) {
                       onChange={(e) => set(name, "untagged", e.target.value)}
                     />
                   ) : (
-                    <span className="font-mono">{port.untagged || "—"}</span>
+                    badges(port.untagged)
                   )}
                   {warnings.length > 0 && (
-                    <div className="mt-1 max-w-xs text-xs text-warning">
+                    <div className="mt-1 max-w-xs text-xs whitespace-normal text-warning">
                       {warnings.join(" ")}
                     </div>
                   )}
                 </TableCell>
-                <TableCell className={vlanCell}>
-                  {editable ? (
+                <TableCell className="align-top">
+                  {onChange ? (
                     <Input
                       className="h-7 w-32 font-mono"
                       aria-invalid={bad.has(`${name}.tagged`)}
@@ -364,7 +437,7 @@ function PortTable({ draft, ports, onChange, warningsFor, bad }: TableProps) {
                       onChange={(e) => set(name, "tagged", e.target.value)}
                     />
                   ) : (
-                    <span className="font-mono">{port.tagged || "—"}</span>
+                    badges(isBmc ? "" : port.tagged)
                   )}
                 </TableCell>
               </TableRow>
@@ -376,6 +449,31 @@ function PortTable({ draft, ports, onChange, warningsFor, bad }: TableProps) {
   );
 }
 
+/** A setting as a switch with a short label and a line of explanation. */
+function Toggle({
+  id,
+  label,
+  description,
+  checked,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  description: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}) {
+  return (
+    <Field orientation="horizontal" className="items-start">
+      <Switch id={id} checked={checked} onCheckedChange={onChange} />
+      <FieldContent>
+        <FieldLabel htmlFor={id}>{label}</FieldLabel>
+        <FieldDescription>{description}</FieldDescription>
+      </FieldContent>
+    </Field>
+  );
+}
+
 /**
  * The on-board switch: what each port is doing, and which ports can talk to
  * which.
@@ -384,23 +482,21 @@ function PortTable({ draft, ports, onChange, warningsFor, bad }: TableProps) {
  * failure. A wrong VLAN on the BMC's own port takes the board off the
  * network, and the thing you would use to undo it is this page.
  *
- * So the card never applies anything it keeps. An apply puts the change on
+ * So the page never applies anything it keeps. An apply puts the change on
  * the switch and starts a window; confirming is a second request, and the
  * fact that it arrives at all is the proof that the new configuration works.
  * If this page cannot reach the board there is nothing to press, and the
  * board puts the old configuration back by itself. That is the design
  * working, not a failure.
  *
- * TWO THINGS THIS CARD NEVER DOES. It never expands a preset itself -- the
+ * TWO THINGS THIS PAGE NEVER DOES. It never expands a preset itself -- the
  * board returns each preset's full table -- and it never judges a document.
  * Both for the same reason: a client that computed its own answer would
  * eventually disagree with the board, and the way that disagreement surfaces
  * is a board nobody can reach.
  *
- * The port table is shown even on a board whose daemon has no switch
- * configuration at all. Link state is the older, smaller feature and the one
- * people arrive looking for; losing it because the board cannot be configured
- * would be a worse trade than showing a table with two columns fewer.
+ * Two cards: the ports, read-only, for the person checking a cable; and the
+ * VLANs, read-only until Edit, for the person changing the layout.
  */
 export default function SwitchConfig() {
   const { t } = useTranslation();
@@ -412,17 +508,18 @@ export default function SwitchConfig() {
   const confirm = useConfirmSwitchMutation();
   const revert = useRevertSwitchMutation();
 
+  const [editing, setEditing] = useState(false);
   const [edited, setEdited] = useState<Draft | null>(null);
+  const [preset, setPreset] = useState<string | null>(null);
   /**
    * Seconds to confirm within, or null while the board's default stands.
    *
-   * Null rather than a number, so an untouched card sends no `window_s` at
+   * Null rather than a number, so an untouched dialog sends no `window_s` at
    * all and the board decides. Hard-coding 30 here would be this page having
    * an opinion about a default the daemon publishes.
    */
   const [window_s, setWindow] = useState<number | null>(null);
   const [confirming, setConfirming] = useState(false);
-  const [tried, setTried] = useState(false);
   const [now, setNow] = useState(() => Date.now());
 
   const pending = state.data?.pending ?? null;
@@ -471,40 +568,44 @@ export default function SwitchConfig() {
     .filter((w) => w.port === null)
     .map((w) => w.reason);
 
-  // The board's rule, read from the board, so an out-of-range window greys
-  // the button out instead of being sent to be refused.
-  const windowOk =
-    window_s === null ||
-    limits === undefined ||
-    (Number.isInteger(window_s) &&
-      window_s >= limits.window_min_s &&
-      window_s <= limits.window_max_s);
+  // The board's rule, read from the board: an out-of-range window is pulled
+  // into range rather than sent to be refused.
+  const windowToSend =
+    window_s === null || limits === undefined
+      ? window_s
+      : Math.min(
+          Math.max(Math.round(window_s), limits.window_min_s),
+          limits.window_max_s
+        );
 
   const canApply =
     proposed !== null &&
     edits &&
-    windowOk &&
     refusal === null &&
     verdict.isSuccess &&
     pending === null &&
     !apply.isPending;
 
-  const send = (why: "apply" | "try") => {
+  const stopEditing = () => {
+    setEditing(false);
+    setEdited(null);
+    setPreset(null);
+  };
+
+  const send = () => {
     if (!proposed) return;
-    setTried(why === "try");
     // The daemon flattens the proposal, so `window_s` rides alongside the
     // document's own fields -- proved against bmc-2 before this was written.
     const body =
-      window_s === null ? proposed : { ...proposed, window_s: window_s };
+      windowToSend === null
+        ? proposed
+        : { ...proposed, window_s: windowToSend };
     apply.mutate(body, {
       onSuccess: () => {
-        setEdited(null);
+        stopEditing();
         toast({
           title: t("switchConfig.applied"),
-          description:
-            why === "try"
-              ? t("switchConfig.triedNote")
-              : t("switchConfig.appliedNote"),
+          description: t("switchConfig.appliedNote"),
         });
       },
       onError: (e: Error) =>
@@ -526,295 +627,356 @@ export default function SwitchConfig() {
 
   const vlans = proposed ? vlansOf(proposed) : [];
 
+  // Everything the board or the parser has to say about the draft, in one
+  // place under the table rather than a line each.
+  const blocking = [
+    ...(bad.size > 0 ? [t("switchConfig.notNumbers")] : []),
+    ...(refusal ? [refusal] : []),
+  ];
+  const notes = [
+    ...generalWarnings,
+    ...(verdict.isError && edits
+      ? [
+          verdict.error instanceof ValidationRefused &&
+          verdict.error.reason !== null
+            ? t("switchConfig.refusedQuestion", {
+                reason: verdict.error.reason,
+              })
+            : t("switchConfig.cannotCheck"),
+        ]
+      : []),
+  ];
+
+  const presetItems = [
+    { value: null, label: t("switchConfig.presetPlaceholder") },
+    ...(presets.data?.presets ?? []).map((p) => ({
+      value: p.name,
+      label: p.name,
+    })),
+  ];
+
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4">
-        {portsQuery.isError && (
-          <p className="text-sm text-muted-foreground">
-            {t("network.switchPortsUnavailable")}
-          </p>
-        )}
+    <div className="flex flex-col gap-4 md:gap-6">
+      {portsQuery.isError && (
+        <p className="text-sm text-muted-foreground">
+          {t("network.switchPortsUnavailable")}
+        </p>
+      )}
 
-        {(unprobed || empty) && (
-          <Alert variant="destructive">
-            <TriangleAlert />
-            <AlertTitle>{t("network.switchNotProbed")}</AlertTitle>
-            <AlertDescription>
-              {empty
-                ? t("network.switchNoPorts")
-                : t("network.switchNotProbedDescription")}
-            </AlertDescription>
-          </Alert>
-        )}
+      {(unprobed || empty) && (
+        <Alert variant="destructive">
+          <TriangleAlert />
+          <AlertTitle>{t("network.switchNotProbed")}</AlertTitle>
+          <AlertDescription>
+            {empty
+              ? t("network.switchNoPorts")
+              : t("network.switchNotProbedDescription")}
+          </AlertDescription>
+        </Alert>
+      )}
 
-        {/* A change that has been applied and not yet kept. The one urgent
+      {/* A change that has been applied and not yet kept. The one urgent
           thing on this page, so it comes above everything it is about. */}
-        {pending && (
-          <Alert variant="warning">
-            <TriangleAlert />
-            <AlertTitle>{t("switchConfig.pendingTitle")}</AlertTitle>
-            <AlertDescription className="flex flex-col gap-3">
-              <p>
-                {remaining === null
-                  ? t("switchConfig.waitingForUplink")
-                  : t("switchConfig.countdown", { seconds: remaining })}
-                {tried && <> {t("switchConfig.tryingNow")}</>}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  disabled={confirm.isPending}
-                  onClick={() =>
-                    confirm.mutate(pending.token, {
-                      onSuccess: () => {
-                        setTried(false);
-                        toast({ title: t("switchConfig.confirmed") });
-                      },
-                      onError: (e: Error) =>
-                        toast({
-                          title: t("switchConfig.confirmFailed"),
-                          description: e.message,
-                          variant: "destructive",
-                        }),
-                    })
-                  }
-                >
-                  {t("switchConfig.confirm")}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={revert.isPending}
-                  onClick={() => revert.mutate()}
-                >
-                  {t("switchConfig.revertNow")}
-                </Button>
-              </div>
-              {/* The sentence the daemon says when it refuses a confirmation from
-              the board's own shell, said here first. */}
-              <p className="text-xs text-muted-foreground">
-                {t("switchConfig.confirmFromHere")}
-              </p>
-            </AlertDescription>
-          </Alert>
-        )}
+      {pending && (
+        <Alert variant="warning">
+          <TriangleAlert />
+          <AlertTitle>{t("switchConfig.pendingTitle")}</AlertTitle>
+          <AlertDescription className="flex flex-col gap-3">
+            <p>
+              {remaining === null
+                ? t("switchConfig.waitingForUplink")
+                : t("switchConfig.countdown", { seconds: remaining })}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                disabled={confirm.isPending}
+                onClick={() =>
+                  confirm.mutate(pending.token, {
+                    onSuccess: () =>
+                      toast({ title: t("switchConfig.confirmed") }),
+                    onError: (e: Error) =>
+                      toast({
+                        title: t("switchConfig.confirmFailed"),
+                        description: e.message,
+                        variant: "destructive",
+                      }),
+                  })
+                }
+              >
+                {t("switchConfig.confirm")}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={revert.isPending}
+                onClick={() => revert.mutate()}
+              >
+                {t("switchConfig.revertNow")}
+              </Button>
+            </div>
+            {/* The sentence the daemon says when it refuses a confirmation
+                from the board's own shell, said here first. */}
+            <p className="text-xs text-muted-foreground">
+              {t("switchConfig.confirmFromHere")}
+            </p>
+          </AlertDescription>
+        </Alert>
+      )}
 
-        {!pending && state.data?.last_revert?.reason === "not_confirmed" && (
-          <div className="text-sm text-warning">
+      {!pending && state.data?.last_revert?.reason === "not_confirmed" && (
+        <Alert variant="warning">
+          <TriangleAlert />
+          <AlertDescription>
             {t("switchConfig.wasReverted", {
               at: new Date(
                 epochMillis(state.data.last_revert.at) ?? 0
               ).toLocaleTimeString(),
             })}
-          </div>
-        )}
+          </AlertDescription>
+        </Alert>
+      )}
 
-        {/* Presets fill the table below. They are starting points, not modes:
-          there is no Custom to enter, and changing a cell afterwards is
-          simply editing. The board expands them, never this card. */}
-        {configurable && presets.data && (
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm text-muted-foreground">
-              {t("switchConfig.startFrom")}
-            </span>
-            {presets.data.presets.map((preset) => (
-              <Button
-                key={preset.name}
-                type="button"
-                variant="outline"
-                title={preset.summary}
-                onClick={() => setEdited(draftFrom(preset.document))}
-              >
-                {preset.name}
-              </Button>
-            ))}
-            {edits && (
-              <Button
-                type="button"
-                variant="link"
-                onClick={() => setEdited(null)}
-              >
-                {t("switchConfig.discard")}
-              </Button>
-            )}
-          </div>
-        )}
+      <div className="grid gap-4 md:gap-6 xl:grid-cols-2 xl:items-start">
+        <PortsCard ports={ports} />
 
         {draft && (
-          <PortTable
-            draft={draft}
-            ports={ports}
-            onChange={configurable ? setEdited : undefined}
-            warningsFor={warningsFor}
-            bad={bad}
-          />
-        )}
-
-        {configurable && draft && (
-          <div className="flex w-full flex-col gap-4">
-            <div className="flex flex-col gap-3 xl:flex-row xl:gap-6">
-              <Field orientation="horizontal">
-                <Checkbox
-                  id="switch-filtering"
-                  checked={draft.filtering}
-                  onCheckedChange={(checked) =>
-                    setEdited({ ...draft, filtering: checked })
-                  }
-                />
-                <FieldLabel htmlFor="switch-filtering" className="font-normal">
-                  {t("switchConfig.filtering")}
-                </FieldLabel>
-              </Field>
-              <Field orientation="horizontal">
-                <Checkbox
-                  id="switch-stp"
-                  checked={draft.stp}
-                  onCheckedChange={(checked) =>
-                    setEdited({ ...draft, stp: checked })
-                  }
-                />
-                <FieldLabel htmlFor="switch-stp" className="font-normal">
-                  {t("switchConfig.spanningTree")}
-                </FieldLabel>
-              </Field>
-            </div>
-
-            {/* A word beside a number, so that a layout is still legible to
-              whoever opens this board next year. The board carries these and
-              never acts on them. */}
-            {draft.filtering && vlans.length > 0 && (
-              <div className="flex flex-col gap-2">
-                <div className="text-sm font-medium">
-                  {t("switchConfig.names")}
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  {vlans.map((v) => (
-                    <div key={v} className="w-44">
-                      <TextField
-                        name={`vlan-name-${v}`}
-                        label={t("switchConfig.vlanNumber", { vid: v })}
-                        value={draft.names[String(v)] ?? ""}
-                        placeholder={t("switchConfig.unnamed")}
-                        onChange={(e) =>
-                          setEdited({
-                            ...draft,
-                            names: {
-                              ...draft.names,
-                              [String(v)]: e.target.value,
-                            },
-                          })
-                        }
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {bad.size > 0 && (
-              <div className="text-sm text-destructive">
-                {t("switchConfig.notNumbers")}
-              </div>
-            )}
-
-            {refusal && (
-              <div className="text-sm text-destructive">{refusal}</div>
-            )}
-
-            {generalWarnings.length > 0 && (
-              <div className="text-sm text-warning">
-                {generalWarnings.join(" ")}
-              </div>
-            )}
-
-            {verdict.isError && edits && (
-              <div className="text-sm text-muted-foreground">
-                {verdict.error instanceof ValidationRefused &&
-                verdict.error.reason !== null
-                  ? t("switchConfig.refusedQuestion", {
-                      reason: verdict.error.reason,
-                    })
-                  : t("switchConfig.cannotCheck")}
-              </div>
-            )}
-
-            <div className="flex flex-wrap items-center gap-3">
-              <Button
-                type="button"
-                disabled={!canApply}
-                onClick={() => setConfirming(true)}
-              >
-                {t("switchConfig.apply")}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={!canApply}
-                onClick={() => send("try")}
-              >
-                {t("switchConfig.tryIt")}
-              </Button>
-
-              {/* On the same row as the buttons it belongs to, and bounded by
-                what the board says it accepts -- never by a number written
-                here. Thirty seconds is enough to watch a preset take effect
-                and too short to check a layout you made by hand, which is
-                exactly when Try it is worth using. Only once there is an
-                edit: until then there is nothing for the window to time. */}
-              {limits && edits && (
-                <label className="flex items-center gap-2 text-sm">
-                  {t("switchConfig.windowLabel")}
-                  <Input
-                    type="number"
-                    className="h-7 w-20"
-                    min={limits.window_min_s}
-                    max={limits.window_max_s}
-                    step={5}
-                    value={window_s ?? limits.window_default_s}
-                    onChange={(e) => {
-                      const next = Number(e.target.value);
-                      setWindow(Number.isFinite(next) ? next : null);
-                    }}
-                  />
-                  <span className="whitespace-nowrap text-muted-foreground">
-                    {t("switchConfig.windowRange", {
-                      min: limits.window_min_s,
-                      max: limits.window_max_s,
-                    })}
-                  </span>
-                </label>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("switchConfig.vlans")}</CardTitle>
+              <CardDescription>
+                {draft.filtering
+                  ? t("switchConfig.filteringOnNote")
+                  : t("switchConfig.oneNetwork")}
+              </CardDescription>
+              {configurable && !editing && (
+                <CardAction>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={pending !== null}
+                    title={
+                      pending !== null
+                        ? t("switchConfig.oneAtATime")
+                        : undefined
+                    }
+                    onClick={() => setEditing(true)}
+                  >
+                    <PencilIcon data-icon="inline-start" />
+                    {t("switchConfig.edit")}
+                  </Button>
+                </CardAction>
               )}
-            </div>
+            </CardHeader>
 
-            {pending !== null && (
-              <div className="text-sm text-muted-foreground">
-                {t("switchConfig.oneAtATime")}
-              </div>
+            <CardContent className="flex flex-col gap-4">
+              {editing && configurable ? (
+                <>
+                  {/* Presets fill the table below. They are starting points,
+                      not modes: changing a cell afterwards is simply editing.
+                      The board expands them, never this page. */}
+                  <Select
+                    items={presetItems}
+                    value={preset}
+                    onValueChange={(value) => {
+                      const chosen = presets.data?.presets.find(
+                        (p) => p.name === value
+                      );
+                      if (!chosen) return;
+                      setPreset(chosen.name);
+                      setEdited(draftFrom(chosen.document));
+                    }}
+                  >
+                    <SelectTrigger
+                      aria-label={t("switchConfig.startFrom")}
+                      className="w-56"
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {presets.data?.presets.map((p) => (
+                          <SelectItem key={p.name} value={p.name}>
+                            {p.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+
+                  <div className="flex flex-col gap-3">
+                    <Toggle
+                      id="switch-filtering"
+                      label={t("switchConfig.filteringShort")}
+                      description={t("switchConfig.filtering")}
+                      checked={draft.filtering}
+                      onChange={(checked) =>
+                        setEdited({ ...draft, filtering: checked })
+                      }
+                    />
+                    <Toggle
+                      id="switch-stp"
+                      label={t("switchConfig.stpShort")}
+                      description={t("switchConfig.spanningTree")}
+                      checked={draft.stp}
+                      onChange={(checked) =>
+                        setEdited({ ...draft, stp: checked })
+                      }
+                    />
+                  </div>
+
+                  <VlanTable
+                    draft={draft}
+                    onChange={setEdited}
+                    warningsFor={warningsFor}
+                    bad={bad}
+                  />
+
+                  {/* A word beside a number, so that a layout is still
+                      legible to whoever opens this board next year. The board
+                      carries these and never acts on them. */}
+                  {draft.filtering && vlans.length > 0 && (
+                    <div className="flex flex-col gap-2">
+                      <div className="text-sm font-medium">
+                        {t("switchConfig.names")}
+                      </div>
+                      <div className="flex flex-wrap gap-3">
+                        {vlans.map((v) => (
+                          <div key={v} className="w-40">
+                            <TextField
+                              name={`vlan-name-${v}`}
+                              label={t("switchConfig.vlanNumber", { vid: v })}
+                              value={draft.names[String(v)] ?? ""}
+                              placeholder={t("switchConfig.unnamed")}
+                              onChange={(e) =>
+                                setEdited({
+                                  ...draft,
+                                  names: {
+                                    ...draft.names,
+                                    [String(v)]: e.target.value,
+                                  },
+                                })
+                              }
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {(blocking.length > 0 || notes.length > 0) && (
+                    <Alert
+                      variant={blocking.length > 0 ? "destructive" : "warning"}
+                    >
+                      <TriangleAlert />
+                      <AlertDescription className="flex flex-col gap-1">
+                        {[...blocking, ...notes].map((line) => (
+                          <p key={line}>{line}</p>
+                        ))}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </>
+              ) : (
+                <>
+                  <VlanTable
+                    draft={draft}
+                    warningsFor={() => []}
+                    bad={new Set()}
+                  />
+                  <dl className="flex flex-col gap-1 text-sm">
+                    <div className="flex gap-2">
+                      <dt className="text-muted-foreground">
+                        {t("switchConfig.filteringShort")}
+                      </dt>
+                      <dd className="font-medium">
+                        {draft.filtering
+                          ? t("switchConfig.on")
+                          : t("switchConfig.off")}
+                      </dd>
+                    </div>
+                    <div className="flex gap-2">
+                      <dt className="text-muted-foreground">
+                        {t("switchConfig.stpShort")}
+                      </dt>
+                      <dd className="font-medium">
+                        {draft.stp
+                          ? t("switchConfig.on")
+                          : t("switchConfig.off")}
+                      </dd>
+                    </div>
+                  </dl>
+                </>
+              )}
+            </CardContent>
+
+            {editing && configurable && (
+              <CardFooter className="justify-end gap-2 border-t py-3">
+                <Button type="button" variant="outline" onClick={stopEditing}>
+                  {t("ui.cancel")}
+                </Button>
+                <Button
+                  type="button"
+                  disabled={!canApply}
+                  onClick={() => setConfirming(true)}
+                >
+                  {t("switchConfig.apply")}
+                </Button>
+              </CardFooter>
             )}
-            {/* One line, not two. "Try it does not keep it" and "this is what
-              the board is running" were both permanently on screen; the
-              first is only useful once there is something to try. */}
-            <div className="text-sm text-muted-foreground">
-              {edits
-                ? t("switchConfig.tryItNote")
-                : t("switchConfig.unchanged")}
-            </div>
-          </div>
+          </Card>
         )}
-
-        <ConfirmationModal
-          isOpen={confirming}
-          onClose={() => setConfirming(false)}
-          onConfirm={() => {
-            setConfirming(false);
-            send("apply");
-          }}
-          title={t("switchConfig.apply")}
-          message={t("switchConfig.applyWarning", {
-            seconds: window_s ?? state.data?.default_window_s ?? 30,
-          })}
-        />
       </div>
+
+      <ConfirmationModal
+        isOpen={confirming}
+        onClose={() => setConfirming(false)}
+        onConfirm={() => {
+          setConfirming(false);
+          send();
+        }}
+        title={t("switchConfig.apply")}
+        message={
+          <div className="flex flex-col gap-4">
+            <p>
+              {t("switchConfig.applyWarning", {
+                seconds:
+                  window_s ??
+                  limits?.window_default_s ??
+                  state.data?.default_window_s ??
+                  30,
+              })}
+            </p>
+            {/* Bounded by what the board says it accepts -- never by a
+                number written here. Thirty seconds is enough to watch a
+                preset take effect and short for a layout made by hand. */}
+            {limits && (
+              <label className="flex flex-wrap items-center gap-2 text-sm text-foreground">
+                {t("switchConfig.windowLabel")}
+                <Input
+                  type="number"
+                  className="h-7 w-20"
+                  min={limits.window_min_s}
+                  max={limits.window_max_s}
+                  step={5}
+                  value={window_s ?? limits.window_default_s}
+                  onChange={(e) => {
+                    const next = Number(e.target.value);
+                    setWindow(Number.isFinite(next) ? next : null);
+                  }}
+                />
+                <span className="whitespace-nowrap text-muted-foreground">
+                  {t("switchConfig.windowRange", {
+                    min: limits.window_min_s,
+                    max: limits.window_max_s,
+                  })}
+                </span>
+              </label>
+            )}
+          </div>
+        }
+      />
     </div>
   );
 }

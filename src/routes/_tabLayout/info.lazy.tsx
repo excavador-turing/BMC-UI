@@ -1,9 +1,9 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
 
-import AboutCard from "@/components/AboutCard";
 import BoardHealth from "@/components/BoardHealth";
 import NodeTiles from "@/components/dashboard/NodeTiles";
 import InfoSkeleton from "@/components/skeletons/info";
+import SoftwareCard from "@/components/SoftwareCard";
 import TabView from "@/components/TabView";
 
 export const Route = createLazyFileRoute("/_tabLayout/info")({
@@ -17,8 +17,8 @@ export const Route = createLazyFileRoute("/_tabLayout/info")({
  * right" before any other question is asked.
  *
  * Kept simple: dashboard-01's section cards, one per module -- its name,
- * whether it is on, and since when -- and below them the board's details,
- * its storage included.
+ * whether it is on, and since when -- and below them the board itself
+ * (what it is and how it is doing) beside the software it runs.
  */
 export function Info() {
   return (
@@ -30,7 +30,7 @@ export function Info() {
           <div id="health" className="scroll-mt-4">
             <BoardHealth />
           </div>
-          <AboutCard />
+          <SoftwareCard />
         </div>
       </div>
     </TabView>

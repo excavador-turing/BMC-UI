@@ -279,15 +279,11 @@ const translations = {
       "Die aktuelle statische Adresse wurde von Hand eingetragen; eine bestätigte Änderung ersetzt die Datei.",
   },
   switchConfig: {
-    title: "Der Onboard-Switch",
-    running: "Was er gerade tut",
     oneNetwork:
       "Ein Netzwerk. Alle Module, der BMC und beide Uplinks teilen es, und der Switch beachtet keine VLANs.",
     port: "Port",
     link: "Verbindung",
     traffic: "Datenverkehr",
-    showTraffic: "Datenverkehr anzeigen",
-    hideTraffic: "Datenverkehr ausblenden",
     untaggedOn: "Untagged-VLAN auf {{port}}",
     taggedOn: "Tagged-VLANs auf {{port}}",
     none: "keins",
@@ -295,9 +291,6 @@ const translations = {
     bmcUntaggedOnly:
       "Dieses Board liest nur untagged Frames; ein Tag hier wäre Verkehr, den es nicht sehen kann.",
     startFrom: "Ausgehen von",
-    discard: "Meine Änderungen verwerfen",
-    unchanged:
-      "Das ist, was das Board gerade fährt. Ändern Sie eine Zelle, um etwas anderes vorzuschlagen.",
     filtering:
       "VLANs beachten (aus heißt ein flaches Netzwerk, was auch immer in der Tabelle steht)",
     spanningTree:
@@ -311,31 +304,11 @@ const translations = {
       "The board refused the question rather than the layout: {{reason}}",
     windowLabel: "Bestätigen in",
     windowRange: "s, {{min}}–{{max}}",
-    tryIt: "Ausprobieren",
-    tryItNote:
-      "Ausprobieren wendet die Änderung an und behält sie nicht: Beobachten Sie, worüber Sie dieses Board erreichen, und lassen Sie sie zurückgehen.",
-    triedNote:
-      "Beobachten Sie, was Sie beobachten müssen, und lassen Sie es zurückgehen — oder behalten Sie es doch.",
-    tryingNow:
-      "Sie haben das mit Ausprobieren gestartet. Nichts zu tun ist der Plan: Das Board stellt die vorherige Konfiguration wieder her.",
     confirmFromHere:
       "Bestätigen Sie von dem Browser oder Rechner aus, über den Sie dieses Board erreichen — das ist der Beweis. Eine Bestätigung aus einer Shell auf dem Board selbst beweist nichts, und das Board weist sie ab.",
     untagged: "Untagged",
     tagged: "Tagged",
     thisBoard: "dieses Board",
-    nothingConfirmed:
-      "Nichts wurde bestätigt, ein Neustart kehrt also hierher zurück.",
-    change: "Ändern",
-    showTable: "Tabelle anzeigen",
-    hideTable: "Tabelle ausblenden",
-    trunkNote:
-      "Diese beiden Nummern gehören Ihnen: Ihr Router muss dieselben verwenden, und nur Sie wissen, was dort frei ist.",
-    managementVid: "VLAN für dieses Board",
-    nodeVid: "VLAN für die Module",
-    redundant:
-      "Zweiter Uplink führt dieselben VLANs; Spanning Tree entscheidet, welcher weiterleitet",
-    trunkNumbers:
-      "Beide Nummern müssen zwischen {{min}} und {{max}} liegen und sich unterscheiden.",
     apply: "Anwenden",
     applyWarning:
       "Dies ändert den Switch, über den Sie verbunden sind. Die Änderung wird angewendet, aber NICHT behalten: Erreicht diese Seite das Board nicht innerhalb von etwa {{seconds}} Sekunden, stellt das Board die vorherige Konfiguration selbst wieder her. Dann ist nichts kaputt — neu laden und erneut versuchen.",
@@ -355,6 +328,15 @@ const translations = {
       "Ihre Änderung um {{at}} wurde zurückgesetzt, weil sie nicht rechtzeitig bestätigt wurde.",
     oneAtATime:
       "Bestätigen oder verwerfen Sie die wartende Änderung, bevor Sie eine weitere anwenden.",
+    ports: "Ports",
+    vlans: "VLANs",
+    edit: "Bearbeiten",
+    filteringShort: "VLAN-Filterung",
+    stpShort: "Spanning Tree (STP)",
+    filteringOnNote: "Jeder Port erreicht nur die bei ihm aufgeführten VLANs.",
+    on: "an",
+    off: "aus",
+    presetPlaceholder: "Mit einer Vorlage beginnen…",
   },
   console: {
     inputTerm: "Eingabe hier",
@@ -583,6 +565,10 @@ const translations = {
     kernel: "Linux-Kernel",
     apiVersion: "API-Version",
     bmcUI: "BMC UI",
+    software: "Software",
+    ariaCopy: "{{value}} kopieren",
+    copied: "Kopiert",
+    boardTime: "Boardzeit {{time}}",
   },
   ui: {
     aboutThis: "Über {{subject}}",
