@@ -160,14 +160,9 @@ export function SerialConsoleTab({ preselected }: { preselected?: number }) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            {t("console.restTitle")}
-            <InfoNote
-              text={t("console.restCrlf")}
-              path="/features/a-console-to-every-module/#two-ways-to-type-and-they-are-not-the-same"
-              label={t("console.restTitle")}
-            />
-          </CardTitle>
+          {/* No note of its own: the difference between this writer and the
+            terminal is one note, on the terminal, where people type. */}
+          <CardTitle>{t("console.restTitle")}</CardTitle>
           <CardDescription>{t("console.restIntro")}</CardDescription>
         </CardHeader>
         <CardContent>
