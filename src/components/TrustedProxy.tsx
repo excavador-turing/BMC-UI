@@ -1,12 +1,16 @@
+import { ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import ConfirmationModal from "@/components/ConfirmationModal";
-import PasswordForm from "@/components/PasswordForm";
 import TextField from "@/components/TextField";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useAccessQuery } from "@/lib/api/get";
@@ -16,21 +20,20 @@ import {
 } from "@/lib/api/set";
 
 /**
- * Who may reach this board.
+ * The client CA a proxy must present to name an operator on this board's
+ * behalf -- the fleet gateway's trust anchor.
  *
- * Both halves of this used to be filesystem-only and arrive over SSH: the
- * password through `passwd` on a console, the trust anchor through a script
- * in another repository. The interface that demands a password on every login
- * could not change it, and nothing could answer "who can get in" without
- * logging in to look.
+ * It lives with the certificates, not the password: it is a certificate the
+ * board accepts, where the one above it is the certificate the board
+ * presents, and those two are the halves people confuse. It used to sit
+ * under the password form, with which it has nothing to do.
  *
- * WHAT THE CARD SHOWS FIRST is how YOU got here. An operator arriving through
- * the fleet is not holding this board's password and may not know there is
- * one; an operator on the board's own interface is. Saying which, before
- * offering either control, is what stops the next two sections being read as
- * the wrong thing.
+ * Behind "Advanced", because it only matters to a board the fleet reaches;
+ * on a board used on its own it was a PEM box and a header field for a
+ * feature nobody there uses. The trigger says when a CA is stored, so a
+ * closed section never hides that something may name operators here.
  */
-export default function AccessCard() {
+export default function TrustedProxy() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const access = useAccessQuery();
@@ -41,8 +44,8 @@ export default function AccessCard() {
   const [header, setHeader] = useState("");
   const [removing, setRemoving] = useState(false);
 
-  // A board on an older daemon has no such endpoint. A card that cannot work
-  // is not shown as a card that is broken.
+  // A board on an older daemon has no such endpoint; there is nothing to
+  // show rather than something broken.
   if (access.isError || !access.data) return null;
 
   const state = access.data;
@@ -75,37 +78,29 @@ export default function AccessCard() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("access.title")}</CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <div className="text-sm">
-          {t("access.youAre", {
-            name: state.actor.name,
-            scheme: state.actor.scheme,
-          })}
-          {viaGateway && (
-            <span className="ml-1 text-muted-foreground">
-              {t("access.viaGatewayNote")}
-            </span>
+    <>
+      <Collapsible>
+        <CollapsibleTrigger
+          render={
+            <Button
+              variant="ghost"
+              size="sm"
+              className="group -ml-2 self-start text-muted-foreground"
+            />
+          }
+        >
+          <ChevronRight
+            data-icon="inline-start"
+            className="transition-transform group-data-panel-open:rotate-90"
+          />
+          {t("access.trustedProxy")}
+          {state.client_ca !== null && (
+            <Badge variant="secondary" className="ml-1">
+              {t("access.trustedProxyActive")}
+            </Badge>
           )}
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <div className="font-medium">
-            {t("access.passwordFor", { account: state.local_account })}
-          </div>
-          {/* The daemon requires the current password from everyone, including an
-            operator the gateway vouched for, so the field is never hidden. */}
-          <PasswordForm account={state.local_account} />
-        </div>
-
-        <Separator />
-
-        <div>
-          <div className="mb-2 font-medium">{t("access.trustedProxy")}</div>
-
+        </CollapsibleTrigger>
+        <CollapsibleContent className="pt-3">
           {state.client_ca === null ? (
             <div className="mb-3 text-sm">{t("access.noTrustAnchor")}</div>
           ) : (
@@ -114,8 +109,8 @@ export default function AccessCard() {
               <div className="text-muted-foreground">
                 {t("access.caExpires", { date: state.client_ca.not_after })}
               </div>
-              {/* The fingerprint is the point of showing any of this: it is what
-                an operator compares against the certificate their proxy
+              {/* The fingerprint is the point of showing any of this: it is
+                what an operator compares against the certificate their proxy
                 presents, and the only field that distinguishes two CAs with
                 the same name. */}
               <div className="font-mono text-xs break-all text-muted-foreground">
@@ -131,8 +126,7 @@ export default function AccessCard() {
 
           {/* One paragraph with the next, not a gap between them: on a board
             whose CA is pinned in config.yaml these are two short sentences
-            about the same thing, and the gap was the last 10 px keeping this
-            tab scrolling. */}
+            about the same thing. */}
           <div
             className={`text-sm text-muted-foreground ${pinned ? "" : "mb-3"}`}
           >
@@ -144,8 +138,8 @@ export default function AccessCard() {
 
           {pinned ? (
             // config.yaml chose it, and the daemon will not rewrite that file.
-            // Showing a disabled control with the reason beats showing one that
-            // is refused on press.
+            // Showing the reason beats showing a control that is refused on
+            // press.
             <div className="text-sm">{t("access.pinnedInConfig")}</div>
           ) : (
             <div className="flex max-w-2xl flex-col gap-2">
@@ -177,10 +171,10 @@ export default function AccessCard() {
                   <Button
                     type="button"
                     variant="destructive"
-                    // The daemon refuses this from an operator authenticated BY
-                    // the CA -- the request would end its own session through
-                    // the proxy it is asking through. Disabled here with the
-                    // reason, rather than sent to be refused.
+                    // The daemon refuses this from an operator authenticated
+                    // BY the CA -- the request would end its own session
+                    // through the proxy it is asking through. Disabled here
+                    // with the reason, rather than sent to be refused.
                     disabled={viaGateway || removeClientCa.isPending}
                     onClick={() => setRemoving(true)}
                   >
@@ -195,31 +189,31 @@ export default function AccessCard() {
               )}
             </div>
           )}
-        </div>
+        </CollapsibleContent>
+      </Collapsible>
 
-        <ConfirmationModal
-          isOpen={removing}
-          onClose={() => setRemoving(false)}
-          onConfirm={() => {
-            setRemoving(false);
-            removeClientCa.mutate(undefined, {
-              onSuccess: () =>
-                toast({
-                  title: t("access.caRemoved"),
-                  description: t("access.reloadRequired"),
-                }),
-              onError: (e: Error) =>
-                toast({
-                  title: t("access.caFailed"),
-                  description: e.message,
-                  variant: "destructive",
-                }),
-            });
-          }}
-          title={t("access.removeCa")}
-          message={t("access.removeCaConfirm")}
-        />
-      </CardContent>
-    </Card>
+      <ConfirmationModal
+        isOpen={removing}
+        onClose={() => setRemoving(false)}
+        onConfirm={() => {
+          setRemoving(false);
+          removeClientCa.mutate(undefined, {
+            onSuccess: () =>
+              toast({
+                title: t("access.caRemoved"),
+                description: t("access.reloadRequired"),
+              }),
+            onError: (e: Error) =>
+              toast({
+                title: t("access.caFailed"),
+                description: e.message,
+                variant: "destructive",
+              }),
+          });
+        }}
+        title={t("access.removeCa")}
+        message={t("access.removeCaConfirm")}
+      />
+    </>
   );
 }

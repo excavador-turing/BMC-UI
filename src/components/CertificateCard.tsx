@@ -1,9 +1,20 @@
+import { Upload } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import ConfirmationModal from "@/components/ConfirmationModal";
+import TrustedProxy from "@/components/TrustedProxy";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useTlsCertificateQuery } from "@/lib/api/get";
@@ -66,6 +77,7 @@ export default function CertificateCard() {
         onSuccess: () => {
           setCert("");
           setKey("");
+          setInstalling(false);
           toast({
             title: t("certificate.installed"),
             description: t("certificate.installedNote"),
@@ -87,6 +99,35 @@ export default function CertificateCard() {
         <CardTitle>{t("certificate.title")}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="text-sm font-medium">{t("certificate.served")}</div>
+          {/* Installing is occasional and takes two PEM boxes, so the form
+            opens in a sheet -- the same as the firmware sources -- and the
+            card stays about what the board serves and when it expires.
+            Resetting needs no form, so it stays out here. */}
+          <div className="flex flex-wrap gap-2">
+            {installed && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={reset.isPending}
+                onClick={() => setResetting(true)}
+              >
+                {t("certificate.reset")}
+              </Button>
+            )}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setInstalling(true)}
+            >
+              <Upload data-icon="inline-start" />
+              {t("certificate.installHeading")}
+            </Button>
+          </div>
+        </div>
         <div className="text-sm">
           <div>{state.subject}</div>
           <div className="text-muted-foreground">
@@ -121,87 +162,62 @@ export default function CertificateCard() {
             : t("certificate.sourceSelfSigned")}
         </div>
 
-        {/* Behind a disclosure, because the two PEM boxes were 250 px of a card
-          whose everyday job is answering "what certificate does this board
-          serve, and when does it expire". Installing one is an occasional
-          act; reading what is installed is not. The reset button stays out
-          here with it, since it belongs to the same decision. */}
-        <div>
-          <Button
-            type="button"
-            variant="link"
-            className="px-0 text-muted-foreground"
-            onClick={() => setInstalling((open) => !open)}
-          >
-            {installing
-              ? t("certificate.installHide")
-              : t("certificate.installHeading")}
-          </Button>
-        </div>
+        <Sheet open={installing} onOpenChange={setInstalling}>
+          <SheetContent className="w-full data-[side=right]:sm:max-w-xl">
+            <SheetHeader>
+              <SheetTitle>{t("certificate.installTitle")}</SheetTitle>
+              <SheetDescription>
+                {t("certificate.installNote")}
+              </SheetDescription>
+            </SheetHeader>
+            <div className="flex flex-1 flex-col gap-2 overflow-y-auto px-4">
+              <Textarea
+                className="min-h-40 font-mono text-xs"
+                placeholder={t("certificate.certPlaceholder")}
+                value={cert}
+                onChange={(e) => setCert(e.target.value)}
+              />
+              <Textarea
+                className="min-h-40 font-mono text-xs"
+                placeholder={t("certificate.keyPlaceholder")}
+                value={key}
+                onChange={(e) => setKey(e.target.value)}
+              />
 
-        <div
-          className={`max-w-2xl flex-col gap-2 ${installing ? "flex" : "hidden"}`}
-        >
-          <div className="text-sm text-muted-foreground">
-            {t("certificate.installNote")}
-          </div>
+              {/* One message at a time, and only once there is something to
+                say about: a rule shown before the first keystroke reads as an
+                error the operator has already made. */}
+              {cert !== "" && !certLooksRight && (
+                <div className="text-sm text-muted-foreground">
+                  {t("certificate.notACertificate")}
+                </div>
+              )}
+              {certHoldsKey && (
+                <div className="text-sm font-medium text-warning">
+                  {t("certificate.certHoldsKey")}
+                </div>
+              )}
+              {key !== "" && !keyLooksRight && (
+                <div className="text-sm text-muted-foreground">
+                  {t("certificate.notAKey")}
+                </div>
+              )}
 
-          <Textarea
-            className="min-h-32 font-mono text-xs"
-            placeholder={t("certificate.certPlaceholder")}
-            value={cert}
-            onChange={(e) => setCert(e.target.value)}
-          />
-          <Textarea
-            className="min-h-32 font-mono text-xs"
-            placeholder={t("certificate.keyPlaceholder")}
-            value={key}
-            onChange={(e) => setKey(e.target.value)}
-          />
-
-          {/* One message at a time, and only once there is something to say
-            about: a rule shown before the first keystroke reads as an error
-            the operator has already made. */}
-          {cert !== "" && !certLooksRight && (
-            <div className="text-sm text-muted-foreground">
-              {t("certificate.notACertificate")}
+              <div className="text-sm text-muted-foreground">
+                {t("certificate.noRestartNote")}
+              </div>
             </div>
-          )}
-          {certHoldsKey && (
-            <div className="text-sm font-medium text-warning">
-              {t("certificate.certHoldsKey")}
-            </div>
-          )}
-          {key !== "" && !keyLooksRight && (
-            <div className="text-sm text-muted-foreground">
-              {t("certificate.notAKey")}
-            </div>
-          )}
-
-          <div className="flex gap-4">
-            <Button
-              type="button"
-              disabled={!canInstall}
-              onClick={applyCertificate}
-            >
-              {t("certificate.install")}
-            </Button>
-            {installed && (
+            <SheetFooter className="flex-row">
               <Button
                 type="button"
-                variant="destructive"
-                disabled={reset.isPending}
-                onClick={() => setResetting(true)}
+                disabled={!canInstall}
+                onClick={applyCertificate}
               >
-                {t("certificate.reset")}
+                {t("certificate.install")}
               </Button>
-            )}
-          </div>
-
-          <div className="text-sm text-muted-foreground">
-            {t("certificate.noRestartNote")}
-          </div>
-        </div>
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
 
         <ConfirmationModal
           isOpen={resetting}
@@ -221,6 +237,9 @@ export default function CertificateCard() {
           title={t("certificate.reset")}
           message={t("certificate.resetConfirm")}
         />
+        {/* The certificate the board accepts, under the one it presents. */}
+        <Separator />
+        <TrustedProxy />
       </CardContent>
     </Card>
   );

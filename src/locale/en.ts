@@ -45,7 +45,8 @@ const translations = {
     errorUnknown: "An error has occurred. Please try again later.",
   },
   certificate: {
-    title: "The certificate this board serves",
+    title: "Certificates",
+    served: "This board's certificate",
     issuedBy: "Issued by {{issuer}}",
     expires: "Valid until {{date}}",
     key: "Key: {{key}}",
@@ -54,8 +55,8 @@ const translations = {
       "The board issued this certificate itself and reissues it 30 days before it expires, so it never serves an expired one. A browser will warn about it, because nothing else has any reason to trust it \u2014 and the serial console will refuse to connect, since a click-through exception does not cover its WebSocket.",
     sourceInstalled:
       "This certificate was installed, so the board will not touch it \u2014 including when it expires. Renewing it is yours to remember.",
-    installHide: "Hide the install form",
     installHeading: "Install your own",
+    installTitle: "Install your own certificate",
     installNote:
       "For a certificate from your own authority. A browser that already trusts that authority opens this board with no warning, and the serial console works.",
     certPlaceholder:
@@ -85,11 +86,12 @@ const translations = {
       "This is one account: the new password is also the SSH password for this board.",
   },
   access: {
-    title: "Who may reach this board",
-    youAre: "You are here as {{name}}, authenticated by {{scheme}}.",
+    passwordTitle: "Password",
+    passwordAccount:
+      "For the {{account}} account; it is also the SSH password.",
+    youAreGateway: "Signed in as {{name}} through the fleet gateway.",
     viaGatewayNote:
       "The gateway vouched for you with a certificate this board trusts; you are not holding its password.",
-    passwordFor: "Password for {{account}}",
     currentPassword: "Current password",
     newPassword: "New password",
     repeatPassword: "Repeat the new password",
@@ -101,6 +103,7 @@ const translations = {
     sessionsNote:
       "The current password is required even when a gateway vouched for you. Sessions already open keep working \u2014 sign them out separately if that matters.",
     trustedProxy: "Trusted proxy",
+    trustedProxyActive: "active",
     noTrustAnchor:
       "No client certificate authority. Nothing may name an operator on this board's behalf, so only a password or a session token gets in.",
     caExpires: "Expires {{date}}",
