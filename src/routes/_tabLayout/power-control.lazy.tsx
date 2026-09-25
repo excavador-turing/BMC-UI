@@ -250,7 +250,7 @@ export function NodesTab() {
   };
 
   return (
-    <TabView title={t("nodes.header")}>
+    <TabView>
       <form onSubmit={handleSubmit} ref={formRef}>
         <div className="grid gap-4 lg:grid-cols-2">
           {data.map((node, index) => (

@@ -338,8 +338,8 @@ const translations = {
   },
   console: {
     inputTerm: "Eingabe hier",
-    header: "Serielle Konsole für ein Compute-Modul",
-    nodeSelect: "Modul",
+    header: "Serielle Konsole",
+    nodeSelect: "Knoten",
     readerTask: "Lese-Task",
     readerRunning: "läuft",
     readerInitialized: "nicht gestartet",
@@ -530,11 +530,10 @@ const translations = {
     error: "Ein Fehler ist aufgetreten",
   },
   flashNode: {
-    header:
-      "Installieren Sie ein Betriebssystemabbild auf einem ausgewählten Knoten",
-    nodeSelect: "Ausgewählter Knoten:",
-    fileInput: "Datei (Remote oder lokal):",
-    shaInput: "SHA-256 (optional):",
+    header: "Knoten flashen",
+    nodeSelect: "Knoten",
+    fileInput: "Datei (Remote oder lokal)",
+    shaInput: "SHA-256 (optional)",
     skipCrc: "CRC überspringen",
     submitButton: "Betriebssystem installieren",
     ariaProgress: "Fortschritt beim Flashen",

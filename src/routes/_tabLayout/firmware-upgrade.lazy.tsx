@@ -61,7 +61,7 @@ export function FirmwareUpgrade() {
   };
 
   return (
-    <TabView title={t("firmwareUpgrade.header")}>
+    <TabView>
       <FirmwareSlots />
       <FirmwareCandidates />
       <FirmwareSources />

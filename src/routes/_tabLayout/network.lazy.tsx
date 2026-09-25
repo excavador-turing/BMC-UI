@@ -76,7 +76,7 @@ export function Network() {
   };
 
   return (
-    <TabView title={t("network.header")}>
+    <TabView>
       {/* What this board is called and where it answers, together. The name
           IS a network fact: it is how somebody reaches the board, it is in
           the certificate's subject-alternative names, and it is the mDNS
