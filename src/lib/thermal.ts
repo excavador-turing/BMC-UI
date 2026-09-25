@@ -40,3 +40,18 @@ export function hottestReading(sensors: ThermalSensor[]): number | null {
   }
   return hottest;
 }
+
+/**
+ * Kernel thermal-zone names, as a reader would call the part they measure.
+ *
+ * The daemon passes the zone's `type` through from the device tree, and
+ * "bmc-thermal" is a node name, not a label. A name missing from here is
+ * shown as the board sent it rather than guessed at.
+ */
+const SENSOR_LABELS: Record<string, string> = {
+  "bmc-thermal": "BMC",
+};
+
+export function sensorLabel(name: string): string {
+  return SENSOR_LABELS[name] ?? name;
+}
