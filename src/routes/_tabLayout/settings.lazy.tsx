@@ -108,48 +108,54 @@ export function Settings() {
 
   return (
     <TabView columns>
-      <TimeCard />
-      <ConfigBackup />
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("info.bmc")}</CardTitle>
-          {/* The reboot cuts the BMC, not the compute modules. People assume
+      {/* Two stacks rather than the grid's row order. Filled row by row, the
+        tall Time card sat beside Backup and pushed the BMC card -- the one
+        people open this page for -- to the bottom left. The short action
+        cards go together on the left, BMC first; Time takes the right. On a
+        phone that reads BMC, backup, time. */}
+      <div className="flex flex-col gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("info.bmc")}</CardTitle>
+            {/* The reboot cuts the BMC, not the compute modules. People assume
               otherwise and hesitate over a button that is safe, so say it. */}
-          <CardDescription>{t("settings.rebootNote")}</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <div className="flex flex-wrap gap-2">
-            <LoadingButton
-              type="button"
-              variant="destructive"
-              onClick={() => setRebootModalOpened(true)}
-              isLoading={rebootPending}
-            >
-              {t("info.rebootButton")}
-            </LoadingButton>
-            <LoadingButton
-              type="button"
-              variant="outline"
-              onClick={() => handleReloadBMC()}
-              isLoading={reloadPending}
-            >
-              {t("info.reloadDaemonButton")}
-            </LoadingButton>
-          </div>
+            <CardDescription>{t("settings.rebootNote")}</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <div className="flex flex-wrap gap-2">
+              <LoadingButton
+                type="button"
+                variant="destructive"
+                onClick={() => setRebootModalOpened(true)}
+                isLoading={rebootPending}
+              >
+                {t("info.rebootButton")}
+              </LoadingButton>
+              <LoadingButton
+                type="button"
+                variant="outline"
+                onClick={() => handleReloadBMC()}
+                isLoading={reloadPending}
+              >
+                {t("info.reloadDaemonButton")}
+              </LoadingButton>
+            </div>
 
-          {/* Amber, like the same fact on the Firmware tab, and for the same
+            {/* Amber, like the same fact on the Firmware tab, and for the same
               reason: a staged update is not a fault, but it does change what
               this button does. */}
-          {staged && (
-            <p className="text-sm font-medium text-warning">
-              {stagedVersion
-                ? t("settings.rebootStagedNamed", { version: stagedVersion })
-                : t("settings.rebootStaged")}
-            </p>
-          )}
-        </CardContent>
-      </Card>
+            {staged && (
+              <p className="text-sm font-medium text-warning">
+                {stagedVersion
+                  ? t("settings.rebootStagedNamed", { version: stagedVersion })
+                  : t("settings.rebootStaged")}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+        <ConfigBackup />
+      </div>
+      <TimeCard />
 
       <RebootModal
         isOpen={rebootModalOpened}

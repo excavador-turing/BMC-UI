@@ -3,7 +3,14 @@ import { useTranslation } from "react-i18next";
 
 import LoadingButton from "@/components/LoadingButton";
 import TextField from "@/components/TextField";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useNtpQuery } from "@/lib/api/get";
 import { useSetNtpMutation } from "@/lib/api/set";
@@ -15,7 +22,6 @@ import { useSetNtpMutation } from "@/lib/api/set";
  */
 function BoardTime({ offsetSeconds }: { offsetSeconds: number }) {
   const {
-    t,
     i18n: { language },
   } = useTranslation();
   const [now, setNow] = useState(() => Date.now());
@@ -25,12 +31,19 @@ function BoardTime({ offsetSeconds }: { offsetSeconds: number }) {
     return () => clearInterval(timer);
   }, []);
 
-  const time = new Date(now + offsetSeconds * 1000).toLocaleString(language);
+  const board = new Date(now + offsetSeconds * 1000);
 
+  // The time large and the date beside it quietly: date and time together at
+  // this size wrapped onto two lines on a phone.
   return (
-    <p className="text-sm text-muted-foreground">
-      {t("about.boardTime", { time })}
-    </p>
+    <span className="flex flex-wrap items-baseline gap-x-3">
+      <span className="text-xl font-semibold tabular-nums">
+        {board.toLocaleTimeString(language)}
+      </span>
+      <span className="text-sm text-muted-foreground">
+        {board.toLocaleDateString(language, { dateStyle: "medium" })}
+      </span>
+    </span>
   );
 }
 
@@ -96,128 +109,90 @@ export default function TimeCard() {
   };
 
   const clock = ntp.data?.clock;
-  const sources = ntp.data?.sources ?? [];
-  const state = (() => {
-    if (!clock) return null;
-    if (clock.synchronised === true) {
-      const parts = [t("settings.timeSynchronised")];
-      if (clock.source) parts.push(clock.source);
-      if (clock.stratum != null)
-        parts.push(t("settings.timeStratum", { stratum: clock.stratum }));
-      if (clock.offset_seconds != null)
-        parts.push(
-          t("settings.timeOffset", {
-            ms: (clock.offset_seconds * 1000).toFixed(1),
-          })
-        );
-      return parts.join(" · ");
-    }
-    if (clock.synchronised === false) return t("settings.timeNotSynchronised");
-    return t("settings.timeUnknown");
-  })();
+  // What the clock is on, as one quiet line under the time: the source it
+  // follows and how far off it is. The yes/no is the badge in the header.
+  const detail = [
+    clock?.source ?? null,
+    clock?.stratum != null
+      ? t("settings.timeStratum", { stratum: clock.stratum })
+      : null,
+    clock?.offset_seconds != null
+      ? t("settings.timeOffset", {
+          ms: (clock.offset_seconds * 1000).toFixed(1),
+        })
+      : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>{t("settings.timeTitle")}</CardTitle>
+        {clock && (
+          <CardAction>
+            {clock.synchronised === true ? (
+              <Badge variant="success">{t("settings.timeBadgeSynced")}</Badge>
+            ) : clock.synchronised === false ? (
+              <Badge variant="warning">
+                {t("settings.timeBadgeNotSynced")}
+              </Badge>
+            ) : (
+              <Badge variant="outline" title={t("settings.timeUnknown")}>
+                {t("settings.timeBadgeUnknown")}
+              </Badge>
+            )}
+          </CardAction>
+        )}
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
+      <CardContent className="flex flex-col gap-6">
+        {clock?.offset_seconds != null && (
+          <div className="flex flex-col gap-1">
+            <span className="text-sm text-muted-foreground">
+              {t("settings.timeBoardTime")}
+            </span>
+            <BoardTime offsetSeconds={clock.offset_seconds} />
+            {detail !== "" && (
+              <span className="text-sm text-muted-foreground">{detail}</span>
+            )}
+          </div>
+        )}
+
         {/* A list that is saved and never read is the one failure showing the
           servers cannot reveal, so it is said outright. */}
         {ntp.data?.configurable === false && (
-          <p className="mb-3 text-sm font-medium text-destructive">
+          <p className="text-sm font-medium text-destructive">
             {t("settings.timeNotConfigurable")}
           </p>
         )}
 
-        <div className="flex flex-wrap items-end gap-3">
-          <TextField
-            name="ntpServers"
-            label={t("settings.timeTitle")}
-            hideLabel
-            className="max-w-xl"
-            value={draft}
-            spellCheck={false}
-            autoCapitalize="none"
-            placeholder={t("settings.timePlaceholder")}
-            onChange={(e) => setDraft(e.target.value)}
-          />
-          <LoadingButton
-            type="button"
-            disabled={
-              !changed || save.isPending || ntp.data?.configurable === false
-            }
-            isLoading={save.isPending}
-            onClick={apply}
-          >
-            {t("ui.save")}
-          </LoadingButton>
-        </div>
-
-        <p className="mt-2 text-sm text-muted-foreground">
-          {t("settings.timeNote")}
-        </p>
-        {state && <p className="mt-1 text-sm font-medium">{state}</p>}
-        {clock?.offset_seconds != null && (
-          <BoardTime offsetSeconds={clock.offset_seconds} />
-        )}
-
-        {/* What chrony thinks of each source. "NOT synchronised" alone sent a
-          user to Discord with nothing to act on; chrony always knows why, and
-          every line here is its own column put into words. */}
-        {sources.length > 0 && (
-          <div className="mt-3">
-            <div className="mb-1 text-sm font-medium text-muted-foreground">
-              {t("settings.timeSources")}
-            </div>
-            <ul className="flex flex-col gap-0.5 text-sm">
-              {sources.map((source) => (
-                <li
-                  key={`${source.kind}:${source.name}`}
-                  className="flex flex-wrap gap-x-2"
-                >
-                  <span className="font-mono">{source.name}</span>
-                  <span
-                    className={
-                      source.state === "selected"
-                        ? "font-medium"
-                        : source.state === "unreachable" ||
-                            source.state === "falseticker" ||
-                            source.state === "unresolved"
-                          ? "font-medium text-warning"
-                          : "text-muted-foreground"
-                    }
-                  >
-                    {t(`settings.timeSourceState.${source.state}`)}
-                  </span>
-                  <span className="text-muted-foreground">
-                    {t("settings.timeSourceReach", { reach: source.reach })}
-                    {" · "}
-                    {t("settings.timeSourceStratum", {
-                      stratum: source.stratum,
-                    })}
-                    {source.state !== "unreachable" &&
-                      source.state !== "unresolved" && (
-                        <>
-                          {" · "}
-                          {t("settings.timeSourceOffset", {
-                            ms: (source.offset_seconds * 1000).toFixed(1),
-                          })}
-                        </>
-                      )}
-                    {source.configured &&
-                      ` · ${t("settings.timeSourceConfigured")}`}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            {!sources.some((source) => source.state === "selected") && (
-              <p className="mt-2 text-sm text-warning">
-                {t("settings.timeNoSourceSelected")}
-              </p>
-            )}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-end gap-2">
+            <TextField
+              name="ntpServers"
+              label={t("settings.timeServers")}
+              className="flex-1"
+              value={draft}
+              spellCheck={false}
+              autoCapitalize="none"
+              placeholder={t("settings.timePlaceholder")}
+              onChange={(e) => setDraft(e.target.value)}
+            />
+            <LoadingButton
+              type="button"
+              disabled={
+                !changed || save.isPending || ntp.data?.configurable === false
+              }
+              isLoading={save.isPending}
+              onClick={apply}
+            >
+              {t("ui.save")}
+            </LoadingButton>
           </div>
-        )}
+          <p className="text-sm text-muted-foreground">
+            {t("settings.timeNote")}
+          </p>
+        </div>
       </CardContent>
     </Card>
   );

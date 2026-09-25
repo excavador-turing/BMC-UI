@@ -665,6 +665,11 @@ const translations = {
       "Renaming to {{name}} changes the instance label on every metrics series, so a Prometheus history will not follow this board across the rename. Renaming back does not undo it.",
     hostnameRenamed: "renamed to {{name}}",
     timeTitle: "Time",
+    timeServers: "NTP servers",
+    timeBoardTime: "Board time",
+    timeBadgeSynced: "Synchronised",
+    timeBadgeNotSynced: "Not synchronised",
+    timeBadgeUnknown: "Unknown",
     timeNote:
       "Comma-separated, in preference order; the first is preferred. Leave empty for the pool the firmware ships with.",
     timePlaceholder: "192.168.1.1, pool.ntp.org",
@@ -713,8 +718,7 @@ const translations = {
     rebootStaged: "A firmware update is staged. This reboot will start it.",
     rebootStagedNamed:
       "A firmware update is staged: this reboot will start {{version}}.",
-    rebootNote:
-      "Rebooting the BMC does not cut power to the compute modules; they keep running throughout.",
+    rebootNote: "Compute modules keep running during a BMC reboot.",
   },
   about: {
     boardModel: "Board model",
