@@ -187,3 +187,55 @@ export function fanDutyPercent(
 
   return Math.round((level / maxLevel) * 100);
 }
+
+export type PromotionOutcome = "passed" | "rolledBack" | "unknown";
+
+/**
+ * What the health gate decided, read from the line it wrote.
+ *
+ * The daemon passes that line through unclassified, on purpose: its
+ * vocabulary belongs to the firmware. So this reads only the words that are
+ * unambiguous -- a rollback says it fell back, a kept boot says the metrics
+ * answered, that it promoted, or that it skipped the check -- and anything
+ * else is "unknown" rather than a guessed pass. A badge that says "Passed"
+ * over a failure it could not parse is worse than one that says nothing.
+ */
+export function promotionOutcome(message: string): PromotionOutcome {
+  if (/roll(ed|ing)?[\s-]?back|fall(ing)?[\s-]?back|revert/i.test(message)) {
+    return "rolledBack";
+  }
+  if (/metrics answer|promot|skipp|\bkept\b/i.test(message)) return "passed";
+  return "unknown";
+}
+
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+/**
+ * A `date`-style UTC stamp -- "Mon Sep 21 19:32:40 UTC 2026", what the gate
+ * script prints -- as a Date, or null for anything else. Parsed by hand:
+ * `Date.parse` accepts this shape in some engines and not others.
+ */
+export function parseBoardDate(stamp: string): Date | null {
+  const match =
+    /^\w{3}\s+(\w{3})\s+(\d{1,2})\s+(\d{2}):(\d{2}):(\d{2})\s+UTC\s+(\d{4})$/.exec(
+      stamp.trim()
+    );
+  if (!match) return null;
+  const month = MONTHS.indexOf(match[1]);
+  if (month < 0) return null;
+  const [, , day, hours, minutes, seconds, year] = match;
+  return new Date(Date.UTC(+year, month, +day, +hours, +minutes, +seconds));
+}

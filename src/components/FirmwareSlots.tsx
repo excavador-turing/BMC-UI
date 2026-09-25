@@ -1,13 +1,19 @@
 import { filesize } from "filesize";
-import { TriangleAlert } from "lucide-react";
-import { useState } from "react";
+import { CircleCheck, TriangleAlert, Undo2 } from "lucide-react";
+import { type ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import LoadingButton from "@/components/LoadingButton";
 import RebootModal from "@/components/RebootModal";
-import TableItem from "@/components/TableItem";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useConnection } from "@/hooks/useConnection";
@@ -17,7 +23,12 @@ import {
   useUpdateCheckQuery,
 } from "@/lib/api/get";
 import { useRebootBMCMutation } from "@/lib/api/set";
-import { isReading, versionLabel } from "@/lib/format";
+import {
+  isReading,
+  parseBoardDate,
+  promotionOutcome,
+  versionLabel,
+} from "@/lib/format";
 
 const human = (bytes: number) => filesize(bytes, { standard: "jedec" });
 import InfoNote from "@/components/InfoNote";
@@ -58,7 +69,7 @@ function SlotBody({ slot }: { slot: FirmwareSlot | null }) {
     .join(" · ");
 
   return (
-    <div className="flex flex-col items-end gap-0.5 lg:items-start">
+    <div className="flex flex-col gap-0.5">
       {slot.version === null || slot.version === "" ? (
         <span className="font-medium text-muted-foreground">
           {t("firmwareUpgrade.slotVersionUnreadable")}
@@ -69,6 +80,47 @@ function SlotBody({ slot }: { slot: FirmwareSlot | null }) {
       {detail !== "" && (
         <span className="text-sm text-muted-foreground">{detail}</span>
       )}
+    </div>
+  );
+}
+
+/**
+ * The gate's verdict as a word and a colour. Only a verdict the message
+ * states plainly gets green or amber; see `promotionOutcome`.
+ */
+function PromotionBadge({ message }: { message: string }) {
+  const { t } = useTranslation();
+  const outcome = promotionOutcome(message);
+
+  if (outcome === "passed") {
+    return (
+      <Badge variant="success">
+        <CircleCheck data-icon="inline-start" />
+        {t("firmwareUpgrade.promotionPassed")}
+      </Badge>
+    );
+  }
+  if (outcome === "rolledBack") {
+    return (
+      <Badge variant="warning">
+        <Undo2 data-icon="inline-start" />
+        {t("firmwareUpgrade.promotionRolledBack")}
+      </Badge>
+    );
+  }
+  return (
+    <Badge variant="outline">{t("firmwareUpgrade.promotionUnknown")}</Badge>
+  );
+}
+
+/** One labelled value in the slots grid. */
+function Tile({ term, value }: { term: ReactNode; value: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <dt className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+        {term}
+      </dt>
+      <dd className="flex flex-col gap-0.5">{value}</dd>
     </div>
   );
 }
@@ -115,11 +167,24 @@ function SlotsSkeleton() {
  * where the board is, and the form is what changes that.
  */
 export default function FirmwareSlots() {
-  const { t } = useTranslation();
+  const {
+    t,
+    i18n: { language },
+  } = useTranslation();
   const { data, isPending, isError } = useFirmwareSlotsQuery();
   const update = useUpdateCheckQuery();
 
   const promotion = data?.last_promotion ?? null;
+  const promotionDate = promotion ? parseBoardDate(promotion.timestamp) : null;
+  // Which slot the next boot takes, and when and from where the staged image
+  // came -- whichever of those the daemon reported.
+  const nextDetail = [
+    data?.nextboot,
+    data?.staged?.staged_at,
+    data?.staged?.source,
+  ]
+    .filter(Boolean)
+    .join(" · ");
   const { toast } = useToast();
   const { expectReboot } = useConnection();
   const [rebootModalOpened, setRebootModalOpened] = useState(false);
@@ -150,6 +215,23 @@ export default function FirmwareSlots() {
     <Card>
       <CardHeader>
         <CardTitle>{t("firmwareUpgrade.firmwareSlots")}</CardTitle>
+        {/* The answer to "am I current", before any detail. Only from a
+          channel that resolved: an unanswered check is not "up to date". */}
+        {update.data?.stable && (
+          <CardAction>
+            {update.data.stable.update_available ? (
+              <Badge variant="warning">
+                {t("firmwareUpgrade.statusUpdate", {
+                  version: update.data.stable.target,
+                })}
+              </Badge>
+            ) : (
+              <Badge variant="secondary">
+                {t("firmwareUpgrade.statusCurrent")}
+              </Badge>
+            )}
+          </CardAction>
+        )}
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {isPending && <SlotsSkeleton />}
@@ -202,128 +284,135 @@ export default function FirmwareSlots() {
               </Alert>
             )}
 
-            <dl>
-              <TableItem term={t("firmwareUpgrade.slotRunning")}>
-                <SlotBody slot={data.running} />
-              </TableItem>
-              <TableItem term={t("firmwareUpgrade.slotRollback")}>
-                <SlotBody slot={data.rollback} />
-              </TableItem>
-              {data.nextboot !== null && data.nextboot !== "" && (
-                <TableItem term={t("firmwareUpgrade.slotNextboot")}>
-                  <span className="font-medium">{data.nextboot}</span>
-                </TableItem>
-              )}
-              <TableItem term={t("firmwareUpgrade.slotStaged")}>
-                {data.update_staged === true && (
-                  <span className="font-medium text-warning">
-                    {t("firmwareUpgrade.slotStagedYes")}
-                  </span>
-                )}
-                {data.update_staged === false && (
-                  <span className="font-medium">
-                    {t("firmwareUpgrade.slotStagedNo")}
-                  </span>
-                )}
-                {data.update_staged === null && (
-                  <span className="text-muted-foreground">
-                    {t("firmwareUpgrade.slotStagedUnknown")}
-                  </span>
-                )}
-              </TableItem>
-              {/* Only when something was actually recorded. `update_staged`
-                true with no note means an image was armed by something that
-                writes none -- an older tpi-selfupdate, or a hand-run
-                osupdate -- and an empty row would read as "nothing is
-                staged", which is the opposite of the truth. */}
-              {data.staged && (
-                <TableItem term={t("firmwareUpgrade.slotStagedVersion")}>
-                  <div className="flex flex-col items-end gap-0.5 lg:items-start">
-                    <span className="font-medium">
-                      {data.staged.version ??
-                        data.staged.file ??
-                        t("firmwareUpgrade.slotStagedUnnamed")}
-                    </span>
-                    {data.staged.staged_at && (
-                      <span className="text-sm text-muted-foreground">
-                        {data.staged.staged_at}
-                        {data.staged.source ? ` · ${data.staged.source}` : ""}
+            {/* Four tiles instead of a long list: each is one question
+              (what runs, what a rollback lands on, what the next boot does,
+              what the channel offers), and on a laptop they fit in one
+              glance rather than a screen of rows. */}
+            <dl className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
+              <Tile
+                term={t("firmwareUpgrade.slotRunning")}
+                value={<SlotBody slot={data.running} />}
+              />
+              <Tile
+                term={
+                  <>
+                    {t("firmwareUpgrade.slotRollback")}
+                    <InfoNote
+                      text={t("firmwareUpgrade.slotRollbackNote")}
+                      path="/features/updates-that-undo-themselves/"
+                      label={t("firmwareUpgrade.slotRollback")}
+                    />
+                  </>
+                }
+                value={<SlotBody slot={data.rollback} />}
+              />
+              {/* Staged, staged version and next boot were three rows saying
+                one thing: what the next reboot starts. `update_staged` stays
+                three-valued -- "could not be read" is not "no" -- and a
+                staged flag with no note still reads as staged, never as
+                nothing. */}
+              <Tile
+                term={t("firmwareUpgrade.slotNextboot")}
+                value={
+                  <>
+                    {data.update_staged === true && (
+                      <span className="font-medium text-warning">
+                        {data.staged?.version ??
+                          data.staged?.file ??
+                          t("firmwareUpgrade.slotStagedUnnamed")}
                       </span>
                     )}
-                  </div>
-                </TableItem>
-              )}
+                    {data.update_staged === false && (
+                      <span className="font-medium">
+                        {t("firmwareUpgrade.slotNothingStaged")}
+                      </span>
+                    )}
+                    {data.update_staged === null && (
+                      <span className="text-muted-foreground">
+                        {t("firmwareUpgrade.slotStagedUnknown")}
+                      </span>
+                    )}
+                    {nextDetail !== "" && (
+                      <span className="text-sm text-muted-foreground">
+                        {nextDetail}
+                      </span>
+                    )}
+                  </>
+                }
+              />
               {/* The upgrade candidate. Its own query, so a slow or failing
-                check never holds up the slot panel above -- and a channel that
+                check never holds up the tiles beside it -- and a channel that
                 could not be resolved says so, rather than rendering as "no
                 update", which is a different claim. */}
-              {update.data?.stable && (
-                <TableItem term={t("firmwareUpgrade.updateStable")}>
-                  <div className="flex flex-col items-end gap-0.5 lg:items-start">
-                    <span
-                      className={
-                        update.data.stable.update_available
-                          ? "font-medium text-warning"
-                          : "font-medium"
-                      }
-                    >
-                      {update.data.stable.target}
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      {update.data.stable.update_available
-                        ? t("firmwareUpgrade.updateAvailable")
-                        : t("firmwareUpgrade.updateCurrent")}
-                    </span>
-                  </div>
-                </TableItem>
-              )}
-              {update.data?.edge &&
-                update.data.edge.target !== update.data.stable?.target && (
-                  <TableItem term={t("firmwareUpgrade.updateEdge")}>
-                    <span className="font-medium">
-                      {update.data.edge.target}
-                    </span>
-                  </TableItem>
+              {update.data &&
+                (Boolean(update.data.stable) || Boolean(update.data.error)) && (
+                  <Tile
+                    term={t("firmwareUpgrade.updateStable")}
+                    value={
+                      update.data.stable ? (
+                        <>
+                          <span className="font-medium">
+                            {update.data.stable.target}
+                          </span>
+                          {update.data.edge &&
+                            update.data.edge.target !==
+                              update.data.stable.target && (
+                              <span className="text-sm text-muted-foreground">
+                                {t("firmwareUpgrade.updateEdge")}{" "}
+                                {update.data.edge.target}
+                              </span>
+                            )}
+                        </>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">
+                          {t("firmwareUpgrade.updateUnavailable")}
+                        </span>
+                      )
+                    }
+                  />
                 )}
-              {update.data?.error && (
-                <TableItem term={t("firmwareUpgrade.updateCheck")}>
-                  <span className="text-sm text-muted-foreground">
-                    {t("firmwareUpgrade.updateUnavailable")}
-                  </span>
-                </TableItem>
-              )}
+              {/* The boot-time health gate's own verdict: it matters when it
+                says the board put itself back, and it says that here and
+                nowhere else. */}
               {promotion && (
-                <TableItem term={t("firmwareUpgrade.slotPromotion")}>
-                  <div className="flex flex-col items-end gap-0.5 lg:items-start">
-                    <span className="font-medium">{promotion.message}</span>
-                    <span className="text-sm text-muted-foreground">
-                      {promotion.timestamp}
-                    </span>
-                  </div>
-                </TableItem>
+                <Tile
+                  term={
+                    <>
+                      {t("firmwareUpgrade.slotPromotion")}
+                      <InfoNote
+                        text={t("firmwareUpgrade.slotPromotionNote")}
+                        path="/reference/gate-history/"
+                        label={t("firmwareUpgrade.slotPromotion")}
+                      />
+                    </>
+                  }
+                  value={
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      {/* The gate's own words stay on hover: the badge is
+                        read from them, and "Recorded" is exactly the case
+                        where a reader needs to see what was written. */}
+                      <span title={promotion.message}>
+                        <PromotionBadge message={promotion.message} />
+                      </span>
+                      {/* The board's own clock at that moment, which on a
+                        BMC that had just come up may be behind; the stamp
+                        as it was written stays on hover. */}
+                      <span
+                        className="text-sm text-muted-foreground"
+                        title={promotion.timestamp}
+                      >
+                        {promotionDate
+                          ? promotionDate.toLocaleString(language, {
+                              dateStyle: "medium",
+                              timeStyle: "short",
+                            })
+                          : promotion.timestamp}
+                      </span>
+                    </div>
+                  }
+                />
               )}
             </dl>
-
-            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-              <span className="inline-flex items-center gap-1">
-                {t("firmwareUpgrade.slotRollback")}
-                <InfoNote
-                  text={t("firmwareUpgrade.slotRollbackNote")}
-                  path="/features/updates-that-undo-themselves/"
-                  label={t("firmwareUpgrade.slotRollback")}
-                />
-              </span>
-              {promotion && (
-                <span className="inline-flex items-center gap-1">
-                  {t("firmwareUpgrade.slotPromotion")}
-                  <InfoNote
-                    text={t("firmwareUpgrade.slotPromotionNote")}
-                    path="/reference/gate-history/"
-                    label={t("firmwareUpgrade.slotPromotion")}
-                  />
-                </span>
-              )}
-            </div>
           </>
         )}
 
