@@ -286,8 +286,13 @@ const translations = {
       "Het huidige statische adres is met de hand ingesteld; een bevestigde wijziging vervangt het bestand.",
   },
   switchConfig: {
+    title: "Switch",
+    badgeFilteringOn: "VLAN-filter aan",
+    badgeFilteringOff: "VLAN-filter uit",
+    badgeStpOn: "STP aan",
+    badgeStpOff: "STP uit",
     oneNetwork:
-      "Eén netwerk. Alle modules, de BMC en beide uplinks delen het, en de switch kijkt niet naar VLAN's.",
+      "Alle poorten delen één netwerk. De VLAN-kolommen gelden zodra filteren aan staat.",
     port: "Poort",
     link: "Verbinding",
     traffic: "Verkeer",

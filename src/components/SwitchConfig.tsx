@@ -258,7 +258,7 @@ function PortName({ name }: { name: string }) {
 
   return (
     <>
-      <span className="font-mono">{name}</span>
+      <span className="font-medium">{name}</span>
       {name === BMC_PORT && (
         <span className="ml-2 text-xs whitespace-nowrap text-muted-foreground">
           {t("switchConfig.thisBoard")}
@@ -268,89 +268,55 @@ function PortName({ name }: { name: string }) {
   );
 }
 
-/**
- * What each port's cable is doing. Read-only, and shown even on a board whose
- * daemon has no switch configuration at all: link state is the older, smaller
- * feature and the one people arrive looking for.
- */
-function PortsCard({ ports }: { ports: SwitchPort[] | undefined }) {
-  const { t } = useTranslation();
-  const byName = new Map((ports ?? []).map((port) => [port.name, port]));
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("switchConfig.ports")}</CardTitle>
-      </CardHeader>
-      <CardContent className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t("switchConfig.port")}</TableHead>
-              <TableHead>{t("switchConfig.link")}</TableHead>
-              <TableHead>{t("switchConfig.traffic")}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {PORT_ORDER.map((name) => (
-              <TableRow key={name}>
-                <TableCell>
-                  <PortName name={name} />
-                </TableCell>
-                <TableCell>
-                  {name === BMC_PORT ? (
-                    <span className="text-muted-foreground">—</span>
-                  ) : (
-                    <LinkCell port={byName.get(name)} />
-                  )}
-                </TableCell>
-                <TableCell>
-                  {name === BMC_PORT ? (
-                    <span className="text-muted-foreground">—</span>
-                  ) : (
-                    <TrafficCell port={byName.get(name)} />
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
-  );
-}
-
 /** One VLAN as a badge, with its name when it has one. */
 function VlanBadge({ vid, name }: { vid: string; name?: string }) {
   return (
-    <Badge variant="outline" className="font-mono">
+    <Badge variant="outline" className="tabular-nums">
       {vid}
-      {name && <span className="font-sans text-muted-foreground">{name}</span>}
+      {name && <span className="text-muted-foreground">{name}</span>}
     </Badge>
   );
 }
 
-interface VlanTableProps {
-  draft: Draft;
-  /** Absent means the table is read-only: the view mode. */
+interface SwitchTableProps {
+  ports: SwitchPort[] | undefined;
+  /**
+   * The VLAN layout. Absent on a daemon with no switch configuration: the
+   * table is then link and traffic only, which is the older feature and the
+   * one people arrive looking for.
+   */
+  draft?: Draft;
+  /** Absent means the VLAN cells are read-only: the view mode. */
   onChange?: (next: Draft) => void;
   warningsFor: (port: string) => string[];
   bad: Set<string>;
 }
 
 /**
- * Which VLANs each port is on. Read-only badges until Edit, boxes after.
+ * Every port once: what its cable is doing and which VLANs it is on.
+ *
+ * This was two cards listing the same seven ports -- link and traffic in one,
+ * VLANs in the other -- so connecting "node1 is up" with "node1 is on VLAN 1"
+ * meant reading down two tables. One row per port now, and in edit mode the
+ * VLAN cells turn into boxes where they stand.
  *
  * The BMC's tagged cell cannot be typed in: this board reads untagged frames
  * only, so a tag there is traffic it cannot see, and the board refuses such a
  * document. Saying so with a disabled box is kinder than saying it with a
  * refusal after the fact.
  */
-function VlanTable({ draft, onChange, warningsFor, bad }: VlanTableProps) {
+function SwitchTable({
+  ports,
+  draft,
+  onChange,
+  warningsFor,
+  bad,
+}: SwitchTableProps) {
   const { t } = useTranslation();
+  const byName = new Map((ports ?? []).map((port) => [port.name, port]));
 
   const set = (name: string, field: keyof PortDraft, value: string) => {
-    if (!onChange) return;
+    if (!onChange || !draft) return;
     onChange({
       ...draft,
       ports: {
@@ -371,81 +337,146 @@ function VlanTable({ draft, onChange, warningsFor, bad }: VlanTableProps) {
     return (
       <span className="flex flex-wrap gap-1">
         {vids.map((v) => (
-          <VlanBadge key={v} vid={v} name={draft.names[v]} />
+          <VlanBadge key={v} vid={v} name={draft?.names[v]} />
         ))}
       </span>
     );
   };
 
+  // With filtering off the switch does not read the VLAN columns at all.
+  // They stay editable -- setting a layout up and then turning filtering on
+  // is the sane order -- but at full strength they would be showing numbers
+  // that mean nothing yet. Only those columns fade; the link state is live.
+  const faded = draft && !draft.filtering && "opacity-50";
+  // On a phone, five columns do not fit. In view mode the VLANs fold under
+  // the port name instead; in edit mode the boxes are the point, so the
+  // table keeps them and scrolls.
+  const narrowHidden = !onChange && "hidden sm:table-cell";
+  const vlanHead = cn(faded, narrowHidden);
+  const vlanCell = cn("align-top", faded, narrowHidden);
+
   return (
-    // With filtering off the switch does not read this table at all. It is
-    // still editable -- setting a layout up and then turning filtering on is
-    // the sane order -- but showing it at full strength would be showing
-    // numbers that mean nothing yet.
-    <div className={cn("overflow-x-auto", !draft.filtering && "opacity-50")}>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>{t("switchConfig.port")}</TableHead>
-            <TableHead>{t("switchConfig.untagged")}</TableHead>
-            <TableHead>{t("switchConfig.tagged")}</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {PORT_ORDER.map((name) => {
-            const port = draft.ports[name];
-            const warnings = warningsFor(name);
-            const isBmc = name === BMC_PORT;
-            return (
-              <TableRow key={name}>
-                <TableCell className="align-top">
-                  <PortName name={name} />
-                </TableCell>
-                <TableCell className="align-top">
-                  {onChange ? (
-                    <Input
-                      className="h-7 w-20 font-mono"
-                      aria-invalid={bad.has(`${name}.untagged`)}
-                      aria-label={t("switchConfig.untaggedOn", { port: name })}
-                      value={port.untagged}
-                      placeholder={t("switchConfig.none")}
-                      onChange={(e) => set(name, "untagged", e.target.value)}
-                    />
-                  ) : (
-                    badges(port.untagged)
-                  )}
-                  {warnings.length > 0 && (
-                    <div className="mt-1 max-w-xs text-xs whitespace-normal text-warning">
-                      {warnings.join(" ")}
-                    </div>
-                  )}
-                </TableCell>
-                <TableCell className="align-top">
-                  {onChange ? (
-                    <Input
-                      className="h-7 w-32 font-mono"
-                      aria-invalid={bad.has(`${name}.tagged`)}
-                      aria-label={t("switchConfig.taggedOn", { port: name })}
-                      value={isBmc ? "" : port.tagged}
-                      disabled={isBmc}
-                      placeholder={
-                        isBmc ? t("switchConfig.never") : t("switchConfig.none")
-                      }
-                      title={
-                        isBmc ? t("switchConfig.bmcUntaggedOnly") : undefined
-                      }
-                      onChange={(e) => set(name, "tagged", e.target.value)}
-                    />
-                  ) : (
-                    badges(isBmc ? "" : port.tagged)
-                  )}
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
-    </div>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>{t("switchConfig.port")}</TableHead>
+          <TableHead>{t("switchConfig.link")}</TableHead>
+          <TableHead className="hidden md:table-cell">
+            {t("switchConfig.traffic")}
+          </TableHead>
+          {draft && (
+            <>
+              <TableHead className={vlanHead}>
+                {t("switchConfig.untagged")}
+              </TableHead>
+              <TableHead className={vlanHead}>
+                {t("switchConfig.tagged")}
+              </TableHead>
+            </>
+          )}
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {PORT_ORDER.map((name) => {
+          const isBmc = name === BMC_PORT;
+          const port = byName.get(name);
+          const vlan = draft?.ports[name];
+          const warnings = warningsFor(name);
+          return (
+            <TableRow key={name}>
+              <TableCell className="align-top">
+                <PortName name={name} />
+                {vlan && !onChange && (
+                  <div
+                    className={cn(
+                      "mt-1 flex flex-col gap-1 text-xs text-muted-foreground sm:hidden",
+                      faded
+                    )}
+                  >
+                    <span className="flex items-center gap-1">
+                      {t("switchConfig.untagged")} {badges(vlan.untagged)}
+                    </span>
+                    {!isBmc && vlan.tagged.trim() !== "" && (
+                      <span className="flex items-center gap-1">
+                        {t("switchConfig.tagged")} {badges(vlan.tagged)}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </TableCell>
+              <TableCell className="align-top">
+                {isBmc ? (
+                  <span className="text-muted-foreground">—</span>
+                ) : (
+                  <div className="flex flex-col gap-0.5">
+                    <LinkCell port={port} />
+                    {/* Traffic folds under the link on narrow screens, so
+                      five columns never scroll sideways. */}
+                    <span className="text-xs md:hidden">
+                      <TrafficCell port={port} />
+                    </span>
+                  </div>
+                )}
+              </TableCell>
+              <TableCell className="hidden align-top md:table-cell">
+                {isBmc ? (
+                  <span className="text-muted-foreground">—</span>
+                ) : (
+                  <TrafficCell port={port} />
+                )}
+              </TableCell>
+              {vlan && (
+                <>
+                  <TableCell className={vlanCell}>
+                    {onChange ? (
+                      <Input
+                        className="h-7 w-20 tabular-nums"
+                        aria-invalid={bad.has(`${name}.untagged`)}
+                        aria-label={t("switchConfig.untaggedOn", {
+                          port: name,
+                        })}
+                        value={vlan.untagged}
+                        placeholder={t("switchConfig.none")}
+                        onChange={(e) => set(name, "untagged", e.target.value)}
+                      />
+                    ) : (
+                      badges(vlan.untagged)
+                    )}
+                    {warnings.length > 0 && (
+                      <div className="mt-1 max-w-xs text-xs whitespace-normal text-warning">
+                        {warnings.join(" ")}
+                      </div>
+                    )}
+                  </TableCell>
+                  <TableCell className={vlanCell}>
+                    {onChange ? (
+                      <Input
+                        className="h-7 w-32 tabular-nums"
+                        aria-invalid={bad.has(`${name}.tagged`)}
+                        aria-label={t("switchConfig.taggedOn", { port: name })}
+                        value={isBmc ? "" : vlan.tagged}
+                        disabled={isBmc}
+                        placeholder={
+                          isBmc
+                            ? t("switchConfig.never")
+                            : t("switchConfig.none")
+                        }
+                        title={
+                          isBmc ? t("switchConfig.bmcUntaggedOnly") : undefined
+                        }
+                        onChange={(e) => set(name, "tagged", e.target.value)}
+                      />
+                    ) : (
+                      badges(isBmc ? "" : vlan.tagged)
+                    )}
+                  </TableCell>
+                </>
+              )}
+            </TableRow>
+          );
+        })}
+      </TableBody>
+    </Table>
   );
 }
 
@@ -502,8 +533,9 @@ function Toggle({
  * eventually disagree with the board, and the way that disagreement surfaces
  * is a board nobody can reach.
  *
- * Two cards: the ports, read-only, for the person checking a cable; and the
- * VLANs, read-only until Edit, for the person changing the layout.
+ * One card and one table: every port once, with its link, its traffic and
+ * its VLANs. Read-only until Edit, when the VLAN cells become boxes in place
+ * and the presets, switches and names appear around the table.
  */
 export default function SwitchConfig() {
   const { t } = useTranslation();
@@ -744,193 +776,184 @@ export default function SwitchConfig() {
         </Alert>
       )}
 
-      <div className="flex flex-col gap-4 md:gap-6">
-        <PortsCard ports={ports} />
-
-        {draft && (
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("switchConfig.vlans")}</CardTitle>
-              <CardDescription>
-                {draft.filtering
-                  ? t("switchConfig.filteringOnNote")
-                  : t("switchConfig.oneNetwork")}
-              </CardDescription>
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("switchConfig.title")}</CardTitle>
+          {draft && (
+            <CardDescription className="max-sm:col-span-2">
+              {draft.filtering
+                ? t("switchConfig.filteringOnNote")
+                : t("switchConfig.oneNetwork")}
+            </CardDescription>
+          )}
+          {draft && (
+            // Under the title on a phone: beside it, the badges and Edit
+            // squeezed the description into a column a word wide.
+            <CardAction className="flex flex-wrap items-center justify-end gap-2 max-sm:col-span-2 max-sm:col-start-1 max-sm:row-span-1 max-sm:row-start-3 max-sm:mt-2 max-sm:justify-self-start">
+              {/* The two settings as state, in view mode: the switches
+                themselves only appear once there is something to change. */}
+              {!editing && (
+                <>
+                  <Badge variant={draft.filtering ? "secondary" : "outline"}>
+                    {draft.filtering
+                      ? t("switchConfig.badgeFilteringOn")
+                      : t("switchConfig.badgeFilteringOff")}
+                  </Badge>
+                  <Badge variant={draft.stp ? "secondary" : "outline"}>
+                    {draft.stp
+                      ? t("switchConfig.badgeStpOn")
+                      : t("switchConfig.badgeStpOff")}
+                  </Badge>
+                </>
+              )}
               {configurable && !editing && (
-                <CardAction>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    disabled={pending !== null}
-                    title={
-                      pending !== null
-                        ? t("switchConfig.oneAtATime")
-                        : undefined
-                    }
-                    onClick={() => setEditing(true)}
-                  >
-                    <PencilIcon data-icon="inline-start" />
-                    {t("switchConfig.edit")}
-                  </Button>
-                </CardAction>
-              )}
-            </CardHeader>
-
-            <CardContent className="flex flex-col gap-4">
-              {editing && configurable ? (
-                <>
-                  {/* Presets fill the table below. They are starting points,
-                      not modes: changing a cell afterwards is simply editing.
-                      The board expands them, never this page. */}
-                  <Select
-                    items={presetItems}
-                    value={preset}
-                    onValueChange={(value) => {
-                      const chosen = presets.data?.presets.find(
-                        (p) => p.name === value
-                      );
-                      if (!chosen) return;
-                      setPreset(chosen.name);
-                      setEdited(draftFrom(chosen.document));
-                    }}
-                  >
-                    <SelectTrigger
-                      aria-label={t("switchConfig.startFrom")}
-                      className="w-56"
-                    >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {presets.data?.presets.map((p) => (
-                          <SelectItem key={p.name} value={p.name}>
-                            {p.name}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-
-                  <div className="flex flex-col gap-3">
-                    <Toggle
-                      id="switch-filtering"
-                      label={t("switchConfig.filteringShort")}
-                      description={t("switchConfig.filtering")}
-                      checked={draft.filtering}
-                      onChange={(checked) =>
-                        setEdited({ ...draft, filtering: checked })
-                      }
-                    />
-                    <Toggle
-                      id="switch-stp"
-                      label={t("switchConfig.stpShort")}
-                      description={t("switchConfig.spanningTree")}
-                      checked={draft.stp}
-                      onChange={(checked) =>
-                        setEdited({ ...draft, stp: checked })
-                      }
-                    />
-                  </div>
-
-                  <VlanTable
-                    draft={draft}
-                    onChange={setEdited}
-                    warningsFor={warningsFor}
-                    bad={bad}
-                  />
-
-                  {/* A word beside a number, so that a layout is still
-                      legible to whoever opens this board next year. The board
-                      carries these and never acts on them. */}
-                  {draft.filtering && vlans.length > 0 && (
-                    <div className="flex flex-col gap-2">
-                      <div className="text-sm font-medium">
-                        {t("switchConfig.names")}
-                      </div>
-                      <div className="flex flex-wrap gap-3">
-                        {vlans.map((v) => (
-                          <div key={v} className="w-40">
-                            <TextField
-                              name={`vlan-name-${v}`}
-                              label={t("switchConfig.vlanNumber", { vid: v })}
-                              value={draft.names[String(v)] ?? ""}
-                              placeholder={t("switchConfig.unnamed")}
-                              onChange={(e) =>
-                                setEdited({
-                                  ...draft,
-                                  names: {
-                                    ...draft.names,
-                                    [String(v)]: e.target.value,
-                                  },
-                                })
-                              }
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {(blocking.length > 0 || notes.length > 0) && (
-                    <Alert
-                      variant={blocking.length > 0 ? "destructive" : "warning"}
-                    >
-                      <TriangleAlert />
-                      <AlertDescription className="flex flex-col gap-1">
-                        {[...blocking, ...notes].map((line) => (
-                          <p key={line}>{line}</p>
-                        ))}
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                </>
-              ) : (
-                <>
-                  {/* The same switches as in edit mode, greyed out, so the
-                      two modes look alike and only one of them moves. */}
-                  <div className="flex flex-col gap-3">
-                    <Toggle
-                      id="switch-filtering-view"
-                      label={t("switchConfig.filteringShort")}
-                      description={t("switchConfig.filtering")}
-                      checked={draft.filtering}
-                      disabled
-                    />
-                    <Toggle
-                      id="switch-stp-view"
-                      label={t("switchConfig.stpShort")}
-                      description={t("switchConfig.spanningTree")}
-                      checked={draft.stp}
-                      disabled
-                    />
-                  </div>
-                  <VlanTable
-                    draft={draft}
-                    warningsFor={() => []}
-                    bad={new Set()}
-                  />
-                </>
-              )}
-            </CardContent>
-
-            {editing && configurable && (
-              <CardFooter className="justify-end gap-2 border-t py-3">
-                <Button type="button" variant="outline" onClick={stopEditing}>
-                  {t("ui.cancel")}
-                </Button>
                 <Button
                   type="button"
-                  disabled={!canApply}
-                  onClick={() => setConfirming(true)}
+                  variant="outline"
+                  size="sm"
+                  disabled={pending !== null}
+                  title={
+                    pending !== null ? t("switchConfig.oneAtATime") : undefined
+                  }
+                  onClick={() => setEditing(true)}
                 >
-                  {t("switchConfig.apply")}
+                  <PencilIcon data-icon="inline-start" />
+                  {t("switchConfig.edit")}
                 </Button>
-              </CardFooter>
-            )}
-          </Card>
+              )}
+            </CardAction>
+          )}
+        </CardHeader>
+
+        <CardContent className="flex flex-col gap-4">
+          {draft && editing && configurable && (
+            <>
+              {/* Presets fill the table below. They are starting points, not
+                  modes: changing a cell afterwards is simply editing. The
+                  board expands them, never this page. */}
+              <Select
+                items={presetItems}
+                value={preset}
+                onValueChange={(value) => {
+                  const chosen = presets.data?.presets.find(
+                    (p) => p.name === value
+                  );
+                  if (!chosen) return;
+                  setPreset(chosen.name);
+                  setEdited(draftFrom(chosen.document));
+                }}
+              >
+                <SelectTrigger
+                  aria-label={t("switchConfig.startFrom")}
+                  className="w-56"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {presets.data?.presets.map((p) => (
+                      <SelectItem key={p.name} value={p.name}>
+                        {p.name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+
+              <div className="flex flex-col gap-3">
+                <Toggle
+                  id="switch-filtering"
+                  label={t("switchConfig.filteringShort")}
+                  description={t("switchConfig.filtering")}
+                  checked={draft.filtering}
+                  onChange={(checked) =>
+                    setEdited({ ...draft, filtering: checked })
+                  }
+                />
+                <Toggle
+                  id="switch-stp"
+                  label={t("switchConfig.stpShort")}
+                  description={t("switchConfig.spanningTree")}
+                  checked={draft.stp}
+                  onChange={(checked) => setEdited({ ...draft, stp: checked })}
+                />
+              </div>
+            </>
+          )}
+
+          <SwitchTable
+            ports={ports}
+            draft={draft ?? undefined}
+            onChange={editing && configurable ? setEdited : undefined}
+            warningsFor={editing && configurable ? warningsFor : () => []}
+            bad={editing && configurable ? bad : new Set()}
+          />
+
+          {draft && editing && configurable && (
+            <>
+              {/* A word beside a number, so that a layout is still legible to
+                  whoever opens this board next year. The board carries these
+                  and never acts on them. */}
+              {draft.filtering && vlans.length > 0 && (
+                <div className="flex flex-col gap-2">
+                  <div className="text-sm font-medium">
+                    {t("switchConfig.names")}
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    {vlans.map((v) => (
+                      <div key={v} className="w-40">
+                        <TextField
+                          name={`vlan-name-${v}`}
+                          label={t("switchConfig.vlanNumber", { vid: v })}
+                          value={draft.names[String(v)] ?? ""}
+                          placeholder={t("switchConfig.unnamed")}
+                          onChange={(e) =>
+                            setEdited({
+                              ...draft,
+                              names: {
+                                ...draft.names,
+                                [String(v)]: e.target.value,
+                              },
+                            })
+                          }
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {(blocking.length > 0 || notes.length > 0) && (
+                <Alert
+                  variant={blocking.length > 0 ? "destructive" : "warning"}
+                >
+                  <TriangleAlert />
+                  <AlertDescription className="flex flex-col gap-1">
+                    {[...blocking, ...notes].map((line) => (
+                      <p key={line}>{line}</p>
+                    ))}
+                  </AlertDescription>
+                </Alert>
+              )}
+            </>
+          )}
+        </CardContent>
+
+        {draft && editing && configurable && (
+          <CardFooter className="justify-end gap-2 border-t py-3">
+            <Button type="button" variant="outline" onClick={stopEditing}>
+              {t("ui.cancel")}
+            </Button>
+            <Button
+              type="button"
+              disabled={!canApply}
+              onClick={() => setConfirming(true)}
+            >
+              {t("switchConfig.apply")}
+            </Button>
+          </CardFooter>
         )}
-      </div>
+      </Card>
 
       <ConfirmationModal
         isOpen={confirming}
