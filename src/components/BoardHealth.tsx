@@ -1,12 +1,9 @@
-import { Link } from "@tanstack/react-router";
 import { filesize } from "filesize";
-import {
-  ArrowUpCircleIcon,
-  CircleCheckIcon,
-  TriangleAlertIcon,
-} from "lucide-react";
+import { CircleCheckIcon, TriangleAlertIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import CopyButton from "@/components/CopyButton";
 import TableItem from "@/components/TableItem";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,9 +19,13 @@ import {
   useHealthQuery,
   useInfoTabData,
   useThermalQuery,
-  useUpdateCheckQuery,
 } from "@/lib/api/get";
-import { EMPTY_VALUE, isReading, versionLabel } from "@/lib/format";
+import {
+  eepromLabel,
+  EMPTY_VALUE,
+  isReading,
+  versionLabel,
+} from "@/lib/format";
 import { hottestReading } from "@/lib/thermal";
 
 const human = (bytes: number) => filesize(bytes, { standard: "jedec" });
@@ -158,29 +159,59 @@ function StorageRows() {
   });
 }
 
+/**
+ * The board's own time, ticking: this browser's clock plus the offset the
+ * daemon measured. Shown so a clock that is wrong reads as wrong at a glance,
+ * not only as "not synchronised".
+ */
+function BoardTime({ offsetSeconds }: { offsetSeconds: number }) {
+  const {
+    t,
+    i18n: { language },
+  } = useTranslation();
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const time = new Date(now + offsetSeconds * 1000).toLocaleString(language);
+
+  return (
+    <span className="text-muted-foreground">
+      {t("about.boardTime", { time })}
+    </span>
+  );
+}
+
 /** Whether the clock is synchronised: yes, no, or the daemon cannot say. */
 function ClockReading({ clock }: { clock: HealthClock }) {
   const { t } = useTranslation();
 
-  if (clock.synchronised === true) {
-    return (
+  const state =
+    clock.synchronised === true ? (
       <span className="inline-flex items-center gap-1.5 font-medium">
         <CircleCheckIcon className="size-4" />
         {t("info.healthClockSynced")}
       </span>
-    );
-  }
-  if (clock.synchronised === false) {
-    return (
+    ) : clock.synchronised === false ? (
       <span className="inline-flex items-center gap-1.5 font-medium text-warning">
         <TriangleAlertIcon className="size-4" />
         {t("info.healthClockNotSynced")}
       </span>
+    ) : (
+      <span className="text-muted-foreground">
+        {t("info.healthClockUnknown")}
+      </span>
     );
-  }
+
   return (
-    <span className="text-muted-foreground">
-      {t("info.healthClockUnknown")}
+    <span className="inline-flex flex-wrap items-baseline justify-end gap-x-2 lg:justify-start">
+      {state}
+      {isReading(clock.offset_seconds) && (
+        <BoardTime offsetSeconds={clock.offset_seconds} />
+      )}
     </span>
   );
 }
@@ -254,7 +285,6 @@ export default function BoardHealth() {
   const { t } = useTranslation();
   const { data: about } = useAboutTabData();
   const address = useAddressQuery();
-  const update = useUpdateCheckQuery();
   const { data, isPending, isError } = useHealthQuery();
   const durationLabel = useDurationLabel();
 
@@ -262,6 +292,8 @@ export default function BoardHealth() {
     data?.uptime_seconds === null || data?.uptime_seconds === undefined
       ? null
       : durationLabel(data.uptime_seconds);
+  const ip = address.data?.live.address;
+  const serial = eepromLabel(about.board_serial);
 
   return (
     <Card>
@@ -269,47 +301,34 @@ export default function BoardHealth() {
         <CardTitle>{t("info.boardInfo")}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        {isPending && <HealthSkeleton />}
-
-        {isError && (
-          <p className="text-sm text-muted-foreground">
-            {t("info.healthUnavailable")}
-          </p>
-        )}
-
-        {data && (
-          <>
-            <dl>
-              <TableItem term={t("about.firmwareVersion")}>
-                <span className="inline-flex items-center gap-1.5 font-medium">
-                  {versionLabel(about.version)}
-                  {/* A newer stable release, by the daemon's own check --
-                      the same one the Firmware tile and page read. */}
-                  {update.data?.stable?.update_available && (
-                    <Link
-                      to="/firmware-upgrade"
-                      title={t("dashboard.attnUpdate", {
-                        version: update.data.stable.target,
-                      })}
-                      aria-label={t("dashboard.attnUpdate", {
-                        version: update.data.stable.target,
-                      })}
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      <ArrowUpCircleIcon className="size-4" />
-                    </Link>
-                  )}
-                </span>
-              </TableItem>
-              <TableItem term={t("info.boardIp")}>
-                {address.data?.live.address ? (
-                  <span className="font-medium">
-                    {address.data.live.address}
-                  </span>
-                ) : (
-                  <Absent />
-                )}
-              </TableItem>
+        <dl>
+          <TableItem term={t("about.boardModel")}>
+            <span className="font-medium">
+              {eepromLabel(about.board_model)} (
+              {versionLabel(about.board_revision)})
+            </span>
+          </TableItem>
+          <TableItem term={t("about.boardSerial")}>
+            <span className="inline-flex items-center gap-1 font-medium">
+              {serial}
+              {serial !== EMPTY_VALUE && <CopyButton value={serial} />}
+            </span>
+          </TableItem>
+          <TableItem term={t("about.hostname")}>
+            <span className="font-medium">{about.hostname || EMPTY_VALUE}</span>
+          </TableItem>
+          <TableItem term={t("info.boardIp")}>
+            {ip ? (
+              <span className="inline-flex items-center gap-1 font-medium">
+                {ip}
+                <CopyButton value={ip} />
+              </span>
+            ) : (
+              <Absent />
+            )}
+          </TableItem>
+          {data && (
+            <>
               <TableItem term={t("info.healthUptime")}>
                 {uptime === null ? (
                   <Absent />
@@ -349,8 +368,16 @@ export default function BoardHealth() {
                   <ClockReading clock={data.clock} />
                 )}
               </TableItem>
-            </dl>
-          </>
+            </>
+          )}
+        </dl>
+
+        {isPending && <HealthSkeleton />}
+
+        {isError && (
+          <p className="text-sm text-muted-foreground">
+            {t("info.healthUnavailable")}
+          </p>
         )}
       </CardContent>
     </Card>
