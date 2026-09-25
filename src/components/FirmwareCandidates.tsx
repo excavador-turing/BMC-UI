@@ -2,13 +2,18 @@ import {
   AlertTriangle,
   ExternalLink,
   RefreshCw,
+  Settings2,
   ShieldCheck,
   ShieldQuestion,
+  Upload,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import ConfirmationModal from "@/components/ConfirmationModal";
+import FirmwareSources from "@/components/FirmwareSources";
+import FirmwareUploadDialog from "@/components/FirmwareUploadDialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +24,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   type FirmwareCandidate,
   type FirmwareSourceCatalog,
@@ -120,68 +133,87 @@ function CandidateRow({
   const notes = releaseNotesUrl(source, candidate);
 
   return (
-    <div className="flex items-center justify-between gap-4 border-b py-2 last:border-b-0">
-      <div className="flex flex-col items-start gap-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="font-mono font-medium">{candidate.version}</span>
-          {candidate.relation === "current" && (
-            <Badge variant="outline">
-              {t("firmwareUpgrade.relationCurrent")}
-            </Badge>
-          )}
-          {candidate.relation === "newer" && (
-            <Badge>{t("firmwareUpgrade.relationNewer")}</Badge>
-          )}
-          {candidate.relation === "older" && (
-            <span className="text-xs text-muted-foreground">
-              {t("firmwareUpgrade.relationOlder")}
+    <TableRow>
+      <TableCell className="align-top whitespace-normal">
+        <div className="flex flex-col items-start gap-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-medium tabular-nums">
+              {candidate.version}
             </span>
-          )}
-          {candidate.relation === "unknown" && (
+            {candidate.relation === "current" && (
+              <Badge variant="outline">
+                {t("firmwareUpgrade.relationCurrent")}
+              </Badge>
+            )}
+            {candidate.relation === "newer" && (
+              <Badge>{t("firmwareUpgrade.relationNewer")}</Badge>
+            )}
+            {candidate.relation === "older" && (
+              <span className="text-xs text-muted-foreground">
+                {t("firmwareUpgrade.relationOlder")}
+              </span>
+            )}
+            {/* No word for "unknown": on a board running a local build it
+                was on every row and said nothing. The install confirmation
+                still says the version may be older. */}
+            {candidate.prerelease && (
+              <span className="text-xs text-muted-foreground">
+                {t("firmwareUpgrade.prerelease")}
+              </span>
+            )}
+          </div>
+          {/* On a phone the source and checksum columns fold in here, so
+              the table never scrolls sideways. */}
+          <div className="flex flex-col items-start gap-1 sm:hidden">
             <span className="text-xs text-muted-foreground">
-              {t("firmwareUpgrade.relationUnknown")}
+              {source.label}
             </span>
-          )}
-          {candidate.prerelease && (
-            <span className="text-xs text-muted-foreground">
-              {t("firmwareUpgrade.prerelease")}
-            </span>
-          )}
+            <TrustBadge trust={candidate.trust} />
+          </div>
         </div>
+      </TableCell>
+      <TableCell className="hidden align-top sm:table-cell">
+        <span title={source.location}>{source.label}</span>
+      </TableCell>
+      <TableCell className="hidden align-top sm:table-cell">
         <TrustBadge trust={candidate.trust} />
-      </div>
-      <div className="flex shrink-0 items-center gap-2">
-        {/* What changed, before deciding to install it. Only where a page
-            exists: a mirror directory and an SD card have nothing to read. */}
-        {notes && (
+      </TableCell>
+      <TableCell className="align-top">
+        <div className="flex flex-col items-end gap-2 sm:flex-row sm:justify-end">
+          {/* What changed, before deciding to install it. Only where a page
+              exists: a mirror directory and an SD card have nothing to read. */}
+          {notes && (
+            <Button
+              variant="outline"
+              size="sm"
+              nativeButton={false}
+              render={
+                <a href={notes} target="_blank" rel="noreferrer noopener" />
+              }
+            >
+              <ExternalLink data-icon="inline-start" />
+              <span className="max-sm:sr-only">
+                {t("firmwareUpgrade.releaseNotes")}
+              </span>
+            </Button>
+          )}
+          {/* A parked image can be installed now: the daemon takes it through
+              the transfer endpoint rather than the updater, which is why this
+              used to be refused. Only the running version is still not
+              installable, and that is because there is nothing to do. */}
           <Button
             variant="outline"
             size="sm"
-            nativeButton={false}
-            render={
-              <a href={notes} target="_blank" rel="noreferrer noopener" />
-            }
+            disabled={busy || candidate.relation === "current"}
+            onClick={() => onInstall(candidate)}
           >
-            <ExternalLink data-icon="inline-start" />
-            {t("firmwareUpgrade.releaseNotes")}
+            {installing
+              ? t("firmwareUpgrade.installing")
+              : t("firmwareUpgrade.install")}
           </Button>
-        )}
-        {/* A parked image can be installed now: the daemon takes it through
-            the transfer endpoint rather than the updater, which is why this
-            used to be refused. Only the running version is still not
-            installable, and that is because there is nothing to do. */}
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={busy || candidate.relation === "current"}
-          onClick={() => onInstall(candidate)}
-        >
-          {installing
-            ? t("firmwareUpgrade.installing")
-            : t("firmwareUpgrade.install")}
-        </Button>
-      </div>
-    </div>
+        </div>
+      </TableCell>
+    </TableRow>
   );
 }
 
@@ -190,16 +222,12 @@ const VISIBLE_PER_SOURCE = 1;
 
 export default function FirmwareCandidates() {
   const { t } = useTranslation();
-  // Per source, not per page: opening the long list on the mirror should not
-  // also unfold the fork's three releases.
-  const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
-  const toggle = (id: string) =>
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+  // One toggle for the table. It was one per source when each source was its
+  // own box; in a single table, unfolding one source's history in the middle
+  // of the others' newest rows read as a jumble.
+  const [expanded, setExpanded] = useState(false);
+  const [sourcesOpen, setSourcesOpen] = useState(false);
+  const [uploadOpen, setUploadOpen] = useState(false);
   const [confirming, setConfirming] = useState<{
     source: FirmwareSourceCatalog;
     candidate: FirmwareCandidate;
@@ -283,6 +311,29 @@ export default function FirmwareCandidates() {
     await catalog.refetch();
   };
 
+  const sources = catalog.data?.sources ?? [];
+  // Collapsed: each source's newest, whatever its relation to the running
+  // version -- filtering by relation left a source with nothing to show the
+  // moment a board ran something no source offered yet. Anything newer than
+  // what runs goes to the top, because that is what the page is opened for.
+  const newest = sources.flatMap((source) =>
+    source.candidates
+      .slice(0, VISIBLE_PER_SOURCE)
+      .map((candidate) => ({ source, candidate }))
+  );
+  newest.sort(
+    (a, b) =>
+      Number(b.candidate.relation === "newer") -
+      Number(a.candidate.relation === "newer")
+  );
+  // Expanded: every candidate, grouped by source in the daemon's order.
+  const rows = expanded
+    ? sources.flatMap((source) =>
+        source.candidates.map((candidate) => ({ source, candidate }))
+      )
+    : newest;
+  const total = sources.reduce((n, s) => n + s.candidates.length, 0);
+
   return (
     <Card>
       <CardHeader>
@@ -291,7 +342,7 @@ export default function FirmwareCandidates() {
           data up to half an hour old, which is a claim about the present
           tense made from the past. */}
         {catalog.data && (
-          <CardDescription>
+          <CardDescription className="max-sm:col-span-2">
             {catalog.data.refreshing
               ? t("firmwareUpgrade.checking")
               : t("firmwareUpgrade.checkedAt", {
@@ -301,7 +352,25 @@ export default function FirmwareCandidates() {
             {t("firmwareUpgrade.runningIs", { version: catalog.data.running })}
           </CardDescription>
         )}
-        <CardAction>
+        {/* Under the title on a phone: beside it, three buttons squeezed the
+          title and the checked-at line into a column a word wide. */}
+        <CardAction className="flex flex-wrap justify-end gap-2 max-sm:col-span-2 max-sm:col-start-1 max-sm:row-span-1 max-sm:row-start-3 max-sm:mt-2 max-sm:justify-self-start">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setUploadOpen(true)}
+          >
+            <Upload data-icon="inline-start" />
+            {t("firmwareUpgrade.uploadButton")}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSourcesOpen(true)}
+          >
+            <Settings2 data-icon="inline-start" />
+            {t("firmwareUpgrade.sourcesButton")}
+          </Button>
           {/* The spinner belongs on this control, not over the page: the list
             below stays readable and stays scrollable while the sources are
             re-polled. `refreshing` is the daemon still working after it
@@ -329,78 +398,83 @@ export default function FirmwareCandidates() {
           </p>
         )}
 
-        {catalog.data?.sources.map((source) => {
-          // The newest, always -- not "the newest that is newer than what is
-          // running". Filtering by relation left a card with nothing in it but
-          // a "show 3 older" link the moment a board ran something no source
-          // offered yet, which is exactly the state right after a release is
-          // cut and before it is published. The relation badge on the row says
-          // what it is; hiding the row said nothing.
-          const isOpen = expanded.has(source.id);
-          const shown = isOpen
-            ? source.candidates
-            : source.candidates.slice(0, VISIBLE_PER_SOURCE);
-          const hidden = source.candidates.length - shown.length;
-          return (
-            <div key={source.id} className="rounded-lg border p-4">
-              <div className="mb-2 flex items-baseline justify-between gap-2">
-                <span className="font-medium">{source.label}</span>
-                <span className="font-mono text-xs text-muted-foreground">
-                  {source.location}
-                </span>
-              </div>
+        {/* An error is never rendered as "nothing new": a source that could
+          not be read says so above the table, by name, rather than simply
+          contributing no rows. */}
+        {sources
+          .filter((source) => source.error)
+          .map((source) => (
+            <Alert key={source.id} variant="warning">
+              <AlertTriangle />
+              <AlertTitle>{source.label}</AlertTitle>
+              <AlertDescription>
+                {t("firmwareUpgrade.sourceUnreadable", {
+                  reason: source.error,
+                })}
+              </AlertDescription>
+            </Alert>
+          ))}
 
-              {/* An error is never rendered as "nothing new". */}
-              {source.error && (
-                <p className="flex items-start gap-2 text-sm text-destructive">
-                  <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-                  {t("firmwareUpgrade.sourceUnreadable", {
-                    reason: source.error,
-                  })}
-                </p>
-              )}
-
-              {!source.error && source.candidates.length === 0 && (
-                <p className="text-sm text-muted-foreground">
-                  {t("firmwareUpgrade.sourceEmpty")}
-                </p>
-              )}
-
-              {shown.map((c) => (
+        {rows.length > 0 && (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("firmwareUpgrade.colVersion")}</TableHead>
+                <TableHead className="hidden sm:table-cell">
+                  {t("firmwareUpgrade.colSource")}
+                </TableHead>
+                <TableHead className="hidden sm:table-cell">
+                  {t("firmwareUpgrade.colChecksum")}
+                </TableHead>
+                <TableHead>
+                  <span className="sr-only">
+                    {t("firmwareUpgrade.install")}
+                  </span>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map(({ source, candidate }) => (
                 <CandidateRow
-                  key={`${source.id}-${c.version}`}
+                  key={`${source.id}-${candidate.version}`}
                   source={source}
-                  candidate={c}
+                  candidate={candidate}
                   busy={install.isPending}
                   installing={
                     install.isPending &&
                     install.variables?.source === source.id &&
-                    install.variables?.version === c.version
+                    install.variables?.version === candidate.version
                   }
-                  onInstall={(candidate) =>
-                    setConfirming({ source, candidate })
-                  }
+                  onInstall={(c) => setConfirming({ source, candidate: c })}
                 />
               ))}
+            </TableBody>
+          </Table>
+        )}
 
-              {(hidden > 0 || isOpen) && (
-                <Button
-                  type="button"
-                  variant="link"
-                  size="sm"
-                  className="mt-2 px-0 text-muted-foreground"
-                  onClick={() => toggle(source.id)}
-                >
-                  {isOpen
-                    ? t("firmwareUpgrade.showFewer")
-                    : t("firmwareUpgrade.showAll", {
-                        count: source.candidates.length,
-                      })}
-                </Button>
-              )}
-            </div>
-          );
-        })}
+        {/* A readable source with nothing on it is still named, so its
+          silence is not mistaken for a source that is missing. */}
+        {sources
+          .filter((source) => !source.error && source.candidates.length === 0)
+          .map((source) => (
+            <p key={source.id} className="text-sm text-muted-foreground">
+              {source.label}: {t("firmwareUpgrade.sourceEmpty")}
+            </p>
+          ))}
+
+        {total > newest.length && (
+          <Button
+            type="button"
+            variant="link"
+            size="sm"
+            className="self-start px-0 text-muted-foreground"
+            onClick={() => setExpanded((open) => !open)}
+          >
+            {expanded
+              ? t("firmwareUpgrade.showFewer")
+              : t("firmwareUpgrade.showAllVersions", { count: total })}
+          </Button>
+        )}
 
         {/* A MODAL, not a panel below the list.
 
@@ -470,6 +544,8 @@ export default function FirmwareCandidates() {
             {t("firmwareUpgrade.installStaged")}
           </p>
         )}
+        <FirmwareSources open={sourcesOpen} onOpenChange={setSourcesOpen} />
+        <FirmwareUploadDialog open={uploadOpen} onOpenChange={setUploadOpen} />
       </CardContent>
     </Card>
   );
