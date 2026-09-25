@@ -1308,8 +1308,19 @@ export class ValidationRefused extends Error {
 /** The daemon's own words from an error response, if it gave any. */
 function reasonFrom(error: unknown): string | null {
   if (!axios.isAxiosError(error) || !error.response) return null;
+  // No such endpoint is an older daemon, which is "cannot check", whatever
+  // the 404 page says.
+  if (error.response.status === 404) return null;
   const body: unknown = error.response.data;
   if (typeof body === "string" && body.trim() !== "") return body.trim();
+  // The path-style endpoints answer with RFC 7807 problem details, and the
+  // sentence is in `detail`.
+  if (body && typeof body === "object" && "detail" in body) {
+    const detail = (body as { detail?: unknown }).detail;
+    if (typeof detail === "string" && detail.trim() !== "") {
+      return detail.trim();
+    }
+  }
   if (body && typeof body === "object" && "response" in body) {
     // The legacy envelope: { response: [{ result: "..." }] }
     const inner = (body as { response?: unknown }).response;
