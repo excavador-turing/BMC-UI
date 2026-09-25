@@ -118,11 +118,6 @@ export const FLEET_TABS: FleetTab[] = [
       "Settings"
     ),
   },
-  {
-    id: "about",
-    label: "About",
-    Component: named(() => import("@/routes/_tabLayout/about.lazy"), "About"),
-  },
 ];
 
 export const DEFAULT_TAB = FLEET_TABS[0].id;

@@ -3,7 +3,6 @@ import {
   CableIcon,
   FanIcon,
   HardDriveDownloadIcon,
-  InfoIcon,
   LayoutDashboardIcon,
   type LucideIcon,
   NetworkIcon,
@@ -114,7 +113,6 @@ export const navigation: NavSection[] = [
         icon: WrenchIcon,
       },
       { title: "navigation.security", url: "/security", icon: ShieldCheckIcon },
-      { title: "navigation.about", url: "/about", icon: InfoIcon },
     ],
   },
   {

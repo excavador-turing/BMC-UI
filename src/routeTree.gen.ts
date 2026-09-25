@@ -17,7 +17,6 @@ import { Route as TabLayoutConsoleRouteImport } from './routes/_tabLayout/consol
 import { Route as TabLayoutFlashNodeRouteImport } from './routes/_tabLayout/flash-node'
 
 const IndexLazyRouteImport = createFileRoute('/')()
-const TabLayoutAboutLazyRouteImport = createFileRoute('/_tabLayout/about')()
 const TabLayoutCoolingLazyRouteImport = createFileRoute('/_tabLayout/cooling')()
 const TabLayoutFirmwareUpgradeLazyRouteImport = createFileRoute(
   '/_tabLayout/firmware-upgrade',
@@ -50,13 +49,6 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TabLayoutAboutLazyRoute = TabLayoutAboutLazyRouteImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => TabLayoutRoute,
-} as any).lazy(() =>
-  import('./routes/_tabLayout/about.lazy').then((d) => d.Route),
-)
 const TabLayoutConsoleRoute = TabLayoutConsoleRouteImport.update({
   id: '/console',
   path: '/console',
@@ -142,7 +134,6 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/console': typeof TabLayoutConsoleRoute
   '/flash-node': typeof TabLayoutFlashNodeRoute
-  '/about': typeof TabLayoutAboutLazyRoute
   '/cooling': typeof TabLayoutCoolingLazyRoute
   '/firmware-upgrade': typeof TabLayoutFirmwareUpgradeLazyRoute
   '/info': typeof TabLayoutInfoLazyRoute
@@ -158,7 +149,6 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/console': typeof TabLayoutConsoleRoute
   '/flash-node': typeof TabLayoutFlashNodeRoute
-  '/about': typeof TabLayoutAboutLazyRoute
   '/cooling': typeof TabLayoutCoolingLazyRoute
   '/firmware-upgrade': typeof TabLayoutFirmwareUpgradeLazyRoute
   '/info': typeof TabLayoutInfoLazyRoute
@@ -176,7 +166,6 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_tabLayout/console': typeof TabLayoutConsoleRoute
   '/_tabLayout/flash-node': typeof TabLayoutFlashNodeRoute
-  '/_tabLayout/about': typeof TabLayoutAboutLazyRoute
   '/_tabLayout/cooling': typeof TabLayoutCoolingLazyRoute
   '/_tabLayout/firmware-upgrade': typeof TabLayoutFirmwareUpgradeLazyRoute
   '/_tabLayout/info': typeof TabLayoutInfoLazyRoute
@@ -194,7 +183,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/console'
     | '/flash-node'
-    | '/about'
     | '/cooling'
     | '/firmware-upgrade'
     | '/info'
@@ -210,7 +198,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/console'
     | '/flash-node'
-    | '/about'
     | '/cooling'
     | '/firmware-upgrade'
     | '/info'
@@ -227,7 +214,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/_tabLayout/console'
     | '/_tabLayout/flash-node'
-    | '/_tabLayout/about'
     | '/_tabLayout/cooling'
     | '/_tabLayout/firmware-upgrade'
     | '/_tabLayout/info'
@@ -267,13 +253,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/_tabLayout/about': {
-      id: '/_tabLayout/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof TabLayoutAboutLazyRouteImport
-      parentRoute: typeof TabLayoutRoute
     }
     '/_tabLayout/console': {
       id: '/_tabLayout/console'
@@ -358,7 +337,6 @@ declare module '@tanstack/react-router' {
 interface TabLayoutRouteChildren {
   TabLayoutConsoleRoute: typeof TabLayoutConsoleRoute
   TabLayoutFlashNodeRoute: typeof TabLayoutFlashNodeRoute
-  TabLayoutAboutLazyRoute: typeof TabLayoutAboutLazyRoute
   TabLayoutCoolingLazyRoute: typeof TabLayoutCoolingLazyRoute
   TabLayoutFirmwareUpgradeLazyRoute: typeof TabLayoutFirmwareUpgradeLazyRoute
   TabLayoutInfoLazyRoute: typeof TabLayoutInfoLazyRoute
@@ -373,7 +351,6 @@ interface TabLayoutRouteChildren {
 const TabLayoutRouteChildren: TabLayoutRouteChildren = {
   TabLayoutConsoleRoute: TabLayoutConsoleRoute,
   TabLayoutFlashNodeRoute: TabLayoutFlashNodeRoute,
-  TabLayoutAboutLazyRoute: TabLayoutAboutLazyRoute,
   TabLayoutCoolingLazyRoute: TabLayoutCoolingLazyRoute,
   TabLayoutFirmwareUpgradeLazyRoute: TabLayoutFirmwareUpgradeLazyRoute,
   TabLayoutInfoLazyRoute: TabLayoutInfoLazyRoute,

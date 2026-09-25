@@ -133,6 +133,7 @@ const translations = {
   },
   info: {
     userStorage: "User Storage",
+    bmcStorage: "BMC storage",
     ariaStorageUtilization: "Storage utilization",
     backupButton: "Backup User Data",
     fanControl: "Fan Control",
