@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import LoadingButton from "@/components/LoadingButton";
@@ -7,6 +7,32 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useNtpQuery } from "@/lib/api/get";
 import { useSetNtpMutation } from "@/lib/api/set";
+
+/**
+ * The board's own time, ticking: this browser's clock plus the offset the
+ * daemon measured. Shown so a clock that is wrong reads as wrong at a glance,
+ * not only as "not synchronised".
+ */
+function BoardTime({ offsetSeconds }: { offsetSeconds: number }) {
+  const {
+    t,
+    i18n: { language },
+  } = useTranslation();
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const time = new Date(now + offsetSeconds * 1000).toLocaleString(language);
+
+  return (
+    <p className="text-sm text-muted-foreground">
+      {t("about.boardTime", { time })}
+    </p>
+  );
+}
 
 /**
  * Which time sources the board uses, and how its clock is doing on them.
@@ -132,6 +158,9 @@ export default function TimeCard() {
           {t("settings.timeNote")}
         </p>
         {state && <p className="mt-1 text-sm font-medium">{state}</p>}
+        {clock?.offset_seconds != null && (
+          <BoardTime offsetSeconds={clock.offset_seconds} />
+        )}
 
         {/* What chrony thinks of each source. "NOT synchronised" alone sent a
           user to Discord with nothing to act on; chrony always knows why, and

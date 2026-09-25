@@ -92,7 +92,7 @@ const translations = {
     fanOverride: "手动接管",
     fanNotApplied: "风扇设置未生效",
     fanTrips: "风扇升档温度",
-    tripHot: "{{celsius}} °C 过热",
+    tripHot: "{{celsius}} °C",
     tripCritical: "{{celsius}} °C 危险",
     fanOverrideOff: "将风扇保持在所选档位，而不是由主板自动调节。",
     fanOverrideOn:

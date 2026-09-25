@@ -1,6 +1,5 @@
 import { filesize } from "filesize";
 import { CircleCheckIcon, TriangleAlertIcon } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CopyButton from "@/components/CopyButton";
@@ -160,58 +159,25 @@ function StorageRows() {
 }
 
 /**
- * The board's own time, ticking: this browser's clock plus the offset the
- * daemon measured. Shown so a clock that is wrong reads as wrong at a glance,
- * not only as "not synchronised".
+ * Whether the clock is synchronised: yes, no, or the daemon cannot say. The
+ * board's time itself is on the Time card.
  */
-function BoardTime({ offsetSeconds }: { offsetSeconds: number }) {
-  const {
-    t,
-    i18n: { language },
-  } = useTranslation();
-  const [now, setNow] = useState(() => Date.now());
-
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const time = new Date(now + offsetSeconds * 1000).toLocaleString(language);
-
-  return (
-    <span className="text-muted-foreground">
-      {t("about.boardTime", { time })}
-    </span>
-  );
-}
-
-/** Whether the clock is synchronised: yes, no, or the daemon cannot say. */
 function ClockReading({ clock }: { clock: HealthClock }) {
   const { t } = useTranslation();
 
-  const state =
-    clock.synchronised === true ? (
-      <span className="inline-flex items-center gap-1.5 font-medium">
-        <CircleCheckIcon className="size-4" />
-        {t("info.healthClockSynced")}
-      </span>
-    ) : clock.synchronised === false ? (
-      <span className="inline-flex items-center gap-1.5 font-medium text-warning">
-        <TriangleAlertIcon className="size-4" />
-        {t("info.healthClockNotSynced")}
-      </span>
-    ) : (
-      <span className="text-muted-foreground">
-        {t("info.healthClockUnknown")}
-      </span>
-    );
-
-  return (
-    <span className="inline-flex flex-wrap items-baseline justify-end gap-x-2 lg:justify-start">
-      {state}
-      {isReading(clock.offset_seconds) && (
-        <BoardTime offsetSeconds={clock.offset_seconds} />
-      )}
+  return clock.synchronised === true ? (
+    <span className="inline-flex items-center gap-1.5 font-medium">
+      <CircleCheckIcon className="size-4" />
+      {t("info.healthClockSynced")}
+    </span>
+  ) : clock.synchronised === false ? (
+    <span className="inline-flex items-center gap-1.5 font-medium text-warning">
+      <TriangleAlertIcon className="size-4" />
+      {t("info.healthClockNotSynced")}
+    </span>
+  ) : (
+    <span className="text-muted-foreground">
+      {t("info.healthClockUnknown")}
     </span>
   );
 }

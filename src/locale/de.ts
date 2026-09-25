@@ -93,8 +93,8 @@ const translations = {
     fanOverride: "Übersteuern",
     fanNotApplied: "Die Lüftereinstellung wurde nicht übernommen",
     fanTrips: "Lüfter schaltet hoch bei",
-    tripHot: "{{celsius}} °C heiß",
-    tripCritical: "{{celsius}} °C kritisch",
+    tripHot: "{{celsius}} °C",
+    tripCritical: "{{celsius}} °C",
     fanOverrideOff:
       "Den Lüfter auf einer gewählten Stufe halten, statt ihn vom Board regeln zu lassen.",
     fanOverrideOn:

@@ -161,7 +161,7 @@ const translations = {
     fanOverride: "Override",
     fanNotApplied: "The fan setting was not applied",
     fanTrips: "Fan steps up at",
-    tripHot: "{{celsius}} °C hot",
+    tripHot: "{{celsius}} °C",
     tripCritical: "{{celsius}} °C critical",
     fanOverrideOff:
       "Hold the fan at a step you choose instead of letting the board regulate it.",
