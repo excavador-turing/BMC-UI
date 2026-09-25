@@ -90,6 +90,12 @@ const translations = {
       "De kernel regelt deze ventilator op basis van de boardtemperatuur. Deze daemon kan hem niet pauzeren, dus een instelling hier wordt bij de volgende peiling van de regelaar, enkele seconden later, ongedaan gemaakt.",
     fanHeld: "regelaar gepauzeerd",
     fanOverride: "Overschrijven",
+    fanNotApplied: "De ventilatorinstelling is niet toegepast",
+    fanTrips: "Ventilator schakelt op bij",
+    tripHot: "{{celsius}} °C heet",
+    tripCritical: "{{celsius}} °C kritiek",
+    fanOverrideOff:
+      "Houd de ventilator op een zelfgekozen stand in plaats van hem door het board te laten regelen.",
     fanOverrideOn:
       "De regelaar is gepauzeerd. Deze ventilator houdt de hier ingestelde stand vast tot Overschrijven wordt uitgeschakeld of het board opnieuw opstart.",
     fanOverrideCeiling:

@@ -91,6 +91,12 @@ const translations = {
       "El kernel regula este ventilador según la temperatura de la placa. Este daemon no puede pausarlo, así que un ajuste aquí se deshace en el siguiente sondeo del regulador, unos segundos después.",
     fanHeld: "regulador en pausa",
     fanOverride: "Anular",
+    fanNotApplied: "No se aplicó el ajuste del ventilador",
+    fanTrips: "El ventilador sube a",
+    tripHot: "{{celsius}} °C caliente",
+    tripCritical: "{{celsius}} °C crítico",
+    fanOverrideOff:
+      "Mantener el ventilador en el nivel que elijas en lugar de que la placa lo regule.",
     fanOverrideOn:
       "El regulador está en pausa. Este ventilador mantendrá el nivel fijado aquí hasta que se desactive Anular o se reinicie la placa.",
     fanOverrideCeiling:

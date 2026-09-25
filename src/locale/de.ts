@@ -91,6 +91,12 @@ const translations = {
       "Der Kernel regelt diesen Lüfter anhand der Board-Temperatur. Dieser Daemon kann ihn nicht anhalten, daher wird eine Einstellung hier bei der nächsten Abfrage des Reglers wenige Sekunden später wieder aufgehoben.",
     fanHeld: "Regler angehalten",
     fanOverride: "Übersteuern",
+    fanNotApplied: "Die Lüftereinstellung wurde nicht übernommen",
+    fanTrips: "Lüfter schaltet hoch bei",
+    tripHot: "{{celsius}} °C heiß",
+    tripCritical: "{{celsius}} °C kritisch",
+    fanOverrideOff:
+      "Den Lüfter auf einer gewählten Stufe halten, statt ihn vom Board regeln zu lassen.",
     fanOverrideOn:
       "Der Regler ist angehalten. Dieser Lüfter hält die hier gesetzte Stufe, bis Übersteuern ausgeschaltet wird oder das Board neu startet.",
     fanOverrideCeiling:

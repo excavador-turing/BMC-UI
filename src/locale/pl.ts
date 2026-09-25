@@ -91,6 +91,12 @@ const translations = {
       "Jądro reguluje ten wentylator na podstawie temperatury płyty. Ten demon nie potrafi go wstrzymać, więc ustawienie tutaj zostanie cofnięte przy następnym odpytaniu regulatora, kilka sekund później.",
     fanHeld: "regulator wstrzymany",
     fanOverride: "Nadpisz",
+    fanNotApplied: "Ustawienie wentylatora nie zostało zastosowane",
+    fanTrips: "Wentylator przyspiesza przy",
+    tripHot: "{{celsius}} °C gorąco",
+    tripCritical: "{{celsius}} °C krytycznie",
+    fanOverrideOff:
+      "Utrzymuj wentylator na wybranym poziomie zamiast regulacji przez płytę.",
     fanOverrideOn:
       "Regulator jest wstrzymany. Ten wentylator utrzyma ustawiony tutaj stopień, dopóki nie wyłączysz nadpisania albo płyta się nie zrestartuje.",
     fanOverrideCeiling:
