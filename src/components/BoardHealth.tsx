@@ -20,6 +20,7 @@ import {
   useAboutTabData,
   useAddressQuery,
   useHealthQuery,
+  useInfoTabData,
   useThermalQuery,
   useUpdateCheckQuery,
 } from "@/lib/api/get";
@@ -132,6 +133,29 @@ function NandReading({ nand }: { nand: HealthNand }) {
       )}
     </span>
   );
+}
+
+/** The user storage volumes, one row each, in the order the daemon lists them. */
+function StorageRows() {
+  const { t } = useTranslation();
+  const { data } = useInfoTabData();
+
+  return data.storage.map((storage) => {
+    const used = Math.max(storage.total_bytes - storage.bytes_free, 0);
+    return (
+      <TableItem
+        key={storage.name}
+        term={storage.name === "BMC" ? t("info.bmcStorage") : storage.name}
+      >
+        <UsageBar
+          aria-label={t("info.ariaStorageUtilization")}
+          value={Math.round((used / storage.total_bytes) * 100)}
+          label={`${human(used)} / ${human(storage.total_bytes)}`}
+          warningOnHigh
+        />
+      </TableItem>
+    );
+  });
 }
 
 /** Whether the clock is synchronised: yes, no, or the daemon cannot say. */
@@ -317,6 +341,7 @@ export default function BoardHealth() {
                   <NandReading nand={data.nand} />
                 )}
               </TableItem>
+              <StorageRows />
               <TableItem term={t("info.healthClock")}>
                 {data.clock === null ? (
                   <Absent />

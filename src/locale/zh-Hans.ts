@@ -64,6 +64,7 @@ const translations = {
   info: {
     fanAboveTrip: "高于 {{celsius}} °C",
     userStorage: "用户存储",
+    bmcStorage: "BMC 存储",
     ariaStorageUtilization: "存储使用率",
     backupButton: "备份用户数据",
     fanControl: "风扇控制",

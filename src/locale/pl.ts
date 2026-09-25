@@ -65,6 +65,7 @@ const translations = {
   info: {
     fanAboveTrip: "powyżej {{celsius}} °C",
     userStorage: "Pamięć użytkownika",
+    bmcStorage: "Pamięć BMC",
     ariaStorageUtilization: "Wykorzystanie pamięci",
     backupButton: "Utwórz kopię zapasową",
     fanControl: "Sterowanie wentylatorami",
