@@ -456,16 +456,23 @@ function Toggle({
   description,
   checked,
   onChange,
+  disabled,
 }: {
   id: string;
   label: string;
   description: string;
   checked: boolean;
-  onChange: (checked: boolean) => void;
+  onChange?: (checked: boolean) => void;
+  disabled?: boolean;
 }) {
   return (
     <Field orientation="horizontal" className="items-start">
-      <Switch id={id} checked={checked} onCheckedChange={onChange} />
+      <Switch
+        id={id}
+        checked={checked}
+        disabled={disabled}
+        onCheckedChange={onChange}
+      />
       <FieldContent>
         <FieldLabel htmlFor={id}>{label}</FieldLabel>
         <FieldDescription>{description}</FieldDescription>
@@ -737,7 +744,7 @@ export default function SwitchConfig() {
         </Alert>
       )}
 
-      <div className="grid gap-4 md:gap-6 xl:grid-cols-2 xl:items-start">
+      <div className="flex flex-col gap-4 md:gap-6">
         <PortsCard ports={ports} />
 
         {draft && (
@@ -880,33 +887,29 @@ export default function SwitchConfig() {
                 </>
               ) : (
                 <>
+                  {/* The same switches as in edit mode, greyed out, so the
+                      two modes look alike and only one of them moves. */}
+                  <div className="flex flex-col gap-3">
+                    <Toggle
+                      id="switch-filtering-view"
+                      label={t("switchConfig.filteringShort")}
+                      description={t("switchConfig.filtering")}
+                      checked={draft.filtering}
+                      disabled
+                    />
+                    <Toggle
+                      id="switch-stp-view"
+                      label={t("switchConfig.stpShort")}
+                      description={t("switchConfig.spanningTree")}
+                      checked={draft.stp}
+                      disabled
+                    />
+                  </div>
                   <VlanTable
                     draft={draft}
                     warningsFor={() => []}
                     bad={new Set()}
                   />
-                  <dl className="flex flex-col gap-1 text-sm">
-                    <div className="flex gap-2">
-                      <dt className="text-muted-foreground">
-                        {t("switchConfig.filteringShort")}
-                      </dt>
-                      <dd className="font-medium">
-                        {draft.filtering
-                          ? t("switchConfig.on")
-                          : t("switchConfig.off")}
-                      </dd>
-                    </div>
-                    <div className="flex gap-2">
-                      <dt className="text-muted-foreground">
-                        {t("switchConfig.stpShort")}
-                      </dt>
-                      <dd className="font-medium">
-                        {draft.stp
-                          ? t("switchConfig.on")
-                          : t("switchConfig.off")}
-                      </dd>
-                    </div>
-                  </dl>
                 </>
               )}
             </CardContent>

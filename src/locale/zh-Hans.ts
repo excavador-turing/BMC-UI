@@ -320,8 +320,6 @@ const translations = {
     filteringShort: "VLAN 过滤",
     stpShort: "生成树 (STP)",
     filteringOnNote: "每个端口只能访问其列出的 VLAN。",
-    on: "开",
-    off: "关",
     presetPlaceholder: "从预设开始…",
   },
   console: {

@@ -333,8 +333,6 @@ const translations = {
     filteringShort: "Filtrowanie VLAN",
     stpShort: "Spanning tree (STP)",
     filteringOnNote: "Każdy port widzi tylko VLAN-y przypisane do niego.",
-    on: "wł.",
-    off: "wył.",
     presetPlaceholder: "Zacznij od szablonu…",
   },
   console: {

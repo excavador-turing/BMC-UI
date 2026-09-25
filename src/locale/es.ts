@@ -332,8 +332,6 @@ const translations = {
     filteringShort: "Filtrado de VLAN",
     stpShort: "Spanning tree (STP)",
     filteringOnNote: "Cada puerto solo alcanza las VLAN que tiene asignadas.",
-    on: "activado",
-    off: "desactivado",
     presetPlaceholder: "Empezar desde un preajuste…",
   },
   console: {

@@ -332,8 +332,6 @@ const translations = {
     filteringShort: "VLAN-filtering",
     stpShort: "Spanning tree (STP)",
     filteringOnNote: "Elke poort bereikt alleen de VLAN's die erbij staan.",
-    on: "aan",
-    off: "uit",
     presetPlaceholder: "Begin met een voorinstelling…",
   },
   console: {
