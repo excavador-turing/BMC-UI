@@ -95,9 +95,14 @@ export function AppSidebar(props: ComponentProps<typeof Sidebar>) {
                   ) : (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
-                        isActive={item.url ? Boolean(matchRoute({ to: item.url })) : false}
+                        isActive={
+                          item.url
+                            ? Boolean(matchRoute({ to: item.url }))
+                            : false
+                        }
                         className={cn(
-                          item.url && pulses(item.url, isFlashing, flashType) &&
+                          item.url &&
+                            pulses(item.url, isFlashing, flashType) &&
                             "animate-pulse"
                         )}
                         render={
