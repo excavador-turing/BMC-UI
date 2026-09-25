@@ -92,7 +92,7 @@ const translations = {
     fanOverride: "Overschrijven",
     fanNotApplied: "De ventilatorinstelling is niet toegepast",
     fanTrips: "Ventilator schakelt op bij",
-    tripHot: "{{celsius}} °C heet",
+    tripHot: "{{celsius}} °C",
     tripCritical: "{{celsius}} °C kritiek",
     fanOverrideOff:
       "Houd de ventilator op een zelfgekozen stand in plaats van hem door het board te laten regelen.",

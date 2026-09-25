@@ -93,7 +93,7 @@ const translations = {
     fanOverride: "Anular",
     fanNotApplied: "No se aplicó el ajuste del ventilador",
     fanTrips: "El ventilador sube a",
-    tripHot: "{{celsius}} °C caliente",
+    tripHot: "{{celsius}} °C",
     tripCritical: "{{celsius}} °C crítico",
     fanOverrideOff:
       "Mantener el ventilador en el nivel que elijas en lugar de que la placa lo regule.",

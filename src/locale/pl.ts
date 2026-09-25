@@ -93,7 +93,7 @@ const translations = {
     fanOverride: "Nadpisz",
     fanNotApplied: "Ustawienie wentylatora nie zostało zastosowane",
     fanTrips: "Wentylator przyspiesza przy",
-    tripHot: "{{celsius}} °C gorąco",
+    tripHot: "{{celsius}} °C",
     tripCritical: "{{celsius}} °C krytycznie",
     fanOverrideOff:
       "Utrzymuj wentylator na wybranym poziomie zamiast regulacji przez płytę.",
