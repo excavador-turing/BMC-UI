@@ -287,8 +287,13 @@ const translations = {
       "Obecny adres statyczny wpisano ręcznie; potwierdzona zmiana zastąpi plik.",
   },
   switchConfig: {
+    title: "Przełącznik",
+    badgeFilteringOn: "Filtrowanie VLAN wł.",
+    badgeFilteringOff: "Filtrowanie VLAN wył.",
+    badgeStpOn: "STP wł.",
+    badgeStpOff: "STP wył.",
     oneNetwork:
-      "Jedna sieć. Wszystkie moduły, BMC i oba łącza dzielą ją, a przełącznik nie patrzy na VLAN-y.",
+      "Wszystkie porty dzielą jedną sieć. Kolumny VLAN działają po włączeniu filtrowania.",
     port: "Port",
     link: "Łącze",
     traffic: "Ruch",

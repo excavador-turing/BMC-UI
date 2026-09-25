@@ -286,8 +286,13 @@ const translations = {
       "La dirección estática actual se escribió a mano; un cambio confirmado reemplaza el archivo.",
   },
   switchConfig: {
+    title: "Switch",
+    badgeFilteringOn: "Filtrado VLAN activado",
+    badgeFilteringOff: "Filtrado VLAN desactivado",
+    badgeStpOn: "STP activado",
+    badgeStpOff: "STP desactivado",
     oneNetwork:
-      "Una sola red. Todos los módulos, el BMC y ambos enlaces la comparten, y el conmutador no mira las VLAN.",
+      "Todos los puertos comparten una red. Las columnas VLAN se aplican al activar el filtrado.",
     port: "Puerto",
     link: "Enlace",
     traffic: "Tráfico",

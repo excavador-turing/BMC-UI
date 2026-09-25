@@ -359,8 +359,13 @@ const translations = {
       "The current static address was written by hand; a confirmed change replaces the file.",
   },
   switchConfig: {
+    title: "Switch",
+    badgeFilteringOn: "VLAN filtering on",
+    badgeFilteringOff: "VLAN filtering off",
+    badgeStpOn: "STP on",
+    badgeStpOff: "STP off",
     oneNetwork:
-      "One network. Every module, the BMC and both uplinks share it, and the switch does not look at VLANs.",
+      "All ports share one network. The VLAN columns apply once filtering is on.",
     port: "Port",
     link: "Link",
     traffic: "Traffic",

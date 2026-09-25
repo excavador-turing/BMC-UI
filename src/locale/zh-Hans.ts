@@ -279,8 +279,12 @@ const translations = {
     fileHandEdited: "当前静态地址为手动设置；确认后的更改会替换该文件。",
   },
   switchConfig: {
-    oneNetwork:
-      "一个网络。所有模块、BMC 和两个上行口共用它，交换机不区分 VLAN。",
+    title: "交换机",
+    badgeFilteringOn: "VLAN 过滤已开启",
+    badgeFilteringOff: "VLAN 过滤已关闭",
+    badgeStpOn: "STP 已开启",
+    badgeStpOff: "STP 已关闭",
+    oneNetwork: "所有端口共用一个网络。开启过滤后，VLAN 列才会生效。",
     port: "端口",
     link: "链路",
     traffic: "流量",
