@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import InfoNote from "@/components/InfoNote";
-import TableItem from "@/components/TableItem";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -13,10 +12,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/hooks/use-toast";
 import {
   type ThermalSensor,
   useCoolingDevicesQuery,
@@ -151,6 +156,58 @@ function SensorReading({ sensor }: { sensor: ThermalSensor }) {
   );
 }
 
+/**
+ * The temperatures at which the board steps its fan up, from the sensor's own
+ * `active` trips, with the ones already crossed filled in. It is what makes
+ * "4 of 6" read as a consequence rather than a number. `hot` and `critical`
+ * trips are the board's alarm lines, not fan steps, and are shown in red.
+ */
+function TripScale({ sensor }: { sensor: ThermalSensor }) {
+  const { t } = useTranslation();
+
+  const trips = (sensor.trips ?? [])
+    .filter((trip) => isReading(trip.temperature_c))
+    .sort((a, b) => (a.temperature_c ?? 0) - (b.temperature_c ?? 0));
+  const active = trips.filter((trip) => trip.kind === "active");
+  const alarms = trips.filter(
+    (trip) => trip.kind === "hot" || trip.kind === "critical"
+  );
+  if (active.length === 0 && alarms.length === 0) return null;
+
+  const reading =
+    sensor.present && isReading(sensor.temperature_c)
+      ? sensor.temperature_c
+      : null;
+
+  return (
+    <div className="flex flex-wrap items-center gap-1.5 text-sm">
+      {active.length > 0 && (
+        <span className="mr-1 text-muted-foreground">{t("info.fanTrips")}</span>
+      )}
+      {active.map((trip) => (
+        <Badge
+          key={trip.index}
+          variant={
+            reading !== null && reading >= (trip.temperature_c ?? 0)
+              ? "default"
+              : "outline"
+          }
+          className="tabular-nums"
+        >
+          {t("info.thermalCelsius", { value: trip.temperature_c })}
+        </Badge>
+      ))}
+      {alarms.map((trip) => (
+        <Badge key={trip.index} variant="destructive" className="tabular-nums">
+          {trip.kind === "critical"
+            ? t("info.tripCritical", { celsius: trip.temperature_c })
+            : t("info.tripHot", { celsius: trip.temperature_c })}
+        </Badge>
+      ))}
+    </div>
+  );
+}
+
 function ThermalSkeleton() {
   return (
     <div className="flex flex-row py-1">
@@ -208,14 +265,51 @@ function overrideCeiling(sensors: ThermalSensor[]): number | null {
 
 export default function FanControl() {
   const { t } = useTranslation();
-  const { data: coolingDevices } = useCoolingDevicesQuery();
+  const { data: coolingDevices, refetch: refetchCooling } =
+    useCoolingDevicesQuery();
   const {
     data: thermal,
     isPending,
     isError,
     dataUpdatedAt,
   } = useThermalQuery();
+  const { toast } = useToast();
   const { mutate: mutateCoolingDevices } = useCoolingDeviceMutation();
+
+  // The legacy endpoint answers a refusal with a 200 and the reason in
+  // `result`, so a request that "succeeded" can still have changed nothing.
+  // Whether it did is read back from the board rather than guessed from the
+  // wording: an Override that did not take is reported, with the board's
+  // own sentence. Without this it just looked like a switch that would not
+  // stay on.
+  const setFan = (
+    variables: Parameters<typeof mutateCoolingDevices>[0],
+    expectHeld?: boolean
+  ) =>
+    mutateCoolingDevices(variables, {
+      onSuccess: (result) => {
+        if (expectHeld === undefined) return;
+        void refetchCooling().then(({ data: fresh }) => {
+          const device = fresh?.find((d) => d.device === variables.device);
+          if (
+            device?.overridden !== undefined &&
+            device.overridden !== expectHeld
+          ) {
+            toast({
+              title: t("info.fanNotApplied"),
+              description: typeof result === "string" ? result : undefined,
+              variant: "destructive",
+            });
+          }
+        });
+      },
+      onError: (error: Error) =>
+        toast({
+          title: t("info.fanNotApplied"),
+          description: error.message,
+          variant: "destructive",
+        }),
+    });
 
   const [requested, setRequested] = useState(() =>
     coolingDevices.reduce(
@@ -327,31 +421,15 @@ export default function FanControl() {
     );
   });
 
+  const reason = governorReason(sensors);
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          {t("info.fanControl")}
-          {showDutyNote && (
-            <InfoNote
-              text={t("info.fanDutyNote")}
-              path="/features/see-what-the-board-sees/"
-              label={t("info.fanControl")}
-            />
-          )}
-        </CardTitle>
-        {governed && (
-          <CardAction>
-            <Badge variant="secondary">
-              {rows.some((row) => row.overridden)
-                ? t("info.fanHeld")
-                : t("info.fanAutomatic")}
-            </Badge>
-          </CardAction>
-        )}
-      </CardHeader>
-      <CardContent className="flex flex-col gap-6">
-        <div>
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("info.healthTemperatureTerm")}</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-6">
           {isPending && <ThermalSkeleton />}
 
           {isError && (
@@ -366,187 +444,222 @@ export default function FanControl() {
             </p>
           )}
 
-          {sensors.length > 0 && (
-            <dl>
-              {sensors.map((sensor) => (
-                <TableItem key={sensor.name} term={sensor.name}>
+          {sensors.map((sensor) => (
+            <div key={sensor.name} className="flex flex-col gap-3">
+              <div className="flex flex-col gap-1">
+                <span className="text-sm text-muted-foreground">
+                  {sensor.name}
+                </span>
+                <span className="text-3xl font-semibold tabular-nums">
                   <SensorReading sensor={sensor} />
-                </TableItem>
-              ))}
-            </dl>
-          )}
-        </div>
+                </span>
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
 
-        <div className="flex flex-col gap-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            {t("info.fanControl")}
+            {showDutyNote && (
+              <InfoNote
+                text={t("info.fanDutyNote")}
+                path="/features/see-what-the-board-sees/"
+                label={t("info.fanControl")}
+              />
+            )}
+          </CardTitle>
+          {governed && (
+            <CardAction>
+              <Badge variant="secondary">
+                {rows.some((row) => row.overridden)
+                  ? t("info.fanHeld")
+                  : t("info.fanAutomatic")}
+              </Badge>
+            </CardAction>
+          )}
+        </CardHeader>
+        <CardContent className="flex flex-col gap-6">
           {rows.map((row) => {
-            // The step being drawn, and the duty of that same step -- not of the
-            // setpoint and not of anything else, so the two numbers beside each
-            // other always describe one position of one fan.
+            // The step being drawn, and the duty of that same step -- not of
+            // the setpoint and not of anything else, so the numbers beside
+            // each other always describe one position of one fan.
             const step = row.live ?? row.setpoint ?? 0;
             const duty = fanDutyPercent(row.levels, row.maxLevel, step);
             const stepLabel = t("info.fanStep", { cur: step, max: row.max });
-            // Why the fan is where it is. The governor is step_wise, so the
-            // step is a consequence of the highest `active` trip the board has
-            // crossed -- and a step with no reason attached is exactly the
-            // question this display was asked to answer. Only shown when the
-            // daemon reports the trips; nothing here is a table of assumed
-            // temperatures.
-            const reason = governorReason(thermal?.sensors ?? []);
+            // Why the fan is where it is: the highest `active` trip the board
+            // has crossed, shown only when the daemon reports the trips.
+            const detail = [
+              duty === null ? null : t("info.fanDuty", { value: duty }),
+              reason === null
+                ? null
+                : t("info.fanAboveTrip", { celsius: reason }),
+            ].filter((part): part is string => part !== null);
 
             return (
-              <div key={row.name} className="flex items-start justify-between">
-                <div className="w-1/4 font-medium">{row.name}</div>
-                <div className="w-2/4 lg:w-3/4">
-                  <div className="flex items-center gap-4">
-                    {row.present && row.max > 0 ? (
-                      <>
-                        <StepBar
-                          value={step}
-                          max={row.max}
-                          label={t("info.ariaFanStep", { device: row.name })}
-                          valueText={
-                            duty === null
-                              ? stepLabel
-                              : `${stepLabel} · ${t("info.fanDuty", { value: duty })}`
-                          }
-                        />
-                        <div className="w-28 shrink-0 text-right">
-                          <div className="font-medium">{stepLabel}</div>
-                          {duty !== null && (
-                            <div className="text-sm text-muted-foreground">
-                              {t("info.fanDuty", { value: duty })}
-                            </div>
-                          )}
-                          {reason !== null && (
-                            <div className="text-sm text-muted-foreground">
-                              {t("info.fanAboveTrip", { celsius: reason })}
-                            </div>
-                          )}
-                        </div>
-                      </>
-                    ) : (
-                      <span className="font-medium text-warning">
-                        {t("info.thermalAbsent")}
+              <div key={row.name} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm text-muted-foreground">
+                    {row.name}
+                  </span>
+                  {row.present && row.max > 0 ? (
+                    <>
+                      <span className="text-3xl font-semibold tabular-nums">
+                        {stepLabel}
                       </span>
-                    )}
-                  </div>
+                      {detail.length > 0 && (
+                        <span className="text-sm text-muted-foreground">
+                          {detail.join(" · ")}
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="font-medium text-warning">
+                      {t("info.thermalAbsent")}
+                    </span>
+                  )}
+                </div>
 
-                  {row.controllable && row.canHold && (
-                    <div className="mt-4 flex items-center gap-3">
-                      <Switch
-                        id={`fan-override-${row.name}`}
-                        checked={row.overridden}
-                        onCheckedChange={(on) => {
-                          // Turning the switch on must not move the fan. The
-                          // step it is on now becomes the step it is held at,
-                          // so the only thing that changes is who decides it.
-                          const hold = row.live ?? row.setpoint ?? 0;
-                          if (on) {
-                            setRequested((previous) => ({
-                              ...previous,
-                              [row.name]: hold,
-                            }));
-                          } else {
-                            // The governor is about to choose a step. Forget
-                            // what was committed here, or the notice below
-                            // would report the governor's own choice as the
-                            // board overruling this page.
-                            setCommitted((previous) => {
-                              const next = { ...previous };
-                              delete next[row.name];
-                              return next;
-                            });
-                          }
-                          mutateCoolingDevices({
+                {row.present && row.max > 0 && (
+                  <StepBar
+                    value={step}
+                    max={row.max}
+                    label={t("info.ariaFanStep", { device: row.name })}
+                    valueText={[stepLabel, ...detail].join(" · ")}
+                  />
+                )}
+
+                {/* The temperatures the step follows, beside the step, so
+                    "4 of 6" reads as a consequence of the board's heat. */}
+                {row.present &&
+                  row.live !== null &&
+                  sensors.map((sensor) => (
+                    <TripScale key={sensor.name} sensor={sensor} />
+                  ))}
+
+                {row.controllable && row.canHold && (
+                  <Field orientation="horizontal" className="items-start">
+                    <Switch
+                      id={`fan-override-${row.name}`}
+                      checked={row.overridden}
+                      onCheckedChange={(on) => {
+                        // Turning the switch on must not move the fan. The
+                        // step it is on now becomes the step it is held at,
+                        // so the only thing that changes is who decides it.
+                        const hold = row.live ?? row.setpoint ?? 0;
+                        if (on) {
+                          setRequested((previous) => ({
+                            ...previous,
+                            [row.name]: hold,
+                          }));
+                        } else {
+                          // The governor is about to choose a step. Forget
+                          // what was committed here, or the notice below
+                          // would report the governor's own choice as the
+                          // board overruling this page.
+                          setCommitted((previous) => {
+                            const next = { ...previous };
+                            delete next[row.name];
+                            return next;
+                          });
+                        }
+                        setFan(
+                          {
                             device: row.name,
                             speed: hold,
                             mode: on ? "manual" : "auto",
-                          });
-                        }}
-                        aria-label={t("info.ariaFanOverride", {
-                          device: row.name,
-                        })}
-                      />
-                      <Label htmlFor={`fan-override-${row.name}`}>
+                          },
+                          on
+                        );
+                      }}
+                      aria-label={t("info.ariaFanOverride", {
+                        device: row.name,
+                      })}
+                    />
+                    <FieldContent>
+                      <FieldLabel htmlFor={`fan-override-${row.name}`}>
                         {t("info.fanOverride")}
-                      </Label>
-                    </div>
-                  )}
+                      </FieldLabel>
+                      <FieldDescription
+                        className={cn(row.overridden && "text-warning")}
+                      >
+                        {row.overridden
+                          ? t("info.fanOverrideOn") +
+                            (ceiling !== null
+                              ? ` ${t("info.fanOverrideCeiling", { celsius: ceiling })}`
+                              : "")
+                          : t("info.fanOverrideOff")}
+                      </FieldDescription>
+                    </FieldContent>
+                  </Field>
+                )}
 
-                  {/* The slider is the default only on a daemon that cannot
+                {/* The slider is the default only on a daemon that cannot
                     hold a step; where it can, it appears with the switch. */}
-                  {row.controllable && (!row.canHold || row.overridden) && (
-                    <div className="mt-4 flex items-center gap-4">
-                      <Slider
-                        defaultValue={row.live ?? row.setpoint ?? 0}
-                        min={0}
-                        max={row.max}
-                        aria-label={t("info.fanControl")}
-                        onValueChange={(value) =>
-                          setRequested((previous) => ({
-                            ...previous,
-                            [row.name]: single(value),
-                          }))
-                        }
-                        onValueCommitted={(committed) => {
-                          const value = single(committed);
-                          setCommitted((previous) => ({
-                            ...previous,
-                            [row.name]: { step: value, at: Date.now() },
-                          }));
-                          mutateCoolingDevices({
-                            device: row.name,
-                            speed: value,
-                            mode: row.canHold ? "manual" : undefined,
-                          });
-                        }}
-                      />
-                      <span className="w-20 shrink-0 text-right text-sm text-muted-foreground">
-                        {t("info.fanRequested", {
-                          value: requested[row.name] ?? row.setpoint ?? 0,
-                        })}
-                      </span>
-                    </div>
-                  )}
-
-                  {row.controllable && row.canHold && row.overridden && (
-                    <p className="mt-3 text-sm text-warning">
-                      {t("info.fanOverrideOn")}
-                      {ceiling !== null
-                        ? ` ${t("info.fanOverrideCeiling", { celsius: ceiling })}`
-                        : ""}
-                    </p>
-                  )}
-                </div>
+                {row.controllable && (!row.canHold || row.overridden) && (
+                  <div className="flex items-center gap-4">
+                    <Slider
+                      defaultValue={row.live ?? row.setpoint ?? 0}
+                      min={0}
+                      max={row.max}
+                      aria-label={t("info.fanControl")}
+                      onValueChange={(value) =>
+                        setRequested((previous) => ({
+                          ...previous,
+                          [row.name]: single(value),
+                        }))
+                      }
+                      onValueCommitted={(committed) => {
+                        const value = single(committed);
+                        setCommitted((previous) => ({
+                          ...previous,
+                          [row.name]: { step: value, at: Date.now() },
+                        }));
+                        setFan({
+                          device: row.name,
+                          speed: value,
+                          mode: row.canHold ? "manual" : undefined,
+                        });
+                      }}
+                    />
+                    <span className="w-20 shrink-0 text-right text-sm text-muted-foreground">
+                      {t("info.fanRequested", {
+                        value: requested[row.name] ?? row.setpoint ?? 0,
+                      })}
+                    </span>
+                  </div>
+                )}
               </div>
             );
           })}
-        </div>
 
-        {showGovernorNote && (
-          <p className="text-sm text-muted-foreground">
-            {t("info.fanGovernorNote")}
-          </p>
-        )}
+          {showGovernorNote && (
+            <p className="text-sm text-muted-foreground">
+              {t("info.fanGovernorNote")}
+            </p>
+          )}
 
-        {reverted.length > 0 && (
-          <Alert variant="warning">
-            <TriangleAlert />
-            <AlertDescription>
-              {reverted.map((row) => (
-                <p key={row.name}>
-                  {t("info.fanReverted", {
-                    device: row.name,
-                    cur: row.live,
-                    max: row.max,
-                    requested: committed[row.name].step,
-                  })}
-                </p>
-              ))}
-            </AlertDescription>
-          </Alert>
-        )}
-      </CardContent>
-    </Card>
+          {reverted.length > 0 && (
+            <Alert variant="warning">
+              <TriangleAlert />
+              <AlertDescription>
+                {reverted.map((row) => (
+                  <p key={row.name}>
+                    {t("info.fanReverted", {
+                      device: row.name,
+                      cur: row.live,
+                      max: row.max,
+                      requested: committed[row.name].step,
+                    })}
+                  </p>
+                ))}
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
+    </>
   );
 }

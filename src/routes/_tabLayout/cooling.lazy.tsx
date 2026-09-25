@@ -19,7 +19,7 @@ export const Route = createLazyFileRoute("/_tabLayout/cooling")({
  */
 export function Cooling() {
   return (
-    <TabView>
+    <TabView columns>
       <FanControl />
     </TabView>
   );

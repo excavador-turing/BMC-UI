@@ -159,6 +159,12 @@ const translations = {
       "The kernel regulates this fan from the board temperature. This daemon cannot pause it, so a setting here is undone at the governor's next poll, a few seconds later.",
     fanHeld: "governor paused",
     fanOverride: "Override",
+    fanNotApplied: "The fan setting was not applied",
+    fanTrips: "Fan steps up at",
+    tripHot: "{{celsius}} °C hot",
+    tripCritical: "{{celsius}} °C critical",
+    fanOverrideOff:
+      "Hold the fan at a step you choose instead of letting the board regulate it.",
     fanOverrideOn:
       "The governor is paused. This fan will hold the step set here until Override is switched off or the board reboots.",
     fanOverrideCeiling:

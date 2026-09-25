@@ -90,6 +90,11 @@ const translations = {
       "内核根据主板温度调节此风扇。此守护进程无法暂停调节器，因此这里的设置会在几秒后的下一次轮询时被撤销。",
     fanHeld: "调节器已暂停",
     fanOverride: "手动接管",
+    fanNotApplied: "风扇设置未生效",
+    fanTrips: "风扇升档温度",
+    tripHot: "{{celsius}} °C 过热",
+    tripCritical: "{{celsius}} °C 危险",
+    fanOverrideOff: "将风扇保持在所选档位，而不是由主板自动调节。",
     fanOverrideOn:
       "调节器已暂停。此风扇将保持在这里设定的档位，直到关闭手动接管或主板重启。",
     fanOverrideCeiling:
