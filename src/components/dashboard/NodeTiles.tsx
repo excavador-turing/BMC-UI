@@ -35,7 +35,9 @@ export default function NodeTiles() {
   const { data: ports } = useSwitchPortsQuery();
 
   return (
-    <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+    // Two across from the smallest width: four full-width cards were most of
+    // a phone's two screens. Wide screens keep four across.
+    <div className="grid grid-cols-2 gap-3 @xl/main:gap-4 @5xl/main:grid-cols-4">
       {nodes.map((node, index) => (
         <NodeTile
           key={index}
@@ -84,8 +86,8 @@ function NodeTile({
           <CardTitle
             className={
               node.name
-                ? "truncate text-2xl font-semibold"
-                : "truncate text-2xl font-semibold text-muted-foreground"
+                ? "truncate text-lg font-semibold @xl/main:text-2xl"
+                : "truncate text-lg font-semibold text-muted-foreground @xl/main:text-2xl"
             }
           >
             {node.name ?? t("dashboard.unnamed")}
@@ -105,7 +107,7 @@ function NodeTile({
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 border-none bg-transparent pt-0 text-sm">
-          <div className="line-clamp-1 font-medium">
+          <div className="font-medium @xl/main:line-clamp-1">
             {on
               ? since === null
                 ? t("nodes.powerOnUnreadable")
@@ -113,7 +115,11 @@ function NodeTile({
               : t("dashboard.offSinceUnknown")}
           </div>
           {link && (
-            <div className="line-clamp-1 text-muted-foreground">{link}</div>
+            // Hidden on a phone to keep the tiles compact; the same readings
+            // are on the Switch page.
+            <div className="hidden truncate text-muted-foreground @xl/main:block">
+              {link}
+            </div>
           )}
         </CardFooter>
       </Card>
