@@ -10,6 +10,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [v4.0.0] — 2026-10-03
+
+The whole interface was redesigned by
+[Sven van Ginkel (@svenvg93)](https://github.com/svenvg93) in
+[#46](https://github.com/excavador-turing/BMC-UI/pull/46) — thank you, Sven.
+A major version because two addresses are gone: bookmarks to `/nodes` and
+`/about` now land on the "page not found" screen. Nothing the interface asks
+the daemon changed.
+
 ### Changed
 
 - **The interface is stock shadcn/ui now, on Base UI, with a sidebar.** It
