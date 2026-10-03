@@ -38,8 +38,10 @@ WIDTH, HEIGHT = 1280, 900
 # Every tab the demo can reach, by hash route.
 ROUTES = [
     "info",
-    "nodes",
+    "power-control",
+    "cooling",
     "network",
+    "switch",
     "security",
     "settings",
     "firmware-upgrade",

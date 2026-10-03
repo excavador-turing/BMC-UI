@@ -42,6 +42,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
     packages they replace. CSS 60 KB → 117 KB (18 KB gzipped), from shadcn's
     class vocabulary across thirty components. `npm run screens`: no new
     faults. `npm run type-test`: 30 inputs, every one keeps what is typed.
+  - **Old addresses are dropped on purpose.** `/nodes` and `/about` have no
+    redirect: bookmarks to `/nodes` and `/about` now 404; Power Control and
+    the Dashboard replace them. An unknown address shows the 404 page.
 
 ## [v3.38.0] — 2026-09-23
 
