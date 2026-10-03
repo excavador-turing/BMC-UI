@@ -816,6 +816,7 @@ export default function SwitchConfig() {
                     pending !== null ? t("switchConfig.oneAtATime") : undefined
                   }
                   onClick={() => setEditing(true)}
+                  data-testid="switch-edit"
                 >
                   <PencilIcon data-icon="inline-start" />
                   {t("switchConfig.edit")}

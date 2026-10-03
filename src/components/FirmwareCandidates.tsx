@@ -359,6 +359,7 @@ export default function FirmwareCandidates() {
             variant="outline"
             size="sm"
             onClick={() => setUploadOpen(true)}
+            data-testid="firmware-upload"
           >
             <Upload data-icon="inline-start" />
             {t("firmwareUpgrade.uploadButton")}
@@ -367,6 +368,7 @@ export default function FirmwareCandidates() {
             variant="outline"
             size="sm"
             onClick={() => setSourcesOpen(true)}
+            data-testid="firmware-sources"
           >
             <Settings2 data-icon="inline-start" />
             {t("firmwareUpgrade.sourcesButton")}

@@ -314,7 +314,11 @@ export default function AddressCard() {
               );
             }}
           >
-            <SelectTrigger id="address-mode" className="w-full">
+            <SelectTrigger
+              id="address-mode"
+              data-testid="address-mode"
+              className="w-full"
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

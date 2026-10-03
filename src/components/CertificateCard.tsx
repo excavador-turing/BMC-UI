@@ -122,6 +122,7 @@ export default function CertificateCard() {
               variant="outline"
               size="sm"
               onClick={() => setInstalling(true)}
+              data-testid="certificate-install"
             >
               <Upload data-icon="inline-start" />
               {t("certificate.installHeading")}
