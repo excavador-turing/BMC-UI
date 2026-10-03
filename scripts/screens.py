@@ -53,14 +53,14 @@ BASELINE = ROOT / "scripts" / "screens-baseline.json"
 # The tabs, by the hash route the demo serves them at.
 TABS = [
     "info",
-    "nodes",
+    "power-control",
     "console",
     "cooling",
     "network",
+    "switch",
     "security",
     "firmware-upgrade",
     "settings",
-    "about",
     "flash-node",
     "usb",
 ]
