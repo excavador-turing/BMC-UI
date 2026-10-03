@@ -7,6 +7,7 @@ import { FlashProvider } from "@/contexts/FlashContext";
 import {
   type NodeDestination,
   NodeNavProvider,
+  takesNode,
 } from "@/contexts/NodeNavContext";
 import { ToastScopeContext } from "@/contexts/ToastScopeContext";
 import { apiBaseFor, type FleetBoard } from "@/fleet/config";
@@ -74,24 +75,20 @@ export function BoardScope({
     [board]
   );
 
-  const nav = useMemo(
-    () => ({
-      href: (destination: NodeDestination, node?: number) =>
-        toHash({
-          board: board.id,
-          tab: destination,
-          ...(destination === "usb" ? {} : { node }),
-        }),
+  const nav = useMemo(() => {
+    const hashFor = (destination: NodeDestination, node?: number) =>
+      toHash({
+        board: board.id,
+        tab: destination,
+        ...(takesNode(destination) ? { node } : {}),
+      });
+    return {
+      href: hashFor,
       open: (destination: NodeDestination, node?: number) => {
-        window.location.hash = toHash({
-          board: board.id,
-          tab: destination,
-          ...(destination === "usb" ? {} : { node }),
-        });
+        window.location.hash = hashFor(destination, node);
       },
-    }),
-    [board.id]
-  );
+    };
+  }, [board.id]);
 
   return (
     <QueryClientProvider client={active}>

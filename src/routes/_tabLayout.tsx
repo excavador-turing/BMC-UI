@@ -5,6 +5,7 @@ import {
   redirect,
   useLocation,
   useNavigate,
+  useRouter,
 } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -31,6 +32,7 @@ import { ConnectionProvider } from "@/contexts/ConnectionContext";
 import {
   type NodeDestination,
   NodeNavProvider,
+  takesNode,
 } from "@/contexts/NodeNavContext";
 import { trailFor } from "@/lib/navigation";
 
@@ -52,24 +54,36 @@ export const Route = createFileRoute("/_tabLayout")({
 
 export function AppLayoutComponent() {
   const navigate = useNavigate();
+  const router = useRouter();
 
   // What "open the console for node 3" means HERE: a route in this
   // application. The fleet answers the same question with a hash change. The
   // node cards ask and do not care which.
-  const nav = useMemo(
-    () => ({
+  // Power Control lists all four modules and has no selection to carry, so
+  // here it takes no `?node=`; the fleet's hash keeps it for the link's sake.
+  const nav = useMemo(() => {
+    const selects = (destination: NodeDestination) =>
+      takesNode(destination) && destination !== "power-control";
+    return {
+      // Built by the router, so it carries the hash or base path this build
+      // is served under: a new-tab click on a dashboard tile in the demo
+      // must land on the demo's page, not on the host's.
       href: (destination: NodeDestination, node?: number) =>
-        destination === "usb" ? "/usb" : `/${destination}?node=${String(node)}`,
+        router.history.createHref(
+          router.buildLocation({
+            to: `/${destination}`,
+            ...(selects(destination) ? { search: { node } } : {}),
+          }).href
+        ),
       open: (destination: NodeDestination, node?: number) => {
-        if (destination === "usb") {
-          void navigate({ to: "/usb" });
-        } else {
+        if (selects(destination)) {
           void navigate({ to: `/${destination}`, search: { node } });
+        } else {
+          void navigate({ to: `/${destination}` });
         }
       },
-    }),
-    [navigate]
-  );
+    };
+  }, [navigate, router]);
 
   return (
     <NodeNavProvider value={nav}>
