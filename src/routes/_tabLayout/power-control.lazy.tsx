@@ -276,6 +276,7 @@ export function NodesTab() {
               setEditMode(!editMode);
             }}
             disabled={isPending}
+            data-testid="nodes-edit"
           >
             {editMode ? t("ui.cancel") : t("nodes.editButton")}
           </Button>
