@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import TimeAgo from "javascript-time-ago";
 import de from "javascript-time-ago/locale/de";
 import en from "javascript-time-ago/locale/en";
@@ -10,6 +9,7 @@ import { ArrowUpCircleIcon } from "lucide-react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
+import NavLink from "@/components/NavLink";
 import TableItem from "@/components/TableItem";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAboutTabData, useUpdateCheckQuery } from "@/lib/api/get";
@@ -57,8 +57,8 @@ export default function SoftwareCard() {
               {/* A newer stable release, by the daemon's own check -- the
                   same one the Firmware tile and page read. */}
               {update.data?.stable?.update_available && (
-                <Link
-                  to="/firmware-upgrade"
+                <NavLink
+                  destination="firmware-upgrade"
                   title={t("dashboard.attnUpdate", {
                     version: update.data.stable.target,
                   })}
@@ -68,7 +68,7 @@ export default function SoftwareCard() {
                   className="text-muted-foreground hover:text-foreground"
                 >
                   <ArrowUpCircleIcon className="size-4" />
-                </Link>
+                </NavLink>
               )}
             </span>
           </TableItem>

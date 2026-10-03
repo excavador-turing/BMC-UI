@@ -1,7 +1,7 @@
-import { Link } from "@tanstack/react-router";
 import { PowerIcon, PowerOffIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import NavLink from "@/components/NavLink";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -73,9 +73,10 @@ function NodeTile({
         : t("nodes.linkDown");
 
   return (
-    <Link
-      to="/power-control"
-      className="rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+    <NavLink
+      destination="power-control"
+      node={nodeId}
+      className="block rounded-xl text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
     >
       <Card className="@container/card h-full transition-colors hover:bg-muted/40">
         <CardHeader>
@@ -116,6 +117,6 @@ function NodeTile({
           )}
         </CardFooter>
       </Card>
-    </Link>
+    </NavLink>
   );
 }

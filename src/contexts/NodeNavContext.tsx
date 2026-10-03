@@ -10,14 +10,29 @@ import { createContext, type ReactNode } from "react";
  * the URL hash instead.
  *
  * Both still need the same buttons on the same cards. So the cards ask for a
- * destination and someone above them decides what that means -- a `<Link>` in
+ * destination and someone above them decides what that means -- a route in
  * the board app, a hash change in the fleet.
+ *
+ * A component shared with the fleet must therefore never render a router
+ * `<Link>` of its own: with no router above it, it throws. Use `NavLink`,
+ * which asks this context.
  *
  * The default is deliberately a no-op rather than a throw: a component that
  * renders these buttons somewhere neither provider reaches should draw and do
  * nothing, not take the page down.
  */
-export type NodeDestination = "console" | "flash-node" | "usb";
+export type NodeDestination =
+  "console" | "flash-node" | "usb" | "power-control" | "firmware-upgrade";
+
+/** The destinations that are about one module, and so carry which. USB and
+ *  Firmware are about the board as a whole. */
+export function takesNode(destination: NodeDestination): boolean {
+  return (
+    destination === "console" ||
+    destination === "flash-node" ||
+    destination === "power-control"
+  );
+}
 
 export interface NodeNav {
   /** Where a button for this destination points, or null to render a plain
