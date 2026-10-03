@@ -30,3 +30,6 @@ dist-ssr
 
 # release staging
 artifacts
+
+# shadcn agent tooling
+skills-lock.json
