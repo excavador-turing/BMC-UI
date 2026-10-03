@@ -95,6 +95,11 @@ export const FLEET_TABS: FleetTab[] = [
     ),
   },
   {
+    id: "switch",
+    label: "Switch",
+    Component: named(() => import("@/routes/_tabLayout/switch.lazy"), "Switch"),
+  },
+  {
     id: "security",
     label: "Security",
     Component: named(
