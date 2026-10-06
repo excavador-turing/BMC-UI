@@ -670,6 +670,9 @@ const translations = {
     durationHours: "{{value}} h",
     durationMinutes: "{{value}} m",
     durationSeconds: "{{value}} s",
+    staleBundle:
+      "The interface was updated. Reload the page to use the new version.",
+    reloadPage: "Reload",
   },
 };
 

@@ -530,6 +530,9 @@ const translations = {
     durationHours: "{{value}} h",
     durationMinutes: "{{value}} min",
     durationSeconds: "{{value}} s",
+    staleBundle:
+      "La interfaz se ha actualizado. Recarga la página para usar la nueva versión.",
+    reloadPage: "Recargar",
   },
 } satisfies OptionalTranslations;
 

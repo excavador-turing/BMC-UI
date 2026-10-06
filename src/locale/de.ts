@@ -535,6 +535,9 @@ const translations = {
     durationHours: "{{value}} Std",
     durationMinutes: "{{value}} Min",
     durationSeconds: "{{value}} Sek",
+    staleBundle:
+      "Die Oberfläche wurde aktualisiert. Lade die Seite neu, um die neue Version zu verwenden.",
+    reloadPage: "Neu laden",
   },
 } satisfies OptionalTranslations;
 

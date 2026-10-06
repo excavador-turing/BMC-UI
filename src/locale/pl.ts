@@ -529,6 +529,9 @@ const translations = {
     durationHours: "{{value}} godz",
     durationMinutes: "{{value}} min",
     durationSeconds: "{{value}} s",
+    staleBundle:
+      "Interfejs został zaktualizowany. Odśwież stronę, aby użyć nowej wersji.",
+    reloadPage: "Odśwież",
   },
 } satisfies OptionalTranslations;
 
