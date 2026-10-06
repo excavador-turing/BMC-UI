@@ -10,6 +10,27 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **A browser that kept an old copy of the interface now rescues itself after
+  an upgrade.** A reader on the Turing Pi Discord upgraded to firmware v2.40.0
+  and found the upgrade page, the password page and the node list broken, with
+  nodes shown as off, until they cleared the browser's cache. The browser had
+  kept the old page, which asked for files the new firmware no longer has. When
+  a page piece fails to load, the interface now reloads itself once, which
+  fetches the current page, and carries on where you were. If the reload does
+  not help, it does not try again and a banner says the interface was updated
+  and offers a Reload button, in all six languages. This covers the board, the
+  fleet and the demo. A page already stuck in a browser from before this
+  release cannot do this itself; one reload of the page (or clearing the cache)
+  gets it onto this version once.
+- **The fleet's web server tells browsers what to keep.** The page itself is
+  now revalidated on every visit, so a new release shows up without clearing
+  anything; the numbered files under `/assets/` are cached for a year, with one
+  clear instruction instead of two; and a file that is not there is a plain
+  "not found" rather than the page. (The board's own server is fixed
+  separately, in bmcd.)
+
 ## [v4.0.0] — 2026-10-03
 
 The whole interface was redesigned by

@@ -10,9 +10,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { FlashProvider } from "@/contexts/FlashContext";
 import InnerApp from "@/innerApp";
+import { installStaleBundleRecovery } from "@/lib/staleBundle";
 import { type router } from "@/router";
 
 const queryClient = new QueryClient();
+
+// Before anything is imported lazily, so the first failed chunk is caught.
+installStaleBundleRecovery();
 
 // The demo answers from fixtures instead of a board. Vite replaces
 // `import.meta.env.VITE_DEMO` at build time, so in a normal build this branch

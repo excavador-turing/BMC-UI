@@ -530,6 +530,9 @@ const translations = {
     durationHours: "{{value}} u",
     durationMinutes: "{{value}} min",
     durationSeconds: "{{value}} s",
+    staleBundle:
+      "De interface is bijgewerkt. Laad de pagina opnieuw om de nieuwe versie te gebruiken.",
+    reloadPage: "Opnieuw laden",
   },
 } satisfies OptionalTranslations;
 

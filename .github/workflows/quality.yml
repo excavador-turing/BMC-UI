@@ -164,6 +164,52 @@ jobs:
       - name: Type into every box
         run: npm run type-test
 
+  # A page left open (or cached) across an upgrade must recover by itself.
+  #
+  # After firmware v2.40.0 a browser kept the old index.html, asked for chunk
+  # names the board no longer had, and was answered with index.html instead of
+  # a 404. The lazy routes failed to load: a broken upgrade page, a broken
+  # password page, nodes shown as off. This swaps the served build under an
+  # open page, exactly so, and requires one reload and a rendered route -- and
+  # no reload loop when a reload cannot help. About ten seconds.
+  stale-chunk:
+    name: A stale page reloads itself after an upgrade
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          pip install websockets
+
+      - name: Swap the build under an open page
+        run: npm run stale-chunk-test
+
+  # The fleet image's cache rules, against the nginx it ships.
+  fleet-headers:
+    name: The fleet server's cache headers
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check
+        run: npm run fleet-headers-test
+
   api-types:
     name: Generated API types match the pinned release
     runs-on: ubuntu-latest

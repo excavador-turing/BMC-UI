@@ -509,6 +509,8 @@ const translations = {
     durationHours: "{{value}} 小时",
     durationMinutes: "{{value}} 分",
     durationSeconds: "{{value}} 秒",
+    staleBundle: "界面已更新。请重新加载页面以使用新版本。",
+    reloadPage: "重新加载",
   },
 } satisfies OptionalTranslations;
 

@@ -9,6 +9,8 @@
     "lint": "eslint .",
     "screens": "VITE_DEMO=1 vite build && python3 scripts/screens.py",
     "type-test": "VITE_DEMO=1 vite build && python3 scripts/type-test.py",
+    "stale-chunk-test": "VITE_DEMO=1 vite build && python3 scripts/stale-chunk-test.py",
+    "fleet-headers-test": "sh scripts/fleet-headers-test.sh",
     "preview": "vite preview",
     "test": "echo \"Error: no test specified\" && exit 0",
     "api:refresh": "sh scripts/refresh-api-types.sh"
