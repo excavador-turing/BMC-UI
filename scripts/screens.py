@@ -245,6 +245,52 @@ def chrome_binary() -> str:
     sys.exit("screens: no Chrome on PATH. Install one, or skip this check.")
 
 
+# The SD-card picker, opened on the flash page. A long path once pushed the
+# Choose button out of the dialog (nowrap cells), so the operator could see an
+# image and not pick it. Every Choose button must lie inside the dialog's box,
+# and the table's scroller must not scroll sideways.
+PICKER = """
+(async () => {
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  const until = async (f) => {
+    for (let i = 0; i < 40; i++) { const v = f(); if (v) return v; await wait(150); }
+    return null;
+  };
+  const trigger = await until(() => document.querySelector('[data-testid="sdcard-browse"]'));
+  if (!trigger) return { error: 'no [data-testid=sdcard-browse] on the flash page' };
+  trigger.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+  trigger.click();
+  const dialog = await until(() => document.querySelector('[data-testid="sdcard-dialog"]'));
+  if (!dialog) return { error: 'the picker did not open' };
+  const buttons = await until(() => {
+    const b = [...dialog.querySelectorAll('[data-testid="sdcard-choose"]')];
+    return b.length ? b : null;
+  });
+  if (!buttons) return { error: 'the picker showed no Choose buttons (sdcard_files fixture?)' };
+  await wait(300);
+  const d = dialog.getBoundingClientRect();
+  const wrap = dialog.querySelector('[data-slot="table-container"]');
+  const outside = buttons.filter((b) => {
+    const r = b.getBoundingClientRect();
+    return r.left < d.left - 0.5 || r.right > d.right + 0.5 ||
+           r.top < d.top - 0.5 || r.bottom > d.bottom + 0.5;
+  }).length;
+  const longest = Math.max(...[...dialog.querySelectorAll('td')].map((c) => c.textContent.length));
+  const out = {
+    buttons: buttons.length, outside, longest,
+    dialog: [Math.round(d.left), Math.round(d.right)],
+    scrollWidth: wrap ? wrap.scrollWidth : -1,
+    clientWidth: wrap ? wrap.clientWidth : -1,
+  };
+  document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  return out;
+})()
+"""
+
+
+PICKER_RESULTS: list[dict] = []
+
+
 async def measure(base: str, ws_url: str) -> list[dict]:
     results: list[dict] = []
     async with websockets.connect(ws_url, max_size=40 * 1024 * 1024) as ws:
@@ -278,6 +324,15 @@ async def measure(base: str, ws_url: str) -> list[dict]:
                     sys.exit(f"screens: {tab} at {name} did not measure")
                 m.update({"tab": tab, "viewport": name, "width": width})
                 results.append(m)
+
+            # The picker, once per viewport, after the tabs.
+            print(f"  {name} sdcard picker", file=sys.stderr, flush=True)
+            await browser.hash_to(session, "flash-node")
+            await asyncio.sleep(1.2)
+            p = await browser.js(session, PICKER)
+            PICKER_RESULTS.append({"viewport": name, **(p if isinstance(p, dict) else {"error": "no result"})})
+            await browser.hash_to(session, "info")
+            await asyncio.sleep(0.6)
     return results
 
 
@@ -313,6 +368,28 @@ def faults(results: list[dict]) -> list[tuple[str, str]]:
         if m["viewport"] == "phone" and m["hscroll"]:
             out.append(
                 (f"hscroll: {where}", "the page is wider than the window.")
+            )
+    for p in PICKER_RESULTS:
+        where = f"sd card picker at {p['viewport']}"
+        if "error" in p:
+            out.append((f"picker: {where}", p["error"]))
+            continue
+        if p["outside"]:
+            out.append(
+                (
+                    f"picker choose: {where}",
+                    f"{p['outside']} of {p['buttons']} Choose buttons lie outside "
+                    f"the dialog (x {p['dialog'][0]}..{p['dialog'][1]}); the "
+                    f"longest cell is {p['longest']} characters.",
+                )
+            )
+        if p["scrollWidth"] > p["clientWidth"] + 1:
+            out.append(
+                (
+                    f"picker hscroll: {where}",
+                    f"the table scrolls sideways ({p['scrollWidth']}px in "
+                    f"{p['clientWidth']}px), which hides the Choose column.",
+                )
             )
     return out
 

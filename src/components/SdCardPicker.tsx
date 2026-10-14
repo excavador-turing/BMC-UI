@@ -81,7 +81,10 @@ export default function SdCardPicker({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[80vh] overflow-hidden sm:max-w-2xl">
+      <DialogContent
+        data-testid="sdcard-dialog"
+        className="max-h-[80vh] overflow-hidden sm:max-w-2xl"
+      >
         <DialogHeader>
           <DialogTitle>{t("sdCard.pickerTitle")}</DialogTitle>
           <DialogDescription>
@@ -144,6 +147,7 @@ export default function SdCardPicker({
                         type="button"
                         size="sm"
                         variant="outline"
+                        data-testid="sdcard-choose"
                         disabled={!entry.flashable}
                         onClick={() => {
                           onChoose(entry);
