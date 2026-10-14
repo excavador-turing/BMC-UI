@@ -81,6 +81,7 @@ export function FlashNode({ preselected }: { preselected?: number }) {
         nodeId: parsedNodeId,
         file,
         url,
+        sdcard: fromCard !== null,
         sha256,
         skipCRC,
       });

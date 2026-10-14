@@ -2,50 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AxiosProgressEvent } from "axios";
 
 import { useAxiosWithAuth } from "./_core";
-
-const handleParams = (variables: {
-  type: "firmware" | "flash";
-  file?: { name: string; size: number };
-  url?: string;
-  sha256?: string;
-  skipCRC?: boolean;
-  node?: number;
-  park?: boolean;
-}) => {
-  const params: Record<string, unknown> = {
-    opt: "set",
-    type: variables.type,
-  };
-
-  if (variables.file) {
-    params.file = variables.file.name;
-    params.length = variables.file.size;
-  } else {
-    params.file = variables.url;
-  }
-
-  if (variables.sha256) {
-    params.sha256 = variables.sha256;
-  }
-
-  if (variables.skipCRC !== undefined) {
-    params.skip_crc = variables.skipCRC;
-  }
-
-  if (variables.node !== undefined) {
-    params.node = variables.node;
-  }
-
-  // Park the image on the SD card instead of installing it. The daemon writes
-  // it and stops, so the catalogue lists it and installing stays a separate,
-  // visible choice -- rather than an upload that arms the board the moment it
-  // lands.
-  if (variables.park) {
-    params.park = 1;
-  }
-
-  return params;
-};
+import { handleParams } from "./flashParams.ts";
 
 export function useBackupMutation() {
   const api = useAxiosWithAuth();
@@ -127,6 +84,8 @@ export function useNodeUpdateMutation(
       nodeId: number;
       file?: File;
       url?: string;
+      /** `url` is a path on the board's SD card, not an address to fetch. */
+      sdcard?: boolean;
       sha256?: string;
       skipCRC: boolean;
     }) => {
@@ -142,6 +101,7 @@ export function useNodeUpdateMutation(
           node: variables.nodeId,
           file: variables.file,
           url: variables.url,
+          sdcard: variables.sdcard,
           skipCRC: variables.skipCRC,
           sha256: variables.sha256,
         }),

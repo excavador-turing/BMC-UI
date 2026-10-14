@@ -68,8 +68,10 @@ export default function SdCardPicker({
   const rows = useMemo(() => {
     const all = (files.data ?? []).filter((entry) => !entry.directory);
     const listed = showAll ? all : all.filter((entry) => entry.flashable);
-    // Directory first, then name, so the order is the card's shape rather
-    // than whatever order the daemon walked it in.
+    // Directories are not rows (nothing here can flash one), and the listing
+    // is flat: each entry carries its full path. Sorting by path therefore
+    // groups files by folder, so the order is the card's shape rather than
+    // whatever order the daemon walked it in.
     return [...listed].sort((a, b) => a.path.localeCompare(b.path));
   }, [files.data, showAll]);
 
@@ -123,18 +125,21 @@ export default function SdCardPicker({
               <TableBody>
                 {rows.map((entry) => (
                   <TableRow key={entry.path}>
-                    <TableCell className="font-mono break-all">
+                    {/* The path is the only cell allowed to wrap: a 60+
+                        character filename must not push Choose out of the
+                        dialog (every cell is nowrap by default). */}
+                    <TableCell className="min-w-0 font-mono break-all whitespace-normal">
                       {entry.path}
                     </TableCell>
-                    <TableCell className="whitespace-nowrap tabular-nums">
+                    <TableCell className="shrink-0 whitespace-nowrap tabular-nums">
                       {human(entry.size)}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">
+                    <TableCell className="min-w-0 whitespace-normal text-muted-foreground">
                       {entry.flashable
                         ? t("sdCard.flashable")
                         : (entry.reason ?? t("sdCard.notFlashable"))}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="shrink-0 text-right whitespace-nowrap">
                       <Button
                         type="button"
                         size="sm"

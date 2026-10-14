@@ -1,0 +1,36 @@
+{
+ "response": [
+  {
+   "result": [
+    {
+     "path": "images/ubuntu-24.04.2-preinstalled-server-arm64+raspi-rk1-board-with-a-very-long-name.img.xz",
+     "directory": false,
+     "flashable": true,
+     "size": 1288490188,
+     "modified": 1760000000
+    },
+    {
+     "path": "images/armbian-bookworm-minimal.img",
+     "directory": false,
+     "flashable": true,
+     "size": 524288000,
+     "modified": 1759000000
+    },
+    {
+     "path": "notes.txt",
+     "directory": false,
+     "flashable": false,
+     "size": 412,
+     "modified": 1758000000,
+     "reason": "not a disk image, and nothing in the name or contents says it could be written to a module"
+    },
+    {
+     "path": "images",
+     "directory": true,
+     "flashable": false,
+     "modified": 1760000000
+    }
+   ]
+  }
+ ]
+}
