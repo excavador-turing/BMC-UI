@@ -75,6 +75,11 @@ export default function SdCardPicker({
     return [...listed].sort((a, b) => a.path.localeCompare(b.path));
   }, [files.data, showAll]);
 
+  const stateText = (entry: SdCardEntry) =>
+    entry.flashable
+      ? t("sdCard.flashable")
+      : (entry.reason ?? t("sdCard.notFlashable"));
+
   const flashableCount = (files.data ?? []).filter(
     (entry) => entry.flashable
   ).length;
@@ -119,9 +124,13 @@ export default function SdCardPicker({
             <Table>
               <TableHeader className="text-muted-foreground">
                 <TableRow>
-                  <TableHead>{t("sdCard.colName")}</TableHead>
+                  <TableHead className="whitespace-normal">
+                    {t("sdCard.colName")}
+                  </TableHead>
                   <TableHead>{t("sdCard.colSize")}</TableHead>
-                  <TableHead>{t("sdCard.colState")}</TableHead>
+                  <TableHead className="hidden whitespace-normal sm:table-cell">
+                    {t("sdCard.colState")}
+                  </TableHead>
                   <TableHead />
                 </TableRow>
               </TableHeader>
@@ -133,14 +142,17 @@ export default function SdCardPicker({
                         dialog (every cell is nowrap by default). */}
                     <TableCell className="min-w-0 font-mono break-all whitespace-normal">
                       {entry.path}
+                      {/* On a phone the state column is dropped and its text
+                          sits under the path, so the table fits the dialog. */}
+                      <span className="mt-1 block font-sans text-xs break-words text-muted-foreground sm:hidden">
+                        {stateText(entry)}
+                      </span>
                     </TableCell>
                     <TableCell className="shrink-0 whitespace-nowrap tabular-nums">
                       {human(entry.size)}
                     </TableCell>
-                    <TableCell className="min-w-0 whitespace-normal text-muted-foreground">
-                      {entry.flashable
-                        ? t("sdCard.flashable")
-                        : (entry.reason ?? t("sdCard.notFlashable"))}
+                    <TableCell className="hidden min-w-0 whitespace-normal text-muted-foreground sm:table-cell">
+                      {stateText(entry)}
                     </TableCell>
                     <TableCell className="shrink-0 text-right whitespace-nowrap">
                       <Button
