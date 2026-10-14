@@ -10,6 +10,36 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [v4.1.0] — 2026-10-15
+
+### Fixed
+
+- **"Skip CRC" left unticked still skipped the check, on every node flash,
+  since v3.25.0.** The interface sent `skip_crc=false` when the box was
+  empty, and the daemon only asks whether the word `skip_crc` is present, not
+  what it says, so verification was switched off whether you ticked the box
+  or not. The interface now sends `skip_crc=1` only when the box is ticked,
+  and the check runs otherwise. This needs bmcd 2.39.0 (firmware with it) to
+  take full effect; on an older daemon the flash behaves as before.
+- **Flashing a node from the SD card works.** Choosing an image on the card
+  and pressing flash was refused with "Invalid `length` query parameter",
+  because the interface asked the daemon to fetch the card path as though it
+  were an upload. It never worked since the picker arrived in v3.25.0. The
+  interface now asks the daemon to read the file from the card itself, and the
+  progress bar shows a real percentage when the daemon reports the image's
+  size (bmcd 2.39.0). Reported by a user on Discord.
+- **The "Choose" button in the SD card picker is always visible.** A long
+  filename widened the table until the button was pushed out of the dialog.
+  Long paths now wrap, and the size, state and button columns keep their width.
+- **A failed flash now says why in words.** The daemon's answer was shown as
+  raw JSON (`{"response":[{"result":"..."}]}`); the message inside it is shown
+  instead.
+
+### Added
+
+- Unit tests for the flash request (`npm test`), and an SD card listing with a
+  long filename in the demo.
+
 ## [v4.0.1] — 2026-10-06
 
 ### Fixed

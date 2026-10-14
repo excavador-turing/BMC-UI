@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { type AxiosError, type AxiosProgressEvent } from "axios";
+import { type AxiosProgressEvent } from "axios";
 import { filesize } from "filesize";
 import React, {
   createContext,
@@ -11,6 +11,7 @@ import React, {
 import { useTranslation } from "react-i18next";
 
 import { useToast } from "@/hooks/use-toast";
+import { bmcdMessage } from "@/lib/api/bmcdMessage";
 import {
   useFirmwareUpdateMutation,
   useNodeUpdateMutation,
@@ -43,6 +44,7 @@ export interface FlashContextValue {
     nodeId: number;
     file?: File;
     url?: string;
+    sdcard?: boolean;
     sha256?: string;
     skipCRC: boolean;
   }) => Promise<void>;
@@ -111,8 +113,7 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
       onError: (error) => {
         setIsUploading(false);
         const title = t("firmwareUpgrade.uploadFailed");
-        const errorMessage =
-          ((error as AxiosError).response?.data as string) ?? error.message;
+        const errorMessage = bmcdMessage(error);
         setStatusMessage(`${title}: ${errorMessage}`);
         toast({
           title,
@@ -127,6 +128,7 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
     nodeId: number;
     file?: File;
     url?: string;
+    sdcard?: boolean;
     sha256?: string;
     skipCRC: boolean;
   }) => {
@@ -147,8 +149,7 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
       onError: (error) => {
         setIsUploading(false);
         const title = t("flashNode.transferFailed", { nodeId });
-        const errorMessage =
-          ((error as AxiosError).response?.data as string) ?? error.message;
+        const errorMessage = bmcdMessage(error);
         setStatusMessage(`${title}: ${errorMessage}`);
         toast({
           title,
@@ -176,12 +177,20 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
   const handleTransferProgress = useCallback(
     (data: FlashStatus) => {
       const bytesWritten = data.Transferring?.bytes_written ?? 0;
+      // bmcd 2.39.0 reports the size of a transfer it reads itself (from the
+      // card). Where it does, show a real percentage; where it does not, the
+      // bar stays full and pulsing -- "working, extent unknown" -- with only
+      // the bytes written to go on.
+      const size = data.Transferring?.size ?? 0;
+      const known = size > 0;
       setUploadProgress({
         transferred: t("firmwareUpgrade.writtenData", {
           written: filesize(bytesWritten, { standard: "jedec" }),
         }),
-        total: null,
-        pct: 100,
+        total: known ? filesize(size, { standard: "jedec" }) : null,
+        pct: known
+          ? Math.min(100, Math.round((bytesWritten / size) * 100))
+          : 100,
       });
     },
     [t]
