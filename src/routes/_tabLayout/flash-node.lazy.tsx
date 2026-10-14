@@ -145,6 +145,7 @@ export function FlashNode({ preselected }: { preselected?: number }) {
                     <Button
                       type="button"
                       variant="outline"
+                      data-testid="sdcard-browse"
                       onClick={() => setPicking(true)}
                       disabled={nodeUpdateMutation.isPending || isFlashing}
                     >
