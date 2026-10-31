@@ -56,6 +56,8 @@ the interface shows nothing new.
   could not be mounted, repairable) and `?storage=keyhold` (KEY1 held at
   power-on); `?board=v2.4` shows a v2.4 revision for the reboot dialogs. The
   fixtures are written, not captured.
+- The generated API types are now from bmcd v2.42.0 (they were v2.36.0), and
+  the storage banner is typed from them.
 - Unit tests for the banner's decisions (`src/lib/api/storageView.test.mjs`).
 
 ## [v4.2.0] — 2026-10-31
