@@ -7,6 +7,7 @@ import axios from "axios";
 
 import { useAxiosWithAuth } from "./_core";
 import type { components } from "./schema";
+import { parseStorage } from "./storageView";
 
 /**
  * The daemon's own description of what it sends, generated from the OpenAPI
@@ -1523,5 +1524,36 @@ export function useAccessQuery() {
     // One try, no retries: the card hides itself either way, and three
     // attempts only delay that by a few seconds on every older board.
     retry: false,
+  });
+}
+
+/**
+ * Where the board keeps its settings, and whether they will survive a reboot
+ * (daemon 2.42.0 and later).
+ *
+ * Asked once per page load and never polled: what the storage is does not
+ * change under a running board, and the one thing that changes it -- the
+ * repair -- reboots it, which reloads the page. A daemon that has no such
+ * endpoint (404, or a page of HTML) or that refuses the question answers
+ * `null`, and the banner shows nothing. Only a request that got no answer at
+ * all is an error, so the connection banner still hears about a dead board.
+ */
+export function useStorageQuery() {
+  const api = useAxiosWithAuth();
+
+  return useQuery({
+    queryKey: ["storage"],
+    queryFn: async () => {
+      try {
+        const { data } = await api.get<unknown>("/bmc/storage");
+        return parseStorage(data);
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response) return null;
+        throw error;
+      }
+    },
+    retry: false,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
   });
 }

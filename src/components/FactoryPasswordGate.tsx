@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import ConnectionBanner from "@/components/ConnectionBanner";
 import PasswordForm from "@/components/PasswordForm";
+import StorageBanner from "@/components/StorageBanner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Card,
@@ -50,6 +51,10 @@ export default function FactoryPasswordGate({
   return (
     <div className="flex min-h-svh w-full flex-col">
       <ConnectionBanner />
+      {/* A board that could not mount its settings is on factory defaults,
+          and so is always on this page. The password chosen here is lost at
+          the next reboot, which is what the banner has to say first. */}
+      <StorageBanner />
       <main className="flex flex-1 items-start justify-center p-4 md:items-center md:p-6">
         <Card className="w-full max-w-lg">
           <CardHeader>

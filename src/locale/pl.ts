@@ -190,6 +190,32 @@ const translations = {
     lost: "Płyta przestała odpowiadać {{elapsed}} sekund temu, a nic tutaj o to nie prosiło. Strona nadal próbuje i wróci sama.",
     cameBack: "Płyta wróciła po {{seconds}} sekundach.",
   },
+  storage: {
+    unmounted:
+      "Nie udało się zamontować pamięci ustawień. Płyta działa na ustawieniach fabrycznych, a nic, co zmienisz – łącznie z hasłem – nie przetrwa restartu.",
+    keyhold:
+      "Przy włączeniu zażądano trybu awaryjnego (KEY1). Zapisane ustawienia nie są wczytywane; uruchom ponownie bez przytrzymywania KEY1, aby ich użyć.",
+    details:
+      "Szczegóły",
+    knownFaults:
+      "Znane usterki i ich znaczenie",
+    repairButton:
+      "Napraw pamięć ustawień",
+    rebooting:
+      "Restartowanie…",
+    repairTitle:
+      "Naprawić pamięć ustawień?",
+    repairRemoves:
+      "Spowoduje to usunięcie uszkodzonego woluminu ustawień i restart BMC.",
+    repairFactory:
+      "Płyta wróci z ustawieniami fabrycznymi (hasło turing), na których i tak teraz działa.",
+    repairNodes:
+      "W Turing Pi 2 v2.4 restart BMC wyłącza i włącza też wszystkie cztery węzły, więc najpierw je wyłącz.",
+    repairStarted:
+      "Wolumin ustawień jest usuwany, a płyta się restartuje.",
+    repairFailed:
+      "Nie udało się naprawić pamięci ustawień",
+  },
   addressCard: {
     title: "Adres IP",
     mode: "Tryb adresu",

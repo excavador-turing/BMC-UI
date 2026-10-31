@@ -122,6 +122,21 @@ function addressFixtureName(): string {
   return "address";
 }
 
+/**
+ * Which settings-storage state the demo shows. The default is a healthy
+ * board, which shows no banner. `?storage=broken` is a settings volume that
+ * would not mount (the factory-defaults banner, with a repair), and
+ * `?storage=keyhold` is a board powered on with KEY1 held (the safemode
+ * banner). Both are written fixtures, not captures; the UBIFS lines are the
+ * shape the kernel prints, with nothing from a real board in them.
+ */
+function storageFixtureName(): string {
+  const storage = new URLSearchParams(window.location.search).get("storage");
+  if (storage === "broken") return "storage_broken";
+  if (storage === "keyhold") return "storage_keyhold";
+  return "storage";
+}
+
 function demoAddress(): DemoAddress | null {
   if (address) return address;
   const captured = fixture(addressFixtureName()) as AddressState | undefined;
@@ -206,6 +221,9 @@ export const demoAdapter: AxiosAdapter = (config) => {
       const state = demoAddress();
       if (state) return reply(config, 200, state.view());
     }
+    if (url.endsWith("/bmc/storage")) {
+      return reply(config, 200, fixture(storageFixtureName()));
+    }
     for (const [suffix, name] of Object.entries(reads)) {
       if (url.endsWith(suffix)) {
         const data = fixture(name);
@@ -270,6 +288,19 @@ export const demoAdapter: AxiosAdapter = (config) => {
     const state = demoAddress();
     if (!state) return reply(config, 400, { detail: "no address" });
     return reply(config, 200, state.revert());
+  } else if (url.endsWith("/bmc/storage/repair")) {
+    // The one repair the demo accepts is the one it offers: it answers 202
+    // and the banner says it is rebooting. Nothing reboots (the connection
+    // wait is switched off in the demo), so the banner stays that way until
+    // the page is reloaded.
+    if (storageFixtureName() === "storage_broken") {
+      return reply(config, 202, { rebooting: true });
+    }
+    return reply(
+      config,
+      409,
+      legacyResult("the settings storage is not damaged; nothing to repair")
+    );
   } else if (url.includes("/bmc/")) {
     // Every write on a path-style endpoint -- a switch document, a
     // certificate, a password, the client CA -- and the validate call, which
