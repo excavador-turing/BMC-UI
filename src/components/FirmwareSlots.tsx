@@ -17,6 +17,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useConnection } from "@/hooks/useConnection";
+import { useRebootCopy } from "@/hooks/useRebootCopy";
 import {
   type FirmwareSlot,
   useFirmwareSlotsQuery,
@@ -187,6 +188,7 @@ export default function FirmwareSlots() {
     .join(" · ");
   const { toast } = useToast();
   const { expectReboot } = useConnection();
+  const copy = useRebootCopy();
   const [rebootModalOpened, setRebootModalOpened] = useState(false);
   const { mutate: mutateRebootBMC, isPending: rebootPending } =
     useRebootBMCMutation();
@@ -421,7 +423,7 @@ export default function FirmwareSlots() {
           onClose={() => setRebootModalOpened(false)}
           onReboot={handleRebootBMC}
           title={t("firmwareUpgrade.rebootToApply")}
-          message={t("firmwareUpgrade.rebootToApplyConfirm")}
+          message={copy.upgrade}
         />
       </CardContent>
     </Card>

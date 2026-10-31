@@ -45,9 +45,17 @@ the interface shows nothing new.
   repaired from here, the banner shows the daemon's reason instead. A refusal
   shows the daemon's own message. The request is sent as `application/json`,
   which the daemon requires.
+- **The reboot dialog no longer tells v2.4 owners their nodes keep running;
+  on v2.4 they are power-cycled.** A Turing Pi 2 v2.4 has no latch on its node
+  power rails, which the BMC drives directly, so any BMC reboot power-cycles
+  all four nodes; a v2.5 has latches and its nodes keep running. The Settings
+  reboot dialog and its note, the dialog that reboots to start a staged
+  firmware, the banner's reboot and the repair dialog now choose their
+  warning by the board revision, and say both when the revision is unknown.
 - The demo can show both banners: `?storage=broken` (a settings volume that
   could not be mounted, repairable) and `?storage=keyhold` (KEY1 held at
-  power-on). The fixtures are written, not captured.
+  power-on); `?board=v2.4` shows a v2.4 revision for the reboot dialogs. The
+  fixtures are written, not captured.
 - Unit tests for the banner's decisions (`src/lib/api/storageView.test.mjs`).
 
 ## [v4.2.0] — 2026-10-31

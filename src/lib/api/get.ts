@@ -6,6 +6,7 @@ import {
 import axios from "axios";
 
 import { useAxiosWithAuth } from "./_core";
+import { nodesOnReboot, type RebootNodes } from "./boardRevision";
 import type { components } from "./schema";
 import { parseStorage } from "./storageView";
 
@@ -1549,6 +1550,35 @@ export function useStorageQuery() {
         return parseStorage(data);
       } catch (error) {
         if (axios.isAxiosError(error) && error.response) return null;
+        throw error;
+      }
+    },
+    retry: false,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+  });
+}
+
+/**
+ * What a BMC reboot does to the nodes on this board, from the revision `about`
+ * reports. Not the suspense query the Info page uses: a dialog that cannot
+ * learn the revision (a daemon that will not say, a board still on its first
+ * password) must fall back to `unknown`, which says both things, and not blank
+ * the page it sits on. Asked once and kept; the revision does not change.
+ */
+export function useRebootNodesQuery() {
+  const api = useAxiosWithAuth();
+
+  return useQuery({
+    queryKey: ["rebootNodes"],
+    queryFn: async (): Promise<RebootNodes> => {
+      try {
+        const { data } = await api.get<
+          APIResponse<{ board_revision?: unknown }>
+        >("/bmc", { params: { opt: "get", type: "about" } });
+        return nodesOnReboot(data.response?.[0]?.result?.board_revision);
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response) return "unknown";
         throw error;
       }
     },
