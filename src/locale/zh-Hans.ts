@@ -194,12 +194,17 @@ const translations = {
       "开机时请求了安全模式（KEY1）。已保存的设置未被加载；如需使用，请在不按住 KEY1 的情况下重启。",
     details: "详情",
     knownFaults: "已知故障及其含义",
+    rebootFirst:
+      "如果故障是暂时的，普通重启可能就够了，请先试一试。如果该提示再次出现，再修复存储。",
     repairButton: "修复设置存储",
     rebooting: "正在重启…",
-    repairTitle: "修复设置存储？",
-    repairRemoves: "这会删除已损坏的设置卷并重启 BMC。",
-    repairFactory:
-      "主板将以出厂设置（密码 turing）重新启动，而它现在本来就在使用这些设置。",
+    repairTitle: "删除已保存的设置并修复存储？",
+    repairRemoves:
+      "这会删除无法挂载的设置卷并重启 BMC。主板将以出厂设置（密码 turing）重新启动。",
+    repairErases:
+      "保存在该卷上的设置——网络配置、证书、节点名称和应用数据——将被永久删除，且无法恢复。它们现在没有被加载，但在您执行此操作之前仍然存在。",
+    repairTryReboot:
+      "挂载可能只是这一次失败，所以请先尝试普通重启。只有提示再次出现时才进行修复。",
     repairNodes:
       "在 Turing Pi 2 v2.4 上，BMC 重启还会让全部四个节点断电再上电，请先将它们关机。",
     repairStarted: "正在删除设置卷，主板正在重启。",

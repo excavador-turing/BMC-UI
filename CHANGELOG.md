@@ -19,25 +19,35 @@ the interface shows nothing new.
 ### Added
 
 - **A banner on every page when the board's settings will not survive a
-  reboot.** A board whose settings volume could not be mounted runs on factory
-  defaults, and everything looks normal until the next power cut puts back
-  whatever you had changed, the password included. The banner says so above
-  every page, and on the page that asks for a first password, with the
+  reboot.** A board whose settings storage could not be mounted runs on
+  factory defaults, and everything looks normal until the next power cut puts
+  back whatever you had changed, the password included. The banner says so
+  above every page, and on the page that asks for a first password, with the
   daemon's own detail under a "Details" disclosure and a link to the known
   faults page. A board started with KEY1 held (safemode) gets its own, shorter
   banner: saved settings are not loaded, reboot without KEY1 to use them.
   The question is asked once per page load, never polled.
-- **Repair settings storage.** Where the daemon says the damaged volume can be
-  removed, the banner offers a button that asks first (it removes the volume
-  and reboots the BMC; the board comes back on the factory settings it is
-  already running, password `turing`; on a Turing Pi 2 v2.4 the reboot also
-  power-cycles all four nodes, so shut them down first), then waits for the
-  board exactly as the Reboot button does. Where it cannot be repaired from
-  here, the banner shows the daemon's reason instead. A refusal shows the
-  daemon's own message.
+- **A plain reboot, first.** The daemon only knows that the mount failed, and
+  that can be a one-off, so the banner offers the Settings page's Reboot
+  beside the repair and recommends trying it before anything else. It is
+  offered even where the repair is not, because the daemon's reason there
+  ("there is no settings volume to remove; reboot the BMC to recreate it")
+  points at it.
+- **Repair settings storage, which erases what is saved on the volume.**
+  Where the daemon says the volume that could not be mounted can be removed,
+  the banner offers a button that asks first. The settings saved on that
+  volume (network configuration, certificates, node names, app data) are not
+  loading now, but they are still there, and the repair erases them for good:
+  they cannot be recovered. The board then comes back on factory settings
+  (password `turing`). On a Turing Pi 2 v2.4 the reboot also power-cycles all
+  four nodes, so shut them down first. After the confirmation the page waits
+  for the board exactly as the Reboot button does. Where it cannot be
+  repaired from here, the banner shows the daemon's reason instead. A refusal
+  shows the daemon's own message. The request is sent as `application/json`,
+  which the daemon requires.
 - The demo can show both banners: `?storage=broken` (a settings volume that
-  would not mount, repairable) and `?storage=keyhold` (KEY1 held at power-on).
-  The fixtures are written, not captured.
+  could not be mounted, repairable) and `?storage=keyhold` (KEY1 held at
+  power-on). The fixtures are written, not captured.
 - Unit tests for the banner's decisions (`src/lib/api/storageView.test.mjs`).
 
 ## [v4.2.0] — 2026-10-31

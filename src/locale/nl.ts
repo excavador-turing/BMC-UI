@@ -196,13 +196,17 @@ const translations = {
       "Bij het inschakelen is de veilige modus gevraagd (KEY1). Opgeslagen instellingen worden niet geladen; herstart zonder KEY1 ingedrukt te houden om ze te gebruiken.",
     details: "Details",
     knownFaults: "Bekende fouten en wat ze betekenen",
+    rebootFirst:
+      "Een gewone herstart kan genoeg zijn als de fout tijdelijk was; probeer die eerst. Als de melding terugkomt, herstel dan de opslag.",
     repairButton: "Opslag voor instellingen herstellen",
     rebooting: "Herstarten…",
-    repairTitle: "Opslag voor instellingen herstellen?",
+    repairTitle: "Opgeslagen instellingen wissen en opslag herstellen?",
     repairRemoves:
-      "Dit verwijdert het beschadigde instellingenvolume en herstart de BMC.",
-    repairFactory:
-      "Het board komt terug met fabrieksinstellingen (wachtwoord turing), waarop het nu toch al draait.",
+      "Dit verwijdert het instellingenvolume dat niet kon worden gekoppeld en herstart de BMC. Het board komt terug met fabrieksinstellingen (wachtwoord turing).",
+    repairErases:
+      "De instellingen die op dat volume zijn opgeslagen – netwerkconfiguratie, certificaten, nodenamen en appgegevens – worden definitief gewist en kunnen niet worden hersteld. Ze worden nu niet geladen, maar ze staan er nog tot u dit doet.",
+    repairTryReboot:
+      "Het koppelen is misschien maar één keer mislukt, dus probeer eerst een gewone herstart. Herstel alleen als de melding terugkomt.",
     repairNodes:
       "Op een Turing Pi 2 v2.4 zet de BMC-herstart ook alle vier de nodes uit en weer aan, dus sluit ze eerst af.",
     repairStarted:

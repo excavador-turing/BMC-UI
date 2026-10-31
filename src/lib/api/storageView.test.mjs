@@ -6,7 +6,9 @@ import {
   bannerKind,
   parseStorage,
   repairBlocker,
+  REPAIR_HEADERS,
   repairBody,
+  showReboot,
   showRepair,
 } from "./storageView.ts";
 
@@ -123,7 +125,31 @@ test("missing and mistyped fields fall back to the quiet value", () => {
   assert.equal(parseStorage({ ...broken, detail: "  " }).detail, null);
 });
 
+test("the plain reboot is offered wherever the mount failed, repairable or not", () => {
+  assert.equal(showReboot(parseStorage(broken)), true);
+  const blocked = parseStorage({
+    ...broken,
+    repairable: false,
+    repair_blocker:
+      "There is no settings volume to remove; reboot the BMC to recreate it.",
+  });
+  assert.equal(showRepair(blocked), false);
+  assert.equal(showReboot(blocked), true);
+  assert.equal(
+    showReboot(parseStorage({ ...broken, reason: "unrecorded" })),
+    true
+  );
+  // Not with KEY1 held, not on a healthy or unreadable answer.
+  assert.equal(
+    showReboot(parseStorage({ ...broken, reason: "requested" })),
+    false
+  );
+  assert.equal(showReboot(parseStorage({ state: "persistent" })), false);
+  assert.equal(showReboot(null), false);
+});
+
 test("the repair request carries the confirmation the daemon demands", () => {
+  assert.deepEqual(REPAIR_HEADERS, { "Content-Type": "application/json" });
   assert.deepEqual(repairBody(), { confirm: true });
   assert.equal(JSON.stringify(repairBody()), '{"confirm":true}');
 });

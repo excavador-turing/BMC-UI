@@ -197,13 +197,17 @@ const translations = {
       "Przy włączeniu zażądano trybu awaryjnego (KEY1). Zapisane ustawienia nie są wczytywane; uruchom ponownie bez przytrzymywania KEY1, aby ich użyć.",
     details: "Szczegóły",
     knownFaults: "Znane usterki i ich znaczenie",
+    rebootFirst:
+      "Zwykły restart może wystarczyć, jeśli usterka była przejściowa; spróbuj go najpierw. Jeśli komunikat wróci, napraw pamięć.",
     repairButton: "Napraw pamięć ustawień",
     rebooting: "Restartowanie…",
-    repairTitle: "Naprawić pamięć ustawień?",
+    repairTitle: "Usunąć zapisane ustawienia i naprawić pamięć?",
     repairRemoves:
-      "Spowoduje to usunięcie uszkodzonego woluminu ustawień i restart BMC.",
-    repairFactory:
-      "Płyta wróci z ustawieniami fabrycznymi (hasło turing), na których i tak teraz działa.",
+      "Spowoduje to usunięcie woluminu ustawień, którego nie udało się zamontować, i restart BMC. Płyta wróci z ustawieniami fabrycznymi (hasło turing).",
+    repairErases:
+      "Ustawienia zapisane na tym woluminie – konfiguracja sieci, certyfikaty, nazwy węzłów i dane aplikacji – zostaną trwale usunięte i nie będzie można ich odzyskać. Teraz się nie wczytują, ale wciąż tam są, dopóki tego nie zrobisz.",
+    repairTryReboot:
+      "Montowanie mogło zawieść tylko ten jeden raz, więc najpierw spróbuj zwykłego restartu. Naprawiaj tylko wtedy, gdy komunikat wróci.",
     repairNodes:
       "W Turing Pi 2 v2.4 restart BMC wyłącza i włącza też wszystkie cztery węzły, więc najpierw je wyłącz.",
     repairStarted: "Wolumin ustawień jest usuwany, a płyta się restartuje.",

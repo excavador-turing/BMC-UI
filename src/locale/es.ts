@@ -197,13 +197,17 @@ const translations = {
       "Se solicitó el modo seguro al encender (KEY1). Los ajustes guardados no se cargan; reinicie sin mantener pulsado KEY1 para usarlos.",
     details: "Detalles",
     knownFaults: "Fallos conocidos y su significado",
+    rebootFirst:
+      "Un reinicio simple puede bastar si el fallo fue temporal; pruébelo primero. Si el aviso vuelve, repare el almacenamiento.",
     repairButton: "Reparar el almacenamiento de ajustes",
     rebooting: "Reiniciando…",
-    repairTitle: "¿Reparar el almacenamiento de ajustes?",
+    repairTitle: "¿Borrar los ajustes guardados y reparar el almacenamiento?",
     repairRemoves:
-      "Esto elimina el volumen de ajustes dañado y reinicia el BMC.",
-    repairFactory:
-      "La placa vuelve con los ajustes de fábrica (contraseña turing), con los que ya está funcionando ahora.",
+      "Esto elimina el volumen de ajustes que no se pudo montar y reinicia el BMC. La placa vuelve con los ajustes de fábrica (contraseña turing).",
+    repairErases:
+      "Los ajustes guardados en ese volumen —configuración de red, certificados, nombres de nodos y datos de aplicaciones— se borran de forma permanente y no se pueden recuperar. Ahora no se cargan, pero siguen ahí hasta que haga esto.",
+    repairTryReboot:
+      "Puede que el montaje fallara solo esta vez, así que pruebe primero un reinicio simple. Repare solo si el aviso vuelve.",
     repairNodes:
       "En una Turing Pi 2 v2.4, el reinicio del BMC también apaga y enciende los cuatro nodos, así que apáguelos antes.",
     repairStarted:

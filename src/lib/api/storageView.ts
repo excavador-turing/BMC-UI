@@ -89,14 +89,29 @@ export function bannerKind(
 }
 
 /**
- * Is the repair button offered? Only where the volume is damaged, and the
- * daemon says it can be removed. With KEY1 held the volume is fine and not
- * loading it is deliberate: removing it would destroy settings that a reboot
- * without KEY1 brings back, so the button is not offered however the daemon
- * answers.
+ * Is the repair button offered? Only where the settings volume could not be
+ * mounted, and the daemon says it can be removed. With KEY1 held the volume
+ * is fine and not loading it is deliberate: removing it would erase settings
+ * that a reboot without KEY1 brings back, so the button is not offered
+ * however the daemon answers.
+ *
+ * The repair ERASES what is saved on the volume. The daemon only knows the
+ * mount failed, which can be transient, so a plain reboot comes first (see
+ * `showReboot`).
  */
 export function showRepair(view: StorageView | null | undefined): boolean {
   return bannerKind(view) === "unmounted" && view?.repairable === true;
+}
+
+/**
+ * Is the plain reboot offered beside the repair? Wherever the mount failed,
+ * and whether or not the repair is on offer: the daemon's blocker "There is no
+ * settings volume to remove; reboot the BMC to recreate it" has no other
+ * button to point at. Not with KEY1 held -- that remedy is to reboot without
+ * KEY1, which a button cannot do.
+ */
+export function showReboot(view: StorageView | null | undefined): boolean {
+  return bannerKind(view) === "unmounted";
 }
 
 /**
@@ -112,7 +127,13 @@ export function repairBlocker(
   return view?.repair_blocker ?? null;
 }
 
-/** The body of the repair request. The daemon refuses it without the flag. */
+/**
+ * The body of the repair request, sent as `application/json` (the daemon
+ * refuses it without that header, and without the flag).
+ */
 export function repairBody(): { confirm: true } {
   return { confirm: true };
 }
+
+/** The header the repair request carries with that body. */
+export const REPAIR_HEADERS = { "Content-Type": "application/json" } as const;
