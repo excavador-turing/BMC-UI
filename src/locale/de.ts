@@ -197,13 +197,17 @@ const translations = {
       "Beim Einschalten wurde der abgesicherte Modus angefordert (KEY1). Gespeicherte Einstellungen werden nicht geladen; starten Sie neu, ohne KEY1 zu halten, um sie zu verwenden.",
     details: "Details",
     knownFaults: "Bekannte Fehler und was sie bedeuten",
+    rebootFirst:
+      "Ein einfacher Neustart kann genügen, wenn der Fehler nur vorübergehend war; versuchen Sie ihn zuerst. Wenn die Meldung wiederkommt, reparieren Sie den Speicher.",
     repairButton: "Einstellungsspeicher reparieren",
     rebooting: "Neustart …",
-    repairTitle: "Einstellungsspeicher reparieren?",
+    repairTitle: "Gespeicherte Einstellungen löschen und Speicher reparieren?",
     repairRemoves:
-      "Dabei wird das beschädigte Einstellungsvolume entfernt und der BMC neu gestartet.",
-    repairFactory:
-      "Das Board startet mit Werkseinstellungen (Passwort turing), mit denen es jetzt ohnehin läuft.",
+      "Dabei wird das Einstellungsvolume entfernt, das nicht eingebunden werden konnte, und der BMC neu gestartet. Das Board startet mit Werkseinstellungen (Passwort turing).",
+    repairErases:
+      "Die auf diesem Volume gespeicherten Einstellungen – Netzwerkkonfiguration, Zertifikate, Knotennamen und Anwendungsdaten – werden unwiderruflich gelöscht und lassen sich nicht wiederherstellen. Sie werden jetzt nicht geladen, sind aber noch vorhanden, bis Sie das tun.",
+    repairTryReboot:
+      "Das Einbinden ist vielleicht nur dieses eine Mal fehlgeschlagen; versuchen Sie daher zuerst einen einfachen Neustart. Reparieren Sie nur, wenn die Meldung wiederkommt.",
     repairNodes:
       "Bei einem Turing Pi 2 v2.4 schaltet der BMC-Neustart auch alle vier Knoten aus und wieder ein; fahren Sie sie daher vorher herunter.",
     repairStarted:

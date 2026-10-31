@@ -269,13 +269,17 @@ const translations = {
       "Safemode was requested at power-on (KEY1). Saved settings are not loaded; reboot without holding KEY1 to use them.",
     details: "Details",
     knownFaults: "Known faults and what they mean",
+    rebootFirst:
+      "A plain reboot may be enough if the failure was temporary; try that first. If the banner comes back, repair the storage.",
     repairButton: "Repair settings storage",
     rebooting: "Rebooting…",
-    repairTitle: "Repair settings storage?",
+    repairTitle: "Erase saved settings and repair storage?",
     repairRemoves:
-      "This removes the damaged settings volume and reboots the BMC.",
-    repairFactory:
-      "The board comes back with factory settings (password turing), which is what it is running on now anyway.",
+      "This removes the settings volume that could not be mounted and reboots the BMC. The board comes back with factory settings (password turing).",
+    repairErases:
+      "The settings saved on that volume — network configuration, certificates, node names and app data — are permanently erased and cannot be recovered. They are not loading now, but they are still there until you do this.",
+    repairTryReboot:
+      "The mount may have failed only this once, so try a plain reboot first. Repair only if the banner comes back.",
     repairNodes:
       "On a Turing Pi 2 v2.4 the BMC reboot also power-cycles all four nodes, so shut them down first.",
     repairStarted:

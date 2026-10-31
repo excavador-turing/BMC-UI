@@ -4,15 +4,17 @@ import { useTranslation } from "react-i18next";
 
 import ConfirmationModal from "@/components/ConfirmationModal";
 import LoadingButton from "@/components/LoadingButton";
+import RebootModal from "@/components/RebootModal";
 import { useToast } from "@/hooks/use-toast";
 import { useConnection } from "@/hooks/useConnection";
 import { bmcdMessage } from "@/lib/api/bmcdMessage";
 import { useStorageQuery } from "@/lib/api/get";
-import { useRepairStorageMutation } from "@/lib/api/set";
+import { useRebootBMCMutation, useRepairStorageMutation } from "@/lib/api/set";
 import {
   bannerKind,
   KNOWN_FAULTS_URL,
   repairBlocker,
+  showReboot,
   showRepair,
 } from "@/lib/api/storageView";
 
@@ -30,10 +32,14 @@ import {
  * endpoint, an answer this interface cannot read, and a healthy board all
  * render nothing. The question is asked once per page load and never polled.
  *
- * The repair removes the damaged volume and reboots. It asks first, and says
- * what it costs: the board comes back on factory settings (which it is
- * running on anyway) and, on a v2.4 board, the BMC reboot power-cycles the
- * nodes.
+ * A plain reboot is offered first, beside the repair, because the daemon only
+ * knows that the mount failed and that can be transient. It is the Settings
+ * page's reboot, with the same wait.
+ *
+ * The repair removes the settings volume that could not be mounted and
+ * reboots. What is saved on it is permanently erased, and the modal says so
+ * before it asks; it also says the board comes back on factory settings and,
+ * on a v2.4 board, that the BMC reboot power-cycles the nodes.
  */
 export default function StorageBanner() {
   const { t } = useTranslation();
@@ -41,7 +47,9 @@ export default function StorageBanner() {
   const { expectReboot } = useConnection();
   const storage = useStorageQuery();
   const { mutate: repair, isPending } = useRepairStorageMutation();
+  const { mutate: reboot, isPending: rebootPending } = useRebootBMCMutation();
   const [confirming, setConfirming] = useState(false);
+  const [confirmingReboot, setConfirmingReboot] = useState(false);
   const [rebooting, setRebooting] = useState(false);
 
   const view = storage.data;
@@ -49,6 +57,26 @@ export default function StorageBanner() {
   if (!view || !kind) return null;
 
   const blocker = repairBlocker(view);
+
+  const handleReboot = () => {
+    setConfirmingReboot(false);
+    reboot(undefined, {
+      onSuccess: () => {
+        setRebooting(true);
+        expectReboot();
+        toast({
+          title: t("info.rebootButton"),
+          description: t("info.rebootSuccess"),
+        });
+      },
+      onError: (e) =>
+        toast({
+          title: t("info.rebootFailed"),
+          description: bmcdMessage(e),
+          variant: "destructive",
+        }),
+    });
+  };
 
   const handleRepair = () => {
     setConfirming(false);
@@ -105,19 +133,33 @@ export default function StorageBanner() {
                 {t("storage.knownFaults")}
               </a>
               {blocker && <p data-testid="storage-repair-blocker">{blocker}</p>}
+              {showRepair(view) && <p>{t("storage.rebootFirst")}</p>}
             </>
           )}
         </div>
-        {showRepair(view) && (
-          <LoadingButton
-            type="button"
-            variant="destructive"
-            size="sm"
-            isLoading={isPending || rebooting}
-            onClick={() => setConfirming(true)}
-          >
-            {rebooting ? t("storage.rebooting") : t("storage.repairButton")}
-          </LoadingButton>
+        {showReboot(view) && (
+          <div className="flex flex-wrap gap-2">
+            <LoadingButton
+              type="button"
+              variant="outline"
+              size="sm"
+              isLoading={rebootPending || rebooting}
+              onClick={() => setConfirmingReboot(true)}
+            >
+              {rebooting ? t("storage.rebooting") : t("info.rebootButton")}
+            </LoadingButton>
+            {showRepair(view) && (
+              <LoadingButton
+                type="button"
+                variant="destructive"
+                size="sm"
+                isLoading={isPending || rebooting}
+                onClick={() => setConfirming(true)}
+              >
+                {t("storage.repairButton")}
+              </LoadingButton>
+            )}
+          </div>
         )}
       </div>
       <ConfirmationModal
@@ -127,11 +169,20 @@ export default function StorageBanner() {
         title={t("storage.repairTitle")}
         message={
           <>
+            <p>{t("storage.repairErases")}</p>
             <p>{t("storage.repairRemoves")}</p>
-            <p>{t("storage.repairFactory")}</p>
+            <p>{t("storage.repairTryReboot")}</p>
             <p>{t("storage.repairNodes")}</p>
           </>
         }
+      />
+      <RebootModal
+        isOpen={confirmingReboot}
+        onClose={() => setConfirmingReboot(false)}
+        onReboot={handleReboot}
+        title={t("info.rebootModalTitle")}
+        message={t("settings.rebootModalDescription")}
+        isPending={rebootPending}
       />
     </div>
   );

@@ -299,7 +299,7 @@ export const demoAdapter: AxiosAdapter = (config) => {
     return reply(
       config,
       409,
-      legacyResult("the settings storage is not damaged; nothing to repair")
+      legacyResult("the settings storage is mounted; nothing to repair")
     );
   } else if (url.includes("/bmc/")) {
     // Every write on a path-style endpoint -- a switch document, a
