@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import TextField from "@/components/TextField";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -19,7 +20,17 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import {
+  applyBody,
+  applyFailedShown,
+  managedPresent,
+  needsReplaceConsent,
+  orderInterfaces,
+  timeMillis,
+} from "@/lib/api/addressView";
+import { bmcdMessage } from "@/lib/api/bmcdMessage";
+import {
   type AddressDocument,
+  type AddressInterface,
   epochMillis,
   useAddressLimitsQuery,
   useAddressQuery,
@@ -93,6 +104,46 @@ function useDebounced<T>(value: T, ms: number): T {
   return settled;
 }
 
+/**
+ * Every interface the board has, read-only. The card edits one bridge; this is
+ * the whole picture, so a person on a layout the card does not manage can see
+ * what the board is actually doing. Rows wrap rather than widen: a CIDR and a
+ * MAC side by side do not fit a phone.
+ */
+function InterfaceList({ interfaces }: { interfaces: AddressInterface[] }) {
+  const { t } = useTranslation();
+  if (interfaces.length === 0) return null;
+
+  return (
+    <ul
+      className="flex max-w-2xl flex-col divide-y rounded-lg border text-sm"
+      data-testid="address-interfaces"
+    >
+      {interfaces.map((i) => (
+        <li
+          key={i.name}
+          className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3 py-2"
+        >
+          <span className="font-mono font-medium">{i.name}</span>
+          {i.default_route === true && (
+            <Badge variant="secondary">{t("addressCard.defaultRoute")}</Badge>
+          )}
+          <span className="min-w-0 break-all">
+            {i.addresses.length > 0
+              ? i.addresses.join(", ")
+              : t("addressCard.noAddress")}
+          </span>
+          {i.mac && (
+            <span className="font-mono text-xs break-all text-muted-foreground">
+              {i.mac}
+            </span>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function words(document: AddressDocument, t: (k: string) => string): string {
   if (document.mode === "dhcp") return t("addressCard.dhcp");
   let out = `${document.address}/${document.prefix}`;
@@ -121,7 +172,8 @@ export default function AddressCard() {
   const [edited, setEdited] = useState<Draft | null>(null);
   const draft = edited ?? (running ? draftFrom(running) : null);
   const edits = edited !== null;
-  const [confirming, setConfirming] = useState(false);
+  // What the dialog is asking about: an apply, or a try. Null when closed.
+  const [asking, setAsking] = useState<"apply" | "try" | null>(null);
   const [tried, setTried] = useState(false);
   const [window_s, setWindow] = useState<number | null>(null);
 
@@ -136,11 +188,17 @@ export default function AddressCard() {
 
   const pending = state.data?.pending ?? null;
   const [now, setNow] = useState(() => Date.now());
+  // The clock runs every second while a change is waiting, and slowly
+  // otherwise: a banner that expires has to notice that it has, even when the
+  // poll brings nothing new to render.
+  const counting = pending !== null;
   useEffect(() => {
-    if (!pending) return;
-    const id = window.setInterval(() => setNow(Date.now()), 1000);
+    const id = window.setInterval(
+      () => setNow(Date.now()),
+      counting ? 1000 : 15000
+    );
     return () => window.clearInterval(id);
-  }, [pending]);
+  }, [counting]);
 
   // An older daemon has no such endpoint; the card is not shown as broken.
   if (state.isError) return null;
@@ -156,6 +214,11 @@ export default function AddressCard() {
         )
       : null;
 
+  const present = managedPresent(state.data);
+  const interfaces = orderInterfaces(state.data.interfaces);
+  const consent = needsReplaceConsent(state.data);
+  const lastRevert = state.data.last_revert;
+
   const windowOk =
     window_s === null ||
     limits === undefined ||
@@ -168,14 +231,15 @@ export default function AddressCard() {
     verdict.data?.refusal == null &&
     !verdict.isError &&
     pending === null &&
+    present &&
     windowOk &&
     !apply.isPending;
 
   const send = (how: "apply" | "try") => {
     if (!proposed) return;
-    const body: Record<string, unknown> =
-      window_s === null ? { ...proposed } : { ...proposed, window_s };
-    apply.mutate(body, {
+    // Asking was the dialog's job; reaching here with a hand-written file
+    // means it was answered yes.
+    apply.mutate(applyBody(proposed, window_s, consent), {
       onSuccess: () => {
         setTried(how === "try");
         setEdited(null);
@@ -187,7 +251,7 @@ export default function AddressCard() {
       onError: (e: Error) =>
         toast({
           title: t("addressCard.applyFailed"),
-          description: e.message,
+          description: bmcdMessage(e),
           variant: "destructive",
         }),
     });
@@ -229,7 +293,7 @@ export default function AddressCard() {
                       onError: (e: Error) =>
                         toast({
                           title: t("addressCard.confirmFailed"),
-                          description: e.message,
+                          description: bmcdMessage(e),
                           variant: "destructive",
                         }),
                     })
@@ -241,7 +305,16 @@ export default function AddressCard() {
                   type="button"
                   variant="outline"
                   disabled={revert.isPending}
-                  onClick={() => revert.mutate()}
+                  onClick={() =>
+                    revert.mutate(undefined, {
+                      onError: (e: Error) =>
+                        toast({
+                          title: t("addressCard.revertFailed"),
+                          description: bmcdMessage(e),
+                          variant: "destructive",
+                        }),
+                    })
+                  }
                 >
                   {t("addressCard.revertNow")}
                 </Button>
@@ -256,32 +329,59 @@ export default function AddressCard() {
           </Alert>
         )}
 
-        {!pending && state.data.last_revert?.reason === "not_confirmed" && (
+        {!pending && lastRevert?.reason === "not_confirmed" && (
           <div className="text-sm text-warning">
             {t("addressCard.wasReverted", {
-              at: new Date(
-                epochMillis(state.data.last_revert.at) ?? 0
-              ).toLocaleTimeString(),
+              at: new Date(timeMillis(lastRevert.at) ?? 0).toLocaleTimeString(),
             })}
           </div>
         )}
-        {!pending && state.data.last_revert?.reason === "apply_failed" && (
-          <div className="text-sm text-destructive">
-            {t("addressCard.applyFailedRevert")}
+        {!pending && applyFailedShown(lastRevert, now) && lastRevert && (
+          <div className="flex flex-col gap-1 text-sm text-destructive">
+            <p>
+              {t("addressCard.applyFailedRevert", {
+                at: new Date(
+                  timeMillis(lastRevert.at) ?? 0
+                ).toLocaleTimeString(),
+              })}
+            </p>
+            {lastRevert.detail && (
+              <p className="break-words">{lastRevert.detail}</p>
+            )}
           </div>
         )}
 
-        {state.data.file === "unreadable" && (
+        {!present && (
+          <Alert variant="warning" data-testid="address-no-bridge">
+            <TriangleAlert />
+            <AlertTitle>
+              {t("addressCard.noBridgeTitle", {
+                name: state.data.managed_interface ?? "br0",
+              })}
+            </AlertTitle>
+            <AlertDescription>
+              {t("addressCard.noBridgeBody", {
+                name: state.data.managed_interface ?? "br0",
+              })}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {state.data.file === "unreadable" && present && (
           <p className="text-sm text-warning">
             {t("addressCard.fileUnreadable")}
           </p>
         )}
-        {state.data.file === "hand_edited" &&
-          state.data.configured?.mode === "static" && (
-            <p className="text-sm text-muted-foreground">
-              {t("addressCard.fileHandEdited")}
-            </p>
-          )}
+        {state.data.file === "hand_edited" && present && (
+          <p className="text-sm text-warning">
+            {t("addressCard.fileHandEdited")}
+          </p>
+        )}
+        {state.data.file_backup && (
+          <p className="text-sm break-all text-muted-foreground">
+            {t("addressCard.fileKept", { path: state.data.file_backup })}
+          </p>
+        )}
 
         <Field className="max-w-sm">
           <FieldLabel htmlFor="address-mode">
@@ -294,7 +394,7 @@ export default function AddressCard() {
               { value: "static", label: t("addressCard.static") },
             ]}
             value={draft.mode}
-            disabled={pending !== null}
+            disabled={pending !== null || !present}
             onValueChange={(value) => {
               const mode = value;
               if (mode === null) return;
@@ -340,7 +440,7 @@ export default function AddressCard() {
               value={draft.cidr}
               spellCheck={false}
               placeholder="192.168.1.20/24"
-              disabled={pending !== null}
+              disabled={pending !== null || !present}
               onChange={(e) => set({ cidr: e.target.value })}
             />
             <TextField
@@ -349,7 +449,7 @@ export default function AddressCard() {
               value={draft.gateway}
               spellCheck={false}
               placeholder="192.168.1.1"
-              disabled={pending !== null}
+              disabled={pending !== null || !present}
               onChange={(e) => set({ gateway: e.target.value })}
             />
             <TextField
@@ -358,7 +458,7 @@ export default function AddressCard() {
               value={draft.dns}
               spellCheck={false}
               placeholder="192.168.1.1, 1.1.1.1"
-              disabled={pending !== null}
+              disabled={pending !== null || !present}
               onChange={(e) => set({ dns: e.target.value })}
             />
             <TextField
@@ -367,7 +467,7 @@ export default function AddressCard() {
               value={draft.search}
               spellCheck={false}
               placeholder="home.lan"
-              disabled={pending !== null}
+              disabled={pending !== null || !present}
               onChange={(e) => set({ search: e.target.value })}
             />
           </div>
@@ -400,7 +500,7 @@ export default function AddressCard() {
           <Button
             type="button"
             disabled={!canApply}
-            onClick={() => setConfirming(true)}
+            onClick={() => setAsking("apply")}
           >
             {t("addressCard.apply")}
           </Button>
@@ -408,7 +508,7 @@ export default function AddressCard() {
             type="button"
             variant="outline"
             disabled={!canApply}
-            onClick={() => send("try")}
+            onClick={() => (consent ? setAsking("try") : send("try"))}
           >
             {t("addressCard.tryIt")}
           </Button>
@@ -452,17 +552,33 @@ export default function AddressCard() {
           </p>
         )}
 
+        {/* The board as a whole, read-only. Under the form on a layout the
+            form manages; the only thing worth reading on one it does not. */}
+        <InterfaceList interfaces={interfaces} />
+
         <ConfirmationModal
-          isOpen={confirming}
-          onClose={() => setConfirming(false)}
+          isOpen={asking !== null}
+          onClose={() => setAsking(null)}
           onConfirm={() => {
-            setConfirming(false);
-            send("apply");
+            const how = asking;
+            setAsking(null);
+            if (how !== null) send(how);
           }}
-          title={t("addressCard.apply")}
-          message={t("addressCard.applyWarning", {
-            seconds: window_s ?? state.data.default_window_s,
-          })}
+          title={
+            consent ? t("addressCard.replaceTitle") : t("addressCard.apply")
+          }
+          message={
+            <div className="flex flex-col gap-2">
+              {asking === "apply" && (
+                <p>
+                  {t("addressCard.applyWarning", {
+                    seconds: window_s ?? state.data.default_window_s,
+                  })}
+                </p>
+              )}
+              {consent && <p>{t("addressCard.replaceWarning")}</p>}
+            </div>
+          }
         />
       </CardContent>
     </Card>

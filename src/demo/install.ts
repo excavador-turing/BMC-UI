@@ -107,9 +107,24 @@ function sent<T>(config: InternalAxiosRequestConfig): T | null {
 
 let address: DemoAddress | null = null;
 
+/**
+ * Which board layout the demo's address card shows. The captured board has
+ * its `br0` bridge; `?layout=split` is a hand-split board with `br-wan` and
+ * `br-lan` and no `br0` (the page is read-only there), and
+ * `?layout=handwritten` is `br0` with an interfaces file written by hand (an
+ * apply asks before replacing it). Both are written fixtures, not captures,
+ * and use documentation addresses.
+ */
+function addressFixtureName(): string {
+  const layout = new URLSearchParams(window.location.search).get("layout");
+  if (layout === "split") return "address_split";
+  if (layout === "handwritten") return "address_hand_written";
+  return "address";
+}
+
 function demoAddress(): DemoAddress | null {
   if (address) return address;
-  const captured = fixture("address") as AddressState | undefined;
+  const captured = fixture(addressFixtureName()) as AddressState | undefined;
   if (!captured) return null;
   address = new DemoAddress(captured);
   return address;
@@ -205,9 +220,17 @@ export const demoAdapter: AxiosAdapter = (config) => {
     return reply(config, 200, verdictFor(document));
   } else if (method === "put" && url.endsWith("/bmc/network/address")) {
     const state = demoAddress();
-    const body = sent<AddressDocument & { window_s?: number }>(config);
+    const body = sent<
+      AddressDocument & { window_s?: number; replace_hand_written?: boolean }
+    >(config);
     if (!state || !body) return reply(config, 400, { detail: "no document" });
-    const { window_s, ...document } = body;
+    const { window_s, replace_hand_written, ...document } = body;
+    // The daemon's two 409s, in its envelope: no bridge to manage, and a
+    // file written by hand that nobody agreed to replace.
+    const refusal = state.refusal(replace_hand_written === true);
+    if (refusal) {
+      return reply(config, 409, legacyResult(refusal));
+    }
     const verdict = verdictFor(document);
     if (verdict.refusal) {
       return reply(

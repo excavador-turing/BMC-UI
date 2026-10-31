@@ -210,7 +210,6 @@ const translations = {
     applied: "已应用，尚未保留",
     appliedNote: "请在新地址打开本页面并在时限内确认，否则会回退。",
     applyFailed: "地址未能应用",
-    applyFailedRevert: "上一次更改未能应用，已立即恢复之前的地址。",
     pendingTitle: "{{address}} 正在等待确认",
     pendingNoClock: "计时进行中。",
     countdown: "还剩 {{seconds}} 秒可确认。",
@@ -222,9 +221,21 @@ const translations = {
     confirmFromThere:
       "只有到达新地址的确认才算数——即在新地址打开的本页面。来自主板自身 shell 的确认不能证明任何事情，会被拒绝。",
     wasReverted: "{{at}} 的更改因未确认而被撤回。",
+    applyFailedRevert: "{{at}} 的更改未能应用，已立即恢复之前的地址。",
     fileUnreadable:
-      "主板的 interfaces 文件为手动编写且无法读取；确认后的更改会整体替换它。",
-    fileHandEdited: "当前静态地址为手动设置；确认后的更改会替换该文件。",
+      "无法读取主板的 interfaces 文件。确认后的更改会整体替换该文件，并将副本保留为 /etc/network/interfaces.hand-written.<时间>。",
+    fileHandEdited:
+      "主板的 interfaces 文件为手动编写。确认后的更改会整体替换该文件，并将副本保留为 /etc/network/interfaces.hand-written.<时间>。",
+    fileKept: "之前的文件已保留为 {{path}}。",
+    replaceTitle: "替换 interfaces 文件？",
+    replaceWarning:
+      "主板的 interfaces 文件为手动编写。确认后的更改会整体替换该文件；副本保留为 /etc/network/interfaces.hand-written.<时间>。",
+    revertFailed: "未能恢复旧地址",
+    noBridgeTitle: "此主板没有 {{name}} 网桥",
+    noBridgeBody:
+      "此页面只管理 {{name}} 网桥，因此在这里为只读。下方列出了主板的网络接口。请通过 SSH 修改，或恢复含 {{name}} 的默认布局。",
+    defaultRoute: "默认路由",
+    noAddress: "无地址",
   },
   switchConfig: {
     title: "交换机",

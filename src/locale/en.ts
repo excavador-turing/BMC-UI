@@ -286,8 +286,6 @@ const translations = {
     appliedNote:
       "Open this page at the new address and confirm before the window runs out, or it goes back.",
     applyFailed: "The address was not applied",
-    applyFailedRevert:
-      "The last change could not be applied, and the previous address was put back at once.",
     pendingTitle: "{{address}} is waiting to be confirmed",
     pendingNoClock: "The window is running.",
     countdown: "{{seconds}} seconds left to confirm.",
@@ -300,10 +298,22 @@ const translations = {
       "A confirmation counts only when it arrives at the new address — this page, reached there. From a shell on the board it proves nothing and is refused.",
     wasReverted:
       "The change at {{at}} was put back because it was not confirmed.",
+    applyFailedRevert:
+      "The change at {{at}} could not be applied, and the previous address was put back at once.",
     fileUnreadable:
-      "The board's interfaces file was written by hand and could not be read; a confirmed change replaces it whole.",
+      "The board's interfaces file could not be read. A confirmed change replaces the whole file and keeps a copy of it as /etc/network/interfaces.hand-written.<time>.",
     fileHandEdited:
-      "The current static address was written by hand; a confirmed change replaces the file.",
+      "The board's interfaces file was written by hand. A confirmed change replaces the whole file and keeps a copy of it as /etc/network/interfaces.hand-written.<time>.",
+    fileKept: "The previous file was kept as {{path}}.",
+    replaceTitle: "Replace the interfaces file?",
+    replaceWarning:
+      "The board's interfaces file was written by hand. A confirmed change replaces the whole file; a copy is kept as /etc/network/interfaces.hand-written.<time>.",
+    revertFailed: "The old address was not put back",
+    noBridgeTitle: "This board has no {{name}} bridge",
+    noBridgeBody:
+      "This page manages the {{name}} bridge only, so it is read-only here. The interfaces the board has are listed below. Change them over SSH, or restore the default layout with {{name}}.",
+    defaultRoute: "default route",
+    noAddress: "no address",
   },
   switchConfig: {
     title: "Switch",

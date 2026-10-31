@@ -214,8 +214,6 @@ const translations = {
     appliedNote:
       "Otwórz tę stronę pod nowym adresem i potwierdź, zanim minie czas, inaczej zmiana się cofnie.",
     applyFailed: "Adres nie został zastosowany",
-    applyFailedRevert:
-      "Ostatniej zmiany nie udało się zastosować; poprzedni adres przywrócono od razu.",
     pendingTitle: "{{address}} czeka na potwierdzenie",
     pendingNoClock: "Czas biegnie.",
     countdown: "Zostało {{seconds}} sekund na potwierdzenie.",
@@ -228,10 +226,22 @@ const translations = {
     confirmFromThere:
       "Potwierdzenie liczy się tylko wtedy, gdy dotrze pod nowy adres — ta strona, otwarta tam. Z powłoki na płycie niczego nie dowodzi i jest odrzucane.",
     wasReverted: "Zmiana z {{at}} została cofnięta, bo jej nie potwierdzono.",
+    applyFailedRevert:
+      "Zmiany z {{at}} nie udało się zastosować; poprzedni adres przywrócono od razu.",
     fileUnreadable:
-      "Plik interfaces płyty został napisany ręcznie i nie dało się go odczytać; potwierdzona zmiana zastąpi go w całości.",
+      "Pliku interfaces płyty nie dało się odczytać. Potwierdzona zmiana zastąpi cały plik i zachowa jego kopię jako /etc/network/interfaces.hand-written.<czas>.",
     fileHandEdited:
-      "Obecny adres statyczny wpisano ręcznie; potwierdzona zmiana zastąpi plik.",
+      "Plik interfaces płyty został napisany ręcznie. Potwierdzona zmiana zastąpi cały plik i zachowa jego kopię jako /etc/network/interfaces.hand-written.<czas>.",
+    fileKept: "Poprzedni plik zachowano jako {{path}}.",
+    replaceTitle: "Zastąpić plik interfaces?",
+    replaceWarning:
+      "Plik interfaces płyty został napisany ręcznie. Potwierdzona zmiana zastąpi cały plik; kopia zostanie jako /etc/network/interfaces.hand-written.<czas>.",
+    revertFailed: "Nie przywrócono poprzedniego adresu",
+    noBridgeTitle: "Ta płyta nie ma mostu {{name}}",
+    noBridgeBody:
+      "Ta strona zarządza tylko mostem {{name}}, więc jest tu tylko do odczytu. Poniżej lista interfejsów płyty. Zmień je przez SSH albo przywróć domyślny układ z {{name}}.",
+    defaultRoute: "trasa domyślna",
+    noAddress: "brak adresu",
   },
   switchConfig: {
     title: "Przełącznik",

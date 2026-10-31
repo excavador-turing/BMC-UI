@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import UsageBar from "@/components/UsageBar";
 import { useDurationLabel } from "@/hooks/use-duration";
+import { addressedInterfaces } from "@/lib/api/addressView";
 import {
   type HealthClock,
   type HealthLoad,
@@ -259,6 +260,10 @@ export default function BoardHealth() {
       ? null
       : durationLabel(data.uptime_seconds);
   const ip = address.data?.live.address;
+  // Daemon 2.41.0 lists every interface. With more than one that carries an
+  // address -- a split WAN/LAN layout -- say which is which, default route
+  // first; with one (or an older daemon) the address stands alone as before.
+  const interfaces = addressedInterfaces(address.data?.interfaces);
   const serial = eepromLabel(about.board_serial);
 
   return (
@@ -284,7 +289,24 @@ export default function BoardHealth() {
             <span className="font-medium">{about.hostname || EMPTY_VALUE}</span>
           </TableItem>
           <TableItem term={t("info.boardIp")}>
-            {ip ? (
+            {interfaces.length > 1 ? (
+              <ul className="flex flex-col gap-1" data-testid="board-ips">
+                {interfaces.map((i) => (
+                  <li
+                    key={i.name}
+                    className="flex flex-wrap items-center justify-end gap-x-2 lg:justify-start"
+                  >
+                    <span className="font-mono text-xs text-muted-foreground">
+                      {i.name}
+                    </span>
+                    <span className="inline-flex items-center gap-1 font-medium break-all">
+                      {i.addresses.join(", ")}
+                      <CopyButton value={i.addresses[0].split("/")[0]} />
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : ip ? (
               <span className="inline-flex items-center gap-1 font-medium">
                 {ip}
                 <CopyButton value={ip} />
