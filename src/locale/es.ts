@@ -195,16 +195,11 @@ const translations = {
       "No se pudo montar el almacenamiento de ajustes. La placa funciona con los valores de fábrica y nada de lo que cambie —contraseña incluida— sobrevive a un reinicio.",
     keyhold:
       "Se solicitó el modo seguro al encender (KEY1). Los ajustes guardados no se cargan; reinicie sin mantener pulsado KEY1 para usarlos.",
-    details:
-      "Detalles",
-    knownFaults:
-      "Fallos conocidos y su significado",
-    repairButton:
-      "Reparar el almacenamiento de ajustes",
-    rebooting:
-      "Reiniciando…",
-    repairTitle:
-      "¿Reparar el almacenamiento de ajustes?",
+    details: "Detalles",
+    knownFaults: "Fallos conocidos y su significado",
+    repairButton: "Reparar el almacenamiento de ajustes",
+    rebooting: "Reiniciando…",
+    repairTitle: "¿Reparar el almacenamiento de ajustes?",
     repairRemoves:
       "Esto elimina el volumen de ajustes dañado y reinicia el BMC.",
     repairFactory:
@@ -213,8 +208,7 @@ const translations = {
       "En una Turing Pi 2 v2.4, el reinicio del BMC también apaga y enciende los cuatro nodos, así que apáguelos antes.",
     repairStarted:
       "Se está eliminando el volumen de ajustes y la placa se está reiniciando.",
-    repairFailed:
-      "No se pudo reparar el almacenamiento de ajustes",
+    repairFailed: "No se pudo reparar el almacenamiento de ajustes",
   },
   addressCard: {
     title: "Dirección IP",

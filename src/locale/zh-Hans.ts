@@ -192,26 +192,18 @@ const translations = {
       "无法挂载设置存储。主板正在使用出厂默认设置运行，您所做的任何更改（包括密码）在重启后都不会保留。",
     keyhold:
       "开机时请求了安全模式（KEY1）。已保存的设置未被加载；如需使用，请在不按住 KEY1 的情况下重启。",
-    details:
-      "详情",
-    knownFaults:
-      "已知故障及其含义",
-    repairButton:
-      "修复设置存储",
-    rebooting:
-      "正在重启…",
-    repairTitle:
-      "修复设置存储？",
-    repairRemoves:
-      "这会删除已损坏的设置卷并重启 BMC。",
+    details: "详情",
+    knownFaults: "已知故障及其含义",
+    repairButton: "修复设置存储",
+    rebooting: "正在重启…",
+    repairTitle: "修复设置存储？",
+    repairRemoves: "这会删除已损坏的设置卷并重启 BMC。",
     repairFactory:
       "主板将以出厂设置（密码 turing）重新启动，而它现在本来就在使用这些设置。",
     repairNodes:
       "在 Turing Pi 2 v2.4 上，BMC 重启还会让全部四个节点断电再上电，请先将它们关机。",
-    repairStarted:
-      "正在删除设置卷，主板正在重启。",
-    repairFailed:
-      "无法修复设置存储",
+    repairStarted: "正在删除设置卷，主板正在重启。",
+    repairFailed: "无法修复设置存储",
   },
   addressCard: {
     title: "IP 地址",
