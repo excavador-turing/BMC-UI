@@ -14,6 +14,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import ConnectionBanner from "@/components/ConnectionBanner";
 import FactoryPasswordGate from "@/components/FactoryPasswordGate";
 import SiteFooter from "@/components/SiteFooter";
+import StorageBanner from "@/components/StorageBanner";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -99,6 +100,9 @@ export function AppLayoutComponent() {
               {/* Above the page, full width: an outage is not a property of
                   the page you happen to be on. */}
               <ConnectionBanner />
+              {/* Likewise: settings that will not survive a reboot are the
+                  board's, not the page's. */}
+              <StorageBanner />
               <header className="flex h-12 shrink-0 items-center gap-2 border-b px-4">
                 <SidebarTrigger className="-ml-1" />
                 <Separator

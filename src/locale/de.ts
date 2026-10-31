@@ -190,6 +190,32 @@ const translations = {
     lost: "Das Board antwortet seit {{elapsed}} Sekunden nicht mehr, und nichts hier hat es dazu aufgefordert. Die Seite versucht es weiter und kehrt von selbst zurück.",
     cameBack: "Das Board war nach {{seconds}} Sekunden wieder da.",
   },
+  storage: {
+    unmounted:
+      "Der Einstellungsspeicher konnte nicht eingebunden werden. Das Board läuft mit Werkseinstellungen, und nichts, was Sie ändern – auch das Passwort nicht –, übersteht einen Neustart.",
+    keyhold:
+      "Beim Einschalten wurde der abgesicherte Modus angefordert (KEY1). Gespeicherte Einstellungen werden nicht geladen; starten Sie neu, ohne KEY1 zu halten, um sie zu verwenden.",
+    details:
+      "Details",
+    knownFaults:
+      "Bekannte Fehler und was sie bedeuten",
+    repairButton:
+      "Einstellungsspeicher reparieren",
+    rebooting:
+      "Neustart …",
+    repairTitle:
+      "Einstellungsspeicher reparieren?",
+    repairRemoves:
+      "Dabei wird das beschädigte Einstellungsvolume entfernt und der BMC neu gestartet.",
+    repairFactory:
+      "Das Board startet mit Werkseinstellungen (Passwort turing), mit denen es jetzt ohnehin läuft.",
+    repairNodes:
+      "Bei einem Turing Pi 2 v2.4 schaltet der BMC-Neustart auch alle vier Knoten aus und wieder ein; fahren Sie sie daher vorher herunter.",
+    repairStarted:
+      "Das Einstellungsvolume wird entfernt, und das Board startet neu.",
+    repairFailed:
+      "Der Einstellungsspeicher konnte nicht repariert werden",
+  },
   addressCard: {
     title: "IP-Adresse",
     mode: "Adressmodus",

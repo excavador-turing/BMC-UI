@@ -262,6 +262,32 @@ const translations = {
     lost: "The board stopped answering {{elapsed}} seconds ago, and nothing here asked it to. The page is still trying, and will come back on its own.",
     cameBack: "The board came back in {{seconds}} seconds.",
   },
+  storage: {
+    unmounted:
+      "Settings storage could not be mounted. The board is running on factory defaults, and nothing you change — password included — survives a reboot.",
+    keyhold:
+      "Safemode was requested at power-on (KEY1). Saved settings are not loaded; reboot without holding KEY1 to use them.",
+    details:
+      "Details",
+    knownFaults:
+      "Known faults and what they mean",
+    repairButton:
+      "Repair settings storage",
+    rebooting:
+      "Rebooting…",
+    repairTitle:
+      "Repair settings storage?",
+    repairRemoves:
+      "This removes the damaged settings volume and reboots the BMC.",
+    repairFactory:
+      "The board comes back with factory settings (password turing), which is what it is running on now anyway.",
+    repairNodes:
+      "On a Turing Pi 2 v2.4 the BMC reboot also power-cycles all four nodes, so shut them down first.",
+    repairStarted:
+      "The settings volume is being removed and the board is rebooting.",
+    repairFailed:
+      "Could not repair settings storage",
+  },
   addressCard: {
     title: "IP address",
     mode: "Address mode",

@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useAxiosWithAuth } from "./_core";
 import type { FirmwareSources, SwitchDocument } from "./get";
+import { repairBody } from "./storageView";
 
 interface APIResponse<T> {
   response: {
@@ -140,6 +141,22 @@ export function useRebootBMCMutation() {
         },
       });
       return response.data.response[0].result;
+    },
+  });
+}
+
+/**
+ * Remove the damaged settings volume and reboot (daemon 2.42.0 and later).
+ * 202 `{"rebooting": true}` is the daemon agreeing; a refusal is 409, 400 or
+ * 500 with its reason in the legacy envelope, which `bmcdMessage` reads.
+ */
+export function useRepairStorageMutation() {
+  const api = useAxiosWithAuth();
+
+  return useMutation({
+    mutationKey: ["repairStorageMutation"],
+    mutationFn: async () => {
+      await api.post("/bmc/storage/repair", repairBody());
     },
   });
 }

@@ -189,6 +189,32 @@ const translations = {
     lost: "Het bord antwoordt al {{elapsed}} seconden niet meer, en niets hier heeft daarom gevraagd. De pagina blijft het proberen en komt vanzelf terug.",
     cameBack: "Het bord was na {{seconds}} seconden terug.",
   },
+  storage: {
+    unmounted:
+      "De opslag voor instellingen kon niet worden gekoppeld. Het board draait op fabrieksinstellingen en niets wat u wijzigt – wachtwoord inbegrepen – blijft na een herstart bewaard.",
+    keyhold:
+      "Bij het inschakelen is de veilige modus gevraagd (KEY1). Opgeslagen instellingen worden niet geladen; herstart zonder KEY1 ingedrukt te houden om ze te gebruiken.",
+    details:
+      "Details",
+    knownFaults:
+      "Bekende fouten en wat ze betekenen",
+    repairButton:
+      "Opslag voor instellingen herstellen",
+    rebooting:
+      "Herstarten…",
+    repairTitle:
+      "Opslag voor instellingen herstellen?",
+    repairRemoves:
+      "Dit verwijdert het beschadigde instellingenvolume en herstart de BMC.",
+    repairFactory:
+      "Het board komt terug met fabrieksinstellingen (wachtwoord turing), waarop het nu toch al draait.",
+    repairNodes:
+      "Op een Turing Pi 2 v2.4 zet de BMC-herstart ook alle vier de nodes uit en weer aan, dus sluit ze eerst af.",
+    repairStarted:
+      "Het instellingenvolume wordt verwijderd en het board herstart.",
+    repairFailed:
+      "De opslag voor instellingen kon niet worden hersteld",
+  },
   addressCard: {
     title: "IP-adres",
     mode: "Adresmodus",
