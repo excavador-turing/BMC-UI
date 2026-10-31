@@ -129,11 +129,14 @@ test("the repair request carries the confirmation the daemon demands", () => {
 });
 
 test("a refused repair shows the daemon's own words", () => {
-  const error = Object.assign(new Error("Request failed with status code 409"), {
-    response: {
-      status: 409,
-      data: { response: [{ result: "a firmware update is staged" }] },
-    },
-  });
+  const error = Object.assign(
+    new Error("Request failed with status code 409"),
+    {
+      response: {
+        status: 409,
+        data: { response: [{ result: "a firmware update is staged" }] },
+      },
+    }
+  );
   assert.equal(bmcdMessage(error), "a firmware update is staged");
 });

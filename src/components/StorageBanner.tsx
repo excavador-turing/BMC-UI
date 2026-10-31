@@ -82,9 +82,7 @@ export default function StorageBanner() {
         <TriangleAlert className="mt-0.5 size-4 shrink-0 text-destructive" />
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <p className="font-medium">
-            {kind === "keyhold"
-              ? t("storage.keyhold")
-              : t("storage.unmounted")}
+            {kind === "keyhold" ? t("storage.keyhold") : t("storage.unmounted")}
           </p>
           {kind === "unmounted" && (
             <>
@@ -106,9 +104,7 @@ export default function StorageBanner() {
               >
                 {t("storage.knownFaults")}
               </a>
-              {blocker && (
-                <p data-testid="storage-repair-blocker">{blocker}</p>
-              )}
+              {blocker && <p data-testid="storage-repair-blocker">{blocker}</p>}
             </>
           )}
         </div>

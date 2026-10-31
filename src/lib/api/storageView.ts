@@ -84,7 +84,7 @@ export function parseStorage(data: unknown): StorageView | null {
 export function bannerKind(
   view: StorageView | null | undefined
 ): BannerKind | null {
-  if (!view || view.state !== "temporary") return null;
+  if (view?.state !== "temporary") return null;
   return view.reason === "requested" ? "keyhold" : "unmounted";
 }
 
