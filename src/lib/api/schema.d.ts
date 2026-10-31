@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+  "/api/bmc": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Write an image to a node (opt=set&type=flash)
+     * @description Starts writing an image to a compute module and answers `{"handle": N}`; progress is `GET /api/bmc?opt=get&type=flash`. The image comes from one of: `sdcard` (a file on the microSD card), `local` (an absolute path on the BMC), an `http…` `file` (the BMC downloads it), or an upload to `/api/bmc/upload/{handle}` with `length`. `type=firmware` takes the same image parameters. A refusal is `{"response":[{"result":"…"}]}` with status 400 (bad or conflicting parameter) or 411 (an upload without `length`).
+     */
+    get: operations["legacyFlashNode"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/bmc/about": {
     parameters: {
       query?: never;
@@ -33,7 +53,7 @@ export interface paths {
     };
     /**
      * Who may reach this board, and how you reached it
-     * @description The local account the password belongs to, the trust anchor for proxied identity if one is in effect, the header an identity is read from, and how THIS request was authenticated. `client_ca_pinned_in_config` means config.yaml chose it and the daemon will not overwrite that choice.
+     * @description The local account the password belongs to, the trust anchor for proxied identity if one is in effect, the header an identity is read from, and how THIS request was authenticated. `client_ca_pinned_in_config` means config.yaml chose it and the daemon will not overwrite that choice. Also `factory_password`: true while the board is still on `root` / `turing`, which is when this endpoint and the password change are the only two that answer.
      */
     get: operations["getAccess"];
     put?: never;
@@ -324,6 +344,114 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/bmc/network/address": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * The board's own address: running, configured, live
+     * @description What the board is on as the daemon understands it, what `/etc/network/interfaces` says and therefore what a reboot comes back to, what the bridge actually has right now, any change still waiting to be confirmed, and the last revert with its reason. `file` says whether the daemon wrote the file (`bmcd`), a person did (`hand_edited`), or the daemon could not read it (`unreadable`); the file is read again whenever its modification time changes, so a file restored by hand is noticed without a restart.
+     *
+     *     `live` is the **primary interface**: the device of the IPv4 default route, or failing that the first up, non-loopback interface with a global IPv4 address. `live.interface` is its name (`br0` on a stock board, `br-wan` on one whose `interfaces` file was split by hand) and `live.address` its first global, non-alias address in CIDR form. `interfaces` lists every up, non-loopback interface with at least one global IPv4 address as `{name, addresses[], mac, default_route}`, the default route's first and the rest by name. `managed_interface` is `br0`, the only interface this page can change, and `managed_interface_present` says whether it exists: when it does not, `PUT` answers 409. `last_revert` is `{at, reason, detail, document}`, where `detail` is the error text of a failed apply; a later successful apply or a confirm clears it. `file_backup` is the path of the copy a confirmed change made of a hand-written file, or `null`.
+     */
+    get: operations["getAddress"];
+    /**
+     * Apply an address, to be confirmed at that address
+     * @description Takes `{"mode":"dhcp"}` or `{"mode":"static", "address", "prefix", "gateway", "dns", "search"}` and an optional `window_s`. Answers **202**: the address is on the bridge but it is not yours to keep yet. Confirm within the window, at the new address, or the board puts the previous one back by itself. The bridge and the modules' ports are never brought down; only the address on top of them changes. Only a confirmed document is written to `/etc/network/interfaces`.
+     *
+     *     Two refusals answer **409** before anything is touched, with no pending change and no `last_revert`: the board has no `br0` (the message lists the bridges it does have), or `/etc/network/interfaces` was written by hand and the request does not carry `"replace_hand_written": true`. A confirmed change replaces that whole file and first keeps a copy as `/etc/network/interfaces.hand-written.<unix seconds>`; the path is `file_backup` in the view that confirm answers with. (Before 2.41.0 the file was overwritten without a copy.) The image's own default file is not counted as hand-written. Any other failure is a 500 whose message is the command that failed and what it printed.
+     */
+    put: operations["applyAddress"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/bmc/network/address/confirm": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Keep a pending address
+     * @description Must arrive at the address that was just applied -- after an apply the old one is gone, so reaching the daemon at all is the proof. A confirmation from the board itself never used the address and is refused with 403. Writes the document to `/etc/network/interfaces`; when that file was not written by the daemon, a copy of it is kept first as `/etc/network/interfaces.hand-written.<unix seconds>` and reported as `file_backup`.
+     */
+    post: operations["confirmAddress"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/bmc/network/address/limits": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * The bounds a client may ask within
+     * @description Prefix range and the confirm window's default, minimum and maximum, so no client hard-codes a number the daemon publishes.
+     */
+    get: operations["getAddressLimits"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/bmc/network/address/revert": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Put a pending address back now
+     * @description Rather than waiting out the window. Open to the board itself: this is the direction that cannot strand anybody.
+     */
+    post: operations["revertAddress"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/bmc/network/address/validate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * What the board would say about an address
+     * @description Returns the document, a refusal if the board would not apply it -- a gateway off the subnet, a prefix with no room, the network or broadcast address -- and warnings for what it would apply but you should hear: no gateway, no resolver. Changes nothing; a refusal comes back inside a 200.
+     */
+    post: operations["validateAddress"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/bmc/network/reset": {
     parameters: {
       query?: never;
@@ -338,6 +466,112 @@ export interface paths {
      * @description Legacy form: `GET /api/bmc?opt=set&type=network` with the same parameters in the query string. That form answers `{"response":[{"result":…}]}` and puts a refusal's message in `result`; this path answers the bare result and a refusal as `application/problem+json`.
      */
     post: operations["postNetworkReset"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/bmc/network/switch": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * The switch configuration, running and confirmed
+     * @description What the board is running, what was last confirmed and therefore what a reboot comes back to, any change still waiting to be confirmed, and the last revert with its reason.
+     */
+    get: operations["getSwitch"];
+    /**
+     * Apply a configuration, to be confirmed
+     * @description Takes a preset or a whole document, and an optional `window_s`. Answers **202**, not 200: the change is on the switch but it is not yours to keep yet. Confirm within the window or the board puts the previous configuration back by itself. The window does not start counting until the uplink carrying the BMC's VLAN reports forwarding, because spanning tree holds a port for its own forwarding delay first -- counting from the apply would revert every correct change.
+     */
+    put: operations["applySwitch"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/bmc/network/switch/confirm": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Keep a pending change
+     * @description Send the token from the apply, on a NEW connection. That is the whole proof: after an apply the old path no longer exists, so any authenticated request that reaches the daemon came through the new configuration. Only on confirm is anything written to the overlay.
+     *
+     *     Which is why a confirmation sent over **loopback** is refused with 403: it crossed no switch port, so it proves nothing, and it would make permanent a configuration nobody has shown to work. Confirm from the interface, or from `tpi` on another machine. Apply and revert are open to loopback; only this is not.
+     */
+    post: operations["confirmSwitch"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/bmc/network/switch/presets": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * The switch presets, expanded by the board
+     * @description Each preset's full port table, so every client previews the same thing. A client that expanded a preset itself would eventually disagree with the board about what it means, and that disagreement shows up as a board nobody can reach. `trunk` is shown with example VLAN identifiers; the real ones are the operator's, because the router has to match them.
+     */
+    get: operations["getSwitchPresets"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/bmc/network/switch/revert": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Put a pending change back now
+     * @description Rather than waiting out its window.
+     */
+    post: operations["revertSwitch"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/bmc/network/switch/validate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * What the board would say about a configuration
+     * @description Takes a preset or a whole document and returns the document as the board reads it, a refusal if it has one, and any warnings. Changes nothing. A refusal comes back inside a 200: the caller asked a question and got an answer, and did not make a bad request.
+     */
+    post: operations["validateSwitchConfiguration"];
     delete?: never;
     options?: never;
     head?: never;
@@ -552,6 +786,56 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/bmc/storage": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Whether the board is keeping its settings
+     * @description A board that cannot mount its settings volume boots anyway, on a temporary layer in RAM, so every reboot is a factory reset (password `turing`, a new certificate). The same layer is used on purpose when KEY1 is held at power-on. This says which the board is in.
+     *
+     *     `state` is read from the mount table, which is the authority: `temporary` when `/` is an overlay whose upper directory is under `/tmp/safemode/`, `persistent` for an overlay with any other upper directory (normally `/mnt/overlay/upper`), `unknown` otherwise. `reason`, only when `temporary`, is `requested` (the kernel command line contains `safemode`, i.e. KEY1 was held; this wins over the reason file), `mount_failed`, or `unrecorded` (the firmware before 2.46.0 writes no reason and the key was not held); it is `null` otherwise. `detail` is the free text firmware 2.46.0 and later records with the reason, trimmed and cut to 8 KiB, or `null`. `backing` is what the read-only root is on: `ubi` (the built-in flash), `mmc` (the SD card) or `unknown`.
+     *
+     *     `repairable` is true only when the state is `temporary`, the reason is `mount_failed` or `unrecorded`, the backing is `ubi`, a UBI volume named `overlay` exists, and nothing is mounted at `/mnt/overlay`. Otherwise `repair_blocker` says why in one sentence.
+     */
+    get: operations["getStorage"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/bmc/storage/repair": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Remove the settings volume that will not mount, and reboot
+     * @description Runs `ubirmvol /dev/ubi0 -N overlay`, then reboots the BMC about two seconds later so this response can arrive. On the next boot the firmware's preinit finds no settings volume and creates a fresh one.
+     *
+     *     **This permanently erases what is on the settings volume**: network configuration, certificates, node names, application data. It is not being loaded now, but it cannot be recovered afterwards. A mount failure can be transient, so try a plain reboot first. **It also reboots the BMC**, which on a v2.4 board power-cycles the four compute modules. The board is a factory unit afterwards: password `turing`, a new certificate.
+     *
+     *     The body must be sent as `Content-Type: application/json`; any other type is a 415. The removal (60 s at most) and the reboot are one piece of work that does not depend on this request staying connected.
+     *
+     *     Whether repair is on offer is worked out again from the board for every request, from the same facts as `GET /api/bmc/storage`; an earlier answer is never trusted. When it is not, the answer is 409 and the message is that `repair_blocker`, and nothing is run. A failed `ubirmvol` is a 500 carrying what it printed; nothing is rebooted.
+     */
+    post: operations["repairStorage"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/bmc/thermal": {
     parameters: {
       query?: never;
@@ -567,6 +851,34 @@ export interface paths {
     put?: never;
     post?: never;
     delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/bmc/tls/certificate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * The certificate this board serves
+     * @description Subject, issuer, validity, fingerprint, key type, the names it asserts, and whether the board issued it (`self-signed`) or somebody installed it (`installed`). Nothing here is secret: all of it is sent to every client during the handshake.
+     */
+    get: operations["getTlsCertificate"];
+    /**
+     * Install your own certificate and key
+     * @description For a board that should serve a certificate from your own CA. Every check runs before anything is written: the key must belong to the certificate, the certificate must be valid now, it must permit server authentication, and it must name this board -- a certificate naming none of the board's names is one no browser would accept, so it is refused with the reason rather than installed. Takes effect on the next connection; no restart, and the session sending this survives.
+     */
+    put: operations["putTlsCertificate"];
+    post?: never;
+    /**
+     * Remove an installed certificate
+     * @description Removes the installed pair and has the board issue its own, so it is never left without a certificate. Refused when the board is already serving its own. Takes effect on the next connection.
+     */
+    delete: operations["deleteTlsCertificate"];
     options?: never;
     head?: never;
     patch?: never;
@@ -1080,6 +1392,11 @@ export interface components {
        */
       configurable: boolean;
       servers: string[];
+      /**
+       * @description Every source chrony knows about and what it thinks of each -- the
+       *     answer to "why is it not synchronised", which `clock` alone is not.
+       */
+      sources: components["schemas"]["Source"][];
     };
     /** @description What sits on the other side of a switch port. */
     PortKind: "node" | "uplink";
@@ -1297,6 +1614,23 @@ export interface components {
       /** Format: uint64 */
       total_bytes: number;
     };
+    /** @description Whether the board keeps its settings. See GET /api/bmc/storage. */
+    StorageStatus: {
+      /** @enum {string} */
+      backing: "ubi" | "mmc" | "unknown";
+      /** @description Free text recorded with the reason by firmware 2.46.0 and later. */
+      detail: string | null;
+      /**
+       * @description Only when `state` is `temporary`.
+       * @enum {string|null}
+       */
+      reason: "requested" | "mount_failed" | "unrecorded" | null;
+      /** @description One sentence on why repair is not offered; null when it is. */
+      repair_blocker: string | null;
+      repairable: boolean;
+      /** @enum {string} */
+      state: "persistent" | "temporary" | "unknown";
+    };
     /**
      * @description One port of the switch. Every field the kernel would not give us is
      *     `None` rather than a stand-in value: a port that is down has no speed and
@@ -1381,6 +1715,26 @@ export interface components {
        */
       trips: components["schemas"]["Trip"][];
     };
+    /** @description The certificate this listener serves. See GET /api/bmc/tls/certificate. */
+    TlsCertificate: {
+      /** @description Intermediates sent with the leaf. */
+      chain_length?: number;
+      /** @description SHA-256 over the DER, colon-separated. */
+      fingerprint?: string;
+      issuer?: string;
+      /** @description ecdsa-p384, rsa-2048, ed25519. Null when it cannot be described. */
+      key?: string | null;
+      /** @description Every name and address the certificate asserts. */
+      names?: string[];
+      not_after?: string;
+      not_before?: string;
+      /**
+       * @description Whether the board issued it. The board renews only its own.
+       * @enum {string}
+       */
+      source?: "self-signed" | "installed";
+      subject?: string;
+    };
     /** @description One trip point: a temperature and what crossing it means. */
     Trip: {
       /**
@@ -1446,6 +1800,68 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+  legacyFlashNode: {
+    parameters: {
+      query?: {
+        /** @description `set` */
+        opt?: string;
+        /** @description `flash` */
+        type?: string;
+        /** @description 0-based node, 0 to 3. */
+        node?: string;
+        /** @description With `sdcard`: the path relative to the card, as returned by `GET /api/bmc/sdcard/files`. With `local`: an absolute path on the BMC. Otherwise a URL starting `http://` or `https://`, or the name of the file to upload. Required. */
+        file?: string;
+        /** @description `1` (or the key with an empty value) reads `file` from the microSD card. The path is confined to the card: absolute paths, `..`, symlinks leading out, missing files, directories and an unmounted card are refused with 400. Cannot be combined with `local` or a URL. */
+        sdcard?: string;
+        /** @description Key alone or `1|true|yes|on` (`0|false|no|off` is not local): `file` is an absolute path on the BMC. NOT confined to the card; use `sdcard` unless you need another place. */
+        local?: string;
+        /** @description Size in bytes of the upload. Required, else 411, unless `sdcard`, `local` or a URL is used. */
+        length?: string;
+        /** @description Hex SHA-256 the image must match, verified as it is read for every source (upload, URL, `local`, `sdcard`); a mismatch fails the transfer. */
+        sha256?: string;
+        /** @description Skip verifying the written image. Skipped when present with an empty value or `1`, `true`, `yes`, `on` (any case); verified when absent or `0`, `false`, `no`, `off`. Any other value is 400 `Invalid `skip_crc` value`. */
+        skip_crc?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description `{"handle": N}` */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description A parameter is missing, invalid or conflicting. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description An upload without `length`. */
+      411: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A refusal, RFC 9457. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+    };
+  };
   getAbout: {
     parameters: {
       query?: never;
@@ -2267,6 +2683,202 @@ export interface operations {
       };
     };
   };
+  getAddress: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The address, as the daemon sees it. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A refusal, RFC 9457. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+    };
+  };
+  applyAddress: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description Agree to replace a hand-written /etc/network/interfaces on confirm. A copy is kept.
+           * @default false
+           */
+          replace_hand_written?: boolean;
+          window_s?: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Applied, and waiting: token, applied_at, window_s. */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description There is no br0 to change, or the interfaces file was written by hand and replace_hand_written was not sent. Nothing was changed. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            response?: {
+              result?: string;
+            }[];
+          };
+        };
+      };
+      /** @description A refusal, RFC 9457. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+    };
+  };
+  confirmAddress: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          token: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Kept and written; the view, as GET returns it. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A refusal, RFC 9457. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+    };
+  };
+  getAddressLimits: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description prefix_min, prefix_max, window_default_s, window_min_s, window_max_s. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A refusal, RFC 9457. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+    };
+  };
+  revertAddress: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Reverted; the view, as GET returns it. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A refusal, RFC 9457. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+    };
+  };
+  validateAddress: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>;
+      };
+    };
+    responses: {
+      /** @description The verdict: document, refusal, warnings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A refusal, RFC 9457. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+    };
+  };
   postNetworkReset: {
     parameters: {
       query?: never;
@@ -2301,6 +2913,217 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description A refusal, RFC 9457. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+    };
+  };
+  getSwitch: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The switch, as the daemon sees it. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A refusal, RFC 9457. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+    };
+  };
+  applySwitch: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>;
+      };
+    };
+    responses: {
+      /** @description Applied, and waiting: token, applied_at, window_s. */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The board has no br0, the bridge over the switch ports. Nothing was changed. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            response?: {
+              result?: string;
+            }[];
+          };
+        };
+      };
+      /** @description A refusal, RFC 9457. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+    };
+  };
+  confirmSwitch: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          token: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Kept, and persisted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description It came from the board itself and proves nothing. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+      /** @description A refusal, RFC 9457. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+    };
+  };
+  getSwitchPresets: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Every preset, with the board's own warnings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A refusal, RFC 9457. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+    };
+  };
+  revertSwitch: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Reverted. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A refusal, RFC 9457. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+    };
+  };
+  validateSwitchConfiguration: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>;
+      };
+    };
+    responses: {
+      /** @description The verdict: document, refusal, warnings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The board has no br0, the bridge over the switch ports, so there is nothing to validate against. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            response?: {
+              result?: string;
+            }[];
+          };
+        };
       };
       /** @description A refusal, RFC 9457. */
       default: {
@@ -2851,6 +3674,125 @@ export interface operations {
       };
     };
   };
+  getStorage: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description What the board is running on. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["StorageStatus"];
+        };
+      };
+      /** @description A refusal, RFC 9457. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+    };
+  };
+  repairStorage: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description Must be `true`; anything else is a 400. */
+          confirm: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description The volume is removed and the board reboots shortly. */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            rebooting: boolean;
+          };
+        };
+      };
+      /** @description `confirm` was not `true`, or the body was not the request. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            response?: {
+              result?: string;
+            }[];
+          };
+        };
+      };
+      /** @description Repair is not on offer; the message is `repair_blocker`. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            response?: {
+              result?: string;
+            }[];
+          };
+        };
+      };
+      /** @description The content type was not `application/json`. */
+      415: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            response?: {
+              result?: string;
+            }[];
+          };
+        };
+      };
+      /** @description `ubirmvol` failed or did not finish in 60 s; the message carries what it printed. */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            response?: {
+              result?: string;
+            }[];
+          };
+        };
+      };
+      /** @description A refusal, RFC 9457. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+    };
+  };
   getThermal: {
     parameters: {
       query?: never;
@@ -2875,6 +3817,102 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description A refusal, RFC 9457. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+    };
+  };
+  getTlsCertificate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description What is on the wire now. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TlsCertificate"];
+        };
+      };
+      /** @description A refusal, RFC 9457. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+    };
+  };
+  putTlsCertificate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description PEM. Intermediates may follow the leaf, leaf first. */
+          certificate: string;
+          /** @description PEM. Never logged and never returned. */
+          private_key: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Installed, and being served. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TlsCertificate"];
+        };
+      };
+      /** @description A refusal, RFC 9457. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["Problem"];
+        };
+      };
+    };
+  };
+  deleteTlsCertificate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Removed; the board issued its own. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TlsCertificate"];
+        };
       };
       /** @description A refusal, RFC 9457. */
       default: {

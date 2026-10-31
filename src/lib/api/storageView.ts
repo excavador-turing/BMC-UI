@@ -8,24 +8,28 @@
  * is "show nothing", never a fault. A banner telling someone their settings
  * will not survive a reboot is only worth showing when the board said so.
  *
- * No runtime imports: this file runs under node with nothing else loaded.
+ * Types are imported with `import type` only: they are erased, so this file
+ * runs under node with nothing else loaded.
  */
 
-export type StorageState = "persistent" | "temporary" | "unknown";
-export type StorageReason = "requested" | "mount_failed" | "unrecorded";
-export type StorageBacking = "ubi" | "mmc" | "unknown";
+import type { components, operations } from "./schema";
 
-export interface StorageView {
-  state: StorageState;
-  /** Null when the daemon gave none, or one this interface does not know. */
-  reason: StorageReason | null;
-  /** The daemon's own words about the failure, as they are. */
-  detail: string | null;
-  backing: StorageBacking;
-  repairable: boolean;
-  /** Why it cannot be repaired from here, in the daemon's words. */
-  repair_blocker: string | null;
-}
+type Schemas = components["schemas"];
+
+/**
+ * The daemon's own description of the answer (bmcd 2.42.0's OpenAPI document,
+ * `npm run api:refresh`). The TYPE is exact; `parseStorage` below is not
+ * trusting it, because an older daemon sends none of this and a newer one may
+ * send values this file has never seen.
+ */
+export type StorageView = Schemas["StorageStatus"];
+export type StorageState = StorageView["state"];
+export type StorageReason = NonNullable<StorageView["reason"]>;
+export type StorageBacking = StorageView["backing"];
+
+/** The repair request body, as the daemon's document spells it. */
+export type RepairBody =
+  operations["repairStorage"]["requestBody"]["content"]["application/json"];
 
 /** The banner that applies: a mount that failed, or KEY1 held at power-on. */
 export type BannerKind = "unmounted" | "keyhold";
@@ -131,7 +135,7 @@ export function repairBlocker(
  * The body of the repair request, sent as `application/json` (the daemon
  * refuses it without that header, and without the flag).
  */
-export function repairBody(): { confirm: true } {
+export function repairBody(): RepairBody & { confirm: true } {
   return { confirm: true };
 }
 
