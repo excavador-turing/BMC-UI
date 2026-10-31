@@ -213,8 +213,6 @@ const translations = {
     appliedNote:
       "Open deze pagina op het nieuwe adres en bevestig voor de tijd om is, anders gaat het terug.",
     applyFailed: "Het adres is niet toegepast",
-    applyFailedRevert:
-      "De laatste wijziging kon niet worden toegepast; het vorige adres is direct teruggezet.",
     pendingTitle: "{{address}} wacht op bevestiging",
     pendingNoClock: "De tijd loopt.",
     countdown: "Nog {{seconds}} seconden om te bevestigen.",
@@ -227,10 +225,22 @@ const translations = {
       "Een bevestiging telt alleen als ze op het nieuwe adres aankomt — deze pagina, daar geopend. Vanaf een shell op het board bewijst ze niets en wordt ze geweigerd.",
     wasReverted:
       "De wijziging van {{at}} is teruggedraaid omdat ze niet is bevestigd.",
+    applyFailedRevert:
+      "De wijziging van {{at}} kon niet worden toegepast; het vorige adres is direct teruggezet.",
     fileUnreadable:
-      "Het interfaces-bestand van het board is met de hand geschreven en kon niet worden gelezen; een bevestigde wijziging vervangt het volledig.",
+      "Het interfaces-bestand van het board kon niet worden gelezen. Een bevestigde wijziging vervangt het hele bestand en bewaart een kopie als /etc/network/interfaces.hand-written.<tijd>.",
     fileHandEdited:
-      "Het huidige statische adres is met de hand ingesteld; een bevestigde wijziging vervangt het bestand.",
+      "Het interfaces-bestand van het board is met de hand geschreven. Een bevestigde wijziging vervangt het hele bestand en bewaart een kopie als /etc/network/interfaces.hand-written.<tijd>.",
+    fileKept: "Het vorige bestand is bewaard als {{path}}.",
+    replaceTitle: "Het interfaces-bestand vervangen?",
+    replaceWarning:
+      "Het interfaces-bestand van het board is met de hand geschreven. Een bevestigde wijziging vervangt het hele bestand; een kopie blijft bewaard als /etc/network/interfaces.hand-written.<tijd>.",
+    revertFailed: "Het oude adres is niet teruggezet",
+    noBridgeTitle: "Dit board heeft geen bridge {{name}}",
+    noBridgeBody:
+      "Deze pagina beheert alleen de bridge {{name}} en is hier dus alleen-lezen. Hieronder staan de interfaces van het board. Wijzig ze via SSH, of zet de standaardindeling met {{name}} terug.",
+    defaultRoute: "standaardroute",
+    noAddress: "geen adres",
   },
   switchConfig: {
     title: "Switch",

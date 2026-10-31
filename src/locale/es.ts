@@ -214,8 +214,6 @@ const translations = {
     appliedNote:
       "Abra esta página en la nueva dirección y confirme antes de que acabe el plazo, o volverá atrás.",
     applyFailed: "La dirección no se aplicó",
-    applyFailedRevert:
-      "El último cambio no pudo aplicarse y la dirección anterior se restauró de inmediato.",
     pendingTitle: "{{address}} espera confirmación",
     pendingNoClock: "El plazo está corriendo.",
     countdown: "Quedan {{seconds}} segundos para confirmar.",
@@ -227,10 +225,22 @@ const translations = {
     confirmFromThere:
       "Una confirmación solo cuenta si llega a la nueva dirección — esta página, abierta allí. Desde un shell en la placa no prueba nada y se rechaza.",
     wasReverted: "El cambio de las {{at}} se deshizo porque no se confirmó.",
+    applyFailedRevert:
+      "El cambio de las {{at}} no pudo aplicarse y la dirección anterior se restauró de inmediato.",
     fileUnreadable:
-      "El archivo interfaces de la placa se escribió a mano y no pudo leerse; un cambio confirmado lo reemplaza por completo.",
+      "El archivo interfaces de la placa no pudo leerse. Un cambio confirmado reemplaza el archivo completo y guarda una copia como /etc/network/interfaces.hand-written.<hora>.",
     fileHandEdited:
-      "La dirección estática actual se escribió a mano; un cambio confirmado reemplaza el archivo.",
+      "El archivo interfaces de la placa se escribió a mano. Un cambio confirmado reemplaza el archivo completo y guarda una copia como /etc/network/interfaces.hand-written.<hora>.",
+    fileKept: "El archivo anterior se guardó como {{path}}.",
+    replaceTitle: "¿Reemplazar el archivo interfaces?",
+    replaceWarning:
+      "El archivo interfaces de la placa se escribió a mano. Un cambio confirmado reemplaza el archivo completo; se guarda una copia como /etc/network/interfaces.hand-written.<hora>.",
+    revertFailed: "No se restauró la dirección anterior",
+    noBridgeTitle: "Esta placa no tiene el puente {{name}}",
+    noBridgeBody:
+      "Esta página solo gestiona el puente {{name}}, así que aquí es de solo lectura. Abajo se listan las interfaces de la placa. Cámbielas por SSH o restaure la disposición predeterminada con {{name}}.",
+    defaultRoute: "ruta predeterminada",
+    noAddress: "sin dirección",
   },
   switchConfig: {
     title: "Switch",

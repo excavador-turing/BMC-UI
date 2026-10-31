@@ -1348,6 +1348,8 @@ export type AddressDocument =
 
 export interface AddressLive {
   mode: string;
+  /** The interface `address` is on (daemon 2.41.0 and later). */
+  interface?: string | null;
   address: string | null;
   gateway: string | null;
   dns: string[];
@@ -1361,6 +1363,15 @@ export interface AddressPending {
   window_s: number;
 }
 
+/** One network interface the board has, as the daemon sees it (2.41.0+). */
+export interface AddressInterface {
+  name: string;
+  /** CIDR strings, `192.0.2.20/24`. */
+  addresses: string[];
+  mac?: string | null;
+  default_route?: boolean;
+}
+
 export interface AddressState {
   running: AddressDocument;
   configured: AddressDocument | null;
@@ -1368,11 +1379,24 @@ export interface AddressState {
   live: AddressLive;
   pending: AddressPending | null;
   last_revert: {
-    at: DaemonTime;
+    /** A daemon time, or unix seconds (2.41.0). */
+    at: DaemonTime | number;
     reason: "not_confirmed" | "requested" | "apply_failed";
     document: AddressDocument;
+    /** Why, in the daemon's words (2.41.0). */
+    detail?: string | null;
   } | null;
   default_window_s: number;
+  /**
+   * Daemon 2.41.0 and later. Absent on an older daemon, which managed the
+   * bridge it assumed: read an absent field as the old behaviour (`br0`
+   * present, nothing else listed), never as a refusal.
+   */
+  interfaces?: AddressInterface[];
+  managed_interface?: string;
+  managed_interface_present?: boolean;
+  /** Where the previous, hand-written file was kept after a replace. */
+  file_backup?: string | null;
 }
 
 export interface AddressLimits {

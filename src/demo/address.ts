@@ -195,6 +195,27 @@ export class DemoAddress {
   }
 
   /**
+   * Why the daemon would answer 409 to a `PUT`, or null. Wording follows
+   * bmcd 2.41.0's, which the interface shows as it is.
+   */
+  refusal(replaceHandWritten: boolean): string | null {
+    const name = this.state.managed_interface ?? "br0";
+    if (this.state.managed_interface_present === false) {
+      return (
+        `this board has no ${name} bridge; this page manages ${name} only. ` +
+        "Change the addresses over SSH."
+      );
+    }
+    if (this.state.file !== "bmcd" && !replaceHandWritten) {
+      return (
+        "the interfaces file was written by hand; send replace_hand_written " +
+        "to replace it (a copy is kept)"
+      );
+    }
+    return null;
+  }
+
+  /**
    * `PUT`: 202 and a window. The address goes on the bridge and NOTHING is
    * written until a confirmation arrives -- `configured` is untouched here,
    * exactly as on a board, which is why a reboot mid-window comes back on
@@ -229,6 +250,11 @@ export class DemoAddress {
     this.state.configured = pending.document;
     this.state.running = pending.document;
     this.state.live = liveFor(pending.document, this.lease);
+    // A hand-written file is replaced at the confirmation, and kept.
+    if (this.state.file !== "bmcd") {
+      const stamp = new Date().toISOString().replace(/[-:]/g, "").slice(0, 15);
+      this.state.file_backup = `/etc/network/interfaces.hand-written.${stamp}`;
+    }
     this.state.file = "bmcd";
     this.state.pending = null;
     this.state.last_revert = null;

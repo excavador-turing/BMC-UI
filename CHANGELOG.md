@@ -10,6 +10,46 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [v4.2.0] — 2026-10-31
+
+This release needs bmcd 2.41.0 for the new fields. On an older daemon the
+page behaves as before: a missing field is read as "the board has its bridge,
+nothing else is listed", never as an error.
+
+### Fixed
+
+- **The dashboard shows the board's address on any bridge layout.** A board
+  with its interfaces split by hand (`br-wan` and `br-lan`, no `br0`) showed
+  an empty IP on the dashboard. With more than one interface carrying an
+  address, the dashboard now lists each as `name address`, the one with the
+  default route first.
+- **A failed apply no longer sits on the Network page in red for ever.** The
+  banner stayed for as long as the daemon remembered the revert. It now shows
+  the time of the failure and the daemon's reason, and goes away after ten
+  minutes.
+- **A refused change says why.** Applying, confirming or reverting an address
+  showed axios's "Request failed with status code 500"; it now shows the
+  daemon's own message. Reverting had no error message at all.
+
+### Added
+
+- **The Network page tells a board without `br0` what it is looking at.** It
+  manages `br0` only; on a board without it the card is read-only and says so,
+  lists the interfaces the board has, and points to SSH (or the default
+  layout) for changes.
+- **Every interface, with its addresses, MAC and default route,** listed
+  read-only under the address form.
+- **A hand-written interfaces file is replaced only after you agree.** The
+  card explains that a confirmed change replaces the whole file and keeps a
+  copy as `/etc/network/interfaces.hand-written.<time>`, asks before
+  applying, and afterwards says where the old file was kept.
+- The demo can show these layouts: `?layout=split` (no `br0`) and
+  `?layout=handwritten` (a hand-written file), with documentation addresses.
+- Unit tests for the card's decisions (`npm test` now runs every
+  `src/lib/api/*.test.mjs`).
+
+Reported by a user on Discord.
+
 ## [v4.1.0] — 2026-10-15
 
 ### Fixed

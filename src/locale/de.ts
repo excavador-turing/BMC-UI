@@ -214,8 +214,6 @@ const translations = {
     appliedNote:
       "Öffnen Sie diese Seite unter der neuen Adresse und bestätigen Sie, bevor das Zeitfenster abläuft, sonst geht es zurück.",
     applyFailed: "Die Adresse wurde nicht angewendet",
-    applyFailedRevert:
-      "Die letzte Änderung konnte nicht angewendet werden; die vorherige Adresse wurde sofort wiederhergestellt.",
     pendingTitle: "{{address}} wartet auf Bestätigung",
     pendingNoClock: "Das Zeitfenster läuft.",
     countdown: "Noch {{seconds}} Sekunden zum Bestätigen.",
@@ -229,10 +227,22 @@ const translations = {
       "Eine Bestätigung zählt nur, wenn sie unter der neuen Adresse ankommt — diese Seite, dort geöffnet. Von einer Shell auf dem Board beweist sie nichts und wird abgelehnt.",
     wasReverted:
       "Die Änderung von {{at}} wurde zurückgenommen, weil sie nicht bestätigt wurde.",
+    applyFailedRevert:
+      "Die Änderung von {{at}} konnte nicht angewendet werden; die vorherige Adresse wurde sofort wiederhergestellt.",
     fileUnreadable:
-      "Die interfaces-Datei des Boards wurde von Hand geschrieben und konnte nicht gelesen werden; eine bestätigte Änderung ersetzt sie vollständig.",
+      "Die interfaces-Datei des Boards konnte nicht gelesen werden. Eine bestätigte Änderung ersetzt die gesamte Datei und behält eine Kopie als /etc/network/interfaces.hand-written.<Zeit>.",
     fileHandEdited:
-      "Die aktuelle statische Adresse wurde von Hand eingetragen; eine bestätigte Änderung ersetzt die Datei.",
+      "Die interfaces-Datei des Boards wurde von Hand geschrieben. Eine bestätigte Änderung ersetzt die gesamte Datei und behält eine Kopie als /etc/network/interfaces.hand-written.<Zeit>.",
+    fileKept: "Die vorherige Datei wurde als {{path}} aufbewahrt.",
+    replaceTitle: "interfaces-Datei ersetzen?",
+    replaceWarning:
+      "Die interfaces-Datei des Boards wurde von Hand geschrieben. Eine bestätigte Änderung ersetzt die gesamte Datei; eine Kopie bleibt als /etc/network/interfaces.hand-written.<Zeit> erhalten.",
+    revertFailed: "Die alte Adresse wurde nicht wiederhergestellt",
+    noBridgeTitle: "Dieses Board hat keine Bridge {{name}}",
+    noBridgeBody:
+      "Diese Seite verwaltet nur die Bridge {{name}} und ist hier daher schreibgeschützt. Unten stehen die Schnittstellen des Boards. Ändern Sie sie per SSH oder stellen Sie das Standard-Layout mit {{name}} wieder her.",
+    defaultRoute: "Standardroute",
+    noAddress: "keine Adresse",
   },
   switchConfig: {
     title: "Switch",
