@@ -190,6 +190,26 @@ const translations = {
     lost: "La placa dejó de responder hace {{elapsed}} segundos, y nada aquí se lo pidió. La página sigue intentándolo y volverá sola.",
     cameBack: "La placa volvió en {{seconds}} segundos.",
   },
+  rebootNodes: {
+    modalKeep:
+      "El BMC se reinicia. Los módulos de cómputo siguen funcionando; solo desaparecen esta interfaz, la API y las consolas, durante aproximadamente medio minuto.",
+    modal24:
+      "El BMC se reinicia. En una Turing Pi 2 v2.4, el reinicio del BMC también apaga y enciende los cuatro nodos; apáguelos antes. Esta interfaz, la API y las consolas desaparecen durante aproximadamente medio minuto.",
+    modalUnknown:
+      "El BMC se reinicia. En una Turing Pi 2 v2.5 los módulos de cómputo siguen funcionando, pero en una v2.4 el reinicio del BMC también apaga y enciende los cuatro nodos, así que apáguelos antes. Esta interfaz, la API y las consolas desaparecen durante aproximadamente medio minuto.",
+    noteKeep:
+      "Los módulos de cómputo siguen funcionando durante un reinicio del BMC.",
+    note24:
+      "En una Turing Pi 2 v2.4, el reinicio del BMC también apaga y enciende los cuatro nodos; apáguelos antes.",
+    noteUnknown:
+      "Un reinicio del BMC deja funcionando los módulos de cómputo en una Turing Pi 2 v2.5, pero apaga y enciende los cuatro nodos en una v2.4.",
+    upgradeKeep:
+      "El BMC se reinicia y arranca la imagen preparada. Los módulos de cómputo siguen funcionando. Si la nueva imagen no arranca correctamente, la placa vuelve a la actual.",
+    upgrade24:
+      "El BMC se reinicia y arranca la imagen preparada. En una Turing Pi 2 v2.4, el reinicio del BMC también apaga y enciende los cuatro nodos; apáguelos antes. Si la nueva imagen no arranca correctamente, la placa vuelve a la actual.",
+    upgradeUnknown:
+      "El BMC se reinicia y arranca la imagen preparada. En una Turing Pi 2 v2.5 los módulos de cómputo siguen funcionando, pero en una v2.4 el reinicio del BMC también apaga y enciende los cuatro nodos, así que apáguelos antes. Si la nueva imagen no arranca correctamente, la placa vuelve a la actual.",
+  },
   storage: {
     unmounted:
       "No se pudo montar el almacenamiento de ajustes. La placa funciona con los valores de fábrica y nada de lo que cambie —contraseña incluida— sobrevive a un reinicio.",
@@ -210,6 +230,8 @@ const translations = {
       "Puede que el montaje fallara solo esta vez, así que pruebe primero un reinicio simple. Repare solo si el aviso vuelve.",
     repairNodes:
       "En una Turing Pi 2 v2.4, el reinicio del BMC también apaga y enciende los cuatro nodos, así que apáguelos antes.",
+    repairNodesUnknown:
+      "En una Turing Pi 2 v2.4, el reinicio del BMC también apaga y enciende los cuatro nodos, así que apáguelos antes; en una v2.5 los nodos siguen funcionando.",
     repairStarted:
       "Se está eliminando el volumen de ajustes y la placa se está reiniciando.",
     repairFailed: "No se pudo reparar el almacenamiento de ajustes",
@@ -410,8 +432,6 @@ const translations = {
     parkModalDescription:
       "La imagen se escribe en la tarjeta SD y nada más: sin reinicio y sin preparar nada. Aparecerá en la lista de arriba y podrá instalarse como cualquier otra versión.",
     rebootToApply: "Reiniciar para aplicar",
-    rebootToApplyConfirm:
-      "El BMC se reinicia y arranca la imagen preparada. Los módulos de cómputo siguen funcionando. Si la nueva imagen no arranca correctamente, la placa vuelve a la actual.",
     firmwareSlots: "Ranuras de firmware",
     promotionPassed: "Superado",
     promotionRolledBack: "Revertido",

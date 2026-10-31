@@ -190,6 +190,25 @@ const translations = {
     lost: "Płyta przestała odpowiadać {{elapsed}} sekund temu, a nic tutaj o to nie prosiło. Strona nadal próbuje i wróci sama.",
     cameBack: "Płyta wróciła po {{seconds}} sekundach.",
   },
+  rebootNodes: {
+    modalKeep:
+      "BMC uruchamia się ponownie. Moduły obliczeniowe działają dalej – znikają tylko ten interfejs, API i konsole, na około pół minuty.",
+    modal24:
+      "BMC uruchamia się ponownie. W Turing Pi 2 v2.4 restart BMC wyłącza i włącza też wszystkie cztery węzły; najpierw je wyłącz. Ten interfejs, API i konsole znikają na około pół minuty.",
+    modalUnknown:
+      "BMC uruchamia się ponownie. W Turing Pi 2 v2.5 moduły obliczeniowe działają dalej, ale w v2.4 restart BMC wyłącza i włącza też wszystkie cztery węzły, więc najpierw je wyłącz. Ten interfejs, API i konsole znikają na około pół minuty.",
+    noteKeep: "Moduły obliczeniowe działają dalej podczas restartu BMC.",
+    note24:
+      "W Turing Pi 2 v2.4 restart BMC wyłącza i włącza też wszystkie cztery węzły; najpierw je wyłącz.",
+    noteUnknown:
+      "Restart BMC pozostawia moduły obliczeniowe włączone w Turing Pi 2 v2.5, ale w v2.4 wyłącza i włącza wszystkie cztery węzły.",
+    upgradeKeep:
+      "BMC uruchomi się ponownie i wystartuje przygotowany obraz. Moduły obliczeniowe działają dalej. Jeśli nowy obraz nie wstanie poprawnie, płyta wróci do obecnego.",
+    upgrade24:
+      "BMC uruchomi się ponownie i wystartuje przygotowany obraz. W Turing Pi 2 v2.4 restart BMC wyłącza i włącza też wszystkie cztery węzły; najpierw je wyłącz. Jeśli nowy obraz nie wstanie poprawnie, płyta wróci do obecnego.",
+    upgradeUnknown:
+      "BMC uruchomi się ponownie i wystartuje przygotowany obraz. W Turing Pi 2 v2.5 moduły obliczeniowe działają dalej, ale w v2.4 restart BMC wyłącza i włącza też wszystkie cztery węzły, więc najpierw je wyłącz. Jeśli nowy obraz nie wstanie poprawnie, płyta wróci do obecnego.",
+  },
   storage: {
     unmounted:
       "Nie udało się zamontować pamięci ustawień. Płyta działa na ustawieniach fabrycznych, a nic, co zmienisz – łącznie z hasłem – nie przetrwa restartu.",
@@ -210,6 +229,8 @@ const translations = {
       "Montowanie mogło zawieść tylko ten jeden raz, więc najpierw spróbuj zwykłego restartu. Naprawiaj tylko wtedy, gdy komunikat wróci.",
     repairNodes:
       "W Turing Pi 2 v2.4 restart BMC wyłącza i włącza też wszystkie cztery węzły, więc najpierw je wyłącz.",
+    repairNodesUnknown:
+      "W Turing Pi 2 v2.4 restart BMC wyłącza i włącza też wszystkie cztery węzły, więc najpierw je wyłącz; w v2.5 węzły działają dalej.",
     repairStarted: "Wolumin ustawień jest usuwany, a płyta się restartuje.",
     repairFailed: "Nie udało się naprawić pamięci ustawień",
   },
@@ -409,8 +430,6 @@ const translations = {
     parkModalDescription:
       "Obraz zostanie zapisany na karcie SD i nic więcej: bez restartu i bez przygotowywania. Pojawi się na liście powyżej i można go zainstalować jak każdą inną wersję.",
     rebootToApply: "Uruchom ponownie, aby zastosować",
-    rebootToApplyConfirm:
-      "BMC uruchomi się ponownie i wystartuje przygotowany obraz. Moduły obliczeniowe działają dalej. Jeśli nowy obraz nie wstanie poprawnie, płyta wróci do obecnego.",
     firmwareSlots: "Sloty firmware",
     promotionPassed: "Zaliczono",
     promotionRolledBack: "Przywrócono",

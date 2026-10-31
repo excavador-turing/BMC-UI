@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useConnection } from "@/hooks/useConnection";
+import { useRebootCopy } from "@/hooks/useRebootCopy";
 import { useFirmwareSlotsQuery } from "@/lib/api/get";
 import { useRebootBMCMutation, useReloadBMCMutation } from "@/lib/api/set";
 
@@ -52,6 +53,7 @@ export function Settings() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { expectReboot } = useConnection();
+  const copy = useRebootCopy();
   const [rebootModalOpened, setRebootModalOpened] = useState(false);
   const { mutate: mutateRebootBMC, isPending: rebootPending } =
     useRebootBMCMutation();
@@ -119,7 +121,7 @@ export function Settings() {
             <CardTitle>{t("info.bmc")}</CardTitle>
             {/* The reboot cuts the BMC, not the compute modules. People assume
               otherwise and hesitate over a button that is safe, so say it. */}
-            <CardDescription>{t("settings.rebootNote")}</CardDescription>
+            <CardDescription>{copy.note}</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex flex-wrap gap-2">
@@ -164,7 +166,7 @@ export function Settings() {
         title={t("info.rebootModalTitle")}
         message={
           <>
-            <p>{t("settings.rebootModalDescription")}</p>
+            <p>{copy.modal}</p>
             {staged && (
               <p className="mt-3 font-medium">
                 {stagedVersion

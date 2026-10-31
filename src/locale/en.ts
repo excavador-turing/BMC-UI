@@ -262,6 +262,25 @@ const translations = {
     lost: "The board stopped answering {{elapsed}} seconds ago, and nothing here asked it to. The page is still trying, and will come back on its own.",
     cameBack: "The board came back in {{seconds}} seconds.",
   },
+  rebootNodes: {
+    modalKeep:
+      "The BMC restarts. The compute modules keep running throughout — only this interface, the API and the consoles go away, for about half a minute.",
+    modal24:
+      "The BMC restarts. On a Turing Pi 2 v2.4 a BMC reboot also power-cycles all four nodes; shut them down first. This interface, the API and the consoles go away for about half a minute.",
+    modalUnknown:
+      "The BMC restarts. On a Turing Pi 2 v2.5 the compute modules keep running throughout, but on a v2.4 a BMC reboot also power-cycles all four nodes, so shut them down first. This interface, the API and the consoles go away for about half a minute.",
+    noteKeep: "Compute modules keep running during a BMC reboot.",
+    note24:
+      "On a Turing Pi 2 v2.4 a BMC reboot also power-cycles all four nodes; shut them down first.",
+    noteUnknown:
+      "A BMC reboot leaves the compute modules running on a Turing Pi 2 v2.5, but power-cycles all four nodes on a v2.4.",
+    upgradeKeep:
+      "The BMC restarts and boots the staged image. The compute modules keep running throughout. If the new image does not come up healthy the board reboots back onto the one it has now.",
+    upgrade24:
+      "The BMC restarts and boots the staged image. On a Turing Pi 2 v2.4 a BMC reboot also power-cycles all four nodes; shut them down first. If the new image does not come up healthy the board reboots back onto the one it has now.",
+    upgradeUnknown:
+      "The BMC restarts and boots the staged image. On a Turing Pi 2 v2.5 the compute modules keep running, but on a v2.4 a BMC reboot also power-cycles all four nodes, so shut them down first. If the new image does not come up healthy the board reboots back onto the one it has now.",
+  },
   storage: {
     unmounted:
       "Settings storage could not be mounted. The board is running on factory defaults, and nothing you change — password included — survives a reboot.",
@@ -282,6 +301,8 @@ const translations = {
       "The mount may have failed only this once, so try a plain reboot first. Repair only if the banner comes back.",
     repairNodes:
       "On a Turing Pi 2 v2.4 the BMC reboot also power-cycles all four nodes, so shut them down first.",
+    repairNodesUnknown:
+      "On a Turing Pi 2 v2.4 the BMC reboot also power-cycles all four nodes, so shut them down first; on a v2.5 the nodes keep running.",
     repairStarted:
       "The settings volume is being removed and the board is rebooting.",
     repairFailed: "Could not repair settings storage",
@@ -510,8 +531,6 @@ const translations = {
     parkModalDescription:
       "The image is written to the SD card and nothing else happens: no reboot, and nothing staged. It then appears in the list above, where you can install it like any other version.",
     rebootToApply: "Reboot to apply",
-    rebootToApplyConfirm:
-      "The BMC restarts and boots the staged image. The compute modules keep running throughout. If the new image does not come up healthy the board reboots back onto the one it has now.",
     runningIs: "running {{version}}",
     availableError: "The available firmware could not be read from this board.",
     sourceUnreadable: "This source returned nothing usable: {{reason}}",
@@ -664,12 +683,9 @@ const translations = {
     configApplied: "applied",
     configSkipped: "skipped",
     configFailed: "FAILED",
-    rebootModalDescription:
-      "The BMC restarts. The compute modules keep running throughout — only this interface, the API and the consoles go away, for about half a minute.",
     rebootStaged: "A firmware update is staged. This reboot will start it.",
     rebootStagedNamed:
       "A firmware update is staged: this reboot will start {{version}}.",
-    rebootNote: "Compute modules keep running during a BMC reboot.",
   },
   about: {
     boardModel: "Board model",

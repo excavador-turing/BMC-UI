@@ -187,6 +187,25 @@ const translations = {
     lost: "主板在 {{elapsed}} 秒前停止响应，而本页并未要求它这样做。页面仍在重试，并会自行恢复。",
     cameBack: "主板在 {{seconds}} 秒后恢复。",
   },
+  rebootNodes: {
+    modalKeep:
+      "BMC 将重启。计算模块全程保持运行，只有此界面、API 和控制台会消失约半分钟。",
+    modal24:
+      "BMC 将重启。在 Turing Pi 2 v2.4 上，BMC 重启还会让全部四个节点断电再上电，请先将它们关机。此界面、API 和控制台会消失约半分钟。",
+    modalUnknown:
+      "BMC 将重启。在 Turing Pi 2 v2.5 上计算模块保持运行，但在 v2.4 上，BMC 重启还会让全部四个节点断电再上电，请先将它们关机。此界面、API 和控制台会消失约半分钟。",
+    noteKeep: "BMC 重启期间计算模块保持运行。",
+    note24:
+      "在 Turing Pi 2 v2.4 上，BMC 重启还会让全部四个节点断电再上电，请先将它们关机。",
+    noteUnknown:
+      "BMC 重启在 Turing Pi 2 v2.5 上不影响计算模块的运行，但在 v2.4 上会让全部四个节点断电再上电。",
+    upgradeKeep:
+      "BMC 将重启并启动已暂存的镜像。计算模块全程保持运行。如果新镜像未能正常启动，主板会回退到当前镜像。",
+    upgrade24:
+      "BMC 将重启并启动已暂存的镜像。在 Turing Pi 2 v2.4 上，BMC 重启还会让全部四个节点断电再上电，请先将它们关机。如果新镜像未能正常启动，主板会回退到当前镜像。",
+    upgradeUnknown:
+      "BMC 将重启并启动已暂存的镜像。在 Turing Pi 2 v2.5 上计算模块保持运行，但在 v2.4 上，BMC 重启还会让全部四个节点断电再上电，请先将它们关机。如果新镜像未能正常启动，主板会回退到当前镜像。",
+  },
   storage: {
     unmounted:
       "无法挂载设置存储。主板正在使用出厂默认设置运行，您所做的任何更改（包括密码）在重启后都不会保留。",
@@ -207,6 +226,8 @@ const translations = {
       "挂载可能只是这一次失败，所以请先尝试普通重启。只有提示再次出现时才进行修复。",
     repairNodes:
       "在 Turing Pi 2 v2.4 上，BMC 重启还会让全部四个节点断电再上电，请先将它们关机。",
+    repairNodesUnknown:
+      "在 Turing Pi 2 v2.4 上，BMC 重启还会让全部四个节点断电再上电，请先将它们关机；在 v2.5 上节点保持运行。",
     repairStarted: "正在删除设置卷，主板正在重启。",
     repairFailed: "无法修复设置存储",
   },
@@ -392,8 +413,6 @@ const translations = {
     parkModalDescription:
       "镜像会被写入 SD 卡，仅此而已：不重启，也不暂存。随后它会出现在上面的列表中，可以像其他版本一样安装。",
     rebootToApply: "重启以应用",
-    rebootToApplyConfirm:
-      "BMC 将重启并启动已暂存的镜像。计算模块全程保持运行。如果新镜像未能正常启动，主板会回退到当前镜像。",
     firmwareSlots: "固件槽位",
     promotionPassed: "已通过",
     promotionRolledBack: "已回滚",

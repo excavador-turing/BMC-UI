@@ -137,6 +137,24 @@ function storageFixtureName(): string {
   return "storage";
 }
 
+/**
+ * The captured board is a v2.5, whose nodes keep running through a BMC reboot.
+ * `?board=v2.4` reports a v2.4 revision instead, to show the reboot dialogs
+ * that warn the nodes are power-cycled. A written change to one field of a
+ * capture, not a capture.
+ */
+function aboutFixture(): unknown {
+  const captured = fixture("about");
+  const board = new URLSearchParams(window.location.search).get("board");
+  if (board !== "v2.4") return captured;
+  const copy = structuredClone(captured) as {
+    response?: { result?: { board_revision?: string } }[];
+  };
+  const result = copy.response?.[0]?.result;
+  if (result) result.board_revision = "v2.4.1";
+  return copy;
+}
+
 function demoAddress(): DemoAddress | null {
   if (address) return address;
   const captured = fixture(addressFixtureName()) as AddressState | undefined;
@@ -170,7 +188,7 @@ export const demoAdapter: AxiosAdapter = (config) => {
     const type = String(params.type ?? "");
     if (opt === "get") {
       const name = type === "uart" ? `uart_${params.node ?? 0}` : type;
-      const data = fixture(name);
+      const data = name === "about" ? aboutFixture() : fixture(name);
       if (data !== undefined) return reply(config, 200, data);
       // An honest miss, in the legacy envelope, so the page says what it lacks
       // rather than rendering a skeleton forever.

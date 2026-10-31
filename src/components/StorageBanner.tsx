@@ -7,6 +7,7 @@ import LoadingButton from "@/components/LoadingButton";
 import RebootModal from "@/components/RebootModal";
 import { useToast } from "@/hooks/use-toast";
 import { useConnection } from "@/hooks/useConnection";
+import { useRebootCopy } from "@/hooks/useRebootCopy";
 import { bmcdMessage } from "@/lib/api/bmcdMessage";
 import { useStorageQuery } from "@/lib/api/get";
 import { useRebootBMCMutation, useRepairStorageMutation } from "@/lib/api/set";
@@ -45,6 +46,7 @@ export default function StorageBanner() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { expectReboot } = useConnection();
+  const copy = useRebootCopy();
   const storage = useStorageQuery();
   const { mutate: repair, isPending } = useRepairStorageMutation();
   const { mutate: reboot, isPending: rebootPending } = useRebootBMCMutation();
@@ -172,7 +174,7 @@ export default function StorageBanner() {
             <p>{t("storage.repairErases")}</p>
             <p>{t("storage.repairRemoves")}</p>
             <p>{t("storage.repairTryReboot")}</p>
-            <p>{t("storage.repairNodes")}</p>
+            {copy.repair && <p>{copy.repair}</p>}
           </>
         }
       />
@@ -181,7 +183,7 @@ export default function StorageBanner() {
         onClose={() => setConfirmingReboot(false)}
         onReboot={handleReboot}
         title={t("info.rebootModalTitle")}
-        message={t("settings.rebootModalDescription")}
+        message={copy.modal}
         isPending={rebootPending}
       />
     </div>

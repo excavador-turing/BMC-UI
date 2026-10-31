@@ -190,6 +190,25 @@ const translations = {
     lost: "Das Board antwortet seit {{elapsed}} Sekunden nicht mehr, und nichts hier hat es dazu aufgefordert. Die Seite versucht es weiter und kehrt von selbst zurück.",
     cameBack: "Das Board war nach {{seconds}} Sekunden wieder da.",
   },
+  rebootNodes: {
+    modalKeep:
+      "Der BMC startet neu. Die Compute-Module laufen dabei weiter – nur diese Oberfläche, die API und die Konsolen sind für etwa eine halbe Minute weg.",
+    modal24:
+      "Der BMC startet neu. Bei einem Turing Pi 2 v2.4 schaltet ein BMC-Neustart auch alle vier Knoten aus und wieder ein; fahren Sie sie vorher herunter. Diese Oberfläche, die API und die Konsolen sind für etwa eine halbe Minute weg.",
+    modalUnknown:
+      "Der BMC startet neu. Bei einem Turing Pi 2 v2.5 laufen die Compute-Module dabei weiter, bei einem v2.4 schaltet ein BMC-Neustart aber auch alle vier Knoten aus und wieder ein; fahren Sie sie daher vorher herunter. Diese Oberfläche, die API und die Konsolen sind für etwa eine halbe Minute weg.",
+    noteKeep: "Die Compute-Module laufen während eines BMC-Neustarts weiter.",
+    note24:
+      "Bei einem Turing Pi 2 v2.4 schaltet ein BMC-Neustart auch alle vier Knoten aus und wieder ein; fahren Sie sie vorher herunter.",
+    noteUnknown:
+      "Ein BMC-Neustart lässt die Compute-Module bei einem Turing Pi 2 v2.5 weiterlaufen, schaltet bei einem v2.4 aber alle vier Knoten aus und wieder ein.",
+    upgradeKeep:
+      "Der BMC startet neu und bootet das bereitgestellte Image. Die Compute-Module laufen dabei weiter. Kommt das neue Image nicht sauber hoch, bootet das Board zurück auf das jetzige.",
+    upgrade24:
+      "Der BMC startet neu und bootet das bereitgestellte Image. Bei einem Turing Pi 2 v2.4 schaltet ein BMC-Neustart auch alle vier Knoten aus und wieder ein; fahren Sie sie vorher herunter. Kommt das neue Image nicht sauber hoch, bootet das Board zurück auf das jetzige.",
+    upgradeUnknown:
+      "Der BMC startet neu und bootet das bereitgestellte Image. Bei einem Turing Pi 2 v2.5 laufen die Compute-Module weiter, bei einem v2.4 schaltet ein BMC-Neustart aber auch alle vier Knoten aus und wieder ein; fahren Sie sie daher vorher herunter. Kommt das neue Image nicht sauber hoch, bootet das Board zurück auf das jetzige.",
+  },
   storage: {
     unmounted:
       "Der Einstellungsspeicher konnte nicht eingebunden werden. Das Board läuft mit Werkseinstellungen, und nichts, was Sie ändern – auch das Passwort nicht –, übersteht einen Neustart.",
@@ -210,6 +229,8 @@ const translations = {
       "Das Einbinden ist vielleicht nur dieses eine Mal fehlgeschlagen; versuchen Sie daher zuerst einen einfachen Neustart. Reparieren Sie nur, wenn die Meldung wiederkommt.",
     repairNodes:
       "Bei einem Turing Pi 2 v2.4 schaltet der BMC-Neustart auch alle vier Knoten aus und wieder ein; fahren Sie sie daher vorher herunter.",
+    repairNodesUnknown:
+      "Bei einem Turing Pi 2 v2.4 schaltet der BMC-Neustart auch alle vier Knoten aus und wieder ein; fahren Sie sie daher vorher herunter. Bei einem v2.5 laufen die Knoten weiter.",
     repairStarted:
       "Das Einstellungsvolume wird entfernt, und das Board startet neu.",
     repairFailed: "Der Einstellungsspeicher konnte nicht repariert werden",
@@ -414,8 +435,6 @@ const translations = {
     parkModalDescription:
       "Das Image wird auf die SD-Karte geschrieben, mehr nicht: kein Neustart, nichts bereitgestellt. Es erscheint dann in der Liste oben und lässt sich wie jede andere Version installieren.",
     rebootToApply: "Zum Anwenden neu starten",
-    rebootToApplyConfirm:
-      "Der BMC startet neu und bootet das bereitgestellte Image. Die Compute-Module laufen dabei weiter. Kommt das neue Image nicht sauber hoch, bootet das Board zurück auf das jetzige.",
     firmwareSlots: "Firmware-Slots",
     promotionPassed: "Bestanden",
     promotionRolledBack: "Zurückgesetzt",

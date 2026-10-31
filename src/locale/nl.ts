@@ -189,6 +189,25 @@ const translations = {
     lost: "Het bord antwoordt al {{elapsed}} seconden niet meer, en niets hier heeft daarom gevraagd. De pagina blijft het proberen en komt vanzelf terug.",
     cameBack: "Het bord was na {{seconds}} seconden terug.",
   },
+  rebootNodes: {
+    modalKeep:
+      "De BMC herstart. De compute-modules blijven draaien; alleen deze interface, de API en de consoles zijn ongeveer een halve minuut weg.",
+    modal24:
+      "De BMC herstart. Op een Turing Pi 2 v2.4 zet een BMC-herstart ook alle vier de nodes uit en weer aan; sluit ze eerst af. Deze interface, de API en de consoles zijn ongeveer een halve minuut weg.",
+    modalUnknown:
+      "De BMC herstart. Op een Turing Pi 2 v2.5 blijven de compute-modules draaien, maar op een v2.4 zet een BMC-herstart ook alle vier de nodes uit en weer aan, dus sluit ze eerst af. Deze interface, de API en de consoles zijn ongeveer een halve minuut weg.",
+    noteKeep: "Compute-modules blijven draaien tijdens een BMC-herstart.",
+    note24:
+      "Op een Turing Pi 2 v2.4 zet een BMC-herstart ook alle vier de nodes uit en weer aan; sluit ze eerst af.",
+    noteUnknown:
+      "Een BMC-herstart laat de compute-modules op een Turing Pi 2 v2.5 draaien, maar zet op een v2.4 alle vier de nodes uit en weer aan.",
+    upgradeKeep:
+      "De BMC herstart en start het klaargezette image. De compute-modules blijven draaien. Komt het nieuwe image niet gezond op, dan start het board terug op het huidige.",
+    upgrade24:
+      "De BMC herstart en start het klaargezette image. Op een Turing Pi 2 v2.4 zet een BMC-herstart ook alle vier de nodes uit en weer aan; sluit ze eerst af. Komt het nieuwe image niet gezond op, dan start het board terug op het huidige.",
+    upgradeUnknown:
+      "De BMC herstart en start het klaargezette image. Op een Turing Pi 2 v2.5 blijven de compute-modules draaien, maar op een v2.4 zet een BMC-herstart ook alle vier de nodes uit en weer aan, dus sluit ze eerst af. Komt het nieuwe image niet gezond op, dan start het board terug op het huidige.",
+  },
   storage: {
     unmounted:
       "De opslag voor instellingen kon niet worden gekoppeld. Het board draait op fabrieksinstellingen en niets wat u wijzigt – wachtwoord inbegrepen – blijft na een herstart bewaard.",
@@ -209,6 +228,8 @@ const translations = {
       "Het koppelen is misschien maar één keer mislukt, dus probeer eerst een gewone herstart. Herstel alleen als de melding terugkomt.",
     repairNodes:
       "Op een Turing Pi 2 v2.4 zet de BMC-herstart ook alle vier de nodes uit en weer aan, dus sluit ze eerst af.",
+    repairNodesUnknown:
+      "Op een Turing Pi 2 v2.4 zet de BMC-herstart ook alle vier de nodes uit en weer aan, dus sluit ze eerst af; op een v2.5 blijven de nodes draaien.",
     repairStarted:
       "Het instellingenvolume wordt verwijderd en het board herstart.",
     repairFailed: "De opslag voor instellingen kon niet worden hersteld",
@@ -410,8 +431,6 @@ const translations = {
     parkModalDescription:
       "Het image wordt naar de SD-kaart geschreven en verder niets: geen herstart, niets klaargezet. Het verschijnt daarna in de lijst hierboven en is als elke andere versie te installeren.",
     rebootToApply: "Herstarten om toe te passen",
-    rebootToApplyConfirm:
-      "De BMC herstart en start het klaargezette image. De compute-modules blijven draaien. Komt het nieuwe image niet gezond op, dan start het board terug op het huidige.",
     firmwareSlots: "Firmwareslots",
     promotionPassed: "Geslaagd",
     promotionRolledBack: "Teruggezet",
