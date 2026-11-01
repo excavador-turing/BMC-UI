@@ -1610,6 +1610,17 @@ export interface components {
     StorageInfo: {
       /** Format: uint64 */
       bytes_free: number;
+      /**
+       * @description Whether a card is actually mounted at `/mnt/sdcard`. Only the `SD card`
+       *     entry carries it; the `BMC` entry has no such question and omits it.
+       *
+       *     `total_bytes` and `bytes_free` of the `SD card` entry are NOT a
+       *     statement about a card when this is false: `statvfs` on the empty mount
+       *     point answers for the volume underneath it, which is the BMC's own, and
+       *     they are left as reported so a client that reads only the sizes behaves
+       *     as it always did. Read this field instead of comparing sizes.
+       */
+      mounted?: boolean | null;
       name: string;
       /** Format: uint64 */
       total_bytes: number;
