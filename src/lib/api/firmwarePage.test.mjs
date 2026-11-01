@@ -220,8 +220,8 @@ test("every bmcd wording of the no-card refusal is recognised", () => {
   for (const text of [
     "/mnt/sdcard is not mounted, so there is no card to park an image on. Insert one, or upload without parking to install straight away.",
     "the microSD card is not mounted",
-    "the image was not saved: no SD card is mounted at /mnt/sdcard, so there is nowhere to park it",
-    "an SD card is inserted but not mounted (unsupported or damaged filesystem?)",
+    "the image was not saved: an SD card is inserted but not mounted (unsupported or damaged filesystem?). Install it straight away with `tpi firmware upload` without `--park` (the web interface's install option does the same).",
+    "the image was not saved: no SD card is mounted at /mnt/sdcard. Insert a card and try again, or install it straight away with `tpi firmware upload` without `--park` (the web interface's install option does the same).",
   ]) {
     assert.equal(isNoCardRefusal(text), true, text);
   }
@@ -229,6 +229,9 @@ test("every bmcd wording of the no-card refusal is recognised", () => {
 
 test("other failures are not mistaken for a missing card", () => {
   for (const text of [
+    // Not knowing whether there is a card is not knowing there is none: the
+    // error is shown, and installing directly is not offered.
+    "the image was not saved: cannot tell whether /mnt/sdcard is mounted: Input/output error (os error 5)",
     "the card has 1 MB free and the image is 37 MB",
     "/ is not mounted",
     "an update is already staged for the next boot",
