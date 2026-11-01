@@ -10,6 +10,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [v4.4.0] — 2026-11-01
+
+The firmware page keeps checking until the list arrives, the update badge
+installs the version it names, an upload installs directly on a board without
+an SD card, and the (i) links reach turingpi.xyz.
+
+This release reads `mounted` on the SD card in `GET /api/bmc/info`, which
+bmcd 2.42.2 sends. On an older daemon the page falls back to comparing the
+card's size with the BMC's own volume, and the daemon's own refusal still
+offers "Install directly instead".
+
 ### Fixed
 
 - **The (i) notes still pointed at the dead docs host.** `InfoNote` built every
@@ -75,10 +86,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   asks the updater to allow a downgrade unless the list says the version is
   older and the dialog says so. It is disabled while an install, an upload or
   a flash runs, or an update is already staged.
-- The demo can show both: `?card=none` is a board with no SD card (as bmcd 2.42.2 reports it), and
-  `?firmware=stale` is a board running v2.44.0 whose update check offers
+- The demo can show both: `?card=none` is a board with no SD card (as bmcd
+  2.42.2 reports it), and `?firmware=stale` is a board running v2.44.0 whose update check offers
   v2.46.1 and whose list does not have it (and says it is checking for the
   first 25 seconds). Written changes to the captures, not captures.
+- The generated API types are now from bmcd v2.42.2 (they were v2.42.0); the
+  card question reads `mounted` from them instead of a local type.
 
 ## [v4.3.0] — 2026-10-31
 
