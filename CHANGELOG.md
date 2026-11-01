@@ -10,6 +10,22 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **The (i) notes still pointed at the dead docs host.** `InfoNote` built every
+  "Read more" link from `https://turing.excavador.xyz`, which answers a
+  Cloudflare 502 and will not be redirected, so each (i) on the Firmware, Fan,
+  Console and Nodes pages led to an error. 3.31.0 says it fixed this host and
+  missed `InfoNote`. It now uses `https://turingpi.xyz`.
+
+  The two Console notes also named the wrong page: their anchors live on
+  `/why/a-console-to-every-module/`, not on the feature page, so the link
+  landed at the top instead of at the note. Every path `InfoNote` is given
+  answers 200 on `turingpi.xyz`.
+
+  ESLint now rejects the old host in any string or template literal under
+  `src/`, so a third copy cannot come back unnoticed.
+
 ## [v4.3.0] — 2026-10-31
 
 This release needs bmcd 2.42.0 for `GET /api/bmc/storage` and

@@ -596,7 +596,7 @@ export default function SerialConsole({ node }: { node: number }) {
         {t("console.inputTerm")}
         <InfoNote
           text={t("console.inputNote")}
-          path="/features/a-console-to-every-module/#two-ways-to-type-and-they-are-not-the-same"
+          path="/why/a-console-to-every-module/#two-ways-to-type-and-they-are-not-the-same"
           label={t("console.inputTerm")}
         />
       </p>

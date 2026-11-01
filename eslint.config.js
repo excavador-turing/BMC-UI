@@ -59,6 +59,23 @@ export default tseslint.config(
       "simple-import-sort/imports": "error",
       "simple-import-sort/exports": "error",
       "@typescript-eslint/unbound-method": "warn", // react-i18next typing issue
+
+      // The docs moved from turing.excavador.xyz (dead, answers 502) to
+      // turingpi.xyz. 3.31.0 fixed one link and missed InfoNote; this keeps the
+      // old host from coming back in a string or a template literal.
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "Literal[value=/turing[.]excavador[.]xyz/]",
+          message:
+            "turing.excavador.xyz is dead; the docs are at https://turingpi.xyz.",
+        },
+        {
+          selector: "TemplateElement[value.raw=/turing[.]excavador[.]xyz/]",
+          message:
+            "turing.excavador.xyz is dead; the docs are at https://turingpi.xyz.",
+        },
+      ],
     },
   }
 );
