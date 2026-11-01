@@ -1,8 +1,10 @@
+import { useIsMutating } from "@tanstack/react-query";
 import { filesize } from "filesize";
-import { CircleCheck, TriangleAlert, Undo2 } from "lucide-react";
+import { CircleCheck, Download, TriangleAlert, Undo2 } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import type { InstallRequest } from "@/components/FirmwareCandidates";
 import LoadingButton from "@/components/LoadingButton";
 import RebootModal from "@/components/RebootModal";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -167,13 +169,22 @@ function SlotsSkeleton() {
  * The panel sits above the upload form rather than below it: it describes
  * where the board is, and the form is what changes that.
  */
-export default function FirmwareSlots() {
+export default function FirmwareSlots({
+  onInstallUpdate,
+}: {
+  /**
+   * The "Update available" badge was pressed: install this version. The
+   * confirmation lives with the list below, so this only asks for it.
+   */
+  onInstallUpdate?: (request: InstallRequest) => void;
+}) {
   const {
     t,
     i18n: { language },
   } = useTranslation();
   const { data, isPending, isError } = useFirmwareSlotsQuery();
   const update = useUpdateCheckQuery();
+  const installing = useIsMutating({ mutationKey: ["installFirmware"] }) > 0;
 
   const promotion = data?.last_promotion ?? null;
   const promotionDate = promotion ? parseBoardDate(promotion.timestamp) : null;
@@ -222,7 +233,37 @@ export default function FirmwareSlots() {
         {update.data?.stable && (
           <CardAction>
             {update.data.stable.update_available ? (
-              <Badge variant="warning">
+              /* An action, not just a notice. This comes from the cheap
+                update check, which can know of a release long before the
+                catalogue below has finished listing it (the fork's list took
+                170 s to build on a real board), so the badge installs the
+                version it names whether or not the list has it yet. Nothing
+                is installed by pressing it: the same confirmation as the
+                list's Install button comes first. */
+              <Badge
+                variant="warning"
+                className="h-6 cursor-pointer hover:bg-warning/20 disabled:cursor-not-allowed disabled:opacity-60"
+                render={
+                  <button
+                    type="button"
+                    disabled={
+                      onInstallUpdate === undefined ||
+                      installing ||
+                      data?.update_staged === true
+                    }
+                    title={t("firmwareUpgrade.statusUpdateInstall", {
+                      version: update.data.stable.target,
+                    })}
+                    onClick={() =>
+                      onInstallUpdate?.({
+                        version: update.data.stable?.target ?? "",
+                        repo: update.data.stable?.repo,
+                      })
+                    }
+                  />
+                }
+              >
+                <Download data-icon="inline-start" />
                 {t("firmwareUpgrade.statusUpdate", {
                   version: update.data.stable.target,
                 })}

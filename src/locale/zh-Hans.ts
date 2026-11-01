@@ -412,6 +412,20 @@ const translations = {
     parkModalTitle: "将该镜像上传到卡上？",
     parkModalDescription:
       "镜像会被写入 SD 卡，仅此而已：不重启，也不暂存。随后它会出现在上面的列表中，可以像其他版本一样安装。",
+    statusUpdateInstall: "安装 {{version}}",
+    checkingStale: "仍在检查中——列表可能已过期。请稍后重新加载。",
+    confirmNotListed:
+      "下面的列表还没有这个版本。开发板会直接从 {{source}} 获取它。",
+    directButton: "上传并安装",
+    directModalTitle: "安装此镜像？",
+    directModalDescription:
+      "镜像会被写入空闲槽位，并暂存到下次启动。重启之前不会有任何变化。如果已有更新处于暂存状态，开发板会拒绝。",
+    directNoCard:
+      "此开发板没有 SD 卡，因此无法把镜像留待以后使用。它会立即安装：写入空闲槽位，并暂存到下次启动。重启之前不会有任何变化。",
+    installDirectly: "改为直接安装",
+    dismiss: "关闭",
+    successStaged: "镜像已暂存到下次启动",
+    successStagedMessage: "重启之前不会有任何变化；重启按钮在上方面板中。",
     rebootToApply: "重启以应用",
     firmwareSlots: "固件槽位",
     promotionPassed: "已通过",

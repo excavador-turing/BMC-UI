@@ -434,6 +434,22 @@ const translations = {
     parkModalTitle: "Dieses Image auf die Karte laden?",
     parkModalDescription:
       "Das Image wird auf die SD-Karte geschrieben, mehr nicht: kein Neustart, nichts bereitgestellt. Es erscheint dann in der Liste oben und lässt sich wie jede andere Version installieren.",
+    statusUpdateInstall: "{{version}} installieren",
+    checkingStale:
+      "Die Prüfung läuft noch – die Liste ist möglicherweise veraltet. Laden Sie die Seite später neu.",
+    confirmNotListed:
+      "Die Liste unten enthält diese Version noch nicht. Das Board lädt sie direkt von {{source}}.",
+    directButton: "Hochladen und installieren",
+    directModalTitle: "Dieses Image installieren?",
+    directModalDescription:
+      "Das Image wird in den freien Slot geschrieben und für den nächsten Start bereitgestellt. Bis zum Neustart ändert sich nichts. Ist bereits ein Update bereitgestellt, lehnt das Board ab.",
+    directNoCard:
+      "Dieses Board hat keine SD-Karte, das Image lässt sich also nicht für später ablegen. Es wird sofort installiert: in den freien Slot geschrieben und für den nächsten Start bereitgestellt. Bis zum Neustart ändert sich nichts.",
+    installDirectly: "Stattdessen direkt installieren",
+    dismiss: "Schließen",
+    successStaged: "Image für den nächsten Start bereitgestellt",
+    successStagedMessage:
+      "Bis zum Neustart ändert sich nichts; die Schaltfläche zum Neustarten ist im Bereich oben.",
     rebootToApply: "Zum Anwenden neu starten",
     firmwareSlots: "Firmware-Slots",
     promotionPassed: "Bestanden",

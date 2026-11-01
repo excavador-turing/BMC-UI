@@ -26,6 +26,51 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   ESLint now rejects the old host in any string or template literal under
   `src/`, so a third copy cannot come back unnoticed.
 
+- **The firmware page no longer gives up on a slow catalogue and sticks.**
+  Seen on a board running v2.44.0: "Update available · v2.46.1" in the slots
+  panel, a list with only v2.44.0, v2.1.0 and v2.0.5, "checking the sources
+  now" that never changed and a greyed-out Check now, until the page was
+  reloaded. The page polled the catalogue for two minutes, on the strength of
+  a 16 s refresh measured with one source; building the fork's release list
+  alone takes 170 s on a real board, and the daemon allows a refresh ten
+  minutes. It now keeps asking while the daemon says it is refreshing, for up
+  to eleven minutes, backing off from every 2 s to every 5 s after 30 s and
+  every 10 s after two minutes, and not at all while the tab is hidden. If it
+  does give up it says "Still checking — the list may be out of date. Reload
+  later." and Check now works again; pressing it starts a fresh eleven
+  minutes.
+- **Uploading a `.tpu` to a board with no SD card no longer fails with a toast
+  and nothing else.** The dialog always asked the daemon to park the image on
+  the card, and a card-less board refuses ("/mnt/sdcard is not mounted…").
+  When the board has no card the dialog now says so and installs directly:
+  written to the spare slot and staged for the next boot, confirmed with the
+  same reboot warning (by board revision) as the slots panel's Reboot button.
+  With a card nothing changes: the image is parked and appears in the list.
+  The daemon has no field that says a card is mounted, so the dialog goes by
+  the Info page's storage list (an "SD card" entry that is not the BMC's own
+  volume); where that is wrong, or unreadable, the daemon's refusal now stays
+  in the dialog until dismissed, with "Install directly instead" beside it.
+  Upload errors in general persist in the dialog rather than only as a toast,
+  and a finished upload refreshes the list and the slots panel (so "Next boot"
+  shows what was staged).
+- A refused install shows the daemon's reason after "Nothing has been
+  staged." (already staged, unknown source), not only the generic line.
+
+### Added
+
+- **The "Update available" badge installs the version it names.** It comes
+  from the cheap update check, which knows of a release long before the
+  catalogue has listed it. Pressing it opens the same confirmation as the
+  list's Install button (it installs from the fork's source, `fork`, or the
+  GitHub source for the repository the check resolved the version in) and
+  adds a line when the list does not have the version yet. If the list does,
+  it is that row's install. It is disabled while an install runs or an update
+  is already staged.
+- The demo can show both: `?card=none` is a board with no SD card, and
+  `?firmware=stale` is a board running v2.44.0 whose update check offers
+  v2.46.1 and whose list does not have it (and says it is checking for the
+  first 25 seconds). Written changes to the captures, not captures.
+
 ## [v4.3.0] — 2026-10-31
 
 This release needs bmcd 2.42.0 for `GET /api/bmc/storage` and

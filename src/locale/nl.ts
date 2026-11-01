@@ -430,6 +430,22 @@ const translations = {
     parkModalTitle: "Dit image naar de kaart uploaden?",
     parkModalDescription:
       "Het image wordt naar de SD-kaart geschreven en verder niets: geen herstart, niets klaargezet. Het verschijnt daarna in de lijst hierboven en is als elke andere versie te installeren.",
+    statusUpdateInstall: "{{version}} installeren",
+    checkingStale:
+      "Nog bezig met controleren – de lijst is mogelijk verouderd. Laad de pagina later opnieuw.",
+    confirmNotListed:
+      "De lijst hieronder bevat deze versie nog niet. Het board haalt hem rechtstreeks op bij {{source}}.",
+    directButton: "Uploaden en installeren",
+    directModalTitle: "Dit image installeren?",
+    directModalDescription:
+      "Het image wordt naar de vrije slot geschreven en klaargezet voor de volgende start. Er verandert niets totdat u herstart. Staat er al een update klaar, dan weigert het board.",
+    directNoCard:
+      "Dit board heeft geen SD-kaart, dus het image kan niet voor later worden bewaard. Het wordt direct geïnstalleerd: naar de vrije slot geschreven en klaargezet voor de volgende start. Er verandert niets totdat u herstart.",
+    installDirectly: "In plaats daarvan direct installeren",
+    dismiss: "Sluiten",
+    successStaged: "Image klaargezet voor de volgende start",
+    successStagedMessage:
+      "Er verandert niets totdat u herstart; de knop om te herstarten staat in het paneel hierboven.",
     rebootToApply: "Herstarten om toe te passen",
     firmwareSlots: "Firmwareslots",
     promotionPassed: "Geslaagd",

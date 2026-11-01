@@ -34,6 +34,14 @@ export interface FlashContextValue {
   firmwareStatus: ReturnType<typeof useFirmwareStatusQuery>;
   flashStatus: ReturnType<typeof useFlashStatusQuery>;
   uploadProgress?: { transferred: string; total: string | null; pct: number };
+  /**
+   * Why the last firmware upload failed, in the daemon's words, until it is
+   * cleared. The toast it also raises is gone in seconds; the dialog the
+   * upload was started from keeps this on screen until someone dismisses it
+   * or starts again.
+   */
+  firmwareError: string | null;
+  clearFirmwareError: () => void;
   handleFirmwareUpload: (variables: {
     file?: File;
     url?: string;
@@ -69,6 +77,11 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
   const [statusMessage, setStatusMessage] = useState<string>("");
   const [uploadProgress, setUploadProgress] =
     useState<FlashContextValue["uploadProgress"]>();
+  const [firmwareError, setFirmwareError] = useState<string | null>(null);
+  // Whether the upload in flight parks the image or installs it, so the
+  // success message says what happened rather than what usually does.
+  const [uploadPark, setUploadPark] = useState(true);
+  const clearFirmwareError = useCallback(() => setFirmwareError(null), []);
 
   const uploadProgressCallback = useCallback(
     (progressEvent: AxiosProgressEvent) => {
@@ -101,6 +114,11 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
     park?: boolean;
   }) => {
     setFlashType("firmware");
+    setFirmwareError(null);
+    setUploadPark(variables.park === true);
+    // The status of the PREVIOUS upload is still cached, errors included, and
+    // would be read as this one's the moment polling restarts.
+    queryClient.removeQueries({ queryKey: ["firmwareStatus"] });
     setIsUploading(true);
     setStatusMessage(t("firmwareUpgrade.uploading"));
     await firmwareUpdateMutation.mutateAsync(variables, {
@@ -114,6 +132,7 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
         setIsUploading(false);
         const title = t("firmwareUpgrade.uploadFailed");
         const errorMessage = bmcdMessage(error);
+        setFirmwareError(errorMessage);
         setStatusMessage(`${title}: ${errorMessage}`);
         toast({
           title,
@@ -229,24 +248,35 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
     } else if (flashType === "firmware") {
       if (!firmwareStatus.isStale) {
         if (firmwareStatus.data?.Error) {
+          setFirmwareError(firmwareStatus.data.Error);
           handleError(firmwareStatus.data.Error, t("firmwareUpgrade.error"));
         } else if (firmwareStatus.data?.Transferring) {
           handleTransferProgress(firmwareStatus.data);
         } else if (firmwareStatus.data?.Done) {
-          // No reboot offered, because an upload from the browser parks the
-          // image on the SD card and stops (SQU-134): nothing is staged, so a
-          // reboot here would do nothing at all. The image is now a candidate
-          // in the version list like any other, and installing it is a
-          // separate, deliberate choice made there.
-          handleSuccess(
-            t("firmwareUpgrade.success"),
-            t("firmwareUpgrade.successMessage")
-          );
-          // The parked image is a new candidate under the SD-card source;
-          // without this the list stays as it was until the next check.
+          // A parked image stops on the card (SQU-134): nothing is staged, so
+          // no reboot is offered. It is now a candidate in the version list
+          // like any other, and installing it is a separate, deliberate
+          // choice made there. A board with no card installs directly
+          // instead, which DOES stage: the slots panel then offers the
+          // reboot, with the wording for this board revision.
+          if (uploadPark) {
+            handleSuccess(
+              t("firmwareUpgrade.success"),
+              t("firmwareUpgrade.successMessage")
+            );
+          } else {
+            handleSuccess(
+              t("firmwareUpgrade.successStaged"),
+              t("firmwareUpgrade.successStagedMessage")
+            );
+          }
+          // The parked image is a new candidate under the SD-card source, and
+          // an installed one is now staged; without these the page stays as
+          // it was until the next check.
           void queryClient.invalidateQueries({
             queryKey: ["firmwareAvailable"],
           });
+          void queryClient.invalidateQueries({ queryKey: ["firmwareSlots"] });
         }
       }
     }
@@ -261,6 +291,7 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
     handleTransferProgress,
     handleSuccess,
     queryClient,
+    uploadPark,
     t,
   ]);
   /* eslint-enable react-hooks/set-state-in-effect */
@@ -277,6 +308,8 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
         firmwareStatus,
         flashStatus,
         uploadProgress,
+        firmwareError,
+        clearFirmwareError,
         handleFirmwareUpload,
         handleNodeUpdate,
       }}

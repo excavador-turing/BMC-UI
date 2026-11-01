@@ -155,6 +155,105 @@ function aboutFixture(): unknown {
   return copy;
 }
 
+/**
+ * `?card=none` is a board with no SD card: the Info page lists only the BMC's
+ * own storage, and the firmware page's upload installs directly instead of
+ * parking the image. A written change to the capture, not a capture.
+ */
+function infoFixture(): unknown {
+  const captured = fixture("info");
+  if (new URLSearchParams(window.location.search).get("card") !== "none") {
+    return captured;
+  }
+  const copy = structuredClone(captured) as {
+    response?: { result?: { storage?: { name?: string }[] } }[];
+  };
+  const result = copy.response?.[0]?.result;
+  if (result?.storage) {
+    result.storage = result.storage.filter((s) => s.name !== "SD card");
+  }
+  return copy;
+}
+
+/**
+ * `?firmware=stale` is the firmware page of a board whose catalogue is behind
+ * its update check: running v2.44.0, an update badge for v2.46.1, and a list
+ * that does not have v2.46.1 in it (and says it is still checking for the
+ * first 25 seconds after the page loads). Installing from the badge and the
+ * "checking" line can be seen without a board that takes minutes to list its
+ * releases. Written from the capture, not a capture; the versions are the
+ * ones from the report that prompted it.
+ */
+const STALE_RUNNING = "v2.44.0";
+const STALE_OFFERED = "v2.46.1";
+const STALE_CHECKING_MS = 25_000;
+const demoLoadedAt = Date.now();
+
+function staleFirmware(): boolean {
+  return (
+    new URLSearchParams(window.location.search).get("firmware") === "stale"
+  );
+}
+
+interface Wrapped {
+  response?: { result?: Record<string, unknown> }[];
+}
+
+function withResult(name: string, edit: (r: Record<string, unknown>) => void) {
+  const copy = structuredClone(fixture(name)) as Wrapped;
+  const result = copy.response?.[0]?.result;
+  if (result) edit(result);
+  return copy;
+}
+
+function firmwareFixture(name: string): unknown {
+  if (!staleFirmware()) return fixture(name);
+  if (name === "firmware_slots") {
+    return withResult(name, (r) => {
+      const running = r.running as { version?: string } | undefined;
+      if (running) running.version = STALE_RUNNING;
+    });
+  }
+  if (name === "update_check") {
+    return withResult(name, (r) => {
+      for (const channel of ["stable", "edge"]) {
+        const state = r[channel] as Record<string, unknown> | undefined;
+        if (state) {
+          state.running = STALE_RUNNING;
+          state.target = STALE_OFFERED;
+          state.update_available = true;
+        }
+      }
+    });
+  }
+  if (name === "firmware_available") {
+    return withResult(name, (r) => {
+      r.running = STALE_RUNNING;
+      r.refreshing = Date.now() - demoLoadedAt < STALE_CHECKING_MS;
+      const candidate = (version: string, relation: string, trust: string) => ({
+        version,
+        relation,
+        trust,
+      });
+      const keep: Record<string, ReturnType<typeof candidate>[]> = {
+        fork: [candidate(STALE_RUNNING, "current", "verified")],
+        turingpi: [candidate("v2.1.0", "older", "verified")],
+        "turingpi-http": [candidate("v2.0.5", "older", "tls")],
+        local: [],
+      };
+      for (const source of r.sources as {
+        id: string;
+        error?: string | null;
+        candidates: unknown[];
+      }[]) {
+        source.candidates = keep[source.id] ?? [];
+        source.error = null;
+      }
+    });
+  }
+  return fixture(name);
+}
+
 function demoAddress(): DemoAddress | null {
   if (address) return address;
   const captured = fixture(addressFixtureName()) as AddressState | undefined;
@@ -188,7 +287,12 @@ export const demoAdapter: AxiosAdapter = (config) => {
     const type = String(params.type ?? "");
     if (opt === "get") {
       const name = type === "uart" ? `uart_${params.node ?? 0}` : type;
-      const data = name === "about" ? aboutFixture() : fixture(name);
+      const data =
+        name === "about"
+          ? aboutFixture()
+          : name === "info"
+            ? infoFixture()
+            : firmwareFixture(name);
       if (data !== undefined) return reply(config, 200, data);
       // An honest miss, in the legacy envelope, so the page says what it lacks
       // rather than rendering a skeleton forever.

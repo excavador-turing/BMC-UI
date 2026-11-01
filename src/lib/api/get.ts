@@ -7,6 +7,7 @@ import axios from "axios";
 
 import { useAxiosWithAuth } from "./_core";
 import { nodesOnReboot, type RebootNodes } from "./boardRevision";
+import { sdCardPresent } from "./firmwarePage";
 import type { components } from "./schema";
 import { parseStorage } from "./storageView";
 
@@ -469,6 +470,33 @@ export function useInfoTabData() {
       });
       return response.data.response[0].result;
     },
+  });
+}
+
+/**
+ * Whether the board has an SD card, for the dialogs that must choose between
+ * writing to it and not.
+ *
+ * Reads the same `type=info` document as the Info tab, under its key, but as a
+ * plain query: this is asked from a dialog on another tab, and an unreadable
+ * answer must come back as "could not be told" (`null`), not take the route to
+ * its error component. See `sdCardPresent` for what the answer is made of and
+ * why it is a hint.
+ */
+export function useSdCardPresenceQuery(enabled = true) {
+  const api = useAxiosWithAuth();
+
+  return useQuery({
+    queryKey: ["infoTabData"],
+    enabled,
+    queryFn: async () => {
+      const response = await api.get<APIResponse<InfoTabResponse>>("/bmc", {
+        params: { opt: "get", type: "info" },
+      });
+      return response.data.response[0].result;
+    },
+    select: (info) => sdCardPresent(info.storage),
+    retry: false,
   });
 }
 

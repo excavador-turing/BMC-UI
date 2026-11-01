@@ -530,6 +530,22 @@ const translations = {
     parkModalTitle: "Upload this image to the card?",
     parkModalDescription:
       "The image is written to the SD card and nothing else happens: no reboot, and nothing staged. It then appears in the list above, where you can install it like any other version.",
+    statusUpdateInstall: "Install {{version}}",
+    checkingStale:
+      "Still checking — the list may be out of date. Reload later.",
+    confirmNotListed:
+      "The list below does not have this version yet. The board will fetch it straight from {{source}}.",
+    directButton: "Upload and install",
+    directModalTitle: "Install this image?",
+    directModalDescription:
+      "The image is written to the spare slot and staged for the next boot. Nothing changes until you reboot. If an update is already staged, the board refuses.",
+    directNoCard:
+      "This board has no SD card, so the image cannot be kept for later. It is installed straight away: written to the spare slot and staged for the next boot. Nothing changes until you reboot.",
+    installDirectly: "Install directly instead",
+    dismiss: "Dismiss",
+    successStaged: "Image staged for the next boot",
+    successStagedMessage:
+      "Nothing changes until you reboot; the Reboot to apply button is in the panel above.",
     rebootToApply: "Reboot to apply",
     runningIs: "running {{version}}",
     availableError: "The available firmware could not be read from this board.",
