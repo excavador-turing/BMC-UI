@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/popover";
 
 /** Where the long version of every note now lives. */
-const DOCS = "https://turing.excavador.xyz";
+const DOCS = "https://turingpi.xyz";
 
 /**
  * A footnote, folded into an (i).

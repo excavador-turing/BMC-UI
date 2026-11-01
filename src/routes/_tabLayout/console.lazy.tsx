@@ -134,7 +134,7 @@ export function SerialConsoleTab({ preselected }: { preselected?: number }) {
                 {t("console.readerTask")}
                 <InfoNote
                   text={t("console.readerNote")}
-                  path="/features/a-console-to-every-module/#reader-running-is-about-the-bmc-not-the-module"
+                  path="/why/a-console-to-every-module/#reader-running-is-about-the-bmc-not-the-module"
                   label={t("console.readerTask")}
                 />
               </span>
