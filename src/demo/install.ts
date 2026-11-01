@@ -156,9 +156,11 @@ function aboutFixture(): unknown {
 }
 
 /**
- * `?card=none` is a board with no SD card: the Info page lists only the BMC's
- * own storage, and the firmware page's upload installs directly instead of
- * parking the image. A written change to the capture, not a capture.
+ * `?card=none` is a board with no SD card, as bmcd 2.42.2 reports it: the
+ * "SD card" entry stays, with the BMC volume's sizes and `mounted: false`.
+ * The Info page does not draw it, and the firmware page's upload installs
+ * directly instead of parking the image. A written change to the capture, not
+ * a capture.
  */
 function infoFixture(): unknown {
   const captured = fixture("info");
@@ -166,11 +168,24 @@ function infoFixture(): unknown {
     return captured;
   }
   const copy = structuredClone(captured) as {
-    response?: { result?: { storage?: { name?: string }[] } }[];
+    response?: {
+      result?: {
+        storage?: {
+          name?: string;
+          total_bytes?: number;
+          bytes_free?: number;
+          mounted?: boolean;
+        }[];
+      };
+    }[];
   };
-  const result = copy.response?.[0]?.result;
-  if (result?.storage) {
-    result.storage = result.storage.filter((s) => s.name !== "SD card");
+  const storage = copy.response?.[0]?.result?.storage;
+  const bmc = storage?.find((s) => s.name === "BMC");
+  const card = storage?.find((s) => s.name === "SD card");
+  if (bmc && card) {
+    card.total_bytes = bmc.total_bytes;
+    card.bytes_free = bmc.bytes_free;
+    card.mounted = false;
   }
   return copy;
 }

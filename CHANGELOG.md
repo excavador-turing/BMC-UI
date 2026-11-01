@@ -46,10 +46,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   written to the spare slot and staged for the next boot, confirmed with the
   same reboot warning (by board revision) as the slots panel's Reboot button.
   With a card nothing changes: the image is parked and appears in the list.
-  The daemon has no field that says a card is mounted, so the dialog goes by
-  the Info page's storage list (an "SD card" entry that is not the BMC's own
-  volume); where that is wrong, or unreadable, the daemon's refusal now stays
-  in the dialog until dismissed, with "Install directly instead" beside it.
+  From bmcd 2.42.2 the Info storage list says whether the card is mounted
+  (`mounted` on the "SD card" entry) and the dialog uses that exactly; before
+  it, the dialog goes by whether that entry's size is the BMC's own volume.
+  Where that is wrong, or unreadable, the daemon's refusal now stays in the
+  dialog until dismissed, with "Install directly instead" beside it. A card
+  that is not mounted is no longer drawn as a second storage row on the Info
+  page (its sizes are the BMC's) nor given a usage line in the SD card
+  picker.
   Upload errors in general persist in the dialog rather than only as a toast,
   and a finished upload refreshes the list and the slots panel (so "Next boot"
   shows what was staged).
@@ -66,7 +70,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   adds a line when the list does not have the version yet. If the list does,
   it is that row's install. It is disabled while an install runs or an update
   is already staged.
-- The demo can show both: `?card=none` is a board with no SD card, and
+- The demo can show both: `?card=none` is a board with no SD card (as bmcd 2.42.2 reports it), and
   `?firmware=stale` is a board running v2.44.0 whose update check offers
   v2.46.1 and whose list does not have it (and says it is checking for the
   first 25 seconds). Written changes to the captures, not captures.

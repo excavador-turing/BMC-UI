@@ -22,6 +22,7 @@ import {
 import {
   type SdCardEntry,
   useSdCardFilesQuery,
+  useSdCardPresenceQuery,
   useSdCardQuery,
 } from "@/lib/api/get";
 import { EMPTY_VALUE } from "@/lib/format";
@@ -64,6 +65,9 @@ export default function SdCardPicker({
   const [showAll, setShowAll] = useState(false);
   const files = useSdCardFilesQuery(isOpen);
   const usage = useSdCardQuery(isOpen);
+  // The usage line is `statvfs` on the mount point, which with no card in
+  // answers for the BMC's own volume; do not print that as the card's.
+  const card = useSdCardPresenceQuery(isOpen);
 
   const rows = useMemo(() => {
     const all = (files.data ?? []).filter((entry) => !entry.directory);
@@ -93,7 +97,7 @@ export default function SdCardPicker({
         <DialogHeader>
           <DialogTitle>{t("sdCard.pickerTitle")}</DialogTitle>
           <DialogDescription>
-            {usage.data
+            {usage.data && card.data !== false
               ? t("sdCard.usage", {
                   free: human(usage.data.free),
                   total: human(usage.data.total),
