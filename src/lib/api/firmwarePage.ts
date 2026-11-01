@@ -4,8 +4,10 @@
  * from, and whether there is a card to park an image on.
  *
  * Kept free of imports from the app so `npm test` can load it as plain
- * TypeScript.
+ * TypeScript; the one import is of types, which is erased.
  */
+
+import type { components } from "./schema";
 
 /**
  * How long the page keeps asking while the daemon says `refreshing`.
@@ -209,21 +211,12 @@ export function snapshotFromBadge(
 }
 
 /**
- * The parts of the board's storage list that the card question needs.
- *
- * `mounted` comes from bmcd 2.42.2 and is present only on the "SD card"
- * entry: `true` with a card in, `false` without one, in which case the sizes
- * are the BMC volume's and mean nothing. It is declared here, narrowly,
- * because the generated API types are refreshed from a bmcd release's
- * document only when that release is tagged. A daemon before 2.42.2 does not
- * send it.
+ * One volume of the board's storage list, as the generated types have it.
+ * `mounted` (bmcd 2.42.2) is present only on the "SD card" entry: `true` with
+ * a card in, `false` without one, in which case the sizes are the BMC
+ * volume's and mean nothing. A daemon before 2.42.2 does not send it.
  */
-export interface StorageEntry {
-  name: string;
-  total_bytes: number;
-  bytes_free: number;
-  mounted?: boolean;
-}
+export type StorageEntry = components["schemas"]["StorageInfo"];
 
 /**
  * Is there an SD card in the board?
