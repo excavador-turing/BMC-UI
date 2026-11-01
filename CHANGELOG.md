@@ -10,6 +10,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [v4.5.0] — 2026-11-01
+
+Choosing a node is one click: Console, Flash Node and USB show the four nodes
+side by side instead of in a dropdown.
+
 ### Changed
 
 - **Choosing a node is one click.** Console, Flash Node and USB picked one of
