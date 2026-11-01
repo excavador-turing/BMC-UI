@@ -164,6 +164,39 @@ jobs:
       - name: Type into every box
         run: npm run type-test
 
+  # Choosing a node is one click, or a key.
+  #
+  # Console, Flash Node and USB pick one of four modules with a radio group
+  # rather than a dropdown. The markup cannot show whether it behaves like
+  # one, so this drives the demo build with real mouse and key events: one
+  # click chooses, a second does not un-choose, the arrows move and wrap,
+  # Space and Enter choose, and at a phone's width all four fit on one row.
+  node-picker:
+    name: The node picker behaves as a radio group
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          pip install websockets
+
+      - name: Drive the pickers
+        run: npm run node-picker-test
+
   # A page left open (or cached) across an upgrade must recover by itself.
   #
   # After firmware v2.40.0 a browser kept the old index.html, asked for chunk

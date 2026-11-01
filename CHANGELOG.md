@@ -10,6 +10,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Choosing a node is one click.** Console, Flash Node and USB picked one of
+  four modules from a dropdown: open it, then choose. They now share a
+  `NodePicker`, a horizontal radio group (`role="radiogroup"`, named by its
+  visible label, one tab stop, arrows move and choose, Space and Enter choose)
+  that fits four options on one row at a phone's width. The value, the
+  `?node=` preselection and every API call are unchanged. A new gate,
+  `npm run node-picker-test`, drives the demo build with real mouse and key
+  events.
+
 ## [v4.4.0] — 2026-11-01
 
 The firmware page keeps checking until the list arrives, the update badge

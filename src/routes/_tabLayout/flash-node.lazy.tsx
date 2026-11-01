@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import ConfirmationModal from "@/components/ConfirmationModal";
 import LoadingButton from "@/components/LoadingButton";
+import NodePicker from "@/components/NodePicker";
 import SdCardPicker from "@/components/SdCardPicker";
 import TabView from "@/components/TabView";
 import TextField from "@/components/TextField";
@@ -11,14 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import UsageBar from "@/components/UsageBar";
 import { useFlash } from "@/hooks/use-flash";
 import type { SdCardEntry } from "@/lib/api/get";
@@ -50,10 +43,6 @@ export function FlashNode({ preselected }: { preselected?: number }) {
     uploadProgress,
     handleNodeUpdate,
   } = useFlash();
-  const nodeItems = [0, 1, 2, 3].map((nodeIndex) => ({
-    value: String(nodeIndex),
-    label: t("nodes.node", { nodeId: nodeIndex + 1 }),
-  }));
 
   const handleSubmit = () => {
     if (formRef.current) {
@@ -100,31 +89,13 @@ export function FlashNode({ preselected }: { preselected?: number }) {
               <FieldGroup className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
                 <input type="hidden" name="node" value={selectedNode} />
 
-                <Field className="lg:col-span-2">
-                  <FieldLabel htmlFor="flash-node">
-                    {t("flashNode.nodeSelect")}
-                  </FieldLabel>
-                  <Select
-                    items={nodeItems}
-                    value={selectedNode}
-                    onValueChange={(value) => {
-                      if (value !== null) setSelectedNode(value);
-                    }}
-                  >
-                    <SelectTrigger id="flash-node" className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {nodeItems.map((item) => (
-                          <SelectItem key={item.value} value={item.value}>
-                            {item.label}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </Field>
+                <NodePicker
+                  label={t("flashNode.nodeSelect")}
+                  value={selectedNode}
+                  onValueChange={setSelectedNode}
+                  className="lg:col-span-2"
+                  data-testid="flash-node"
+                />
 
                 <TextField
                   type="file"

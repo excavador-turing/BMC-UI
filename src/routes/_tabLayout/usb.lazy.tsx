@@ -4,6 +4,7 @@ import { type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import LoadingButton from "@/components/LoadingButton";
+import NodePicker from "@/components/NodePicker";
 import USBSkeleton from "@/components/skeletons/usb";
 import TabView from "@/components/TabView";
 import { Badge } from "@/components/ui/badge";
@@ -106,10 +107,6 @@ export function USB() {
     value: option.value,
     label: t(option.label),
   }));
-  const nodeItems = [0, 1, 2, 3].map((nodeIndex) => ({
-    value: String(nodeIndex),
-    label: t("nodes.node", { nodeId: nodeIndex + 1 }),
-  }));
 
   // What each mode means, behind a tooltip on its name: a list of three
   // definitions nobody needs twice.
@@ -152,30 +149,13 @@ export function USB() {
                   </SelectContent>
                 </Select>
               </Field>
-              <Field className="lg:col-span-2">
-                <FieldLabel htmlFor="usb-node">
-                  {t("usb.nodeSelect")}
-                </FieldLabel>
-                <Select
-                  name="node"
-                  items={nodeItems}
-                  value={selectedNode}
-                  onValueChange={(value) => setSelectedNode(value ?? "")}
-                >
-                  <SelectTrigger id="usb-node" className="w-full">
-                    <SelectValue placeholder={t("ui.selectPlaceholder")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {nodeItems.map((item) => (
-                        <SelectItem key={item.value} value={item.value}>
-                          {item.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </Field>
+              <NodePicker
+                label={t("usb.nodeSelect")}
+                value={selectedNode}
+                onValueChange={setSelectedNode}
+                className="lg:col-span-2"
+                data-testid="usb-node"
+              />
               {data.bus_type === "Usb hub" && (
                 <Field orientation="horizontal">
                   <Checkbox
