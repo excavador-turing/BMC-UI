@@ -7,6 +7,7 @@ import {
   refreshPollDelayMs,
   resolveInstallTarget,
   sdCardPresent,
+  visibleStorage,
 } from "./firmwarePage.ts";
 
 test("polling backs off from 2 s to 5 s to 10 s", () => {
@@ -141,4 +142,37 @@ test("the daemon's no-card refusal is recognised, other failures are not", () =>
   assert.equal(isNoCardRefusal("/ is not mounted"), false);
   assert.equal(isNoCardRefusal(undefined), false);
   assert.equal(isNoCardRefusal(null), false);
+});
+
+test("bmcd 2.42.2: mounted true is a card, whatever the sizes say", () => {
+  assert.equal(sdCardPresent([bmc, { ...sd, mounted: true }]), true);
+  assert.equal(
+    sdCardPresent([
+      bmc,
+      { ...sd, total_bytes: bmc.total_bytes, mounted: true },
+    ]),
+    true
+  );
+});
+
+test("bmcd 2.42.2: mounted false is no card, whatever the sizes say", () => {
+  assert.equal(sdCardPresent([bmc, { ...sd, mounted: false }]), false);
+  assert.equal(
+    sdCardPresent([bmc, { ...bmc, name: "SD card", mounted: false }]),
+    false
+  );
+});
+
+test("before bmcd 2.42.2 there is no mounted key and the sizes decide", () => {
+  assert.equal("mounted" in sd, false);
+  assert.equal(sdCardPresent([bmc, sd]), true);
+  assert.equal(sdCardPresent([bmc, { ...bmc, name: "SD card" }]), false);
+});
+
+test("an SD card that is not mounted is not drawn; every other volume is", () => {
+  const gone = { ...bmc, name: "SD card", mounted: false };
+  assert.deepEqual(visibleStorage([bmc, gone]), [bmc]);
+  const there = { ...sd, mounted: true };
+  assert.deepEqual(visibleStorage([bmc, there]), [bmc, there]);
+  assert.deepEqual(visibleStorage([bmc, sd]), [bmc, sd]);
 });

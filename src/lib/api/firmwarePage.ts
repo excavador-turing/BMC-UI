@@ -90,25 +90,38 @@ export function resolveInstallTarget(
   return { sourceId: home?.id ?? FORK_SOURCE_ID, listed: false };
 }
 
-/** The parts of the board's storage list that the card question needs. */
+/**
+ * The parts of the board's storage list that the card question needs.
+ *
+ * `mounted` comes from bmcd 2.42.2 and is present only on the "SD card"
+ * entry: `true` with a card in, `false` without one, in which case the sizes
+ * are the BMC volume's and mean nothing. It is declared here, narrowly,
+ * because the generated API types are refreshed from a bmcd release's
+ * document only when that release is tagged. A daemon before 2.42.2 does not
+ * send it.
+ */
 export interface StorageEntry {
   name: string;
   total_bytes: number;
   bytes_free: number;
+  mounted?: boolean;
 }
 
 /**
  * Is there an SD card in the board?
  *
  * `true` and `false` are answers; `null` is "could not be told", and the
- * caller must not treat it as either. The daemon has no field that says
- * "mounted": `type=info` lists an "SD card" entry when the device node
- * exists and `statvfs` on the mount point works. An empty mount point also
- * passes `statvfs` -- it answers for the filesystem underneath, which is the
- * BMC's own -- so an entry whose size is the BMC volume's is that, not a card.
+ * caller must not treat it as either.
  *
- * It is still a hint rather than proof (a card the daemon did not mount has a
- * device node), which is why the upload dialog also handles the daemon's own
+ * From bmcd 2.42.2 the "SD card" entry says so: `mounted` is used exactly.
+ * Before that the daemon had no such field. `type=info` lists the entry when
+ * the device node exists and `statvfs` on the mount point works, and an empty
+ * mount point also passes `statvfs` -- it answers for the filesystem
+ * underneath, which is the BMC's own -- so there an entry whose size is the
+ * BMC volume's is that, not a card.
+ *
+ * Either way it is a view of the daemon's state and not a promise about the
+ * next write, which is why the upload dialog also handles the daemon's own
  * "not mounted" refusal.
  */
 export function sdCardPresent(
@@ -117,9 +130,19 @@ export function sdCardPresent(
   if (!storage) return null;
   const card = storage.find((s) => s.name === "SD card");
   if (!card) return false;
+  if (typeof card.mounted === "boolean") return card.mounted;
   const bmc = storage.find((s) => s.name === "BMC");
   if (bmc?.total_bytes === card.total_bytes) return false;
   return card.total_bytes > 0;
+}
+
+/**
+ * The storage volumes worth drawing. An "SD card" entry with `mounted: false`
+ * carries the BMC volume's sizes, so showing it would print the BMC's storage
+ * a second time under the name of a card that is not there.
+ */
+export function visibleStorage<T extends StorageEntry>(storage: T[]): T[] {
+  return storage.filter((s) => !(s.name === "SD card" && s.mounted === false));
 }
 
 /**

@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import UsageBar from "@/components/UsageBar";
 import { useDurationLabel } from "@/hooks/use-duration";
 import { addressedInterfaces } from "@/lib/api/addressView";
+import { visibleStorage } from "@/lib/api/firmwarePage";
 import {
   type HealthClock,
   type HealthLoad,
@@ -141,7 +142,7 @@ function StorageRows() {
   const { t } = useTranslation();
   const { data } = useInfoTabData();
 
-  return data.storage.map((storage) => {
+  return visibleStorage(data.storage).map((storage) => {
     const used = Math.max(storage.total_bytes - storage.bytes_free, 0);
     return (
       <TableItem
