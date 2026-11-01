@@ -548,8 +548,8 @@ code and nothing in it to get wrong.
 
 ### What is on the page
 
-- **A module selector**, four entries, the same `Select` the USB and Flash
-  Node tabs use.
+- **A module selector**, four entries, the same `NodePicker` radio group the
+  USB and Flash Node tabs use.
 - **The reader task's state** for the selected module, from
   `POST /api/bmc/serial/status`, with a line saying what it is not. It
   reports whether bmcd's own UART reader is alive. A module that is powered

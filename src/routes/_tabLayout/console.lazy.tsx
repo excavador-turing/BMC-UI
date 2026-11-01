@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import InfoNote from "@/components/InfoNote";
+import NodePicker from "@/components/NodePicker";
 import SerialConsole from "@/components/SerialConsole";
 import TabView from "@/components/TabView";
 import {
@@ -12,15 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Field, FieldLabel } from "@/components/ui/field";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { type SerialReaderState, useSerialStatusQuery } from "@/lib/api/get";
 
 export const Route = createLazyFileRoute("/_tabLayout/console")({
@@ -91,10 +83,6 @@ export function SerialConsoleTab({ preselected }: { preselected?: number }) {
 
   const node = Number.parseInt(selectedNode);
   const readerState = readerStates?.[node];
-  const nodeItems = [0, 1, 2, 3].map((nodeIndex) => ({
-    value: String(nodeIndex),
-    label: t("nodes.node", { nodeId: nodeIndex + 1 }),
-  }));
 
   return (
     <TabView>
@@ -103,31 +91,12 @@ export function SerialConsoleTab({ preselected }: { preselected?: number }) {
           <CardTitle>{t("console.header")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <Field>
-            <FieldLabel htmlFor="console-node">
-              {t("console.nodeSelect")}
-            </FieldLabel>
-            <Select
-              items={nodeItems}
-              value={selectedNode}
-              onValueChange={(value) => {
-                if (value !== null) setSelectedNode(value);
-              }}
-            >
-              <SelectTrigger id="console-node" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {nodeItems.map((item) => (
-                    <SelectItem key={item.value} value={item.value}>
-                      {item.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </Field>
+          <NodePicker
+            label={t("console.nodeSelect")}
+            value={selectedNode}
+            onValueChange={setSelectedNode}
+            data-testid="console-node"
+          />
           <div className="flex flex-col gap-3">
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <span className="inline-flex items-center gap-1 text-muted-foreground">
