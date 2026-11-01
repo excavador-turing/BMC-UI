@@ -432,6 +432,9 @@ const translations = {
     statusUpdateInstall: "Zainstaluj {{version}}",
     checkingStale:
       "Sprawdzanie wciąż trwa – lista może być nieaktualna. Odśwież stronę później.",
+    confirmFrom: "Instalacja ze źródła {{source}} ({{repo}}).",
+    statusUpdateNoSource:
+      "Żadne skonfigurowane źródło nie wskazuje {{repo}}, więc nie można tego tu zainstalować.",
     confirmNotListed:
       "Lista poniżej nie zawiera jeszcze tej wersji. Płytka pobierze ją bezpośrednio z {{source}}.",
     directButton: "Wyślij i zainstaluj",
@@ -439,7 +442,7 @@ const translations = {
     directModalDescription:
       "Obraz zostanie zapisany w wolnym slocie i przygotowany do następnego uruchomienia. Nic się nie zmieni do czasu restartu. Jeśli aktualizacja jest już przygotowana, płytka odmówi.",
     directNoCard:
-      "Ta płytka nie ma karty SD, więc obrazu nie można zachować na później. Zostanie zainstalowany od razu: zapisany w wolnym slocie i przygotowany do następnego uruchomienia. Nic się nie zmieni do czasu restartu.",
+      "Ta płytka nie ma używalnej karty SD, więc obrazu nie można zachować na później. Zostanie zainstalowany od razu: zapisany w wolnym slocie i przygotowany do następnego uruchomienia. Nic się nie zmieni do czasu restartu.",
     installDirectly: "Zainstaluj bezpośrednio",
     dismiss: "Zamknij",
     successStaged: "Obraz przygotowany do następnego uruchomienia",

@@ -69,6 +69,9 @@ export type UpdateChannel = Schemas["ChannelState"];
  */
 export type UpdateCheckResponse = Schemas["UpdateCheck"];
 
+/** What one update channel resolves to. */
+export type ChannelState = Schemas["ChannelState"];
+
 /** Where the board looks for firmware. */
 export type FirmwareSource = Schemas["Source"];
 

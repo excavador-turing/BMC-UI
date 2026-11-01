@@ -17,12 +17,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useFlash } from "@/hooks/use-flash";
 import { useToast } from "@/hooks/use-toast";
 import { useConnection } from "@/hooks/useConnection";
 import { useRebootCopy } from "@/hooks/useRebootCopy";
+import { findRepoSource } from "@/lib/api/firmwarePage";
 import {
+  type ChannelState,
   type FirmwareSlot,
   useFirmwareSlotsQuery,
+  useFirmwareSourcesQuery,
   useUpdateCheckQuery,
 } from "@/lib/api/get";
 import { useRebootBMCMutation } from "@/lib/api/set";
@@ -144,6 +148,89 @@ function SlotsSkeleton() {
 }
 
 /**
+ * "Update available · vX", as an action rather than just a notice.
+ *
+ * It comes from the cheap update check, which can know of a release long
+ * before the catalogue below has finished listing it (the fork's list took
+ * 170 s to build on a real board), so the badge installs the version it names
+ * whether or not the list has it yet -- from the source that IS the
+ * repository the check named, and from no other. Nothing is installed by
+ * pressing it: the same confirmation as the list's Install button comes
+ * first.
+ */
+function UpdateBadge({
+  stable,
+  staged,
+  onInstallUpdate,
+}: {
+  stable: ChannelState;
+  staged: boolean;
+  onInstallUpdate?: (request: InstallRequest) => void;
+}) {
+  const { t } = useTranslation();
+  const sourcesQuery = useFirmwareSourcesQuery();
+  // The board is busy writing the spare slot while an install runs, and while
+  // an upload is being sent or written: a second write over either is what
+  // the daemon's own refusals exist to stop.
+  const { isFlashing, firmwareUpdateMutation } = useFlash();
+  const busy =
+    useIsMutating({ mutationKey: ["installFirmware"] }) > 0 ||
+    isFlashing ||
+    firmwareUpdateMutation.isPending;
+
+  const label = t("firmwareUpgrade.statusUpdate", { version: stable.target });
+  const source = sourcesQuery.data
+    ? findRepoSource(sourcesQuery.data.sources, stable.repo)
+    : undefined;
+
+  // No configured source is that repository: say the update exists, and why
+  // it cannot be installed from here, rather than installing a version of
+  // that name from somewhere else.
+  if (sourcesQuery.isSuccess && !source) {
+    return (
+      <div className="flex flex-col items-end gap-1">
+        <Badge variant="warning">{label}</Badge>
+        <span className="max-w-64 text-right text-xs text-muted-foreground">
+          {t("firmwareUpgrade.statusUpdateNoSource", { repo: stable.repo })}
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <Badge
+      variant="warning"
+      className="h-6 cursor-pointer hover:bg-warning/20 disabled:cursor-not-allowed disabled:opacity-60"
+      render={
+        <button
+          type="button"
+          disabled={
+            onInstallUpdate === undefined ||
+            source === undefined ||
+            busy ||
+            staged
+          }
+          title={t("firmwareUpgrade.statusUpdateInstall", {
+            version: stable.target,
+          })}
+          onClick={() =>
+            source &&
+            onInstallUpdate?.({
+              version: stable.target,
+              repo: stable.repo,
+              source,
+            })
+          }
+        />
+      }
+    >
+      <Download data-icon="inline-start" />
+      {label}
+    </Badge>
+  );
+}
+
+/**
  * The board's A/B firmware state, on the tab that changes it.
  *
  * This board updates firmware into whichever of two root volumes is not
@@ -184,7 +271,6 @@ export default function FirmwareSlots({
   } = useTranslation();
   const { data, isPending, isError } = useFirmwareSlotsQuery();
   const update = useUpdateCheckQuery();
-  const installing = useIsMutating({ mutationKey: ["installFirmware"] }) > 0;
 
   const promotion = data?.last_promotion ?? null;
   const promotionDate = promotion ? parseBoardDate(promotion.timestamp) : null;
@@ -233,41 +319,11 @@ export default function FirmwareSlots({
         {update.data?.stable && (
           <CardAction>
             {update.data.stable.update_available ? (
-              /* An action, not just a notice. This comes from the cheap
-                update check, which can know of a release long before the
-                catalogue below has finished listing it (the fork's list took
-                170 s to build on a real board), so the badge installs the
-                version it names whether or not the list has it yet. Nothing
-                is installed by pressing it: the same confirmation as the
-                list's Install button comes first. */
-              <Badge
-                variant="warning"
-                className="h-6 cursor-pointer hover:bg-warning/20 disabled:cursor-not-allowed disabled:opacity-60"
-                render={
-                  <button
-                    type="button"
-                    disabled={
-                      onInstallUpdate === undefined ||
-                      installing ||
-                      data?.update_staged === true
-                    }
-                    title={t("firmwareUpgrade.statusUpdateInstall", {
-                      version: update.data.stable.target,
-                    })}
-                    onClick={() =>
-                      onInstallUpdate?.({
-                        version: update.data.stable?.target ?? "",
-                        repo: update.data.stable?.repo,
-                      })
-                    }
-                  />
-                }
-              >
-                <Download data-icon="inline-start" />
-                {t("firmwareUpgrade.statusUpdate", {
-                  version: update.data.stable.target,
-                })}
-              </Badge>
+              <UpdateBadge
+                stable={update.data.stable}
+                staged={data?.update_staged === true}
+                onInstallUpdate={onInstallUpdate}
+              />
             ) : (
               <Badge variant="secondary">
                 {t("firmwareUpgrade.statusCurrent")}

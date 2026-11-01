@@ -533,6 +533,9 @@ const translations = {
     statusUpdateInstall: "Install {{version}}",
     checkingStale:
       "Still checking — the list may be out of date. Reload later.",
+    confirmFrom: "Installs from {{source}} ({{repo}}).",
+    statusUpdateNoSource:
+      "No configured source is {{repo}}, so this cannot be installed from here.",
     confirmNotListed:
       "The list below does not have this version yet. The board will fetch it straight from {{source}}.",
     directButton: "Upload and install",
@@ -540,7 +543,7 @@ const translations = {
     directModalDescription:
       "The image is written to the spare slot and staged for the next boot. Nothing changes until you reboot. If an update is already staged, the board refuses.",
     directNoCard:
-      "This board has no SD card, so the image cannot be kept for later. It is installed straight away: written to the spare slot and staged for the next boot. Nothing changes until you reboot.",
+      "This board has no usable SD card, so the image cannot be kept for later. It is installed straight away: written to the spare slot and staged for the next boot. Nothing changes until you reboot.",
     installDirectly: "Install directly instead",
     dismiss: "Dismiss",
     successStaged: "Image staged for the next boot",
