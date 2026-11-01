@@ -431,6 +431,22 @@ const translations = {
     parkModalTitle: "¿Subir esta imagen a la tarjeta?",
     parkModalDescription:
       "La imagen se escribe en la tarjeta SD y nada más: sin reinicio y sin preparar nada. Aparecerá en la lista de arriba y podrá instalarse como cualquier otra versión.",
+    statusUpdateInstall: "Instalar {{version}}",
+    checkingStale:
+      "Aún se está comprobando: puede que la lista esté desactualizada. Vuelva a cargar más tarde.",
+    confirmNotListed:
+      "La lista de abajo todavía no tiene esta versión. La placa la descargará directamente de {{source}}.",
+    directButton: "Subir e instalar",
+    directModalTitle: "¿Instalar esta imagen?",
+    directModalDescription:
+      "La imagen se escribe en la ranura libre y queda preparada para el próximo arranque. Nada cambia hasta que reinicie. Si ya hay una actualización preparada, la placa la rechaza.",
+    directNoCard:
+      "Esta placa no tiene tarjeta SD, así que la imagen no puede guardarse para más tarde. Se instala de inmediato: se escribe en la ranura libre y queda preparada para el próximo arranque. Nada cambia hasta que reinicie.",
+    installDirectly: "Instalar directamente",
+    dismiss: "Descartar",
+    successStaged: "Imagen preparada para el próximo arranque",
+    successStagedMessage:
+      "Nada cambia hasta que reinicie; el botón de reinicio está en el panel de arriba.",
     rebootToApply: "Reiniciar para aplicar",
     firmwareSlots: "Ranuras de firmware",
     promotionPassed: "Superado",

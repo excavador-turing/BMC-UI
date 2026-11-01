@@ -32,6 +32,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { bmcdMessage } from "@/lib/api/bmcdMessage";
+import {
+  FORK_SOURCE_ID,
+  refreshPollDelayMs,
+  resolveInstallTarget,
+} from "@/lib/api/firmwarePage";
 import {
   type FirmwareCandidate,
   type FirmwareSourceCatalog,
@@ -220,7 +226,36 @@ function CandidateRow({
 /** How many of a source's newest candidates are shown before "show all". */
 const VISIBLE_PER_SOURCE = 1;
 
-export default function FirmwareCandidates() {
+/**
+ * A version the page was asked to install without the list having been
+ * consulted: the "Update available" badge in the slots panel. `repo` is where
+ * the update check resolved it (`owner/name`).
+ */
+export interface InstallRequest {
+  version: string;
+  repo?: string;
+}
+
+/** What the confirmation dialog is asking about. */
+interface Confirming {
+  source: FirmwareSourceCatalog;
+  candidate: FirmwareCandidate;
+  /**
+   * False when the catalogue does not list this version, only the update
+   * check does. The install is the same request; the dialog says why the
+   * version is not in the list.
+   */
+  listed: boolean;
+}
+
+export default function FirmwareCandidates({
+  installRequest = null,
+  onInstallRequestHandled,
+}: {
+  installRequest?: InstallRequest | null;
+  /** The request was confirmed or cancelled; stop offering it. */
+  onInstallRequestHandled?: () => void;
+}) {
   const { t } = useTranslation();
   // One toggle for the table. It was one per source when each source was its
   // own box; in a single table, unfolding one source's history in the middle
@@ -228,10 +263,7 @@ export default function FirmwareCandidates() {
   const [expanded, setExpanded] = useState(false);
   const [sourcesOpen, setSourcesOpen] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
-  const [confirming, setConfirming] = useState<{
-    source: FirmwareSourceCatalog;
-    candidate: FirmwareCandidate;
-  } | null>(null);
+  const [picked, setPicked] = useState<Confirming | null>(null);
 
   const catalog = useFirmwareAvailableQuery();
   const install = useInstallFirmwareMutation();
@@ -263,29 +295,62 @@ export default function FirmwareCandidates() {
    * returned. Poll for them while it says it is still working, and stop when
    * it stops -- rather than leaving the page showing the previous list with
    * no sign that anything is happening.
+   *
+   * Bounded, and that bound is not a nicety. A daemon that dies mid-fan-out,
+   * or any bug that leaves its `refreshing` flag set, used to leave this page
+   * polling a 116 MB board every two seconds for as long as a tab stayed open
+   * -- which is how a browser left on this page overnight becomes a load
+   * generator. But the bound has to be longer than a healthy refresh, and it
+   * was not: it was two minutes, on the strength of 16 s measured with one
+   * source, and a board with the fork's release list takes 170 s for that
+   * list alone (2026-11-01). The page then stopped, still saying "checking",
+   * with Check now greyed out until a reload.
+   *
+   * So it asks for up to eleven minutes -- just past the daemon's own
+   * ten-minute claim on a refresh -- backing off as it goes (see
+   * `refreshPollDelayMs`), and when it does give up it says so and gives the
+   * button back.
    */
+  const refreshing = catalog.data?.refreshing === true;
+  const { refetch } = catalog;
+  const [gaveUp, setGaveUp] = useState(false);
+  // Bumped by Check now so a refresh that is still running gets a fresh
+  // eleven minutes: `refreshing` stays true across the press and would not
+  // restart the effect on its own.
+  const [pollRound, setPollRound] = useState(0);
+  // A new refresh clears the verdict on the last one. Adjusted during render
+  // rather than in the effect, which would set state synchronously.
+  const [wasRefreshing, setWasRefreshing] = useState(refreshing);
+  if (wasRefreshing !== refreshing) {
+    setWasRefreshing(refreshing);
+    if (refreshing) setGaveUp(false);
+  }
   useEffect(() => {
-    if (!catalog.data?.refreshing) return;
-    // Bounded, and that bound is not a nicety.
-    //
-    // A daemon that dies mid-fan-out, or any bug that leaves its `refreshing`
-    // flag set, used to leave this page polling a 116 MB board every two
-    // seconds for as long as a tab stayed open -- which is how a browser left
-    // on this page overnight becomes a load generator. Sixty polls is two
-    // minutes, longer than any healthy refresh (the slowest measured was 16
-    // seconds), after which the page stops asking and shows what it has.
-    let polls = 0;
-    const timer = setInterval(() => {
-      if (++polls > 60) {
-        clearInterval(timer);
+    if (!refreshing) return;
+    const startedAt = Date.now();
+    let timer: number | undefined;
+    const tick = () => {
+      const delay = refreshPollDelayMs(Date.now() - startedAt);
+      if (delay === null) {
+        setGaveUp(true);
         return;
       }
-      void catalog.refetch();
-    }, 2000);
-    return () => clearInterval(timer);
-  }, [catalog.data?.refreshing, catalog]);
+      timer = window.setTimeout(() => {
+        // A tab nobody is looking at does not need the answer yet; the next
+        // tick after it comes back to the front asks.
+        if (!document.hidden) void refetch();
+        tick();
+      }, delay);
+    };
+    tick();
+    return () => window.clearTimeout(timer);
+  }, [refreshing, pollRound, refetch]);
+  const waiting = refreshing && !gaveUp;
+  const stale = refreshing && gaveUp;
 
   const checkNow = async () => {
+    setGaveUp(false);
+    setPollRound((round) => round + 1);
     setChecking(true);
     try {
       await catalog.checkNow();
@@ -294,10 +359,47 @@ export default function FirmwareCandidates() {
     }
   };
 
+  const sources = catalog.data?.sources ?? [];
+
+  // The badge's version, as something the dialog can ask about: the row the
+  // list already has for it, or -- when the catalogue is behind the update
+  // check, which is the case this exists for -- the same request built from
+  // the version alone.
+  let requested: Confirming | null = null;
+  if (installRequest) {
+    const target = resolveInstallTarget(
+      sources,
+      installRequest.version,
+      installRequest.repo
+    );
+    const source = sources.find((s) => s.id === target.sourceId) ?? {
+      id: target.sourceId || FORK_SOURCE_ID,
+      kind: "github" as const,
+      label: target.sourceId || FORK_SOURCE_ID,
+      location: installRequest.repo ?? "",
+      candidates: [],
+    };
+    const candidate = source.candidates.find(
+      (c) => c.version === installRequest.version
+    ) ?? {
+      version: installRequest.version,
+      // The update check only offers a version newer than what runs.
+      relation: "newer" as const,
+      trust: source.kind === "github" ? ("verified" as const) : "unverified",
+      prerelease: false,
+    };
+    requested = { source, candidate, listed: target.listed };
+  }
+  const confirming = picked ?? requested;
+  const closeConfirm = () => {
+    setPicked(null);
+    onInstallRequestHandled?.();
+  };
+
   const doInstall = async () => {
     if (!confirming) return;
     const { source, candidate } = confirming;
-    setConfirming(null);
+    closeConfirm();
     await install.mutateAsync({
       source: source.id,
       version: candidate.version,
@@ -311,7 +413,6 @@ export default function FirmwareCandidates() {
     await catalog.refetch();
   };
 
-  const sources = catalog.data?.sources ?? [];
   // Collapsed: each source's newest, whatever its relation to the running
   // version -- filtering by relation left a source with nothing to show the
   // moment a board ran something no source offered yet. Anything newer than
@@ -343,11 +444,13 @@ export default function FirmwareCandidates() {
           tense made from the past. */}
         {catalog.data && (
           <CardDescription className="max-sm:col-span-2">
-            {catalog.data.refreshing
-              ? t("firmwareUpgrade.checking")
-              : t("firmwareUpgrade.checkedAt", {
-                  at: catalog.data.checked_at,
-                })}{" "}
+            {stale
+              ? t("firmwareUpgrade.checkingStale")
+              : waiting
+                ? t("firmwareUpgrade.checking")
+                : t("firmwareUpgrade.checkedAt", {
+                    at: catalog.data.checked_at,
+                  })}{" "}
             ·{" "}
             {t("firmwareUpgrade.runningIs", { version: catalog.data.running })}
           </CardDescription>
@@ -380,14 +483,12 @@ export default function FirmwareCandidates() {
           <Button
             variant="outline"
             size="sm"
-            disabled={checking || catalog.data?.refreshing}
+            disabled={checking || waiting}
             onClick={() => void checkNow()}
           >
             <RefreshCw
               data-icon="inline-start"
-              className={cn(
-                (checking || catalog.data?.refreshing) && "animate-spin"
-              )}
+              className={cn((checking || waiting) && "animate-spin")}
             />
             {t("firmwareUpgrade.checkNow")}
           </Button>
@@ -447,7 +548,9 @@ export default function FirmwareCandidates() {
                     install.variables?.source === source.id &&
                     install.variables?.version === candidate.version
                   }
-                  onInstall={(c) => setConfirming({ source, candidate: c })}
+                  onInstall={(c) =>
+                    setPicked({ source, candidate: c, listed: true })
+                  }
                 />
               ))}
             </TableBody>
@@ -489,9 +592,7 @@ export default function FirmwareCandidates() {
           the phone case the inline panel was worst on. */}
         <ConfirmationModal
           isOpen={confirming !== null}
-          onClose={() => {
-            setConfirming(null);
-          }}
+          onClose={closeConfirm}
           onConfirm={() => void doInstall()}
           title={
             confirming
@@ -510,6 +611,13 @@ export default function FirmwareCandidates() {
                       ? t("firmwareUpgrade.confirmUnknown")
                       : t("firmwareUpgrade.confirmUpgrade")}
                 </p>
+                {!confirming.listed && (
+                  <p>
+                    {t("firmwareUpgrade.confirmNotListed", {
+                      source: confirming.source.label,
+                    })}
+                  </p>
+                )}
                 {confirming.candidate.trust !== "verified" && (
                   <p className="font-medium text-warning">
                     {t("firmwareUpgrade.confirmUnverified")}
@@ -539,6 +647,9 @@ export default function FirmwareCandidates() {
         {install.isError && (
           <p className="text-sm text-destructive">
             {t("firmwareUpgrade.installFailed")}
+            {/* The daemon's reason, when it gave one: "already staged" and
+              "no source called" need different next steps. */}
+            {install.error ? ` ${bmcdMessage(install.error)}` : ""}
           </p>
         )}
         {install.isSuccess && (

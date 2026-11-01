@@ -429,6 +429,22 @@ const translations = {
     parkModalTitle: "Wysłać ten obraz na kartę?",
     parkModalDescription:
       "Obraz zostanie zapisany na karcie SD i nic więcej: bez restartu i bez przygotowywania. Pojawi się na liście powyżej i można go zainstalować jak każdą inną wersję.",
+    statusUpdateInstall: "Zainstaluj {{version}}",
+    checkingStale:
+      "Sprawdzanie wciąż trwa – lista może być nieaktualna. Odśwież stronę później.",
+    confirmNotListed:
+      "Lista poniżej nie zawiera jeszcze tej wersji. Płytka pobierze ją bezpośrednio z {{source}}.",
+    directButton: "Wyślij i zainstaluj",
+    directModalTitle: "Zainstalować ten obraz?",
+    directModalDescription:
+      "Obraz zostanie zapisany w wolnym slocie i przygotowany do następnego uruchomienia. Nic się nie zmieni do czasu restartu. Jeśli aktualizacja jest już przygotowana, płytka odmówi.",
+    directNoCard:
+      "Ta płytka nie ma karty SD, więc obrazu nie można zachować na później. Zostanie zainstalowany od razu: zapisany w wolnym slocie i przygotowany do następnego uruchomienia. Nic się nie zmieni do czasu restartu.",
+    installDirectly: "Zainstaluj bezpośrednio",
+    dismiss: "Zamknij",
+    successStaged: "Obraz przygotowany do następnego uruchomienia",
+    successStagedMessage:
+      "Nic się nie zmieni do czasu restartu; przycisk restartu jest w panelu powyżej.",
     rebootToApply: "Uruchom ponownie, aby zastosować",
     firmwareSlots: "Sloty firmware",
     promotionPassed: "Zaliczono",
