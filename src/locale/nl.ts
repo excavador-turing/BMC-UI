@@ -433,6 +433,9 @@ const translations = {
     statusUpdateInstall: "{{version}} installeren",
     checkingStale:
       "Nog bezig met controleren – de lijst is mogelijk verouderd. Laad de pagina later opnieuw.",
+    confirmFrom: "Wordt geïnstalleerd vanaf {{source}} ({{repo}}).",
+    statusUpdateNoSource:
+      "Geen enkele ingestelde bron is {{repo}}, dus dit kan hier niet worden geïnstalleerd.",
     confirmNotListed:
       "De lijst hieronder bevat deze versie nog niet. Het board haalt hem rechtstreeks op bij {{source}}.",
     directButton: "Uploaden en installeren",
@@ -440,7 +443,7 @@ const translations = {
     directModalDescription:
       "Het image wordt naar de vrije slot geschreven en klaargezet voor de volgende start. Er verandert niets totdat u herstart. Staat er al een update klaar, dan weigert het board.",
     directNoCard:
-      "Dit board heeft geen SD-kaart, dus het image kan niet voor later worden bewaard. Het wordt direct geïnstalleerd: naar de vrije slot geschreven en klaargezet voor de volgende start. Er verandert niets totdat u herstart.",
+      "Dit board heeft geen bruikbare SD-kaart, dus het image kan niet voor later worden bewaard. Het wordt direct geïnstalleerd: naar de vrije slot geschreven en klaargezet voor de volgende start. Er verandert niets totdat u herstart.",
     installDirectly: "In plaats daarvan direct installeren",
     dismiss: "Sluiten",
     successStaged: "Image klaargezet voor de volgende start",

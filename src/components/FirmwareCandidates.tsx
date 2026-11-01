@@ -34,9 +34,11 @@ import {
 } from "@/components/ui/table";
 import { bmcdMessage } from "@/lib/api/bmcdMessage";
 import {
-  FORK_SOURCE_ID,
+  type BadgeRequest,
+  type InstallSnapshot,
   refreshPollDelayMs,
-  resolveInstallTarget,
+  snapshotFromBadge,
+  snapshotFromRow,
 } from "@/lib/api/firmwarePage";
 import {
   type FirmwareCandidate,
@@ -228,25 +230,9 @@ const VISIBLE_PER_SOURCE = 1;
 
 /**
  * A version the page was asked to install without the list having been
- * consulted: the "Update available" badge in the slots panel. `repo` is where
- * the update check resolved it (`owner/name`).
+ * consulted: the "Update available" badge in the slots panel.
  */
-export interface InstallRequest {
-  version: string;
-  repo?: string;
-}
-
-/** What the confirmation dialog is asking about. */
-interface Confirming {
-  source: FirmwareSourceCatalog;
-  candidate: FirmwareCandidate;
-  /**
-   * False when the catalogue does not list this version, only the update
-   * check does. The install is the same request; the dialog says why the
-   * version is not in the list.
-   */
-  listed: boolean;
-}
+export type InstallRequest = BadgeRequest;
 
 export default function FirmwareCandidates({
   installRequest = null,
@@ -263,7 +249,10 @@ export default function FirmwareCandidates({
   const [expanded, setExpanded] = useState(false);
   const [sourcesOpen, setSourcesOpen] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
-  const [picked, setPicked] = useState<Confirming | null>(null);
+  // What the dialog is asking about, fixed when it was chosen. The catalogue
+  // is polled while it checks, and a dialog that re-read it would ask about
+  // one thing and install another.
+  const [picked, setPicked] = useState<InstallSnapshot | null>(null);
 
   const catalog = useFirmwareAvailableQuery();
   const install = useInstallFirmwareMutation();
@@ -361,36 +350,19 @@ export default function FirmwareCandidates({
 
   const sources = catalog.data?.sources ?? [];
 
-  // The badge's version, as something the dialog can ask about: the row the
-  // list already has for it, or -- when the catalogue is behind the update
-  // check, which is the case this exists for -- the same request built from
-  // the version alone.
-  let requested: Confirming | null = null;
-  if (installRequest) {
-    const target = resolveInstallTarget(
-      sources,
-      installRequest.version,
-      installRequest.repo
-    );
-    const source = sources.find((s) => s.id === target.sourceId) ?? {
-      id: target.sourceId || FORK_SOURCE_ID,
-      kind: "github" as const,
-      label: target.sourceId || FORK_SOURCE_ID,
-      location: installRequest.repo ?? "",
-      candidates: [],
-    };
-    const candidate = source.candidates.find(
-      (c) => c.version === installRequest.version
-    ) ?? {
-      version: installRequest.version,
-      // The update check only offers a version newer than what runs.
-      relation: "newer" as const,
-      trust: source.kind === "github" ? ("verified" as const) : "unverified",
-      prerelease: false,
-    };
-    requested = { source, candidate, listed: target.listed };
+  // The badge's version, snapshotted the moment the request arrives (set
+  // during render, which React allows for state derived from a prop): the row
+  // the list already has for it, or -- when the catalogue is behind the
+  // update check, which is the case this exists for -- the same request built
+  // from the version alone.
+  const [seenRequest, setSeenRequest] = useState<InstallRequest | null>(null);
+  if (installRequest !== seenRequest) {
+    setSeenRequest(installRequest);
+    if (installRequest) {
+      setPicked(snapshotFromBadge(installRequest, sources));
+    }
   }
-  const confirming = picked ?? requested;
+  const confirming = picked;
   const closeConfirm = () => {
     setPicked(null);
     onInstallRequestHandled?.();
@@ -398,17 +370,16 @@ export default function FirmwareCandidates({
 
   const doInstall = async () => {
     if (!confirming) return;
-    const { source, candidate } = confirming;
+    // Exactly what the dialog showed, and nothing re-read since.
+    const snapshot = confirming;
     closeConfirm();
     await install.mutateAsync({
-      source: source.id,
-      version: candidate.version,
-      // Anything not strictly newer needs the updater's explicit consent.
-      allowDowngrade: candidate.relation !== "newer",
+      source: snapshot.sourceId,
+      version: snapshot.version,
+      allowDowngrade: snapshot.allowDowngrade,
       // The catalogue reports the path for a local candidate; that is what
       // decides which endpoint this goes to.
-      localFile:
-        source.kind === "local" ? (candidate.file ?? undefined) : undefined,
+      localFile: snapshot.localFile,
     });
     await catalog.refetch();
   };
@@ -548,9 +519,7 @@ export default function FirmwareCandidates({
                     install.variables?.source === source.id &&
                     install.variables?.version === candidate.version
                   }
-                  onInstall={(c) =>
-                    setPicked({ source, candidate: c, listed: true })
-                  }
+                  onInstall={(c) => setPicked(snapshotFromRow(source, c))}
                 />
               ))}
             </TableBody>
@@ -597,7 +566,7 @@ export default function FirmwareCandidates({
           title={
             confirming
               ? t("firmwareUpgrade.confirmTitle", {
-                  version: confirming.candidate.version,
+                  version: confirming.version,
                 })
               : ""
           }
@@ -605,20 +574,27 @@ export default function FirmwareCandidates({
             confirming ? (
               <div className="flex flex-col gap-2">
                 <p>
-                  {confirming.candidate.relation === "older"
+                  {confirming.relation === "older"
                     ? t("firmwareUpgrade.confirmDowngrade")
-                    : confirming.candidate.relation === "unknown"
+                    : confirming.relation === "unknown"
                       ? t("firmwareUpgrade.confirmUnknown")
                       : t("firmwareUpgrade.confirmUpgrade")}
                 </p>
-                {!confirming.listed && (
+                {/* Where it comes from, for every install the badge starts:
+                  the badge names a version, and a version alone does not say
+                  which image. */}
+                {confirming.viaBadge && confirming.repo && (
                   <p>
-                    {t("firmwareUpgrade.confirmNotListed", {
-                      source: confirming.source.label,
+                    {t("firmwareUpgrade.confirmFrom", {
+                      source: confirming.sourceLabel,
+                      repo: confirming.repo,
                     })}
                   </p>
                 )}
-                {confirming.candidate.trust !== "verified" && (
+                {!confirming.listed && (
+                  <p>{t("firmwareUpgrade.confirmNotListed")}</p>
+                )}
+                {confirming.trust !== "verified" && (
                   <p className="font-medium text-warning">
                     {t("firmwareUpgrade.confirmUnverified")}
                   </p>

@@ -65,11 +65,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **The "Update available" badge installs the version it names.** It comes
   from the cheap update check, which knows of a release long before the
   catalogue has listed it. Pressing it opens the same confirmation as the
-  list's Install button (it installs from the fork's source, `fork`, or the
-  GitHub source for the repository the check resolved the version in) and
-  adds a line when the list does not have the version yet. If the list does,
-  it is that row's install. It is disabled while an install runs or an update
-  is already staged.
+  list's Install button, which says which source and repository it installs
+  from and, when the list does not have the version yet, that too. The source
+  is the GitHub source whose location is the repository the check named, and
+  no other: another source listing the same version string does not count.
+  If no configured source is that repository the badge is information only,
+  with a line saying why. What the dialog shows is fixed when the badge is
+  pressed and is what is sent, even if the list refreshes underneath; it never
+  asks the updater to allow a downgrade unless the list says the version is
+  older and the dialog says so. It is disabled while an install, an upload or
+  a flash runs, or an update is already staged.
 - The demo can show both: `?card=none` is a board with no SD card (as bmcd 2.42.2 reports it), and
   `?firmware=stale` is a board running v2.44.0 whose update check offers
   v2.46.1 and whose list does not have it (and says it is checking for the

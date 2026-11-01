@@ -437,6 +437,9 @@ const translations = {
     statusUpdateInstall: "{{version}} installieren",
     checkingStale:
       "Die Prüfung läuft noch – die Liste ist möglicherweise veraltet. Laden Sie die Seite später neu.",
+    confirmFrom: "Installiert von {{source}} ({{repo}}).",
+    statusUpdateNoSource:
+      "Keine konfigurierte Quelle ist {{repo}}; von hier lässt sich das nicht installieren.",
     confirmNotListed:
       "Die Liste unten enthält diese Version noch nicht. Das Board lädt sie direkt von {{source}}.",
     directButton: "Hochladen und installieren",
@@ -444,7 +447,7 @@ const translations = {
     directModalDescription:
       "Das Image wird in den freien Slot geschrieben und für den nächsten Start bereitgestellt. Bis zum Neustart ändert sich nichts. Ist bereits ein Update bereitgestellt, lehnt das Board ab.",
     directNoCard:
-      "Dieses Board hat keine SD-Karte, das Image lässt sich also nicht für später ablegen. Es wird sofort installiert: in den freien Slot geschrieben und für den nächsten Start bereitgestellt. Bis zum Neustart ändert sich nichts.",
+      "Dieses Board hat keine nutzbare SD-Karte, das Image lässt sich also nicht für später ablegen. Es wird sofort installiert: in den freien Slot geschrieben und für den nächsten Start bereitgestellt. Bis zum Neustart ändert sich nichts.",
     installDirectly: "Stattdessen direkt installieren",
     dismiss: "Schließen",
     successStaged: "Image für den nächsten Start bereitgestellt",

@@ -38,16 +38,51 @@ export function refreshPollDelayMs(elapsedMs: number): number | null {
   return 10_000;
 }
 
-/** The parts of a source that choosing where to install from needs. */
+export type SourceKind = "github" | "http" | "local";
+export type Relation = "current" | "newer" | "older" | "unknown";
+export type Trust = "verified" | "tls" | "unverified";
+
+/** A source as the catalogue lists it, down to what installing needs. */
 export interface InstallSource {
   id: string;
-  kind: "github" | "http" | "local";
+  label: string;
+  kind: SourceKind;
   location: string;
-  candidates: { version: string }[];
+  candidates: InstallCandidate[];
 }
 
-/** The source the daemon ships for this fork's releases. */
-export const FORK_SOURCE_ID = "fork";
+export interface InstallCandidate {
+  version: string;
+  relation: Relation;
+  trust: Trust;
+  prerelease?: boolean;
+  file?: string | null;
+}
+
+/** A configured source, which says where it points but not what it holds. */
+export interface RepoSource {
+  id: string;
+  label: string;
+  kind: SourceKind;
+  location: string;
+  enabled?: boolean;
+}
+
+/**
+ * The source that IS the repository an update check named: a GitHub source
+ * whose location is exactly `owner/name`. Nothing else will do. A version
+ * string is not an identity -- another remote can list a `v2.46.1` that is a
+ * different image -- so the badge installs from the repository that offered
+ * it or not at all, and the page says which.
+ */
+export function findRepoSource<T extends RepoSource>(
+  sources: T[],
+  repo: string
+): T | undefined {
+  return sources.find(
+    (s) => s.kind === "github" && s.location === repo && s.enabled !== false
+  );
+}
 
 export interface InstallTarget {
   /** The source id to send. */
@@ -62,32 +97,115 @@ export interface InstallTarget {
 }
 
 /**
- * Where to install an offered version from.
- *
- * `repo` is the repository the update check resolved the version in
- * (`owner/name`). A source that is listed with that version wins, a remote one
- * before a file already on the card; failing that, the GitHub source for that
- * repository even though its list is behind; failing that, the source the
- * daemon ships for the fork.
+ * Where to install an offered version from: the source for the repository the
+ * update check resolved it in, whether or not its list has the version yet.
+ * Null when no source is that repository -- there is then no honest place to
+ * install it from, and the caller shows the update as information only.
  */
 export function resolveInstallTarget(
   sources: InstallSource[],
   version: string,
-  repo: string | undefined
-): InstallTarget {
-  const lists = (s: InstallSource) =>
-    s.candidates.some((c) => c.version === version);
-  const sameRepo = (s: InstallSource) =>
-    s.kind === "github" && repo !== undefined && s.location === repo;
+  repo: string
+): InstallTarget | null {
+  const home = findRepoSource(sources, repo);
+  if (!home) return null;
+  return {
+    sourceId: home.id,
+    listed: home.candidates.some((c) => c.version === version),
+  };
+}
 
-  const listed =
-    sources.find((s) => lists(s) && sameRepo(s)) ??
-    sources.find((s) => lists(s) && s.kind !== "local") ??
-    sources.find((s) => lists(s));
-  if (listed) return { sourceId: listed.id, listed: true };
+/**
+ * Everything the install confirmation asks about and the install then sends,
+ * fixed at the moment it was chosen. The catalogue refreshes under an open
+ * dialog (the page polls it while it is checking); a confirmation that
+ * re-read it could ask about one thing and install another.
+ */
+export interface InstallSnapshot {
+  sourceId: string;
+  sourceLabel: string;
+  sourceKind: SourceKind;
+  /** `owner/name` for a GitHub source; shown, so the origin is not just an id. */
+  repo: string | null;
+  version: string;
+  /** False when the catalogue did not list it, only the update check did. */
+  listed: boolean;
+  trust: Trust;
+  relation: Relation;
+  prerelease: boolean;
+  /** Sent as `allow_downgrade`, and only ever when `relation` is not "newer". */
+  allowDowngrade: boolean;
+  /** For a candidate already on the card: its path. */
+  localFile: string | undefined;
+  /** Chosen with the update badge rather than a row. */
+  viaBadge: boolean;
+}
 
-  const home = sources.find(sameRepo);
-  return { sourceId: home?.id ?? FORK_SOURCE_ID, listed: false };
+/** A row's Install button: the candidate as the list shows it. */
+export function snapshotFromRow(
+  source: InstallSource,
+  candidate: InstallCandidate
+): InstallSnapshot {
+  return {
+    sourceId: source.id,
+    sourceLabel: source.label,
+    sourceKind: source.kind,
+    repo: source.kind === "github" ? source.location : null,
+    version: candidate.version,
+    listed: true,
+    trust: candidate.trust,
+    relation: candidate.relation,
+    prerelease: candidate.prerelease === true,
+    // Anything not strictly newer needs the updater's explicit consent.
+    allowDowngrade: candidate.relation !== "newer",
+    localFile:
+      source.kind === "local" ? (candidate.file ?? undefined) : undefined,
+    viaBadge: false,
+  };
+}
+
+/** What the update badge asks for. */
+export interface BadgeRequest {
+  version: string;
+  /** `owner/name` the update check resolved it in. */
+  repo: string;
+  /** The source that is that repository (see `findRepoSource`). */
+  source: RepoSource;
+}
+
+/**
+ * The badge's install, as the dialog will ask about it and the request will
+ * send it. The update check only offers a version it judged newer than what
+ * runs, so unless the list says the version is OLDER (and the dialog then
+ * says so) this is an upgrade and never asks the updater to allow a
+ * downgrade. A version the list does not hold is "verified" only when the
+ * source is the very repository the check named; the updater checks
+ * `SHA256SUMS` for a GitHub release, and for nothing else can that be said.
+ */
+export function snapshotFromBadge(
+  request: BadgeRequest,
+  catalogSources: InstallSource[]
+): InstallSnapshot {
+  const source = catalogSources.find((s) => s.id === request.source.id);
+  const listed = source?.candidates.find((c) => c.version === request.version);
+  const relation: Relation = listed?.relation === "older" ? "older" : "newer";
+  const ownRepo =
+    request.source.kind === "github" &&
+    request.source.location === request.repo;
+  return {
+    sourceId: request.source.id,
+    sourceLabel: source?.label ?? request.source.label,
+    sourceKind: request.source.kind,
+    repo: request.repo,
+    version: request.version,
+    listed: listed !== undefined,
+    trust: listed?.trust ?? (ownRepo ? "verified" : "unverified"),
+    relation,
+    prerelease: listed?.prerelease === true,
+    allowDowngrade: relation === "older",
+    localFile: undefined,
+    viaBadge: true,
+  };
 }
 
 /**
@@ -146,13 +264,23 @@ export function visibleStorage<T extends StorageEntry>(storage: T[]): T[] {
 }
 
 /**
- * Is this the daemon refusing to park because there is no card?
+ * Is this the daemon refusing to park because there is no usable card?
  *
- * The daemon's words: "/mnt/sdcard is not mounted, so there is no card to
- * park an image on. Insert one, or upload without parking to install straight
- * away." Matched on the sentence, because that is all the daemon sends.
+ * The daemon's words, across versions:
+ * - "/mnt/sdcard is not mounted, so there is no card to park an image on.
+ *   Insert one, or upload without parking to install straight away."
+ * - "the image was not saved: no SD card is mounted at /mnt/sdcard ..."
+ * - "an SD card is inserted but not mounted (unsupported or damaged
+ *   filesystem?)"
+ *
+ * Matched on the sentences, because that is all the daemon sends. Other
+ * failures that mention a card ("the card has 1 MB free ...") or a mount
+ * that is not the card's are not this.
  */
 export function isNoCardRefusal(message: string | null | undefined): boolean {
   const text = message ?? "";
-  return /not mounted/i.test(text) && /sdcard|\bcard\b/i.test(text);
+  return (
+    /no SD card is mounted/i.test(text) ||
+    (/not mounted/i.test(text) && /sdcard|\bcard\b/i.test(text))
+  );
 }
