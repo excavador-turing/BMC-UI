@@ -33,8 +33,8 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useSkipNodeConfirmation } from "@/hooks/useSkipNodeConfirmation";
-import { type NodeInfoResponse, useNodesTabData } from "@/lib/api/get";
 import { bmcdMessage } from "@/lib/api/bmcdMessage";
+import { type NodeInfoResponse, useNodesTabData } from "@/lib/api/get";
 import { useResetNodeMutation, useSetNodeInfoMutation } from "@/lib/api/set";
 import { baudChoices, DEFAULT_BAUD, effectiveBaud } from "@/lib/consoleSpeed";
 
