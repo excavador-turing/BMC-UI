@@ -606,7 +606,7 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * Node names, module names and power-on times
+     * Node names, module names, power-on times and serial console speeds
      * @description Legacy form: `GET /api/bmc?opt=get&type=node_info` with the same parameters in the query string. That form answers `{"response":[{"result":…}]}` and puts a refusal's message in `result`; this path answers the bare result and a refusal as `application/problem+json`.
      */
     get: operations["getNodes"];
@@ -958,10 +958,12 @@ export interface components {
       api: string;
       bmcd_version: string;
       /**
-       * @description From the board's EEPROM. Empty on a board that cannot be read, rather
-       *     than absent: upstream's shape, and the interface renders the blank.
+       * @description From the board's EEPROM. Empty on a board that cannot be read, and on
+       *     one whose EEPROM was never programmed, rather than absent: upstream's
+       *     shape, and the interface renders the blank.
        */
       board_model: string;
+      /** @description Same: empty when the EEPROM has no revision in it. */
       board_revision: string;
       /** @description `None` when the EEPROM field is missing or blank after trimming. */
       board_serial?: string | null;
@@ -1358,7 +1360,18 @@ export interface components {
       name?: string | null;
       /** Format: uint64 */
       power_on_time?: number | null;
-      /** Format: uint32 */
+      /**
+       * Format: uint32
+       * @description The speed of the node's serial console, in baud. `null` means the
+       *     default, 115200. One of 300, 600, 1200, 2400, 4800, 9600, 19200,
+       *     38400, 57600, 115200, 230400, 460800, 500000, 576000, 921600,
+       *     1000000, 1152000, 1500000, 2000000, 2500000 or 3000000; anything else
+       *     is refused with a 400. Takes effect at once on the open port, without
+       *     disconnecting the web console, and again at every start of the
+       *     daemon. Local tools on the BMC read the same console at
+       *     `/dev/ttyNode1` to `/dev/ttyNode4` and cannot change the speed
+       *     themselves.
+       */
       uart_baud?: number | null;
     };
     /**
