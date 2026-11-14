@@ -317,6 +317,11 @@ export const demoAdapter: AxiosAdapter = (config) => {
         legacyResult(`not captured for this demo: ${type}`)
       );
     }
+    if (opt === "set" && type === "node_info") {
+      // The Nodes tab's Save reads no body on success, so a refusal inside a
+      // 200 would pass for a saved form. A 403 reaches its error toast.
+      return reply(config, 403, legacyResult(REFUSED));
+    }
     if (opt === "set") {
       // The legacy form puts a refusal's message inside a 200, and every
       // mutation hook surfaces `result` as a toast. Say what happened.

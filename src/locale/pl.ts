@@ -154,6 +154,11 @@ const translations = {
     module: "Moduł {{moduleId}}",
     nodeName: "Nazwa węzła",
     moduleName: "Nazwa modułu",
+    consoleSpeed: "Szybkość konsoli",
+    baudValue: "{{baud}} baud",
+    baudDefault: "domyślna",
+    consoleSpeedHint:
+      "Szybkość portu szeregowego tego węzła. Musi zgadzać się z tą, której używa system modułu.",
     powerManagement: "Zarządzanie zasilaniem",
     nodeOn: "Węzeł {{nodeId}} został włączony.",
     nodeOff: "Węzeł {{nodeId}} został wyłączony.",
@@ -392,6 +397,10 @@ const translations = {
     restIntro: "Ten sam UART jest dostępny przez zwykły HTTP, bez WebSocketu:",
     restRead: "zwraca cały 16-KiB bufor węzła.",
     restWrite: "zapisuje jedną linię.",
+    localIntro:
+      "Na samym BMC /dev/ttyNodeN to wspólna konsola węzła, gdzie N to numer węzła (od 1 do 4). Pokazuje dokładnie to, co ta strona, a lokalne narzędzie może do niej pisać:",
+    localSpeed:
+      "Szybkość ustawia się w ustawieniach węzła (Sterowanie zasilaniem, Edytuj), a nie w narzędziu.",
   },
   usb: {
     header: "Trasa USB",

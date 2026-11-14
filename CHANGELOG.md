@@ -10,6 +10,35 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **A console speed for each node.** Power Control now shows each node's
+  serial speed beside its name and module name, and Edit offers it as a select
+  of the common rates: 9600, 19200, 38400, 57600, 115200 (the default, shown
+  as "115200 baud (default)" while nothing is stored), 230400, 460800, 921600,
+  1000000 and 1500000. It saves through the same `node_info` call as the
+  names, as `uart_baud`, and only when the speed was changed, so a node with
+  none stored stays unset until somebody chooses one. A speed stored by hand
+  that is not in the list is added to that node's select rather than replaced
+  by the nearest listed one. The Fleet's Power Control tab is the same
+  component and gets the field with it. In the demo, Save is refused and the
+  toast says it is a demo; before, that call came back as a 200 and the form
+  closed as if it had saved. bmcd has stored `uart_baud` for a long time but
+  ignored it; a bmcd that applies it as the port's real speed is what makes
+  the field take effect. Reported in BMC-Firmware#76.
+- **The Console page names the local console devices.** Under "The
+  line-oriented alternative", a note says that on the BMC itself
+  `/dev/ttyNodeN` is the node's shared console (N is the node number), shows
+  exactly what the page shows, and that a tool such as microcom or picocom can
+  open it, with `microcom -s 115200 /dev/ttyNode1` as the example. It also
+  says the speed is set in the node's settings, not by the tool. The devices
+  come with the same bmcd change as the speed.
+- **A gate for both.** `npm run baud-field-test` drives the demo build at a
+  desktop and a phone width: the default shows for every node, the select
+  offers the ten rates in order, a chosen speed reaches the form for that node
+  only, the demo's Save refuses and stays in Edit, and the Console note is
+  there.
+
 ## [v4.5.0] — 2026-11-01
 
 Choosing a node is one click: Console, Flash Node and USB show the four nodes

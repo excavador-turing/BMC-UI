@@ -153,6 +153,11 @@ const translations = {
     module: "Module {{moduleId}}",
     nodeName: "Nodenaam",
     moduleName: "Modulenaam",
+    consoleSpeed: "Consolesnelheid",
+    baudValue: "{{baud}} baud",
+    baudDefault: "standaard",
+    consoleSpeedHint:
+      "De snelheid van de seriële poort van deze node. Ze moet overeenkomen met wat het systeem van de module gebruikt.",
     powerManagement: "Stroombeheer",
     nodeOn: "Node {{nodeId}} is ingeschakeld.",
     nodeOff: "Node {{nodeId}} is uitgeschakeld.",
@@ -393,6 +398,10 @@ const translations = {
       "Dezelfde UART is bereikbaar over gewone HTTP, zonder WebSocket:",
     restRead: "geeft de volledige buffer van 16 KiB van de node terug.",
     restWrite: "schrijft één regel.",
+    localIntro:
+      "Op de BMC zelf is /dev/ttyNodeN de gedeelde console van de node, waarbij N het nodenummer is (1 tot 4). Hij toont precies wat deze pagina toont, en een lokaal hulpmiddel kan erin typen:",
+    localSpeed:
+      "De snelheid wordt ingesteld in de instellingen van de node (Stroomregeling, Bewerken), niet door het hulpmiddel.",
   },
   usb: {
     header: "USB-route",

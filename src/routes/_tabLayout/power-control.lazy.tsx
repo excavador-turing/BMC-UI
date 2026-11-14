@@ -22,10 +22,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useSkipNodeConfirmation } from "@/hooks/useSkipNodeConfirmation";
 import { type NodeInfoResponse, useNodesTabData } from "@/lib/api/get";
+import { bmcdMessage } from "@/lib/api/bmcdMessage";
 import { useResetNodeMutation, useSetNodeInfoMutation } from "@/lib/api/set";
+import { baudChoices, DEFAULT_BAUD, effectiveBaud } from "@/lib/consoleSpeed";
 
 export const Route = createLazyFileRoute("/_tabLayout/power-control")({
   component: NodesTab,
@@ -50,6 +61,7 @@ const NodeRow = (
   // Shared with the power switch, and scoped to this board.
   const [skipConfirmation, rememberSkip] = useSkipNodeConfirmation();
   const [tempSkipConfirmation, setTempSkipConfirmation] = useState(false);
+  const baud = effectiveBaud(props.uart_baud);
 
   const { mutate: mutateResetNode, isPending: isPendingReset } =
     useResetNodeMutation();
@@ -140,6 +152,48 @@ const NodeRow = (
                   t("nodes.module", { moduleId: props.nodeId })
                 }
               />
+              {/* A select, not a text box: a speed a port cannot run at is
+                  not a thing to type. The hidden input Base UI renders for
+                  `name` is what the form reads back on Save. */}
+              <Field>
+                <FieldLabel htmlFor={`node-${props.nodeId}-baud-trigger`}>
+                  {t("nodes.consoleSpeed")}
+                </FieldLabel>
+                <Select
+                  name={`node-${props.nodeId}-baud`}
+                  items={baudChoices(baud).map((rate) => ({
+                    value: String(rate),
+                    label: t("nodes.baudValue", { baud: rate }),
+                  }))}
+                  defaultValue={String(baud)}
+                >
+                  <SelectTrigger
+                    // Not the field's name: the form reads the value back by
+                    // name, and a second element with that id as well would
+                    // make `namedItem` answer a list with no value.
+                    id={`node-${props.nodeId}-baud-trigger`}
+                    data-testid={`node-${props.nodeId}-baud`}
+                    className="w-full"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {baudChoices(baud).map((rate) => (
+                        <SelectItem key={rate} value={String(rate)}>
+                          {t("nodes.baudValue", { baud: rate })}
+                          {rate === DEFAULT_BAUD
+                            ? ` (${t("nodes.baudDefault")})`
+                            : ""}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                <FieldDescription>
+                  {t("nodes.consoleSpeedHint")}
+                </FieldDescription>
+              </Field>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3 text-sm">
@@ -154,6 +208,17 @@ const NodeRow = (
                 <p className="truncate">
                   {props.module_name ??
                     t("nodes.module", { moduleId: props.nodeId })}
+                </p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">
+                  {t("nodes.consoleSpeed")}
+                </p>
+                <p data-testid={`node-${props.nodeId}-baud-value`}>
+                  {t("nodes.baudValue", { baud })}
+                  {props.uart_baud == null
+                    ? ` (${t("nodes.baudDefault")})`
+                    : ""}
                 </p>
               </div>
             </div>
@@ -200,35 +265,30 @@ export function NodesTab() {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
 
+    // What a node's two text boxes and its speed say, read back by name.
+    const field = (nodeId: number, what: string) =>
+      (form.elements.namedItem(`node-${nodeId}-${what}`) as HTMLInputElement)
+        .value;
+    const node = (nodeId: number) => {
+      const chosen = Number.parseInt(field(nodeId, "baud"), 10);
+      return {
+        name: field(nodeId, "name"),
+        module_name: field(nodeId, "module-name"),
+        // Only a speed that was changed goes out. A node with none stored
+        // stays unset when nobody touched the select, rather than gaining an
+        // explicit 115200 nobody chose.
+        ...(Number.isFinite(chosen) &&
+        chosen !== effectiveBaud(data[nodeId - 1]?.uart_baud)
+          ? { uart_baud: chosen }
+          : {}),
+      };
+    };
+
     const nodeInfo = {
-      Node1: {
-        name: (form.elements.namedItem("node-1-name") as HTMLInputElement)
-          .value,
-        module_name: (
-          form.elements.namedItem("node-1-module-name") as HTMLInputElement
-        ).value,
-      },
-      Node2: {
-        name: (form.elements.namedItem("node-2-name") as HTMLInputElement)
-          .value,
-        module_name: (
-          form.elements.namedItem("node-2-module-name") as HTMLInputElement
-        ).value,
-      },
-      Node3: {
-        name: (form.elements.namedItem("node-3-name") as HTMLInputElement)
-          .value,
-        module_name: (
-          form.elements.namedItem("node-3-module-name") as HTMLInputElement
-        ).value,
-      },
-      Node4: {
-        name: (form.elements.namedItem("node-4-name") as HTMLInputElement)
-          .value,
-        module_name: (
-          form.elements.namedItem("node-4-module-name") as HTMLInputElement
-        ).value,
-      },
+      Node1: node(1),
+      Node2: node(2),
+      Node3: node(3),
+      Node4: node(4),
     };
 
     mutate(nodeInfo, {
@@ -242,7 +302,7 @@ export function NodesTab() {
       onError: (e) => {
         toast({
           title: t("nodes.saveButton"),
-          description: e.message,
+          description: bmcdMessage(e),
           variant: "destructive",
         });
       },

@@ -151,6 +151,10 @@ const translations = {
     module: "模块 {{moduleId}}",
     nodeName: "节点名称",
     moduleName: "模块名称",
+    consoleSpeed: "控制台速率",
+    baudValue: "{{baud}} 波特",
+    baudDefault: "默认",
+    consoleSpeedHint: "此节点串口的速率。必须与模块系统使用的速率一致。",
     powerManagement: "电源管理",
     nodeOn: "节点 {{nodeId}} 已开启。",
     nodeOff: "节点 {{nodeId}} 已关闭。",
@@ -377,6 +381,9 @@ const translations = {
     restIntro: "同一个 UART 也可以通过普通 HTTP 访问，无需 WebSocket：",
     restRead: "返回该节点完整的 16 KiB 缓冲区。",
     restWrite: "写入一行。",
+    localIntro:
+      "在 BMC 本机上，/dev/ttyNodeN 是该节点的共享控制台，N 为节点编号（1 到 4）。它显示的内容与本页完全相同，本地工具也可以向其中输入：",
+    localSpeed: "速率在节点的设置中指定（电源控制，编辑），而不是由工具指定。",
   },
   usb: {
     header: "USB 路由",

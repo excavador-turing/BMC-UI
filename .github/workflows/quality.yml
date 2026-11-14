@@ -197,6 +197,39 @@ jobs:
       - name: Drive the pickers
         run: npm run node-picker-test
 
+  # The console speed is a node setting.
+  #
+  # Power Control's Edit offers each node's serial speed as a select, and the
+  # Console page says where the local devices are. This drives the demo build
+  # with real mouse events: the default shows, the ten rates are offered, a
+  # chosen speed reaches the form for that node only, and the demo's Save
+  # refuses and says why rather than reporting a save.
+  baud-field:
+    name: The console speed field and the Console note
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          pip install websockets
+
+      - name: Drive the field
+        run: npm run baud-field-test
+
   # A page left open (or cached) across an upgrade must recover by itself.
   #
   # After firmware v2.40.0 a browser kept the old index.html, asked for chunk

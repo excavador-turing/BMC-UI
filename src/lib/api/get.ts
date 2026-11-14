@@ -312,7 +312,8 @@ export interface NodeInfoResponse {
   module_name: string | null;
   name: string | null;
   power_on_time: number | null;
-  uart_baud: string | null;
+  /** The node's stored console speed; `null` until one has been set. */
+  uart_baud: number | null;
 }
 
 export function useUSBTabData() {

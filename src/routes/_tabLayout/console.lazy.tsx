@@ -150,6 +150,18 @@ export function SerialConsoleTab({ preselected }: { preselected?: number }) {
               — {t("console.restWrite")}
             </li>
           </ul>
+          {/* The same console from a shell on the BMC. The speed is a node
+              setting, so the tool is not asked for one. */}
+          <div className="mt-4 flex flex-col gap-2 text-sm">
+            <p>{t("console.localIntro")}</p>
+            <code
+              className="w-fit rounded-sm bg-muted px-1 font-mono break-all"
+              data-testid="console-local-example"
+            >
+              microcom -s 115200 /dev/ttyNode1
+            </code>
+            <p>{t("console.localSpeed")}</p>
+          </div>
         </CardContent>
       </Card>
     </TabView>

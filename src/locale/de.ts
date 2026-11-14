@@ -154,6 +154,11 @@ const translations = {
     module: "Modul {{moduleId}}",
     nodeName: "Knotenname",
     moduleName: "Modulname",
+    consoleSpeed: "Konsolengeschwindigkeit",
+    baudValue: "{{baud}} Baud",
+    baudDefault: "Standard",
+    consoleSpeedHint:
+      "Die Geschwindigkeit der seriellen Schnittstelle dieses Knotens. Sie muss zu dem passen, was das System des Moduls verwendet.",
     powerManagement: "Stromverwaltung",
     nodeOn: "Knoten {{nodeId}} wurde eingeschaltet.",
     nodeOff: "Knoten {{nodeId}} wurde ausgeschaltet.",
@@ -395,6 +400,10 @@ const translations = {
       "Dieselbe UART ist auch über einfaches HTTP erreichbar, ohne WebSocket:",
     restRead: "gibt den gesamten 16-KiB-Puffer des Knotens zurück.",
     restWrite: "schreibt eine Zeile.",
+    localIntro:
+      "Auf dem BMC selbst ist /dev/ttyNodeN die gemeinsame Konsole des Knotens, N ist die Knotennummer (1 bis 4). Sie zeigt genau, was diese Seite zeigt, und ein lokales Werkzeug kann hineintippen:",
+    localSpeed:
+      "Die Geschwindigkeit wird in den Einstellungen des Knotens (Leistungssteuerung, Bearbeiten) festgelegt, nicht vom Werkzeug.",
   },
   usb: {
     header: "USB-Route",

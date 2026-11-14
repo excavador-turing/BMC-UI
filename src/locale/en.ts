@@ -226,6 +226,10 @@ const translations = {
     module: "Module {{moduleId}}",
     nodeName: "Node name",
     moduleName: "Module name",
+    consoleSpeed: "Console speed",
+    baudValue: "{{baud}} baud",
+    baudDefault: "default",
+    consoleSpeedHint: "Must match the speed the module's system uses.",
     powerManagement: "Power Management",
     nodeOn: "Node {{nodeId}} was powered on.",
     nodeOff: "Node {{nodeId}} was powered off.",
@@ -464,6 +468,10 @@ const translations = {
       "The same UART is reachable over plain HTTP, without a WebSocket:",
     restRead: "returns the node's whole 16 KiB buffer.",
     restWrite: "writes one line.",
+    localIntro:
+      "On the BMC itself, /dev/ttyNodeN is the node's shared console, where N is the node number (1 to 4). It shows exactly what this page shows, and a local tool can type into it:",
+    localSpeed:
+      "The speed is set in the node's settings (Power Control, Edit), not by the tool.",
   },
   usb: {
     header: "USB route",

@@ -10,6 +10,7 @@
     "screens": "VITE_DEMO=1 vite build && python3 scripts/screens.py",
     "type-test": "VITE_DEMO=1 vite build && python3 scripts/type-test.py",
     "node-picker-test": "VITE_DEMO=1 vite build && python3 scripts/node-picker-test.py",
+    "baud-field-test": "VITE_DEMO=1 vite build && python3 scripts/baud-field-test.py",
     "stale-chunk-test": "VITE_DEMO=1 vite build && python3 scripts/stale-chunk-test.py",
     "fleet-headers-test": "sh scripts/fleet-headers-test.sh",
     "preview": "vite preview",

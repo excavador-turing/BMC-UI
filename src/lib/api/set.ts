@@ -58,6 +58,8 @@ export function usePowerNodeMutation() {
 interface NodePayload {
   name?: string;
   module_name?: string;
+  /** Console speed. Left out when it is not being changed. */
+  uart_baud?: number;
 }
 
 interface NodeInfoPayload {
