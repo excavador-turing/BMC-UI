@@ -298,6 +298,7 @@ const translations = {
     badgeFilteringOff: "VLAN-filter uit",
     badgeStpOn: "STP aan",
     badgeStpOff: "STP uit",
+    badgeLagOn: "LACP aan",
     oneNetwork:
       "Alle poorten delen één netwerk. De VLAN-kolommen gelden zodra filteren aan staat.",
     port: "Poort",
@@ -328,6 +329,15 @@ const translations = {
     untagged: "Untagged",
     tagged: "Tagged",
     thisBoard: "dit bord",
+    lacpUplink: "LACP-uplink",
+    bondSlave: "bond-slave",
+    bondSlaveHint:
+      "Met LACP dragen ge0 en ge1 geen eigen VLAN's; zet de uplink-VLAN's op bond0.",
+    uplink: "Uplink",
+    uplinkIndependent: "Onafhankelijk (ge0 / ge1)",
+    uplinkLag: "LACP bond0 (ge0 + ge1)",
+    spanningTreeLag:
+      "Spanning tree staat uit zolang LACP aan staat: de bond is één logische uplink.",
     apply: "Toepassen",
     applyWarning:
       "Dit wijzigt de switch waardoor u verbonden bent. De wijziging wordt toegepast maar NIET behouden: kan deze pagina het bord niet binnen ongeveer {{seconds}} seconden bereiken, dan zet het bord de vorige configuratie zelf terug. Er is dan niets stuk — herlaad en probeer opnieuw.",

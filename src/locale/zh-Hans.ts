@@ -291,6 +291,7 @@ const translations = {
     badgeFilteringOff: "VLAN 过滤已关闭",
     badgeStpOn: "STP 已开启",
     badgeStpOff: "STP 已关闭",
+    badgeLagOn: "LACP 已开启",
     oneNetwork: "所有端口共用一个网络。开启过滤后，VLAN 列才会生效。",
     port: "端口",
     link: "链路",
@@ -317,6 +318,14 @@ const translations = {
     untagged: "未打标签",
     tagged: "已打标签",
     thisBoard: "本主板",
+    lacpUplink: "LACP 上行",
+    bondSlave: "bond 成员口",
+    bondSlaveHint:
+      "启用 LACP 时，ge0/ge1 作为 bond 成员口不承载 VLAN；请把上行 VLAN 配在 bond0。",
+    uplink: "上行口",
+    uplinkIndependent: "独立 (ge0 / ge1)",
+    uplinkLag: "LACP bond0 (ge0 + ge1)",
+    spanningTreeLag: "启用 LACP 时关闭生成树：bond 是一条逻辑上行。",
     apply: "应用",
     applyWarning:
       "这会改变你当前连接所经过的交换机。更改会被应用但不会保留：如果本页在约 {{seconds}} 秒内无法连上主板，主板会自行恢复之前的配置。那并不表示出错——重新载入再试一次即可。",

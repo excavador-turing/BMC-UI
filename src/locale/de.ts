@@ -300,6 +300,7 @@ const translations = {
     badgeFilteringOff: "VLAN-Filter aus",
     badgeStpOn: "STP an",
     badgeStpOff: "STP aus",
+    badgeLagOn: "LACP an",
     oneNetwork:
       "Alle Ports teilen ein Netzwerk. Die VLAN-Spalten gelten erst mit aktivem Filter.",
     port: "Port",
@@ -330,6 +331,15 @@ const translations = {
     untagged: "Untagged",
     tagged: "Tagged",
     thisBoard: "dieses Board",
+    lacpUplink: "LACP-Uplink",
+    bondSlave: "Bond-Slave",
+    bondSlaveHint:
+      "Mit LACP tragen ge0 und ge1 keine eigenen VLANs; die Uplink-VLANs gehören auf bond0.",
+    uplink: "Uplink",
+    uplinkIndependent: "Unabhängig (ge0 / ge1)",
+    uplinkLag: "LACP bond0 (ge0 + ge1)",
+    spanningTreeLag:
+      "Spanning Tree ist aus, solange LACP an ist: der Bond ist ein logischer Uplink.",
     apply: "Anwenden",
     applyWarning:
       "Dies ändert den Switch, über den Sie verbunden sind. Die Änderung wird angewendet, aber NICHT behalten: Erreicht diese Seite das Board nicht innerhalb von etwa {{seconds}} Sekunden, stellt das Board die vorherige Konfiguration selbst wieder her. Dann ist nichts kaputt — neu laden und erneut versuchen.",

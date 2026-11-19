@@ -370,6 +370,7 @@ const translations = {
     badgeFilteringOff: "VLAN filtering off",
     badgeStpOn: "STP on",
     badgeStpOff: "STP off",
+    badgeLagOn: "LACP on",
     oneNetwork:
       "All ports share one network. The VLAN columns apply once filtering is on.",
     port: "Port",
@@ -384,11 +385,20 @@ const translations = {
     bmcUntaggedOnly:
       "This board reads untagged frames only, so a tag here would be traffic it cannot see.",
     thisBoard: "this board",
+    lacpUplink: "LACP uplink",
+    bondSlave: "bond slave",
+    bondSlaveHint:
+      "With LACP, ge0 and ge1 are bond slaves and carry no VLANs of their own; put the uplink VLANs on bond0.",
     startFrom: "Start from",
+    uplink: "Uplink",
+    uplinkIndependent: "Independent (ge0 / ge1)",
+    uplinkLag: "LACP bond0 (ge0 + ge1)",
     filtering:
       "Look at VLANs (off means one flat network, whatever the table says)",
     spanningTree:
       "Spanning tree, so two uplinks into the same network cannot form a loop",
+    spanningTreeLag:
+      "Spanning tree is off while LACP is on: the bond is one logical uplink.",
     names: "Names for these VLANs",
     vlanNumber: "VLAN {{vid}}",
     unnamed: "unnamed",

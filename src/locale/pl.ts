@@ -298,6 +298,7 @@ const translations = {
     badgeFilteringOff: "Filtrowanie VLAN wył.",
     badgeStpOn: "STP wł.",
     badgeStpOff: "STP wył.",
+    badgeLagOn: "LACP wł.",
     oneNetwork:
       "Wszystkie porty dzielą jedną sieć. Kolumny VLAN działają po włączeniu filtrowania.",
     port: "Port",
@@ -329,6 +330,15 @@ const translations = {
     untagged: "Bez znacznika",
     tagged: "Ze znacznikiem",
     thisBoard: "ta płyta",
+    lacpUplink: "Uplink LACP",
+    bondSlave: "slave bonda",
+    bondSlaveHint:
+      "Przy LACP ge0 i ge1 nie niosą własnych VLAN-ów; VLAN-y uplinku należą na bond0.",
+    uplink: "Uplink",
+    uplinkIndependent: "Niezależne (ge0 / ge1)",
+    uplinkLag: "LACP bond0 (ge0 + ge1)",
+    spanningTreeLag:
+      "Spanning tree jest wyłączone przy LACP: bond to jeden logiczny uplink.",
     apply: "Zastosuj",
     applyWarning:
       "To zmienia przełącznik, przez który jesteś połączony. Zmiana zostanie zastosowana, ale NIE zachowana: jeśli ta strona nie dosięgnie płyty w ciągu około {{seconds}} sekund, płyta sama przywróci poprzednią konfigurację. Wtedy nic nie jest zepsute — odśwież i spróbuj ponownie.",
