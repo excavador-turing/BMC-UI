@@ -57,122 +57,24 @@ import {
   useConfirmSwitchMutation,
   useRevertSwitchMutation,
 } from "@/lib/api/set";
+import {
+  BMC_PORT,
+  BOND_PORT,
+  documentFrom,
+  type Draft,
+  draftFrom,
+  isLag,
+  isSlave,
+  type PortDraft,
+  portOrder,
+  unparsed,
+  vlansOf,
+  withLag,
+  withoutLag,
+} from "@/lib/api/switchDraft";
 import { cn } from "@/lib/utils";
 
-/** The ports, in the order they sit on the board. */
-const PORT_ORDER = ["node1", "node2", "node3", "node4", "bmc", "ge0", "ge1"];
-
-/** The one port that has no cable and no link state: the CPU port. */
-const BMC_PORT = "bmc";
-
 const human = (bytes: number) => filesize(bytes, { standard: "jedec" });
-
-/**
- * The document being edited, held as the text that is in the boxes.
- *
- * Text rather than numbers, because a half-typed VLAN list is a legitimate
- * state of a text box and a document that cannot hold it would fight the
- * person typing. Turning it into a document is `documentFrom`, and the one
- * judgement this file makes is whether that succeeds.
- */
-interface PortDraft {
-  untagged: string;
-  tagged: string;
-}
-
-interface Draft {
-  filtering: boolean;
-  stp: boolean;
-  ports: Record<string, PortDraft>;
-  names: Record<string, string>;
-}
-
-function draftFrom(document: SwitchDocument): Draft {
-  const ports: Record<string, PortDraft> = {};
-  for (const name of PORT_ORDER) {
-    const port = document.ports[name];
-    ports[name] = {
-      untagged: port?.untagged == null ? "" : String(port.untagged),
-      tagged: (port?.tagged ?? []).join(", "),
-    };
-  }
-  return {
-    filtering: document.vlan_filtering,
-    stp: document.stp,
-    ports,
-    names: { ...(document.names ?? {}) },
-  };
-}
-
-/** A VLAN number as typed. `null` is "that is not a number". */
-function vid(text: string): number | null {
-  const trimmed = text.trim();
-  if (trimmed === "" || !/^\d+$/.test(trimmed)) return null;
-  return Number(trimmed);
-}
-
-/**
- * Which cells do not parse, as `port.field` keys.
- *
- * The only rule this client owns. Whether 4095 is a legal VLAN, whether the
- * BMC may be tagged, whether two uplinks may share a VLAN -- all of that is
- * the board's, asked over the wire on every edit. A copy of those rules here
- * would eventually disagree with the board, and the way that disagreement
- * shows up is a board nobody can reach.
- */
-function unparsed(draft: Draft): Set<string> {
-  const bad = new Set<string>();
-  for (const name of PORT_ORDER) {
-    const port = draft.ports[name];
-    if (port.untagged.trim() !== "" && vid(port.untagged) === null) {
-      bad.add(`${name}.untagged`);
-    }
-    for (const piece of port.tagged.split(",")) {
-      if (piece.trim() !== "" && vid(piece) === null) {
-        bad.add(`${name}.tagged`);
-      }
-    }
-  }
-  return bad;
-}
-
-/** The draft as a document, or null while something does not parse. */
-function documentFrom(draft: Draft): SwitchDocument | null {
-  if (unparsed(draft).size > 0) return null;
-
-  const ports: SwitchDocument["ports"] = {};
-  for (const name of PORT_ORDER) {
-    const port = draft.ports[name];
-    const tagged = port.tagged
-      .split(",")
-      .map((piece) => vid(piece))
-      .filter((value): value is number => value !== null);
-    ports[name] = {
-      untagged: vid(port.untagged),
-      tagged: [...new Set(tagged)].sort((a, b) => a - b),
-    };
-  }
-
-  // An empty name is not a name, and the board refuses one. Dropping it here
-  // means clearing a box is how you remove a name, which is what somebody
-  // clearing a box means.
-  const names: Record<string, string> = {};
-  for (const [key, value] of Object.entries(draft.names)) {
-    if (value.trim() !== "") names[key] = value.trim();
-  }
-
-  return { vlan_filtering: draft.filtering, stp: draft.stp, ports, names };
-}
-
-/** Every VLAN the draft mentions, ascending. What there is to name. */
-function vlansOf(document: SwitchDocument): number[] {
-  const seen = new Set<number>();
-  for (const port of Object.values(document.ports)) {
-    if (port.untagged !== null) seen.add(port.untagged);
-    for (const tag of port.tagged) seen.add(tag);
-  }
-  return [...seen].sort((a, b) => a - b);
-}
 
 /** A value that follows another one, late. */
 function useDebounced<T>(value: T, ms: number): T {
@@ -252,16 +154,24 @@ function TrafficCell({ port }: { port: SwitchPort | undefined }) {
   );
 }
 
-/** The port's name, with the BMC's own port marked. */
-function PortName({ name }: { name: string }) {
+/** The port's name, with the BMC, bond, or LACP slave marked. */
+function PortName({ name, lag }: { name: string; lag: boolean }) {
   const { t } = useTranslation();
+  const note =
+    name === BMC_PORT
+      ? t("switchConfig.thisBoard")
+      : name === BOND_PORT
+        ? t("switchConfig.lacpUplink")
+        : isSlave(lag, name)
+          ? t("switchConfig.bondSlave")
+          : null;
 
   return (
     <>
       <span className="font-medium">{name}</span>
-      {name === BMC_PORT && (
+      {note && (
         <span className="ml-2 text-xs whitespace-nowrap text-muted-foreground">
-          {t("switchConfig.thisBoard")}
+          {note}
         </span>
       )}
     </>
@@ -354,6 +264,8 @@ function SwitchTable({
   const narrowHidden = !onChange && "hidden sm:table-cell";
   const vlanHead = cn(faded, narrowHidden);
   const vlanCell = cn("align-top", faded, narrowHidden);
+  const lag = draft ? isLag(draft.second_uplink) : false;
+  const rows = portOrder(lag);
 
   return (
     <Table>
@@ -377,15 +289,17 @@ function SwitchTable({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {PORT_ORDER.map((name) => {
+        {rows.map((name) => {
           const isBmc = name === BMC_PORT;
+          const slave = isSlave(lag, name);
+          const vlanLocked = isBmc || slave;
           const port = byName.get(name);
           const vlan = draft?.ports[name];
           const warnings = warningsFor(name);
           return (
             <TableRow key={name}>
               <TableCell className="align-top">
-                <PortName name={name} />
+                <PortName name={name} lag={lag} />
                 {vlan && !onChange && (
                   <div
                     className={cn(
@@ -396,7 +310,7 @@ function SwitchTable({
                     <span className="flex items-center gap-1">
                       {t("switchConfig.untagged")} {badges(vlan.untagged)}
                     </span>
-                    {!isBmc && vlan.tagged.trim() !== "" && (
+                    {!vlanLocked && vlan.tagged.trim() !== "" && (
                       <span className="flex items-center gap-1">
                         {t("switchConfig.tagged")} {badges(vlan.tagged)}
                       </span>
@@ -405,7 +319,7 @@ function SwitchTable({
                 )}
               </TableCell>
               <TableCell className="align-top">
-                {isBmc ? (
+                {isBmc || name === BOND_PORT ? (
                   <span className="text-muted-foreground">—</span>
                 ) : (
                   <div className="flex flex-col gap-0.5">
@@ -419,7 +333,7 @@ function SwitchTable({
                 )}
               </TableCell>
               <TableCell className="hidden align-top md:table-cell">
-                {isBmc ? (
+                {isBmc || name === BOND_PORT ? (
                   <span className="text-muted-foreground">—</span>
                 ) : (
                   <TrafficCell port={port} />
@@ -436,7 +350,15 @@ function SwitchTable({
                           port: name,
                         })}
                         value={vlan.untagged}
-                        placeholder={t("switchConfig.none")}
+                        disabled={slave}
+                        placeholder={
+                          slave
+                            ? t("switchConfig.never")
+                            : t("switchConfig.none")
+                        }
+                        title={
+                          slave ? t("switchConfig.bondSlaveHint") : undefined
+                        }
                         onChange={(e) => set(name, "untagged", e.target.value)}
                       />
                     ) : (
@@ -454,20 +376,24 @@ function SwitchTable({
                         className="h-7 w-32 tabular-nums"
                         aria-invalid={bad.has(`${name}.tagged`)}
                         aria-label={t("switchConfig.taggedOn", { port: name })}
-                        value={isBmc ? "" : vlan.tagged}
-                        disabled={isBmc}
+                        value={vlanLocked ? "" : vlan.tagged}
+                        disabled={vlanLocked}
                         placeholder={
-                          isBmc
+                          vlanLocked
                             ? t("switchConfig.never")
                             : t("switchConfig.none")
                         }
                         title={
-                          isBmc ? t("switchConfig.bmcUntaggedOnly") : undefined
+                          isBmc
+                            ? t("switchConfig.bmcUntaggedOnly")
+                            : slave
+                              ? t("switchConfig.bondSlaveHint")
+                              : undefined
                         }
                         onChange={(e) => set(name, "tagged", e.target.value)}
                       />
                     ) : (
-                      badges(isBmc ? "" : vlan.tagged)
+                      badges(vlanLocked ? "" : vlan.tagged)
                     )}
                   </TableCell>
                 </>
@@ -686,6 +612,11 @@ export default function SwitchConfig() {
       : []),
   ];
 
+  const uplinkItems = [
+    { value: "independent", label: t("switchConfig.uplinkIndependent") },
+    { value: "lag", label: t("switchConfig.uplinkLag") },
+  ];
+
   const presetItems = [
     { value: null, label: t("switchConfig.presetPlaceholder") },
     ...(presets.data?.presets ?? []).map((p) => ({
@@ -804,6 +735,11 @@ export default function SwitchConfig() {
                       ? t("switchConfig.badgeStpOn")
                       : t("switchConfig.badgeStpOff")}
                   </Badge>
+                  {isLag(draft.second_uplink) && (
+                    <Badge variant="secondary">
+                      {t("switchConfig.badgeLagOn")}
+                    </Badge>
+                  )}
                 </>
               )}
               {configurable && !editing && (
@@ -853,8 +789,37 @@ export default function SwitchConfig() {
                 <SelectContent>
                   <SelectGroup>
                     {presets.data?.presets.map((p) => (
-                      <SelectItem key={p.name} value={p.name}>
+                      <SelectItem key={p.name} value={p.name} title={p.summary}>
                         {p.name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+
+              {/* Independent vs LACP. The board expands presets; this only
+                  moves the uplink face between ge0/ge1 and bond0. */}
+              <Select
+                items={uplinkItems}
+                value={isLag(draft.second_uplink) ? "lag" : "independent"}
+                onValueChange={(value) => {
+                  setPreset(null);
+                  setEdited(
+                    value === "lag" ? withLag(draft) : withoutLag(draft)
+                  );
+                }}
+              >
+                <SelectTrigger
+                  aria-label={t("switchConfig.uplink")}
+                  className="w-56"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {uplinkItems.map((item) => (
+                      <SelectItem key={item.value} value={item.value}>
+                        {item.label}
                       </SelectItem>
                     ))}
                   </SelectGroup>
@@ -874,8 +839,13 @@ export default function SwitchConfig() {
                 <Toggle
                   id="switch-stp"
                   label={t("switchConfig.stpShort")}
-                  description={t("switchConfig.spanningTree")}
+                  description={
+                    isLag(draft.second_uplink)
+                      ? t("switchConfig.spanningTreeLag")
+                      : t("switchConfig.spanningTree")
+                  }
                   checked={draft.stp}
+                  disabled={isLag(draft.second_uplink)}
                   onChange={(checked) => setEdited({ ...draft, stp: checked })}
                 />
               </div>

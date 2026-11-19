@@ -299,6 +299,7 @@ const translations = {
     badgeFilteringOff: "Filtrado VLAN desactivado",
     badgeStpOn: "STP activado",
     badgeStpOff: "STP desactivado",
+    badgeLagOn: "LACP activado",
     oneNetwork:
       "Todos los puertos comparten una red. Las columnas VLAN se aplican al activar el filtrado.",
     port: "Puerto",
@@ -330,6 +331,15 @@ const translations = {
     untagged: "Sin etiqueta",
     tagged: "Con etiqueta",
     thisBoard: "esta placa",
+    lacpUplink: "Uplink LACP",
+    bondSlave: "esclavo del bond",
+    bondSlaveHint:
+      "Con LACP, ge0 y ge1 no llevan VLANs propias; ponga las del uplink en bond0.",
+    uplink: "Uplink",
+    uplinkIndependent: "Independiente (ge0 / ge1)",
+    uplinkLag: "LACP bond0 (ge0 + ge1)",
+    spanningTreeLag:
+      "Spanning tree está desactivado mientras LACP está activo: el bond es un uplink lógico.",
     apply: "Aplicar",
     applyWarning:
       "Esto cambia el conmutador por el que está conectado. El cambio se aplica pero NO se conserva: si esta página no alcanza la placa en unos {{seconds}} segundos, la placa restaura por sí misma la configuración anterior. Si ocurre, no se ha roto nada — recargue e inténtelo otra vez.",

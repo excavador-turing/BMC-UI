@@ -10,6 +10,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **LACP on the Switch page.** Presets include `flat-lag` and `trunk-lag`
+  from the board. An uplink control chooses independent ge0/ge1 or LACP
+  `bond0`; with LACP, ge0/ge1 are locked as empty slaves, `bond0` carries the
+  uplink VLANs, and spanning tree stays off. The running view shows an LACP
+  badge. Needs a bmcd that publishes `second_uplink` / `bond0`.
+
 ## [v4.6.0] — 2026-11-14
 
 Each node has its own console speed in Power Control, and the Console page names

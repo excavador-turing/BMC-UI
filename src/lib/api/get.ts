@@ -1112,10 +1112,22 @@ export interface SwitchPortConfig {
   tagged: number[];
 }
 
+/**
+ * How ge0/ge1 relate. Absent on older daemons (treat as independent /
+ * redundant). `lag` puts the uplink on bond0 and leaves ge0/ge1 as empty
+ * slaves.
+ */
+export type SecondUplink = "redundant" | "off" | "lag";
+
 /** The whole switch, as one object. See the daemon's switch_document. */
 export interface SwitchDocument {
   vlan_filtering: boolean;
   stp: boolean;
+  /**
+   * Optional: a board on a daemon from before second_uplink existed sends no
+   * such key. Independent uplinks are the historical default.
+   */
+  second_uplink?: SecondUplink;
   ports: Record<string, SwitchPortConfig>;
   /**
    * What the operator calls each VLAN, keyed by its number as a string
@@ -1180,6 +1192,7 @@ export interface SwitchState {
 }
 
 export interface SwitchPreset {
+  /** List label, e.g. `flat-lag`. */
   name: string;
   summary: string;
   document: SwitchDocument;
