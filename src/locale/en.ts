@@ -390,9 +390,8 @@ const translations = {
     bondSlaveHint:
       "With LACP, ge0 and ge1 are bond slaves and carry no VLANs of their own; put the uplink VLANs on bond0.",
     startFrom: "Start from",
-    uplink: "Uplink",
-    uplinkIndependent: "Independent (ge0 / ge1)",
-    uplinkLag: "LACP bond0 (ge0 + ge1)",
+    lacpShort: "LACP uplink (bond0)",
+    lacp: "Bundle ge0 and ge1 into one 802.3ad link. Off: two independent uplinks.",
     filtering:
       "Look at VLANs (off means one flat network, whatever the table says)",
     spanningTree:

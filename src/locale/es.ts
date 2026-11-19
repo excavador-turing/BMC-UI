@@ -335,9 +335,8 @@ const translations = {
     bondSlave: "esclavo del bond",
     bondSlaveHint:
       "Con LACP, ge0 y ge1 no llevan VLANs propias; ponga las del uplink en bond0.",
-    uplink: "Uplink",
-    uplinkIndependent: "Independiente (ge0 / ge1)",
-    uplinkLag: "LACP bond0 (ge0 + ge1)",
+    lacpShort: "Uplink LACP (bond0)",
+    lacp: "Agrupa ge0 y ge1 en un enlace 802.3ad. Desactivado: dos uplinks independientes.",
     spanningTreeLag:
       "Spanning tree está desactivado mientras LACP está activo: el bond es un uplink lógico.",
     apply: "Aplicar",

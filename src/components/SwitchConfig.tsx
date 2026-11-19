@@ -612,11 +612,6 @@ export default function SwitchConfig() {
       : []),
   ];
 
-  const uplinkItems = [
-    { value: "independent", label: t("switchConfig.uplinkIndependent") },
-    { value: "lag", label: t("switchConfig.uplinkLag") },
-  ];
-
   const presetItems = [
     { value: null, label: t("switchConfig.presetPlaceholder") },
     ...(presets.data?.presets ?? []).map((p) => ({
@@ -797,36 +792,19 @@ export default function SwitchConfig() {
                 </SelectContent>
               </Select>
 
-              {/* Independent vs LACP. The board expands presets; this only
-                  moves the uplink face between ge0/ge1 and bond0. */}
-              <Select
-                items={uplinkItems}
-                value={isLag(draft.second_uplink) ? "lag" : "independent"}
-                onValueChange={(value) => {
-                  setPreset(null);
-                  setEdited(
-                    value === "lag" ? withLag(draft) : withoutLag(draft)
-                  );
-                }}
-              >
-                <SelectTrigger
-                  aria-label={t("switchConfig.uplink")}
-                  className="w-56"
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {uplinkItems.map((item) => (
-                      <SelectItem key={item.value} value={item.value}>
-                        {item.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-
               <div className="flex flex-col gap-3">
+                {/* Independent vs LACP. The board expands presets; this only
+                    moves the uplink face between ge0/ge1 and bond0. */}
+                <Toggle
+                  id="switch-lacp"
+                  label={t("switchConfig.lacpShort")}
+                  description={t("switchConfig.lacp")}
+                  checked={isLag(draft.second_uplink)}
+                  onChange={(checked) => {
+                    setPreset(null);
+                    setEdited(checked ? withLag(draft) : withoutLag(draft));
+                  }}
+                />
                 <Toggle
                   id="switch-filtering"
                   label={t("switchConfig.filteringShort")}
