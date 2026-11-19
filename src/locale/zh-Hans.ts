@@ -322,9 +322,8 @@ const translations = {
     bondSlave: "bond 成员口",
     bondSlaveHint:
       "启用 LACP 时，ge0/ge1 作为 bond 成员口不承载 VLAN；请把上行 VLAN 配在 bond0。",
-    uplink: "上行口",
-    uplinkIndependent: "独立 (ge0 / ge1)",
-    uplinkLag: "LACP bond0 (ge0 + ge1)",
+    lacpShort: "LACP 上行口 (bond0)",
+    lacp: "将 ge0 和 ge1 捆绑为一条 802.3ad 链路。关闭：两个独立上行口。",
     spanningTreeLag: "启用 LACP 时关闭生成树：bond 是一条逻辑上行。",
     apply: "应用",
     applyWarning:
