@@ -1107,28 +1107,33 @@ function isTlsCertificate(value: unknown): value is TlsCertificate {
 }
 
 /** One port's VLAN membership, as the daemon's document spells it. */
-export interface SwitchPortConfig {
-  untagged: number | null;
-  tagged: number[];
-}
+export type SwitchPortConfig = Schemas["PortConfig"];
 
 /**
  * How ge0/ge1 relate. Absent on older daemons (treat as independent /
  * redundant). `lag` puts the uplink on bond0 and leaves ge0/ge1 as empty
  * slaves.
  */
-export type SecondUplink = "redundant" | "off" | "lag";
+export type SecondUplink = Schemas["SecondUplink"];
 
-/** The whole switch, as one object. See the daemon's switch_document. */
-export interface SwitchDocument {
-  vlan_filtering: boolean;
-  stp: boolean;
+/**
+ * The whole switch, as one object. See the daemon's switch_document.
+ *
+ * Generated for everything the daemon always sends. `second_uplink` and
+ * `names` stay optional here, because a daemon from before they existed sends
+ * no such key, and the generated type marks them required (the daemon fills
+ * them in on a document it reads, which is not what an older board does on the
+ * way out).
+ */
+export type SwitchDocument = Omit<
+  Schemas["SwitchDocument"],
+  "second_uplink" | "names"
+> & {
   /**
    * Optional: a board on a daemon from before second_uplink existed sends no
    * such key. Independent uplinks are the historical default.
    */
   second_uplink?: SecondUplink;
-  ports: Record<string, SwitchPortConfig>;
   /**
    * What the operator calls each VLAN, keyed by its number as a string
    * because that is what JSON does to a map key.
@@ -1137,7 +1142,7 @@ export interface SwitchDocument {
    * key, and the table simply shows numbers.
    */
   names?: Record<string, string>;
-}
+};
 
 /**
  * A moment as the daemon sends it. Rust's `SystemTime` serialises as an
@@ -1203,9 +1208,9 @@ export interface SwitchPreset {
    * The request body that asks for this preset, e.g.
    * `{ preset: "flat", second_uplink: "lag" }`. This page sends the expanded
    * `document` instead, so nothing reads it today; it is typed so that nobody
-   * starts sending `name`.
+   * starts sending `name`. Absent on a daemon from before LACP.
    */
-  preset?: Record<string, unknown>;
+  preset?: Schemas["SwitchPreset"];
   document: SwitchDocument;
   warnings: SwitchWarning[];
 }

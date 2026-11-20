@@ -486,7 +486,7 @@ export interface paths {
     get: operations["getSwitch"];
     /**
      * Apply a configuration, to be confirmed
-     * @description Takes a preset or a whole document, and an optional `window_s`. Answers **202**, not 200: the change is on the switch but it is not yours to keep yet. Confirm within the window or the board puts the previous configuration back by itself. The window does not start counting until the uplink carrying the BMC's VLAN reports forwarding, because spanning tree holds a port for its own forwarding delay first -- counting from the apply would revert every correct change.
+     * @description Takes a preset (`flat`, `split` or `trunk`; `flat` and `trunk` take an optional `second_uplink`, and `second_uplink: lag` is LACP on `bond0`) or a whole document (`SwitchDocument`, with `second_uplink` of `redundant`, `off` or `lag`, and `bond0` in its ports when LACP is on; a document without `second_uplink` has it inferred from its ports and STP), plus an optional `window_s` and `replace_hand_written`. Answers **202**, not 200: the change is on the switch but it is not yours to keep yet. Confirm within the window or the board puts the previous configuration back by itself. The window does not start counting until the uplink carrying the BMC's VLAN reports forwarding, because spanning tree holds a port for its own forwarding delay first -- counting from the apply would revert every correct change. If the uplink has not forwarded by `window_s` plus 60 seconds after the apply, the change is put back anyway: an uplink that never comes up must not leave the board stranded. `replace_hand_written` matters for LACP only: LACP needs `bond0` declared in `/etc/network/interfaces`, so a hand-written file is refused with a **409** unless it is sent as true, and a copy of the file is kept when the change is confirmed. Every other change leaves a hand-written file alone.
      */
     put: operations["applySwitch"];
     post?: never;
@@ -527,7 +527,7 @@ export interface paths {
     };
     /**
      * The switch presets, expanded by the board
-     * @description Each preset's full port table, so every client previews the same thing. A client that expanded a preset itself would eventually disagree with the board about what it means, and that disagreement shows up as a board nobody can reach. `trunk` is shown with example VLAN identifiers; the real ones are the operator's, because the router has to match them.
+     * @description Each preset's full port table, so every client previews the same thing. Names are unique labels: `flat`, `flat-lag`, `split`, `trunk`, `trunk-lag`; each preset's `preset` field is what to send back to choose it. A client that expanded a preset itself would eventually disagree with the board about what it means, and that disagreement shows up as a board nobody can reach. `trunk` / `trunk-lag` are shown with example VLAN identifiers; the real ones are the operator's, because the router has to match them. Lag presets put uplink VLANs on `bond0`.
      */
     get: operations["getSwitchPresets"];
     put?: never;
@@ -1412,6 +1412,25 @@ export interface components {
        */
       sources: components["schemas"]["Source"][];
     };
+    /**
+     * @description One port's membership.
+     *
+     *     `untagged` is the port's PVID: the VLAN an untagged frame arriving here
+     *     joins, and the VLAN whose frames leave here with the tag stripped. `tagged`
+     *     is everything else the port carries with tags on.
+     */
+    PortConfig: {
+      /** @default [] */
+      tagged: number[];
+      /**
+       * Format: uint16
+       * @description `None` means the port is in no VLAN at all, which is how a disabled
+       *     uplink is expressed. It is allowed: a port carrying nothing cannot
+       *     strand anyone.
+       * @default null
+       */
+      untagged: number | null;
+    };
     /** @description What sits on the other side of a switch port. */
     PortKind: "node" | "uplink";
     /** @description RFC 9457. `detail` is the same message the legacy form puts in `result`. */
@@ -1536,6 +1555,8 @@ export interface components {
        */
       size: number;
     };
+    /** @description Which uplink arrangement the document uses for ge0/ge1. */
+    SecondUplink: "redundant" | "off" | "lag";
     /** @description One firmware slot. */
     Slot: {
       /**
@@ -1657,6 +1678,64 @@ export interface components {
       state: "persistent" | "temporary" | "unknown";
     };
     /**
+     * @description The whole switch, as one object.
+     *
+     *     Deserialised by hand, below, so that a missing `second_uplink` means the
+     *     same thing wherever the document comes from: see [`SwitchDocument`]'s
+     *     `Deserialize`.
+     */
+    SwitchDocument: {
+      /**
+       * @description What the operator calls each VLAN. A word beside a number, so that a
+       *     layout is still legible to whoever opens this board next year.
+       *
+       *     It reaches the hardware nowhere: [`crate::app::switch_applier::plan`]
+       *     never reads it, and two documents differing only here produce no
+       *     commands at all. It is carried because the alternative -- a name file
+       *     beside the document -- is a second thing to keep in step with the
+       *     first, and they would drift the first time somebody applied a preset.
+       *
+       *     Naming a VLAN nobody is in yet is allowed: people name a layout while
+       *     they are building it.
+       *
+       *     Read by [`names_from_wire`], not by serde's own map handling. In JSON
+       *     a key is always a string, and serde_json turns `"50"` into a `u16`
+       *     when it reads this struct directly -- but `validate` and `PUT` read
+       *     it through an `#[serde(untagged)]` enum, which buffers the input
+       *     first, and the buffered form does not do that conversion. So a
+       *     document with an empty `names` was accepted and a document with one
+       *     name was refused as "did not match any variant", on both endpoints,
+       *     from the day names existed until BMC-Firmware#59 reported it. Parsing
+       *     the keys here works the same by either path.
+       * @default {}
+       */
+      names: {
+        [key: string]: string;
+      };
+      ports: {
+        [key: string]: components["schemas"]["PortConfig"];
+      };
+      /**
+       * @description How ge0/ge1 relate: STP redundancy, second cable off, or LACP bond0.
+       *
+       *     Older files and older clients omit the field. Reading a document
+       *     without it infers it from the ports and STP rather than defaulting
+       *     everything to Redundant — a Split or a Trunk with ge1 off would
+       *     otherwise disagree with its own preset. One rule for every way in: the
+       *     file, the `interfaces` header and an API body all read it the same.
+       * @default redundant
+       */
+      second_uplink: components["schemas"]["SecondUplink"];
+      stp: boolean;
+      /**
+       * @description False is `Flat`: the switch forwards without looking at VLANs and the
+       *     port table below is inert. Kept in the document rather than implied by
+       *     the table because "no VLANs" and "everything in one VLAN" are different
+       *     things to the hardware, and only one of them is what a board ships as.
+       */
+      vlan_filtering: boolean;
+    };
+    /**
      * @description One port of the switch. Every field the kernel would not give us is
      *     `None` rather than a stand-in value: a port that is down has no speed and
      *     no duplex, and saying `0` there would read as a working port running at
@@ -1702,6 +1781,28 @@ export interface components {
       /** Format: uint64 */
       tx_errors?: number | null;
     };
+    /** @description A named document. */
+    SwitchPreset:
+      | {
+          /** @constant */
+          preset: "flat";
+          /** @default redundant */
+          second_uplink: components["schemas"]["SecondUplink"];
+        }
+      | {
+          /** @constant */
+          preset: "split";
+        }
+      | {
+          /** Format: uint16 */
+          management_vid: number;
+          /** Format: uint16 */
+          node_vid: number;
+          /** @constant */
+          preset: "trunk";
+          /** @default redundant */
+          second_uplink: components["schemas"]["SecondUplink"];
+        };
     /** @description Everything `/sys/class/thermal` has to say. */
     Thermal: {
       cooling: components["schemas"]["Cooler"][];
@@ -2986,7 +3087,15 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": Record<string, never>;
+        "application/json": (
+          | components["schemas"]["SwitchPreset"]
+          | components["schemas"]["SwitchDocument"]
+        ) & {
+          /** @description Say yes to replacing a hand-written /etc/network/interfaces. Needed for LACP only. */
+          replace_hand_written?: boolean;
+          /** @description Seconds to wait for a confirmation; the board's default when absent. */
+          window_s?: number;
+        };
       };
     };
     responses: {
@@ -2997,7 +3106,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description The board has no br0, the bridge over the switch ports. Nothing was changed. */
+      /** @description No br0; or LACP was asked for while /etc/network/interfaces is hand-written and replace_hand_written was not set (the message names the options clients have for it); or bond0 already exists and this daemon did not create it. Nothing was changed. */
       409: {
         headers: {
           [name: string]: unknown;
@@ -3126,7 +3235,9 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": Record<string, never>;
+        "application/json":
+          | components["schemas"]["SwitchPreset"]
+          | components["schemas"]["SwitchDocument"];
       };
     };
     responses: {
