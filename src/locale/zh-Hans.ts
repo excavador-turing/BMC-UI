@@ -323,7 +323,12 @@ const translations = {
     bondSlaveHint:
       "启用 LACP 时，ge0/ge1 作为 bond 成员口不承载 VLAN；请把上行 VLAN 配在 bond0。",
     lacpShort: "LACP 上行口 (bond0)",
-    lacp: "将 ge0 和 ge1 捆绑为一条 802.3ad 链路。关闭：两个独立上行口。",
+    lacp: "将 ge0 和 ge1 捆绑为一条 802.3ad 链路。对端交换机需要在两个端口上都启用 LACP。关闭：两个独立上行口。",
+    handWritten:
+      "这块板子的网络文件（/etc/network/interfaces）是手写的，而 LACP 需要在其中声明 bond0，重启后才能建立 bond。确认后的 LACP 更改会替换整个文件，并将副本保存为 /etc/network/interfaces.hand-written.<时间>。或者保持 LACP 关闭，保留你的文件。",
+    replaceHandWritten: "替换我手写的网络文件",
+    bondExists:
+      "这块板子上已存在 bond0，且不是板子自己创建的（手写的网络文件，或之前的运行）。再次创建会失败，因此没有做任何更改。请删除 bond0，或继续手动管理它并使用独立上行口。",
     spanningTreeLag: "启用 LACP 时关闭生成树：bond 是一条逻辑上行。",
     apply: "应用",
     applyWarning:

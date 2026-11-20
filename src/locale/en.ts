@@ -391,7 +391,12 @@ const translations = {
       "With LACP, ge0 and ge1 are bond slaves and carry no VLANs of their own; put the uplink VLANs on bond0.",
     startFrom: "Start from",
     lacpShort: "LACP uplink (bond0)",
-    lacp: "Bundle ge0 and ge1 into one 802.3ad link. Off: two independent uplinks.",
+    lacp: "Bundle ge0 and ge1 into one 802.3ad link. The switch at the other end needs LACP on both ports. Off: two independent uplinks.",
+    handWritten:
+      "This board's network file (/etc/network/interfaces) was written by hand, and LACP needs bond0 declared in it so that a reboot can bring the bond up. A confirmed LACP change replaces the whole file and keeps a copy as /etc/network/interfaces.hand-written.<time>. Or leave LACP off and keep your file.",
+    replaceHandWritten: "Replace my hand-written network file",
+    bondExists:
+      "bond0 already exists on this board, and the board did not create it (a hand-written network file, or an earlier run). Creating it again would fail, so nothing was changed. Remove bond0, or keep managing it by hand and use independent uplinks.",
     filtering:
       "Look at VLANs (off means one flat network, whatever the table says)",
     spanningTree:

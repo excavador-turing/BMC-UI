@@ -17,6 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Field,
   FieldContent,
@@ -57,6 +58,7 @@ import {
   useConfirmSwitchMutation,
   useRevertSwitchMutation,
 } from "@/lib/api/set";
+import { classifyApply, switchApplyBody } from "@/lib/api/switchApply";
 import {
   BMC_PORT,
   BOND_PORT,
@@ -67,6 +69,7 @@ import {
   isSlave,
   type PortDraft,
   portOrder,
+  supportsLag,
   unparsed,
   vlansOf,
   withLag,
@@ -485,6 +488,16 @@ export default function SwitchConfig() {
    */
   const [window_s, setWindow] = useState<number | null>(null);
   const [confirming, setConfirming] = useState(false);
+  /**
+   * What the board refused the last apply for, when it was one of the two LACP
+   * refusals the page can explain. Cleared by anything that could change the
+   * answer: leaving LACP, cancelling, applying.
+   */
+  const [refused, setRefused] = useState<"hand_written" | "bond_exists" | null>(
+    null
+  );
+  /** The checkbox: the person agrees to replace a hand-written network file. */
+  const [replaceHandWritten, setReplaceHandWritten] = useState(false);
   const [now, setNow] = useState(() => Date.now());
 
   const pending = state.data?.pending ?? null;
@@ -543,28 +556,47 @@ export default function SwitchConfig() {
           limits.window_max_s
         );
 
+  // Asked and not yet answered: the board said it would replace a file written
+  // by hand, and nothing is sent until the box is ticked.
+  const awaitingConsent =
+    refused === "hand_written" &&
+    proposed?.second_uplink === "lag" &&
+    !replaceHandWritten;
+
   const canApply =
     proposed !== null &&
     edits &&
     refusal === null &&
     verdict.isSuccess &&
     pending === null &&
+    !awaitingConsent &&
     !apply.isPending;
 
   const stopEditing = () => {
     setEditing(false);
     setEdited(null);
     setPreset(null);
+    setRefused(null);
+    setReplaceHandWritten(false);
   };
+
+  // LACP is offered only on a board that has shown it can do it; see
+  // `supportsLag`. A board running it already is shown the control too, so
+  // that it can be turned off.
+  const lagAvailable = supportsLag(running, presets.data?.presets);
 
   const send = () => {
     if (!proposed) return;
     // The daemon flattens the proposal, so `window_s` rides alongside the
     // document's own fields -- proved against bmc-2 before this was written.
-    const body =
-      windowToSend === null
-        ? proposed
-        : { ...proposed, window_s: windowToSend };
+    // The consent travels only with LACP: it is the one change that needs the
+    // board's network file rewritten.
+    const body = switchApplyBody(
+      proposed,
+      windowToSend,
+      replaceHandWritten && proposed.second_uplink === "lag"
+    );
+    setRefused(null);
     apply.mutate(body, {
       onSuccess: () => {
         stopEditing();
@@ -573,12 +605,20 @@ export default function SwitchConfig() {
           description: t("switchConfig.appliedNote"),
         });
       },
-      onError: (e: Error) =>
+      onError: (e: Error) => {
+        const answer = classifyApply(e);
+        // Two refusals have a place on the card, because one of them has a
+        // question in it. Anything else is a toast with the board's words.
+        if (answer.kind !== "other") {
+          setRefused(answer.kind);
+          return;
+        }
         toast({
           title: t("switchConfig.applyFailed"),
-          description: e.message,
+          description: answer.message,
           variant: "destructive",
-        }),
+        });
+      },
     });
   };
 
@@ -795,16 +835,22 @@ export default function SwitchConfig() {
               <div className="flex flex-col gap-3">
                 {/* Independent vs LACP. The board expands presets; this only
                     moves the uplink face between ge0/ge1 and bond0. */}
-                <Toggle
-                  id="switch-lacp"
-                  label={t("switchConfig.lacpShort")}
-                  description={t("switchConfig.lacp")}
-                  checked={isLag(draft.second_uplink)}
-                  onChange={(checked) => {
-                    setPreset(null);
-                    setEdited(checked ? withLag(draft) : withoutLag(draft));
-                  }}
-                />
+                {lagAvailable && (
+                  <Toggle
+                    id="switch-lacp"
+                    label={t("switchConfig.lacpShort")}
+                    description={t("switchConfig.lacp")}
+                    checked={isLag(draft.second_uplink)}
+                    onChange={(checked) => {
+                      setPreset(null);
+                      if (!checked) {
+                        setRefused(null);
+                        setReplaceHandWritten(false);
+                      }
+                      setEdited(checked ? withLag(draft) : withoutLag(draft));
+                    }}
+                  />
+                )}
                 <Toggle
                   id="switch-filtering"
                   label={t("switchConfig.filteringShort")}
@@ -870,6 +916,42 @@ export default function SwitchConfig() {
                     ))}
                   </div>
                 </div>
+              )}
+
+              {/* The board would have to rewrite its network file for LACP and
+                  the file was written by hand. The page does not decide that
+                  for anyone: it says so and waits for the tick. */}
+              {refused === "hand_written" && isLag(draft.second_uplink) && (
+                <Alert variant="warning" data-testid="switch-hand-written">
+                  <TriangleAlert />
+                  <AlertDescription className="flex flex-col gap-3">
+                    <p>{t("switchConfig.handWritten")}</p>
+                    <Field orientation="horizontal" className="items-center">
+                      <Checkbox
+                        id="switch-replace-hand-written"
+                        checked={replaceHandWritten}
+                        onCheckedChange={(checked) =>
+                          setReplaceHandWritten(checked)
+                        }
+                      />
+                      <FieldLabel
+                        htmlFor="switch-replace-hand-written"
+                        className="font-normal"
+                      >
+                        {t("switchConfig.replaceHandWritten")}
+                      </FieldLabel>
+                    </Field>
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {refused === "bond_exists" && (
+                <Alert variant="destructive" data-testid="switch-bond-exists">
+                  <TriangleAlert />
+                  <AlertDescription>
+                    {t("switchConfig.bondExists")}
+                  </AlertDescription>
+                </Alert>
               )}
 
               {(blocking.length > 0 || notes.length > 0) && (

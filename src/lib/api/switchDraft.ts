@@ -104,17 +104,40 @@ export function withLag(draft: Draft): Draft {
 }
 
 /**
- * Split bond0 back onto both uplinks as redundant ports. STP back on, because
- * two uplinks into the same network without it are a loop.
+ * Split bond0 back onto both uplinks as redundant ports.
+ *
+ * Spanning tree follows VLAN filtering, as the board's own presets do: Trunk
+ * has it on (two tagged uplinks into one network are a loop without it) and
+ * Flat has it off (`flat` is "no spanning tree", and with it on every link
+ * change would wait out the 30 s forwarding delay). So leaving LACP on a flat
+ * layout gives back the flat layout, not a flat layout with STP on.
  */
 export function withoutLag(draft: Draft): Draft {
   const { [BOND_PORT]: bond = emptyPort(), ...ports } = draft.ports;
   return {
     ...draft,
     second_uplink: "redundant",
-    stp: true,
+    stp: draft.filtering,
     ports: { ...ports, ge0: { ...bond }, ge1: { ...bond } },
   };
+}
+
+/**
+ * Can this board do LACP at all?
+ *
+ * A daemon that predates LACP still sends `second_uplink` (it has had
+ * `redundant` and `off` for longer), so that field alone proves nothing; what
+ * a daemon with LACP does is offer a preset that uses it, or already run it.
+ * Judging by the board's own answers keeps this page from owning a version
+ * number. Until both are known the answer is no, so the control never flashes
+ * up on a board that then turns out to be too old.
+ */
+export function supportsLag(
+  running: SwitchDocument | null | undefined,
+  presets: readonly { document: SwitchDocument }[] | null | undefined
+): boolean {
+  if (running?.second_uplink === "lag") return true;
+  return (presets ?? []).some((p) => p.document.second_uplink === "lag");
 }
 
 /** A VLAN number as typed. `null` is "that is not a number". */

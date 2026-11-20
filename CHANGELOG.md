@@ -12,12 +12,29 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- **LACP on the Switch page.** Presets include `flat-lag` and `trunk-lag`
-  from the board. An LACP switch, beside VLAN filtering and spanning tree,
-  chooses independent ge0/ge1 or `bond0`; with LACP, ge0/ge1 are locked as
-  empty slaves, `bond0` carries the
-  uplink VLANs, and spanning tree stays off. The running view shows an LACP
-  badge. Needs a bmcd that publishes `second_uplink` / `bond0`.
+- **LACP on the Switch page** (thanks [@danste22](https://github.com/danste22),
+  [#58](https://github.com/excavador-turing/BMC-UI/pull/58)). The board's
+  `flat-lag` and `trunk-lag` presets are in the list, and an LACP switch beside
+  VLAN filtering and spanning tree bundles ge0 and ge1 into `bond0`. With LACP
+  on, ge0 and ge1 are locked as empty slaves, `bond0` carries the uplink VLANs,
+  and spanning tree is off. The running view shows an LACP badge. The switch at
+  the other end needs LACP on both ports, and the description says so. The draft
+  logic moved out of `SwitchConfig.tsx` into `switchDraft.ts`, with tests.
+- **Replacing a hand-written network file.** LACP needs `bond0` declared in
+  `/etc/network/interfaces`. When the board answers that the file was written
+  by hand, the page says so and shows "Replace my hand-written network file";
+  Apply stays off until it is ticked, then sends `replace_hand_written`. The
+  board keeps a copy of the old file. A `bond0` the board did not create is
+  explained rather than retried.
+- The LACP switch appears only on a board that shows it can do LACP (a preset
+  that uses it, or LACP already running), so a daemon from before bmcd's LACP
+  support does not get a control it would refuse. Turning LACP off on a flat
+  layout gives back the flat layout: spanning tree follows VLAN filtering, as in
+  the board's presets.
+
+Needs a bmcd with LACP ([bmcd#56](https://github.com/excavador-turing/bmcd/pull/56)).
+`src/lib/api/schema.d.ts` and `bmcd-release.txt` move with that bmcd release; the
+new fields are in the hand-written types in `src/lib/api/get.ts` until then.
 
 ## [v4.6.1] — 2026-11-20
 

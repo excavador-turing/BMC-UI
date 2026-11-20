@@ -336,7 +336,12 @@ const translations = {
     bondSlaveHint:
       "Con LACP, ge0 y ge1 no llevan VLANs propias; ponga las del uplink en bond0.",
     lacpShort: "Uplink LACP (bond0)",
-    lacp: "Agrupa ge0 y ge1 en un enlace 802.3ad. Desactivado: dos uplinks independientes.",
+    lacp: "Agrupa ge0 y ge1 en un enlace 802.3ad. El switch del otro extremo necesita LACP en ambos puertos. Desactivado: dos uplinks independientes.",
+    handWritten:
+      "El archivo de red de la placa (/etc/network/interfaces) se escribió a mano, y LACP necesita bond0 declarado en él para que un reinicio pueda levantar el bond. Un cambio LACP confirmado reemplaza el archivo completo y guarda una copia como /etc/network/interfaces.hand-written.<hora>. O deje LACP desactivado y conserve su archivo.",
+    replaceHandWritten: "Reemplazar mi archivo de red escrito a mano",
+    bondExists:
+      "bond0 ya existe en esta placa y la placa no lo creó (un archivo de red escrito a mano o una ejecución anterior). Crearlo de nuevo fallaría, así que no se cambió nada. Elimine bond0, o siga gestionándolo a mano y use uplinks independientes.",
     spanningTreeLag:
       "Spanning tree está desactivado mientras LACP está activo: el bond es un uplink lógico.",
     apply: "Aplicar",

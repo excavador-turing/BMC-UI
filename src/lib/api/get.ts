@@ -1192,9 +1192,20 @@ export interface SwitchState {
 }
 
 export interface SwitchPreset {
-  /** List label, e.g. `flat-lag`. */
+  /**
+   * List label, e.g. `flat-lag`. A label only: it is not a value the apply
+   * request understands. The value to send, if a preset were ever sent rather
+   * than its document, is `preset` below.
+   */
   name: string;
   summary: string;
+  /**
+   * The request body that asks for this preset, e.g.
+   * `{ preset: "flat", second_uplink: "lag" }`. This page sends the expanded
+   * `document` instead, so nothing reads it today; it is typed so that nobody
+   * starts sending `name`.
+   */
+  preset?: Record<string, unknown>;
   document: SwitchDocument;
   warnings: SwitchWarning[];
 }

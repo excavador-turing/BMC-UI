@@ -335,7 +335,12 @@ const translations = {
     bondSlaveHint:
       "Przy LACP ge0 i ge1 nie niosą własnych VLAN-ów; VLAN-y uplinku należą na bond0.",
     lacpShort: "Uplink LACP (bond0)",
-    lacp: "Łączy ge0 i ge1 w jedno łącze 802.3ad. Wyłączone: dwa niezależne uplinki.",
+    lacp: "Łączy ge0 i ge1 w jedno łącze 802.3ad. Przełącznik po drugiej stronie musi mieć LACP na obu portach. Wyłączone: dwa niezależne uplinki.",
+    handWritten:
+      "Plik sieciowy płyty (/etc/network/interfaces) został napisany ręcznie, a LACP wymaga w nim bond0, aby po restarcie można było podnieść bond. Potwierdzona zmiana LACP zastępuje cały plik i zachowuje kopię jako /etc/network/interfaces.hand-written.<czas>. Albo zostaw LACP wyłączone i zachowaj swój plik.",
+    replaceHandWritten: "Zastąp mój ręcznie napisany plik sieciowy",
+    bondExists:
+      "bond0 już istnieje na tej płycie, a płyta go nie utworzyła (ręcznie napisany plik sieciowy lub wcześniejsze uruchomienie). Ponowne utworzenie by się nie powiodło, więc nic nie zmieniono. Usuń bond0 albo zarządzaj nim dalej ręcznie i użyj niezależnych uplinków.",
     spanningTreeLag:
       "Spanning tree jest wyłączone przy LACP: bond to jeden logiczny uplink.",
     apply: "Zastosuj",
