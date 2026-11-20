@@ -1370,7 +1370,8 @@ export interface components {
        *     disconnecting the web console, and again at every start of the
        *     daemon. Local tools on the BMC read the same console at
        *     `/dev/ttyNode1` to `/dev/ttyNode4` and cannot change the speed
-       *     themselves.
+       *     themselves. Posting `null` for it clears the stored speed and goes
+       *     back to the default; leaving it out of a request keeps the speed.
        */
       uart_baud?: number | null;
     };

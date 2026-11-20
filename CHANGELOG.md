@@ -10,6 +10,34 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [v4.6.1] — 2026-11-20
+
+The API types now follow bmcd v2.44.0, the daemon the next firmware ships.
+Nothing in the interface changes.
+
+The pin in `bmcd-release.txt` has to be the bmcd release the firmware pins, and
+the firmware is moving to 2.44.0, so the pin moves with it and the types are
+regenerated. The only difference in `src/lib/api/schema.d.ts` is the
+description of `uart_baud`, which now says that `null` clears a node's stored
+console speed and goes back to the default; bmcd 2.44.0 is the first daemon
+that does that.
+
+bmcd 2.44.0 carries fixes from outside contributors, and they are thanked in
+its release notes and in the firmware's: [@cloudlabworks](https://github.com/cloudlabworks)
+(a forgotten session token no longer counts as a wrong password,
+[bmcd#39](https://github.com/excavador-turing/bmcd/pull/39); the toolchain
+note, [bmcd#40](https://github.com/excavador-turing/bmcd/pull/40)) and
+[@danste22](https://github.com/danste22) (durable config writes,
+[bmcd#48](https://github.com/excavador-turing/bmcd/pull/48) →
+[#51](https://github.com/excavador-turing/bmcd/pull/51); the BMC's VLAN on
+`br0 self`, [bmcd#49](https://github.com/excavador-turing/bmcd/pull/49) →
+[#52](https://github.com/excavador-turing/bmcd/pull/52)).
+
+### Changed
+
+- **The API types are generated from bmcd v2.44.0.** `bmcd-release.txt` and
+  `src/lib/api/schema.d.ts`, with `npm run api:refresh`.
+
 ## [v4.6.0] — 2026-11-14
 
 Each node has its own console speed in Power Control, and the Console page names
