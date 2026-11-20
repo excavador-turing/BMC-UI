@@ -10,6 +10,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [v4.7.0] — 2026-11-20
+
+LACP on the Switch page: ge0 and ge1 can be bundled into one 802.3ad bond. It
+is [@danste22](https://github.com/danste22)'s work
+([#58](https://github.com/excavador-turing/BMC-UI/pull/58)), carried on as
+[#60](https://github.com/excavador-turing/BMC-UI/pull/60) with his two commits
+kept under his authorship, and review fixes on top. Thank you, Daniel.
+
 ### Added
 
 - **LACP on the Switch page** (thanks [@danste22](https://github.com/danste22),
@@ -32,9 +40,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   layout gives back the flat layout: spanning tree follows VLAN filtering, as in
   the board's presets.
 
-Needs a bmcd with LACP ([bmcd#56](https://github.com/excavador-turing/bmcd/pull/56)).
-`src/lib/api/schema.d.ts` and `bmcd-release.txt` move with that bmcd release; the
-new fields are in the hand-written types in `src/lib/api/get.ts` until then.
+### Changed
+
+- **The API types are generated from bmcd v2.45.0,** the first daemon with LACP
+  ([bmcd#56](https://github.com/excavador-turing/bmcd/pull/56), also
+  [@danste22](https://github.com/danste22)'s, from
+  [bmcd#50](https://github.com/excavador-turing/bmcd/pull/50)).
+  `bmcd-release.txt` and `src/lib/api/schema.d.ts`, with `npm run api:refresh`.
+  The hand-written switch types in `src/lib/api/get.ts` now follow the
+  generated ones (`SecondUplink`, the port membership, `SwitchDocument`, the
+  preset's `preset` field), so a change in the daemon's document shows up as a
+  type error here.
 
 ## [v4.6.1] — 2026-11-20
 
