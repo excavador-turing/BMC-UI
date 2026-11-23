@@ -66,7 +66,7 @@ export function FlashNode({ preselected }: { preselected?: number }) {
 
       const parsedNodeId = Number.parseInt(nodeId);
 
-      void handleNodeUpdate({
+      handleNodeUpdate({
         nodeId: parsedNodeId,
         file,
         url,

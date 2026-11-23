@@ -47,7 +47,7 @@ export interface FlashContextValue {
     url?: string;
     sha256?: string;
     park?: boolean;
-  }) => Promise<void>;
+  }) => void;
   handleNodeUpdate: (variables: {
     nodeId: number;
     file?: File;
@@ -55,7 +55,7 @@ export interface FlashContextValue {
     sdcard?: boolean;
     sha256?: string;
     skipCRC: boolean;
-  }) => Promise<void>;
+  }) => void;
 }
 
 export const FlashContext = createContext<FlashContextValue | null>(null);
@@ -107,7 +107,10 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
   );
   const flashStatus = useFlashStatusQuery(flashType === "node" && isFlashing);
 
-  const handleFirmwareUpload = async (variables: {
+  // `mutate`, not `mutateAsync`: these callbacks are the whole outcome, and
+  // the promise `mutateAsync` returns rejects on a failure that `onError` and
+  // the query client have already reported, so nobody had a use for it.
+  const handleFirmwareUpload = (variables: {
     file?: File;
     url?: string;
     sha256?: string;
@@ -121,7 +124,7 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
     queryClient.removeQueries({ queryKey: ["firmwareStatus"] });
     setIsUploading(true);
     setStatusMessage(t("firmwareUpgrade.uploading"));
-    await firmwareUpdateMutation.mutateAsync(variables, {
+    firmwareUpdateMutation.mutate(variables, {
       onSuccess: () => {
         setIsUploading(false);
         setIsFlashing(true);
@@ -139,7 +142,7 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
     });
   };
 
-  const handleNodeUpdate = async (variables: {
+  const handleNodeUpdate = (variables: {
     nodeId: number;
     file?: File;
     url?: string;
@@ -151,7 +154,7 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
     setFlashType("node");
     setIsUploading(true);
     setStatusMessage(t("flashNode.uploading", { nodeId }));
-    await nodeUpdateMutation.mutateAsync(variables, {
+    nodeUpdateMutation.mutate(variables, {
       onSuccess: () => {
         setIsUploading(false);
         setIsFlashing(true);

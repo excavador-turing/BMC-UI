@@ -104,7 +104,7 @@ export default function FirmwareUploadDialog({
       // another with the page never showing which. Now it lands on the SD
       // card and appears in the list like every other candidate. With no card
       // the daemon refuses to park, so the image is installed directly.
-      void handleFirmwareUpload({ file, url, sha256, park });
+      handleFirmwareUpload({ file, url, sha256, park });
     }
   };
 
