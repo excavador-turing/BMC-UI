@@ -32,7 +32,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { bmcdMessage } from "@/lib/api/bmcdMessage";
 import {
   type BadgeRequest,
   type InstallSnapshot,
@@ -372,15 +371,22 @@ export default function FirmwareCandidates({
     if (!confirming) return;
     // Exactly what the dialog showed, and nothing re-read since.
     const snapshot = confirming;
+    try {
+      await install.mutateAsync({
+        source: snapshot.sourceId,
+        version: snapshot.version,
+        allowDowngrade: snapshot.allowDowngrade,
+        // The catalogue reports the path for a local candidate; that is what
+        // decides which endpoint this goes to.
+        localFile: snapshot.localFile,
+      });
+    } catch {
+      // The dialog stays open. The query client toasts the refusal with the
+      // daemon's reason ("already staged" and "no source called" need
+      // different next steps), under firmwareUpgrade.installFailed.
+      return;
+    }
     closeConfirm();
-    await install.mutateAsync({
-      source: snapshot.sourceId,
-      version: snapshot.version,
-      allowDowngrade: snapshot.allowDowngrade,
-      // The catalogue reports the path for a local candidate; that is what
-      // decides which endpoint this goes to.
-      localFile: snapshot.localFile,
-    });
     await catalog.refetch();
   };
 
@@ -618,14 +624,6 @@ export default function FirmwareCandidates({
                   expected: EXPECTED_INSTALL_SECONDS,
                   elapsed: installElapsed,
                 })}
-          </p>
-        )}
-        {install.isError && (
-          <p className="text-sm text-destructive">
-            {t("firmwareUpgrade.installFailed")}
-            {/* The daemon's reason, when it gave one: "already staged" and
-              "no source called" need different next steps. */}
-            {install.error ? ` ${bmcdMessage(install.error)}` : ""}
           </p>
         )}
         {install.isSuccess && (

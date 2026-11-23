@@ -94,12 +94,9 @@ export function USB() {
         title: t("usb.changeSuccessTitle"),
         description: t("usb.changeSuccessMessage"),
       });
-    } catch (e) {
-      toast({
-        title: t("usb.changeFailedTitle"),
-        description: (e as Error).message,
-        variant: "destructive",
-      });
+    } catch {
+      // No success toast. The query client already toasted the board's
+      // message for whichever request failed.
     }
   };
 

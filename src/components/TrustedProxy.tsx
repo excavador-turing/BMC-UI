@@ -67,12 +67,6 @@ export default function TrustedProxy() {
             description: t("access.reloadRequired"),
           });
         },
-        onError: (e: Error) =>
-          toast({
-            title: t("access.caFailed"),
-            description: e.message,
-            variant: "destructive",
-          }),
       }
     );
   };
@@ -202,12 +196,6 @@ export default function TrustedProxy() {
               toast({
                 title: t("access.caRemoved"),
                 description: t("access.reloadRequired"),
-              }),
-            onError: (e: Error) =>
-              toast({
-                title: t("access.caFailed"),
-                description: e.message,
-                variant: "destructive",
               }),
           });
         }}

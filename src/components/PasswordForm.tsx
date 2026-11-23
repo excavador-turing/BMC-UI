@@ -63,12 +63,6 @@ export default function PasswordForm({
           toast({ title: t("access.passwordChanged") });
           onChanged?.();
         },
-        onError: (e: Error) =>
-          toast({
-            title: t("access.passwordFailed"),
-            description: e.message,
-            variant: "destructive",
-          }),
       }
     );
   };

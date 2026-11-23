@@ -301,12 +301,6 @@ export default function FirmwareSlots({
           description: t("info.rebootSuccess"),
         });
       },
-      onError: (e) =>
-        toast({
-          title: t("info.rebootFailed"),
-          description: e.message,
-          variant: "destructive",
-        }),
     });
   };
 

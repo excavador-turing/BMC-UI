@@ -83,12 +83,6 @@ export default function CertificateCard() {
             description: t("certificate.installedNote"),
           });
         },
-        onError: (e: Error) =>
-          toast({
-            title: t("certificate.installFailed"),
-            description: e.message,
-            variant: "destructive",
-          }),
       }
     );
   };
@@ -227,12 +221,6 @@ export default function CertificateCard() {
             setResetting(false);
             reset.mutate(undefined, {
               onSuccess: () => toast({ title: t("certificate.reset") }),
-              onError: (e: Error) =>
-                toast({
-                  title: t("certificate.resetFailed"),
-                  description: e.message,
-                  variant: "destructive",
-                }),
             });
           }}
           title={t("certificate.reset")}

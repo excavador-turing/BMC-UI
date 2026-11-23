@@ -99,12 +99,6 @@ export default function TimeCard() {
               ? t("settings.timeCleared")
               : t("settings.timeSaved"),
         }),
-      onError: (e) =>
-        toast({
-          title: t("settings.timeTitle"),
-          description: e.message,
-          variant: "destructive",
-        }),
     });
   };
 

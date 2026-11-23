@@ -60,12 +60,6 @@ export default function ConfigBackup() {
           ),
         });
       },
-      onError: (e) =>
-        toast({
-          title: t("info.backupFailed"),
-          description: e.message,
-          variant: "destructive",
-        }),
     });
   };
 
@@ -130,12 +124,6 @@ export default function ConfigBackup() {
     if (!document) return;
     importConfig.mutate(document, {
       onSuccess: (result) => setReport(result),
-      onError: (e) =>
-        toast({
-          title: t("settings.configTitle"),
-          description: e.message,
-          variant: "destructive",
-        }),
     });
   };
 

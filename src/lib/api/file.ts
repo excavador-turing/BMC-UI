@@ -8,6 +8,7 @@ export function useBackupMutation() {
   const api = useAxiosWithAuth();
 
   return useMutation({
+    meta: { errorTitle: "info.backupFailed" },
     mutationKey: ["backupMutation"],
     mutationFn: async () => {
       const response = await api.get("/bmc/backup", {
@@ -31,6 +32,7 @@ export function useFirmwareUpdateMutation(
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { errorTitle: "firmwareUpgrade.uploadFailed" },
     mutationKey: ["firmwareUpdateMutation"],
     mutationFn: async (variables: {
       file?: File;
@@ -79,6 +81,7 @@ export function useNodeUpdateMutation(
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { errorTitle: "flashNode.transferRefused" },
     mutationKey: ["nodeUpdateMutation"],
     mutationFn: async (variables: {
       nodeId: number;

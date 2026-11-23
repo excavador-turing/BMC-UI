@@ -160,6 +160,8 @@ const translations = {
     nodeOff: "节点 {{nodeId}} 已关闭。",
     nodeRestarted: "节点 {{nodeId}} 已重新启动。",
     pmError: "更改节点状态时出错。",
+    powerFailed: "节点电源未更改",
+    saveFailed: "节点信息未保存",
     persistSuccess: "节点信息已保存。",
     powerOffConfirmTitle: "关闭节点 {{nodeId}}？",
     powerOnConfirmTitle: "启动节点 {{nodeId}}？",
@@ -344,6 +346,7 @@ const translations = {
     confirmed: "已保留。现在重启会回到此配置。",
     confirmFailed: "更改未被保留",
     revertNow: "立即恢复旧配置",
+    revertFailed: "未能恢复旧配置",
     wasReverted: "你在 {{at}} 的更改因未及时确认而被恢复。",
     oneAtATime: "请先确认或撤销等待中的更改，再应用新的更改。",
     edit: "编辑",
@@ -562,6 +565,7 @@ const translations = {
     uploading: "正在将镜像传输到节点 {{nodeId}}...",
     flashing: "正在将镜像刷写到节点 {{nodeId}}...",
     flashingCrc: "正在检查 CRC 并将镜像刷写到节点 {{nodeId}}...",
+    transferRefused: "镜像未传输",
     transferFailed: "将镜像传输到节点 {{nodeId}} 失败",
     success: "刷写成功",
     successMessage: "镜像已成功刷写到节点。",
@@ -601,6 +605,7 @@ const translations = {
     durationSeconds: "{{value}} 秒",
     staleBundle: "界面已更新。请重新加载页面以使用新版本。",
     reloadPage: "重新加载",
+    requestFailed: "更改未应用",
   },
 } satisfies OptionalTranslations;
 

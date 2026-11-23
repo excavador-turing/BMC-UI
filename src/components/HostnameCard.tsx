@@ -59,12 +59,6 @@ export default function HostnameCard() {
           title: t("settings.hostnameTitle"),
           description: t("settings.hostnameRenamed", { name: draft.trim() }),
         }),
-      onError: (e) =>
-        toast({
-          title: t("settings.hostnameTitle"),
-          description: e.message,
-          variant: "destructive",
-        }),
     });
   };
 

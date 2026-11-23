@@ -10,10 +10,19 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { FlashProvider } from "@/contexts/FlashContext";
 import InnerApp from "@/innerApp";
+import { mutationErrorCache } from "@/lib/mutationErrorToast";
 import { installStaleBundleRecovery } from "@/lib/staleBundle";
 import { type router } from "@/router";
 
-const queryClient = new QueryClient();
+// A failed mutation is toasted here, once, with the board's message, so a
+// call site cannot fail silently or report the same failure twice. A change
+// is sent even when the browser reports itself offline: the default would
+// hold it and send it once the browser is back online, possibly minutes
+// later, when nobody asked for it any more. Sent at once, it fails at once.
+const queryClient = new QueryClient({
+  defaultOptions: { mutations: { networkMode: "always" } },
+  mutationCache: mutationErrorCache(),
+});
 
 // Before anything is imported lazily, so the first failed chunk is caught.
 installStaleBundleRecovery();

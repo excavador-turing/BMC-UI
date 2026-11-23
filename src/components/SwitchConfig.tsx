@@ -606,18 +606,11 @@ export default function SwitchConfig() {
         });
       },
       onError: (e: Error) => {
-        const answer = classifyApply(e);
         // Two refusals have a place on the card, because one of them has a
-        // question in it. Anything else is a toast with the board's words.
-        if (answer.kind !== "other") {
-          setRefused(answer.kind);
-          return;
-        }
-        toast({
-          title: t("switchConfig.applyFailed"),
-          description: answer.message,
-          variant: "destructive",
-        });
+        // question in it. Anything else is the query client's toast with the
+        // board's words (the hook's `shownInPlace` keeps these two out of it).
+        const answer = classifyApply(e);
+        if (answer.kind !== "other") setRefused(answer.kind);
       },
     });
   };
@@ -700,12 +693,6 @@ export default function SwitchConfig() {
                   confirm.mutate(pending.token, {
                     onSuccess: () =>
                       toast({ title: t("switchConfig.confirmed") }),
-                    onError: (e: Error) =>
-                      toast({
-                        title: t("switchConfig.confirmFailed"),
-                        description: e.message,
-                        variant: "destructive",
-                      }),
                   })
                 }
               >

@@ -337,12 +337,6 @@ export default function FanControl() {
           }
         });
       },
-      onError: (error: Error) =>
-        toast({
-          title: t("info.fanNotApplied"),
-          description: error.message,
-          variant: "destructive",
-        }),
     });
 
   const [requested, setRequested] = useState(() =>

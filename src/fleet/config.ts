@@ -84,3 +84,8 @@ export function outOfRange(
   }
   return null;
 }
+
+/** What a toast about this board calls it (`ToastScopeContext`, `makeClient`). */
+export function boardLabel(board: FleetBoard) {
+  return board.name ?? board.id;
+}

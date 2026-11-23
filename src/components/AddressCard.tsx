@@ -27,7 +27,6 @@ import {
   orderInterfaces,
   timeMillis,
 } from "@/lib/api/addressView";
-import { bmcdMessage } from "@/lib/api/bmcdMessage";
 import {
   type AddressDocument,
   type AddressInterface,
@@ -248,12 +247,6 @@ export default function AddressCard() {
           description: t("addressCard.appliedNote"),
         });
       },
-      onError: (e: Error) =>
-        toast({
-          title: t("addressCard.applyFailed"),
-          description: bmcdMessage(e),
-          variant: "destructive",
-        }),
     });
   };
 
@@ -290,12 +283,6 @@ export default function AddressCard() {
                         setTried(false);
                         toast({ title: t("addressCard.confirmed") });
                       },
-                      onError: (e: Error) =>
-                        toast({
-                          title: t("addressCard.confirmFailed"),
-                          description: bmcdMessage(e),
-                          variant: "destructive",
-                        }),
                     })
                   }
                 >
@@ -305,16 +292,7 @@ export default function AddressCard() {
                   type="button"
                   variant="outline"
                   disabled={revert.isPending}
-                  onClick={() =>
-                    revert.mutate(undefined, {
-                      onError: (e: Error) =>
-                        toast({
-                          title: t("addressCard.revertFailed"),
-                          description: bmcdMessage(e),
-                          variant: "destructive",
-                        }),
-                    })
-                  }
+                  onClick={() => revert.mutate()}
                 >
                   {t("addressCard.revertNow")}
                 </Button>

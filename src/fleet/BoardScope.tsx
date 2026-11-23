@@ -10,12 +10,24 @@ import {
   takesNode,
 } from "@/contexts/NodeNavContext";
 import { ToastScopeContext } from "@/contexts/ToastScopeContext";
-import { apiBaseFor, type FleetBoard } from "@/fleet/config";
+import { apiBaseFor, boardLabel, type FleetBoard } from "@/fleet/config";
 import { toHash } from "@/fleet/route";
+import { mutationErrorCache } from "@/lib/mutationErrorToast";
 
-/** A cache of its own per board. See `BoardScope` for why. */
-export function makeClient() {
-  return new QueryClient({ defaultOptions: { queries: { retry: false } } });
+/**
+ * A cache of its own per board. See `BoardScope` for why. `boardName` is put
+ * before a failed change's toast, as `useToast` does for every other one.
+ * Changes are sent even while the browser reports itself offline, as in
+ * `app.tsx`, so none is held and sent later.
+ */
+export function makeClient(boardName: string) {
+  return new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { networkMode: "always" },
+    },
+    mutationCache: mutationErrorCache(boardName),
+  });
 }
 
 /**
@@ -60,7 +72,7 @@ export function BoardScope({
   /** Supply one to control resets from outside; otherwise one is made here. */
   client?: QueryClient;
 }) {
-  const [own] = useState(makeClient);
+  const [own] = useState(() => makeClient(boardLabel(board)));
   const active = client ?? own;
 
   const apiBase = useMemo(
@@ -96,7 +108,7 @@ export function BoardScope({
         <NodeNavProvider value={nav}>
           {/* Outside FlashProvider on purpose: the flash state machine raises
               its own toasts, and they need naming as much as any other. */}
-          <ToastScopeContext.Provider value={board.name ?? board.id}>
+          <ToastScopeContext.Provider value={boardLabel(board)}>
             <FlashProvider>
               <TooltipProvider>{children}</TooltipProvider>
             </FlashProvider>

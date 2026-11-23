@@ -15,7 +15,12 @@ import {
 import { usePowerNodeMutation } from "@/lib/api/set";
 
 import { BoardScope, makeClient } from "./BoardScope";
-import { type FleetBoard, type FleetConfig, outOfRange } from "./config";
+import {
+  boardLabel,
+  type FleetBoard,
+  type FleetConfig,
+  outOfRange,
+} from "./config";
 
 interface Props {
   board: FleetBoard;
@@ -42,10 +47,10 @@ export function BoardCard({ board, range, onOpen }: Props) {
   // means a NEW client, not an invalidation. The key remounts the boundary,
   // which is the only way to clear a React error boundary.
   const [attempt, setAttempt] = useState(0);
-  const [client, setClient] = useState(makeClient);
+  const [client, setClient] = useState(() => makeClient(boardLabel(board)));
 
   const retry = () => {
-    setClient(makeClient());
+    setClient(makeClient(boardLabel(board)));
     setAttempt((n) => n + 1);
   };
 
@@ -318,14 +323,6 @@ function Power({
               onSuccess: () => {
                 toast({
                   title: `node ${String(nodeId)} ${next ? "on" : "off"}`,
-                });
-              },
-              onError: (error: unknown) => {
-                toast({
-                  title: `node ${String(nodeId)} did not change`,
-                  description:
-                    error instanceof Error ? error.message : String(error),
-                  variant: "destructive",
                 });
               },
             }

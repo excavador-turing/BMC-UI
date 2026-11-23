@@ -33,7 +33,6 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useSkipNodeConfirmation } from "@/hooks/useSkipNodeConfirmation";
-import { bmcdMessage } from "@/lib/api/bmcdMessage";
 import { type NodeInfoResponse, useNodesTabData } from "@/lib/api/get";
 import { useResetNodeMutation, useSetNodeInfoMutation } from "@/lib/api/set";
 import { baudChoices, DEFAULT_BAUD, effectiveBaud } from "@/lib/consoleSpeed";
@@ -86,13 +85,6 @@ const NodeRow = (
 
         // Only remembered if the box was ticked.
         if (tempSkipConfirmation) rememberSkip();
-      },
-      onError: (e) => {
-        toast({
-          title: t("nodes.pmError"),
-          description: e.message,
-          variant: "destructive",
-        });
       },
     });
   };
@@ -297,13 +289,6 @@ export function NodesTab() {
         toast({
           title: t("nodes.saveButton"),
           description: t("nodes.persistSuccess"),
-        });
-      },
-      onError: (e) => {
-        toast({
-          title: t("nodes.saveButton"),
-          description: bmcdMessage(e),
-          variant: "destructive",
         });
       },
     });

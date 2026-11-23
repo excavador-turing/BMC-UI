@@ -235,6 +235,8 @@ const translations = {
     nodeOff: "Node {{nodeId}} was powered off.",
     nodeRestarted: "Node {{nodeId}} was restarted.",
     pmError: "Error changing node state.",
+    powerFailed: "The node's power was not changed",
+    saveFailed: "The node details were not saved",
     persistSuccess: "Nodes information saved.",
     powerOffConfirmTitle: "Power off Node {{nodeId}}?",
     powerOnConfirmTitle: "Power on Node {{nodeId}}?",
@@ -429,6 +431,7 @@ const translations = {
     confirmed: "Kept. A reboot now comes back to this.",
     confirmFailed: "The change was not kept",
     revertNow: "Put the old one back now",
+    revertFailed: "The old configuration was not put back",
     wasReverted:
       "Your change at {{at}} was put back because it was not confirmed in time.",
     oneAtATime: "Confirm or revert the waiting change before applying another.",
@@ -681,6 +684,7 @@ const translations = {
     uploading: "Transferring image to node {{nodeId}}...",
     flashing: "Flashing image to node {{nodeId}}...",
     flashingCrc: "Checking CRC and flashing image to node {{nodeId}}...",
+    transferRefused: "The image was not transferred",
     transferFailed: "Failed to transfer the image to node {{nodeId}}",
     success: "Flashing successful",
     successMessage: "Image flashed successfully to the node",
@@ -764,6 +768,7 @@ const translations = {
     staleBundle:
       "The interface was updated. Reload the page to use the new version.",
     reloadPage: "Reload",
+    requestFailed: "The change was not applied",
   },
 };
 

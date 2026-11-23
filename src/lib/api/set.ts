@@ -3,6 +3,12 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAxiosWithAuth } from "./_core";
 import type { FirmwareSources, SwitchDocument } from "./get";
 import { REPAIR_HEADERS, repairBody } from "./storageView";
+import { classifyApply } from "./switchApply.ts";
+
+// Every mutation's failure is toasted once, by the query client's
+// MutationCache (`reportMutationError`), with the board's own words.
+// `meta.errorTitle` names the toast's title (an i18n key); `meta.shownInPlace`
+// says which errors the page already shows where they happened.
 
 interface APIResponse<T> {
   response: {
@@ -21,6 +27,8 @@ export function useLoginMutation() {
   const api = useAxiosWithAuth();
 
   return useMutation({
+    // The sign-in form says what went wrong under the fields.
+    meta: { shownInPlace: () => true },
     mutationKey: ["loginMutation"],
     mutationFn: async (variables: { username: string; password: string }) => {
       const response = await api.post<LoginResponse>(
@@ -37,6 +45,7 @@ export function usePowerNodeMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { errorTitle: "nodes.powerFailed" },
     mutationKey: ["nodePowerMutation"],
     mutationFn: async (variables: { nodeId: number; powerOn: boolean }) => {
       const response = await api.get<APIResponse<string>>("/bmc", {
@@ -74,6 +83,7 @@ export function useSetNodeInfoMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { errorTitle: "nodes.saveFailed" },
     mutationKey: ["setNodeInfoMutation"],
     mutationFn: async (nodeInfo: NodeInfoPayload) => {
       await api.post<void>("/bmc", nodeInfo, {
@@ -94,6 +104,7 @@ export function useResetNodeMutation() {
   const api = useAxiosWithAuth();
 
   return useMutation({
+    meta: { errorTitle: "nodes.pmError" },
     mutationKey: ["setResetNodeMutation"],
     mutationFn: async (nodeId: number) => {
       const response = await api.get<APIResponse<string>>("/bmc", {
@@ -113,6 +124,7 @@ export function useNetworkResetMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { errorTitle: "network.resetSwitchButton" },
     mutationKey: ["networkResetMutation"],
     mutationFn: async () => {
       const response = await api.get<APIResponse<string>>("/bmc", {
@@ -134,6 +146,7 @@ export function useRebootBMCMutation() {
   const api = useAxiosWithAuth();
 
   return useMutation({
+    meta: { errorTitle: "info.rebootFailed" },
     mutationKey: ["rebootBMCMutation"],
     mutationFn: async () => {
       const response = await api.get<APIResponse<string>>("/bmc", {
@@ -158,6 +171,7 @@ export function useRepairStorageMutation() {
   const api = useAxiosWithAuth();
 
   return useMutation({
+    meta: { errorTitle: "storage.repairFailed" },
     mutationKey: ["repairStorageMutation"],
     mutationFn: async () => {
       await api.post("/bmc/storage/repair", repairBody(), {
@@ -171,6 +185,7 @@ export function useReloadBMCMutation() {
   const api = useAxiosWithAuth();
 
   return useMutation({
+    meta: { errorTitle: "info.reloadDaemonFailed" },
     mutationKey: ["reloadBMCMutation"],
     mutationFn: async () => {
       const response = await api.get<APIResponse<string>>("/bmc", {
@@ -189,6 +204,7 @@ export function useUSBModeMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { errorTitle: "usb.changeFailedTitle" },
     mutationKey: ["usbModeMutation"],
     mutationFn: async (variables: { node: number; mode: number }) => {
       const response = await api.get<APIResponse<string>>("/bmc", {
@@ -212,6 +228,7 @@ export function useCoolingDeviceMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { errorTitle: "info.fanNotApplied" },
     mutationKey: ["coolingDeviceMutation"],
     mutationFn: async (variables: {
       device: string;
@@ -249,6 +266,7 @@ export function useUSBNode1Mutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { errorTitle: "usb.changeFailedTitle" },
     mutationKey: ["usbNode1Mutation"],
     mutationFn: async (variables: { alternative_port: boolean }) => {
       const response = await api.get<APIResponse<string>>("/bmc", {
@@ -272,6 +290,7 @@ export function useSetFirmwareSourcesMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { errorTitle: "firmwareUpgrade.sourcesRejected" },
     mutationKey: ["setFirmwareSources"],
     mutationFn: async (sources: FirmwareSources) => {
       const response = await api.get<APIResponse<FirmwareSources>>("/bmc", {
@@ -302,6 +321,7 @@ export function useInstallFirmwareMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { errorTitle: "firmwareUpgrade.installFailed" },
     mutationKey: ["installFirmware"],
     mutationFn: async (variables: {
       source: string;
@@ -351,6 +371,7 @@ export function useSetHostnameMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { errorTitle: "settings.hostnameTitle" },
     mutationKey: ["setHostname"],
     mutationFn: async (name: string) => {
       const response = await api.get<APIResponse<unknown>>("/bmc", {
@@ -372,6 +393,7 @@ export function useSetNtpMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { errorTitle: "settings.timeTitle" },
     mutationKey: ["setNtp"],
     mutationFn: async (servers: string[]) => {
       const response = await api.get<APIResponse<unknown>>("/bmc", {
@@ -397,6 +419,7 @@ export function useImportConfigMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { errorTitle: "settings.configTitle" },
     mutationKey: ["importConfig"],
     mutationFn: async (document: string) => {
       const response = await api.get<APIResponse<ImportReport>>("/bmc", {
@@ -425,6 +448,7 @@ export function useSetPasswordMutation() {
   const api = useAxiosWithAuth();
 
   return useMutation({
+    meta: { errorTitle: "access.passwordFailed" },
     mutationKey: ["setPassword"],
     mutationFn: async (body: {
       username: string;
@@ -442,6 +466,7 @@ export function useSetClientCaMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { errorTitle: "access.caFailed" },
     mutationKey: ["setClientCa"],
     mutationFn: async (body: { pem: string; identity_header?: string }) => {
       await api.put("/bmc/access/client-ca", body);
@@ -466,6 +491,7 @@ export function useInstallCertificateMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { errorTitle: "certificate.installFailed" },
     mutationKey: ["installCertificate"],
     mutationFn: async (body: { certificate: string; private_key: string }) => {
       await api.put("/bmc/tls/certificate", body);
@@ -481,6 +507,7 @@ export function useResetCertificateMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { errorTitle: "certificate.resetFailed" },
     mutationKey: ["resetCertificate"],
     mutationFn: async () => {
       await api.delete("/bmc/tls/certificate");
@@ -502,6 +529,12 @@ export function useApplySwitchMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    // A refusal the card asks about is shown there, not toasted as well.
+    meta: {
+      errorTitle: "switchConfig.applyFailed",
+      shownInPlace: (error: unknown) =>
+        error instanceof Error && classifyApply(error).kind !== "other",
+    },
     mutationKey: ["applySwitch"],
     // A preset with its parameters, or a whole document. The daemon reads
     // either, and the editor sends documents while the preset buttons send
@@ -531,6 +564,7 @@ export function useConfirmSwitchMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { errorTitle: "switchConfig.confirmFailed" },
     mutationKey: ["confirmSwitch"],
     mutationFn: async (token: string) => {
       await api.post("/bmc/network/switch/confirm", { token });
@@ -545,6 +579,7 @@ export function useRevertSwitchMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { errorTitle: "switchConfig.revertFailed" },
     mutationKey: ["revertSwitch"],
     mutationFn: async () => {
       await api.post("/bmc/network/switch/revert");
@@ -562,6 +597,7 @@ export function useApplyAddressMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { errorTitle: "addressCard.applyFailed" },
     mutationKey: ["applyAddress"],
     mutationFn: async (body: Record<string, unknown>) => {
       const { data } = await api.put<{ token: string; window_s: number }>(
@@ -580,6 +616,7 @@ export function useConfirmAddressMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { errorTitle: "addressCard.confirmFailed" },
     mutationKey: ["confirmAddress"],
     mutationFn: async (token: string) => {
       await api.post("/bmc/network/address/confirm", { token });
@@ -593,6 +630,7 @@ export function useRevertAddressMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { errorTitle: "addressCard.revertFailed" },
     mutationKey: ["revertAddress"],
     mutationFn: async () => {
       await api.post("/bmc/network/address/revert");
@@ -607,6 +645,7 @@ export function useRemoveClientCaMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { errorTitle: "access.caFailed" },
     mutationKey: ["removeClientCa"],
     mutationFn: async () => {
       await api.delete("/bmc/access/client-ca");

@@ -65,13 +65,6 @@ export function Network() {
           description: t("network.resetNetworkSuccess"),
         });
       },
-      onError: (e) => {
-        toast({
-          title: t("network.resetSwitchButton"),
-          description: e.message,
-          variant: "destructive",
-        });
-      },
     });
   };
 

@@ -164,6 +164,8 @@ const translations = {
     nodeOff: "Węzeł {{nodeId}} został wyłączony.",
     nodeRestarted: "Węzeł {{nodeId}} został ponownie uruchomiony.",
     pmError: "Błąd podczas zmiany stanu węzła.",
+    powerFailed: "Zasilanie węzła nie zostało zmienione",
+    saveFailed: "Dane węzłów nie zostały zapisane",
     persistSuccess: "Informacje o węzłach zostały zapisane.",
     powerOffConfirmTitle: "Wyłączyć Węzeł {{nodeId}}?",
     powerOnConfirmTitle: "Włączyć Węzeł {{nodeId}}?",
@@ -357,6 +359,7 @@ const translations = {
     confirmed: "Zachowano. Restart wróci teraz do tego stanu.",
     confirmFailed: "Zmiana nie została zachowana",
     revertNow: "Przywróć poprzednią teraz",
+    revertFailed: "Poprzednia konfiguracja nie została przywrócona",
     wasReverted:
       "Twoja zmiana z {{at}} została cofnięta, bo nie potwierdzono jej na czas.",
     oneAtATime:
@@ -586,6 +589,7 @@ const translations = {
     uploading: "Przesyłanie obrazu do węzła {{nodeId}}...",
     flashing: "Flashowanie obrazu do węzła {{nodeId}}...",
     flashingCrc: "Sprawdzanie CRC i flashowanie obrazu do węzła {{nodeId}}...",
+    transferRefused: "Obraz nie został przesłany",
     transferFailed: "Nie udało się przesłać obrazu do węzła {{nodeId}}",
     success: "Flashowanie zakończone pomyślnie",
     successMessage: "Obraz został pomyślnie sflashowany na węźle",
@@ -626,6 +630,7 @@ const translations = {
     staleBundle:
       "Interfejs został zaktualizowany. Odśwież stronę, aby użyć nowej wersji.",
     reloadPage: "Odśwież",
+    requestFailed: "Zmiana nie została zastosowana",
   },
 } satisfies OptionalTranslations;
 

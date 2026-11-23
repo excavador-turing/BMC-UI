@@ -133,12 +133,8 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
         const title = t("firmwareUpgrade.uploadFailed");
         const errorMessage = bmcdMessage(error);
         setFirmwareError(errorMessage);
+        // The progress panel keeps the reason; the query client toasts it.
         setStatusMessage(`${title}: ${errorMessage}`);
-        toast({
-          title,
-          description: errorMessage,
-          variant: "destructive",
-        });
       },
     });
   };
@@ -169,12 +165,8 @@ export const FlashProvider: React.FC<FlashProviderProps> = ({ children }) => {
         setIsUploading(false);
         const title = t("flashNode.transferFailed", { nodeId });
         const errorMessage = bmcdMessage(error);
+        // The progress panel keeps the reason; the query client toasts it.
         setStatusMessage(`${title}: ${errorMessage}`);
-        toast({
-          title,
-          description: errorMessage,
-          variant: "destructive",
-        });
       },
     });
   };

@@ -188,12 +188,6 @@ export default function FirmwareSources({
               </p>
             </div>
           ))}
-
-          {save.isError && (
-            <p className="text-sm text-destructive">
-              {t("firmwareUpgrade.sourcesRejected")}
-            </p>
-          )}
         </div>
         <SheetFooter className="flex-row gap-2">
           <Button variant="outline" onClick={add}>
@@ -202,7 +196,7 @@ export default function FirmwareSources({
           </Button>
           <Button
             disabled={!dirty || save.isPending}
-            onClick={() => void save.mutateAsync({ sources })}
+            onClick={() => save.mutate({ sources })}
           >
             {t("firmwareUpgrade.sourcesSave")}
           </Button>

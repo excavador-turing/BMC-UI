@@ -163,6 +163,8 @@ const translations = {
     nodeOff: "Node {{nodeId}} is uitgeschakeld.",
     nodeRestarted: "Node {{nodeId}} is opnieuw gestart.",
     pmError: "Fout bij het wijzigen van de nodestatus.",
+    powerFailed: "De voeding van de node is niet gewijzigd",
+    saveFailed: "De nodegegevens zijn niet opgeslagen",
     persistSuccess: "Node-informatie opgeslagen.",
     powerOffConfirmTitle: "Node {{nodeId}} uitschakelen?",
     powerOnConfirmTitle: "Node {{nodeId}} inschakelen?",
@@ -357,6 +359,7 @@ const translations = {
     confirmed: "Behouden. Een herstart komt nu hierop terug.",
     confirmFailed: "De wijziging is niet behouden",
     revertNow: "Zet de oude nu terug",
+    revertFailed: "De oude configuratie is niet teruggezet",
     wasReverted:
       "Uw wijziging van {{at}} is teruggezet omdat die niet op tijd is bevestigd.",
     oneAtATime:
@@ -588,6 +591,7 @@ const translations = {
     uploading: "Image overbrengen naar node {{nodeId}}...",
     flashing: "Image flashen naar node {{nodeId}}...",
     flashingCrc: "CRC controleren en image flashen naar node {{nodeId}}...",
+    transferRefused: "Het image is niet overgebracht",
     transferFailed: "Overbrengen van image naar node {{nodeId}} mislukt",
     success: "Flashen geslaagd",
     successMessage: "Image succesvol geflasht naar de node",
@@ -628,6 +632,7 @@ const translations = {
     staleBundle:
       "De interface is bijgewerkt. Laad de pagina opnieuw om de nieuwe versie te gebruiken.",
     reloadPage: "Opnieuw laden",
+    requestFailed: "De wijziging is niet toegepast",
   },
 } satisfies OptionalTranslations;
 

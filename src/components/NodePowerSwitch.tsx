@@ -37,9 +37,8 @@ export function ConfirmationCheckbox({
  *
  * One component for the Nodes page and the Dashboard, so the two cannot ask
  * differently -- or one of them not at all -- about cutting power to a
- * machine. The state shown is optimistic: the switch moves when it is
- * confirmed, not when the daemon next reports, which is what the node cards
- * have always done.
+ * machine. The switch, the toast, and the dialog follow the board's answer.
+ * A refusal leaves the switch where it was and shows the board's message.
  */
 export default function NodePowerSwitch({
   nodeId,
@@ -58,16 +57,26 @@ export default function NodePowerSwitch({
   const { mutate, isPending } = usePowerNodeMutation();
 
   const toggle = () => {
-    mutate({ nodeId, powerOn: !powerOn });
-    setPowerOn(!powerOn);
-    toast({
-      title: t("nodes.powerManagement"),
-      description: powerOn
-        ? t("nodes.nodeOff", { nodeId })
-        : t("nodes.nodeOn", { nodeId }),
-    });
-    setAsking(false);
-    if (dontAskAgain) remember();
+    const next = !powerOn;
+    mutate(
+      { nodeId, powerOn: next },
+      {
+        onSuccess: () => {
+          setPowerOn(next);
+          toast({
+            title: t("nodes.powerManagement"),
+            description: next
+              ? t("nodes.nodeOn", { nodeId })
+              : t("nodes.nodeOff", { nodeId }),
+          });
+          setAsking(false);
+          if (dontAskAgain) remember();
+        },
+        // The query client toasts the board's message; this puts the switch
+        // back where the board still has it. The dialog stays open.
+        onError: () => setPowerOn(powerOnTime !== null),
+      }
+    );
   };
 
   return (

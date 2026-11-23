@@ -164,6 +164,8 @@ const translations = {
     nodeOff: "El nodo {{nodeId}} se apagó.",
     nodeRestarted: "El nodo {{nodeId}} se reinició.",
     pmError: "Error al cambiar el estado del nodo.",
+    powerFailed: "No se cambió la alimentación del nodo",
+    saveFailed: "No se guardaron los datos de los nodos",
     persistSuccess: "Información de nodos guardada.",
     powerOffConfirmTitle: "¿Apagar Nodo {{nodeId}}?",
     powerOnConfirmTitle: "¿Encender Nodo {{nodeId}}?",
@@ -358,6 +360,7 @@ const translations = {
     confirmed: "Conservado. Un reinicio ahora vuelve a esto.",
     confirmFailed: "El cambio no se conservó",
     revertNow: "Restaurar lo anterior ahora",
+    revertFailed: "No se restauró la configuración anterior",
     wasReverted:
       "Su cambio de las {{at}} se restauró porque no se confirmó a tiempo.",
     oneAtATime:
@@ -589,6 +592,7 @@ const translations = {
     uploading: "Subiendo imagen al nodo {{nodeId}}...",
     flashing: "Flasheando imagen al nodo {{nodeId}}...",
     flashingCrc: "Verificando CRC y flasheando imagen al nodo {{nodeId}}...",
+    transferRefused: "La imagen no se transfirió",
     transferFailed: "Error al transferir la imagen al nodo {{nodeId}}",
     success: "Flasheo exitoso",
     successMessage: "Imagen flasheada con éxito al nodo",
@@ -629,6 +633,7 @@ const translations = {
     staleBundle:
       "La interfaz se ha actualizado. Recarga la página para usar la nueva versión.",
     reloadPage: "Recargar",
+    requestFailed: "El cambio no se aplicó",
   },
 } satisfies OptionalTranslations;
 

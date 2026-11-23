@@ -83,12 +83,6 @@ export function Settings() {
           description: t("info.rebootSuccess"),
         });
       },
-      onError: (e) =>
-        toast({
-          title: t("info.rebootFailed"),
-          description: e.message,
-          variant: "destructive",
-        }),
     });
   };
 
@@ -98,12 +92,6 @@ export function Settings() {
         toast({
           title: t("info.reloadDaemonButton"),
           description: t("info.reloadDaemonSuccess"),
-        }),
-      onError: (e) =>
-        toast({
-          title: t("info.reloadDaemonFailed"),
-          description: e.message,
-          variant: "destructive",
         }),
     });
   };

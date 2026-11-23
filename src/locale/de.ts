@@ -164,6 +164,8 @@ const translations = {
     nodeOff: "Knoten {{nodeId}} wurde ausgeschaltet.",
     nodeRestarted: "Knoten {{nodeId}} wurde neu gestartet.",
     pmError: "Fehler beim Ändern des Knotenstatus.",
+    powerFailed: "Die Stromversorgung des Knotens wurde nicht geändert",
+    saveFailed: "Die Knotenangaben wurden nicht gespeichert",
     persistSuccess: "Knoteninformationen gespeichert.",
     powerOffConfirmTitle: "Knoten {{nodeId}} ausschalten?",
     powerOnConfirmTitle: "Knoten {{nodeId}} einschalten?",
@@ -359,6 +361,7 @@ const translations = {
     confirmed: "Behalten. Ein Neustart kehrt jetzt hierher zurück.",
     confirmFailed: "Die Änderung wurde nicht behalten",
     revertNow: "Jetzt zurücksetzen",
+    revertFailed: "Die alte Konfiguration wurde nicht zurückgesetzt",
     wasReverted:
       "Ihre Änderung um {{at}} wurde zurückgesetzt, weil sie nicht rechtzeitig bestätigt wurde.",
     oneAtATime:
@@ -592,6 +595,7 @@ const translations = {
     uploading: "Übertrage Image auf Knoten {{nodeId}}...",
     flashing: "Flashe Image auf Knoten {{nodeId}}...",
     flashingCrc: "Prüfe CRC und flashe Image auf Knoten {{nodeId}}...",
+    transferRefused: "Das Image wurde nicht übertragen",
     transferFailed:
       "Übertragung des Images auf Knoten {{nodeId}} fehlgeschlagen",
     success: "Flashen erfolgreich",
@@ -633,6 +637,7 @@ const translations = {
     staleBundle:
       "Die Oberfläche wurde aktualisiert. Lade die Seite neu, um die neue Version zu verwenden.",
     reloadPage: "Neu laden",
+    requestFailed: "Die Änderung wurde nicht übernommen",
   },
 } satisfies OptionalTranslations;
 

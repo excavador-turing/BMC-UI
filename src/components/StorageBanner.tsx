@@ -8,7 +8,6 @@ import RebootModal from "@/components/RebootModal";
 import { useToast } from "@/hooks/use-toast";
 import { useConnection } from "@/hooks/useConnection";
 import { useRebootCopy } from "@/hooks/useRebootCopy";
-import { bmcdMessage } from "@/lib/api/bmcdMessage";
 import { useStorageQuery } from "@/lib/api/get";
 import { useRebootBMCMutation, useRepairStorageMutation } from "@/lib/api/set";
 import {
@@ -71,12 +70,6 @@ export default function StorageBanner() {
           description: t("info.rebootSuccess"),
         });
       },
-      onError: (e) =>
-        toast({
-          title: t("info.rebootFailed"),
-          description: bmcdMessage(e),
-          variant: "destructive",
-        }),
     });
   };
 
@@ -93,12 +86,6 @@ export default function StorageBanner() {
           description: t("storage.repairStarted"),
         });
       },
-      onError: (e) =>
-        toast({
-          title: t("storage.repairFailed"),
-          description: bmcdMessage(e),
-          variant: "destructive",
-        }),
     });
   };
 
