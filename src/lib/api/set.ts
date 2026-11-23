@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useAxiosWithAuth } from "./_core";
 import type { FirmwareSources, SwitchDocument } from "./get";
+import { sendStateChange } from "./stateChange.ts";
 import { REPAIR_HEADERS, repairBody } from "./storageView";
 
 interface APIResponse<T> {
@@ -39,7 +40,7 @@ export function usePowerNodeMutation() {
   return useMutation({
     mutationKey: ["nodePowerMutation"],
     mutationFn: async (variables: { nodeId: number; powerOn: boolean }) => {
-      const response = await api.get<APIResponse<string>>("/bmc", {
+      const response = await sendStateChange<APIResponse<string>>(api, "/bmc", {
         params: {
           opt: "set",
           type: "power",
@@ -76,7 +77,8 @@ export function useSetNodeInfoMutation() {
   return useMutation({
     mutationKey: ["setNodeInfoMutation"],
     mutationFn: async (nodeInfo: NodeInfoPayload) => {
-      await api.post<void>("/bmc", nodeInfo, {
+      await sendStateChange<void>(api, "/bmc", {
+        data: nodeInfo,
         params: {
           opt: "set",
           type: "node_info",
@@ -96,7 +98,7 @@ export function useResetNodeMutation() {
   return useMutation({
     mutationKey: ["setResetNodeMutation"],
     mutationFn: async (nodeId: number) => {
-      const response = await api.get<APIResponse<string>>("/bmc", {
+      const response = await sendStateChange<APIResponse<string>>(api, "/bmc", {
         params: {
           opt: "set",
           type: "reset",
@@ -115,7 +117,7 @@ export function useNetworkResetMutation() {
   return useMutation({
     mutationKey: ["networkResetMutation"],
     mutationFn: async () => {
-      const response = await api.get<APIResponse<string>>("/bmc", {
+      const response = await sendStateChange<APIResponse<string>>(api, "/bmc", {
         params: {
           opt: "set",
           type: "network",
@@ -136,7 +138,7 @@ export function useRebootBMCMutation() {
   return useMutation({
     mutationKey: ["rebootBMCMutation"],
     mutationFn: async () => {
-      const response = await api.get<APIResponse<string>>("/bmc", {
+      const response = await sendStateChange<APIResponse<string>>(api, "/bmc", {
         params: {
           opt: "set",
           type: "reboot",
@@ -173,7 +175,7 @@ export function useReloadBMCMutation() {
   return useMutation({
     mutationKey: ["reloadBMCMutation"],
     mutationFn: async () => {
-      const response = await api.get<APIResponse<string>>("/bmc", {
+      const response = await sendStateChange<APIResponse<string>>(api, "/bmc", {
         params: {
           opt: "set",
           type: "reload",
@@ -191,7 +193,7 @@ export function useUSBModeMutation() {
   return useMutation({
     mutationKey: ["usbModeMutation"],
     mutationFn: async (variables: { node: number; mode: number }) => {
-      const response = await api.get<APIResponse<string>>("/bmc", {
+      const response = await sendStateChange<APIResponse<string>>(api, "/bmc", {
         params: {
           opt: "set",
           type: "usb",
@@ -227,7 +229,7 @@ export function useCoolingDeviceMutation() {
        */
       mode?: "auto" | "manual";
     }) => {
-      const response = await api.get<APIResponse<string>>("/bmc", {
+      const response = await sendStateChange<APIResponse<string>>(api, "/bmc", {
         params: {
           opt: "set",
           type: "cooling",
@@ -251,7 +253,7 @@ export function useUSBNode1Mutation() {
   return useMutation({
     mutationKey: ["usbNode1Mutation"],
     mutationFn: async (variables: { alternative_port: boolean }) => {
-      const response = await api.get<APIResponse<string>>("/bmc", {
+      const response = await sendStateChange<APIResponse<string>>(api, "/bmc", {
         params: {
           opt: "set",
           type: "usb_node1",
@@ -274,13 +276,17 @@ export function useSetFirmwareSourcesMutation() {
   return useMutation({
     mutationKey: ["setFirmwareSources"],
     mutationFn: async (sources: FirmwareSources) => {
-      const response = await api.get<APIResponse<FirmwareSources>>("/bmc", {
-        params: {
-          opt: "set",
-          type: "firmware_sources",
-          sources: JSON.stringify(sources),
-        },
-      });
+      const response = await sendStateChange<APIResponse<FirmwareSources>>(
+        api,
+        "/bmc",
+        {
+          params: {
+            opt: "set",
+            type: "firmware_sources",
+            sources: JSON.stringify(sources),
+          },
+        }
+      );
       return response.data.response[0].result;
     },
     onSuccess: async () => {
@@ -329,7 +335,11 @@ export function useInstallFirmwareMutation() {
             version: variables.version,
             ...(variables.allowDowngrade ? { allow_downgrade: 1 } : {}),
           };
-      const response = await api.get<APIResponse<unknown>>("/bmc", { params });
+      const response = await sendStateChange<APIResponse<unknown>>(
+        api,
+        "/bmc",
+        { params }
+      );
       return response.data.response[0].result;
     },
     onSuccess: async () => {
@@ -353,9 +363,13 @@ export function useSetHostnameMutation() {
   return useMutation({
     mutationKey: ["setHostname"],
     mutationFn: async (name: string) => {
-      const response = await api.get<APIResponse<unknown>>("/bmc", {
-        params: { opt: "set", type: "hostname", name },
-      });
+      const response = await sendStateChange<APIResponse<unknown>>(
+        api,
+        "/bmc",
+        {
+          params: { opt: "set", type: "hostname", name },
+        }
+      );
       return response.data.response[0].result;
     },
     onSuccess: async () => {
@@ -374,9 +388,13 @@ export function useSetNtpMutation() {
   return useMutation({
     mutationKey: ["setNtp"],
     mutationFn: async (servers: string[]) => {
-      const response = await api.get<APIResponse<unknown>>("/bmc", {
-        params: { opt: "set", type: "ntp", servers: servers.join(",") },
-      });
+      const response = await sendStateChange<APIResponse<unknown>>(
+        api,
+        "/bmc",
+        {
+          params: { opt: "set", type: "ntp", servers: servers.join(",") },
+        }
+      );
       return response.data.response[0].result;
     },
     onSuccess: async () => {
@@ -399,9 +417,13 @@ export function useImportConfigMutation() {
   return useMutation({
     mutationKey: ["importConfig"],
     mutationFn: async (document: string) => {
-      const response = await api.get<APIResponse<ImportReport>>("/bmc", {
-        params: { opt: "set", type: "config", config: document },
-      });
+      const response = await sendStateChange<APIResponse<ImportReport>>(
+        api,
+        "/bmc",
+        {
+          params: { opt: "set", type: "config", config: document },
+        }
+      );
       return response.data.response[0].result;
     },
     onSuccess: async () => {

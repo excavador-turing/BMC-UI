@@ -16,7 +16,7 @@ import { useAuth } from "@/hooks/useAuth";
  * here is what let that workaround go.
  */
 export function useAxiosWithAuth() {
-  const { token, logout } = useAuth();
+  const { token, clearSession } = useAuth();
   const { base, unauthorized } = useApiBase();
 
   return useMemo(() => {
@@ -35,13 +35,17 @@ export function useAxiosWithAuth() {
         // the operator out of the whole interface because one board is
         // unhappy would be the wrong response to the most common failure it
         // will see.
+        // A 401 means the board no longer knows this token -- it expired,
+        // or the password was changed, which drops every session -- so the
+        // session is cleared and the login page shown, without a logout
+        // request the board would refuse anyway.
         if (error.response?.status === 401 && unauthorized === "logout") {
-          logout();
+          clearSession();
         }
         return Promise.reject(error);
       }
     );
 
     return api;
-  }, [base, token, unauthorized, logout]);
+  }, [base, token, unauthorized, clearSession]);
 }
