@@ -3,6 +3,7 @@ import type { AxiosProgressEvent } from "axios";
 
 import { useAxiosWithAuth } from "./_core";
 import { handleParams } from "./flashParams.ts";
+import { sendStateChange } from "./stateChange.ts";
 
 export function useBackupMutation() {
   const api = useAxiosWithAuth();
@@ -11,7 +12,7 @@ export function useBackupMutation() {
     meta: { errorTitle: "info.backupFailed" },
     mutationKey: ["backupMutation"],
     mutationFn: async () => {
-      const response = await api.get("/bmc/backup", {
+      const response = await sendStateChange(api, "/bmc/backup", {
         responseType: "blob",
       });
       const contentDisposition = response.headers[
@@ -46,7 +47,7 @@ export function useFirmwareUpdateMutation(
       // Step 1: Obtain the upload handle
       const {
         data: { handle },
-      } = await api.get<{ handle: number }>("/bmc", {
+      } = await sendStateChange<{ handle: number }>(api, "/bmc", {
         params: handleParams({
           type: "firmware",
           file: variables.file,
@@ -98,7 +99,7 @@ export function useNodeUpdateMutation(
       // Step 1: Obtain the upload handle
       const {
         data: { handle },
-      } = await api.get<{ handle: number }>("/bmc", {
+      } = await sendStateChange<{ handle: number }>(api, "/bmc", {
         params: handleParams({
           type: "flash",
           node: variables.nodeId,

@@ -293,6 +293,11 @@ export const demoAdapter: AxiosAdapter = (config) => {
     });
   }
 
+  if (url.endsWith("/bmc/logout")) {
+    // As bmcd with the logout route answers: revoked, nothing to say.
+    return reply(config, 204, "");
+  }
+
   if (url.endsWith("/bmc/serial/status")) {
     return reply(config, 200, fixture("serial_status") ?? []);
   }

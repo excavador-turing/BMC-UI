@@ -1,10 +1,26 @@
-import { createContext, type ReactNode, useCallback, useState } from "react";
+import axios from "axios";
+import {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useState,
+} from "react";
+
+import { ApiBaseContext } from "@/contexts/ApiBaseContext";
+import { revokeAndClear } from "@/lib/api/logout";
 
 export interface AuthContext {
   isAuthenticated: boolean;
   token: string | null;
   login: (username: string, token: string, rememberMe: boolean) => void;
+  /** Revoke the token on the board, then clear the session. */
   logout: () => void;
+  /**
+   * Clear the session without asking the board: for a 401, where the board
+   * has already dropped the token (it expired, or the password changed).
+   */
+  clearSession: () => void;
 }
 
 export const AuthContext = createContext<AuthContext | null>(null);
@@ -34,7 +50,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [token, setToken] = useState<string | null>(getStoredToken());
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(!!token);
 
-  const logout = useCallback(() => {
+  const { base } = useContext(ApiBaseContext);
+
+  const clearSession = useCallback(() => {
     setStoredToken(null, false);
     setToken(null);
     setIsAuthenticated(false);
@@ -49,6 +67,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     );
   }, []);
 
+  const logout = useCallback(() => {
+    void revokeAndClear(
+      token,
+      base,
+      (url, config) => axios.post(url, undefined, config),
+      clearSession
+    );
+  }, [token, base, clearSession]);
+
   const login = useCallback(
     (username: string, token: string, rememberMe: boolean) => {
       localStorage.setItem("username", username);
@@ -60,7 +87,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   );
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, token, login, logout }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, token, login, logout, clearSession }}
+    >
       {children}
     </AuthContext.Provider>
   );
