@@ -4,6 +4,7 @@ import { CircleCheck, Download, TriangleAlert, Undo2 } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import ConfirmationModal from "@/components/ConfirmationModal";
 import type { InstallRequest } from "@/components/FirmwareCandidates";
 import LoadingButton from "@/components/LoadingButton";
 import RebootModal from "@/components/RebootModal";
@@ -29,7 +30,10 @@ import {
   useFirmwareSourcesQuery,
   useUpdateCheckQuery,
 } from "@/lib/api/get";
-import { useRebootBMCMutation } from "@/lib/api/set";
+import {
+  useRebootBMCMutation,
+  useUnstageFirmwareMutation,
+} from "@/lib/api/set";
 import {
   isReading,
   parseBoardDate,
@@ -289,6 +293,27 @@ export default function FirmwareSlots({
   const [rebootModalOpened, setRebootModalOpened] = useState(false);
   const { mutate: mutateRebootBMC, isPending: rebootPending } =
     useRebootBMCMutation();
+  const [unstageModalOpened, setUnstageModalOpened] = useState(false);
+  const { mutate: mutateUnstage, isPending: unstagePending } =
+    useUnstageFirmwareMutation();
+
+  // The dialog closes the moment the answer is given, before the request
+  // goes out. It used to be the other way round for the requests that have a
+  // dialog (a power change, BMC-Firmware#121): the dialog stayed open over a
+  // pending request, and when the board had stopped answering the error
+  // toast came up behind its backdrop, unreadable. The button below carries
+  // the pending state instead, and the error lands on a page that can be read.
+  const handleUnstage = () => {
+    setUnstageModalOpened(false);
+    mutateUnstage(undefined, {
+      onSuccess: () => {
+        toast({
+          title: t("firmwareUpgrade.unstageSuccess"),
+          description: t("firmwareUpgrade.unstageSuccessMessage"),
+        });
+      },
+    });
+  };
 
   const handleRebootBMC = () => {
     setRebootModalOpened(false);
@@ -363,16 +388,32 @@ export default function FirmwareSlots({
                     Until now it lived on another page: install here, then go
                     to Settings to reboot -- and the two are one operation, so
                     people either forgot or rebooted from the wrong place. */}
-                  <LoadingButton
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    isLoading={rebootPending}
-                    disabled={rebootPending}
-                    onClick={() => setRebootModalOpened(true)}
-                  >
-                    {t("firmwareUpgrade.rebootToApply")}
-                  </LoadingButton>
+                  <div className="flex flex-wrap gap-2">
+                    <LoadingButton
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      isLoading={rebootPending}
+                      disabled={rebootPending || unstagePending}
+                      onClick={() => setRebootModalOpened(true)}
+                    >
+                      {t("firmwareUpgrade.rebootToApply")}
+                    </LoadingButton>
+                    {/* Next to the reboot it undoes. Until now the only way
+                      back from a staged update was a shell on the board.
+                      Outline, not red: it is the safe one of the two -- the
+                      board keeps running what it runs. */}
+                    <LoadingButton
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      isLoading={unstagePending}
+                      disabled={rebootPending || unstagePending}
+                      onClick={() => setUnstageModalOpened(true)}
+                    >
+                      {t("firmwareUpgrade.unstageButton")}
+                    </LoadingButton>
+                  </div>
                 </AlertDescription>
               </Alert>
             )}
@@ -508,6 +549,22 @@ export default function FirmwareSlots({
             </dl>
           </>
         )}
+
+        <ConfirmationModal
+          isOpen={unstageModalOpened}
+          onClose={() => setUnstageModalOpened(false)}
+          onConfirm={handleUnstage}
+          title={t("firmwareUpgrade.unstageModalTitle")}
+          message={
+            data?.staged?.version
+              ? t("firmwareUpgrade.unstageModalDescriptionNamed", {
+                  version: data.staged.version,
+                })
+              : t("firmwareUpgrade.unstageModalDescription")
+          }
+          confirmLabel={t("firmwareUpgrade.unstageConfirm")}
+          dismissLabel={t("firmwareUpgrade.unstageKeep")}
+        />
 
         <RebootModal
           isOpen={rebootModalOpened}

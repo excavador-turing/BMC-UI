@@ -10,6 +10,29 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **"Cancel staged update" on the Firmware page**
+  ([BMC-Firmware#124](https://github.com/excavador-turing/BMC-Firmware/issues/124),
+  asked for by Daniel Steinhauf, [@danste22](https://github.com/danste22)).
+  Next to "Reboot to apply" in the notice that an update is staged, with a
+  confirmation that names the version and says what stays: the board keeps
+  running the firmware it runs, and the image already written to the spare slot
+  stays there until the next install replaces it. It posts
+  `opt=set&type=firmware_unstage` (bmcd 2.51.0), shows the board's own words if
+  it is refused (an install still writing, or the new firmware being checked on
+  its first boot), and reads the slots again whatever the answer was.
+  - **The dialog closes when it is answered, not when the board has.** The
+    request carries its own 15 s timeout, and its error lands on the page where
+    it can be read. A dialog that stayed open over a pending request left the
+    error toast behind its backdrop when the board had stopped answering
+    (BMC-Firmware#121 describes it for the power switch).
+
+### Changed
+
+- The upload dialog's text says what to do when an update is already staged:
+  cancel it first. It used to say only that the board refuses.
+
 ## [v4.8.1] — 2026-11-24
 
 ### Fixed

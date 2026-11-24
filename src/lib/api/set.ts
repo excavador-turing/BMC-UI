@@ -6,6 +6,7 @@ import { SLOW_CHANGE_TIMEOUT_MS } from "./requestTimeout.ts";
 import { sendStateChange } from "./stateChange.ts";
 import { REPAIR_HEADERS, repairBody } from "./storageView";
 import { classifyApply } from "./switchApply.ts";
+import { unstageRequest } from "./unstage.ts";
 
 // Every mutation's failure is toasted once, by the query client's
 // MutationCache (`reportMutationError`), with the board's own words.
@@ -369,6 +370,37 @@ export function useInstallFirmwareMutation() {
       // The slot panel now has something staged to report.
       await queryClient.invalidateQueries({ queryKey: ["firmwareSlots"] });
     },
+  });
+}
+
+/**
+ * Cancels a staged firmware update (BMC-Firmware#124).
+ *
+ * The next reboot then starts the firmware that is running, and the slot panel
+ * stops offering a reboot into an image that will not be taken. The board says
+ * 409, and changes nothing, while an install is still writing or while the new
+ * firmware is being checked on its first boot; that is shown as it is said.
+ *
+ * Settled rather than succeeded: a request that timed out may still have
+ * reached the board, so the slots are read again whatever the answer was.
+ */
+export function useUnstageFirmwareMutation() {
+  const api = useAxiosWithAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    meta: { errorTitle: "firmwareUpgrade.unstageFailed" },
+    mutationKey: ["unstageFirmware"],
+    mutationFn: async () => {
+      const response = await sendStateChange<APIResponse<unknown>>(
+        api,
+        "/bmc",
+        unstageRequest()
+      );
+      return response.data.response[0].result;
+    },
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: ["firmwareSlots"] }),
   });
 }
 
