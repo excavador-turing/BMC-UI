@@ -59,7 +59,10 @@ you, Daniel.
   The change may or may not have been applied", for 20 seconds, instead of as a
   failure, and the toast is raised above dialogs: it used to come up behind the
   blurred backdrop of the confirmation, where it could not be read. A refusal
-  from the board still shows the board's own words.
+  from the board still shows the board's own words. While an upload, a firmware
+  install, a node flash or a backup is running, the page never reloads itself
+  when the board answers again after being flagged lost: the banner shows, and
+  the operation's own result decides.
 - **The serial console shows its last line**
   ([#72](https://github.com/excavador-turing/BMC-UI/pull/72),
   [BMC-Firmware#125](https://github.com/excavador-turing/BMC-Firmware/issues/125)).
