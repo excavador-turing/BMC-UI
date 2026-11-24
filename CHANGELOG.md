@@ -10,6 +10,76 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [v4.8.0] — 2026-11-24
+
+Thanks to Daniel Steinhauf ([@danste22](https://github.com/danste22)) for the
+security review
+([BMC-Firmware#95](https://github.com/excavador-turing/BMC-Firmware/issues/95),
+[#97](https://github.com/excavador-turing/BMC-Firmware/issues/97),
+[#100](https://github.com/excavador-turing/BMC-Firmware/issues/100),
+[#110](https://github.com/excavador-turing/BMC-Firmware/issues/110)) and for the
+fixes in this release: [#63](https://github.com/excavador-turing/BMC-UI/pull/63),
+[#62](https://github.com/excavador-turing/BMC-UI/pull/62),
+[#65](https://github.com/excavador-turing/BMC-UI/pull/65) and
+[#64](https://github.com/excavador-turing/BMC-UI/pull/64). His commits are kept
+under his authorship; #63 and #64 landed as
+[#66](https://github.com/excavador-turing/BMC-UI/pull/66) and
+[#67](https://github.com/excavador-turing/BMC-UI/pull/67), with a commit of
+ours on each.
+
+### Changed
+
+- **The power switch waits for the board's answer**
+  ([#62](https://github.com/excavador-turing/BMC-UI/pull/62), BMC-Firmware#97).
+  The switch moved, toasted success and closed its dialog before the board had
+  answered, so a refused change looked like a success. The switch, the toast
+  and the dialog now follow a successful answer; a refusal puts the switch back
+  and shows the board's message. A failed change is reported once, by the query
+  client, in the board's own words (in the fleet the toast names the board), and
+  the USB page no longer toasts a failure twice.
+- **A change made offline fails at once** (#62). TanStack Query held a change
+  while the browser reported itself offline and sent it when it came back,
+  possibly minutes later, when nobody asked for it any more. It is sent
+  straight away now, and fails straight away.
+- **Logout ends the token on the board**
+  ([#64](https://github.com/excavador-turing/BMC-UI/pull/64), BMC-Firmware#100).
+  Signing out used to clear the browser's storage and leave the token valid
+  until it expired, so a copy of it kept working. It now sends
+  `POST /api/bmc/logout` first, and clears the session whatever the answer, so
+  an older board (404 or 405) or one that cannot be reached still signs the
+  user out. A 401 clears the session without asking the board, which is what
+  follows a password change. This needs a bmcd with the logout route
+  ([bmcd#72](https://github.com/excavador-turing/bmcd/pull/72)); against an
+  older one it signs out locally.
+- **State changes go as POST** (#64). Every `opt=set`, the firmware and flash
+  upload handles and the backup are sent as POST with the same query string,
+  because a board that refuses state changes on GET would otherwise refuse
+  them. An older board answers a POST with 405 and the identical request is
+  sent once more as GET; any other failure is the board's answer and is not
+  retried. Against an older board that costs one extra round trip.
+- **Building needs Node 26**
+  ([#63](https://github.com/excavador-turing/BMC-UI/pull/63), BMC-Firmware#95).
+  `.nvmrc` and `devbox.json` move from Node 24 to 26, and so do
+  `Dockerfile.fleet` (`node:26-alpine`), `devbox.lock` and the README. The
+  built interface behaves the same. `npm audit fix` refreshes the lockfile, and
+  i18next goes to 27 and react-i18next to 18.
+
+### Fixed
+
+- **A failed node flash or firmware upload no longer also logs an unhandled
+  promise** ([#65](https://github.com/excavador-turing/BMC-UI/pull/65),
+  BMC-Firmware#110). The failure was reported (the progress panel and the
+  toast) and then surfaced a second time as `Uncaught (in promise)` in the
+  console. Nothing visible changes but the console error.
+- **A backup from an older board is never a page.** On a board older than
+  bmcd#72 a POST to `/api/bmc/backup` does not get a 405: the daemon routes the
+  backup on GET only, so the request fell through to the interface's own page
+  and was answered 200 with `index.html`, which the new POST would have saved
+  as `tp2-backup-....tar.gz`. The backup now accepts the POST answer only if it
+  is a gzip archive and otherwise asks again with GET; if what comes back still
+  is not an archive, the button reports an error instead of saving it. This is
+  our fix on top of #64.
+
 ## [v4.7.0] — 2026-11-20
 
 LACP on the Switch page: ge0 and ge1 can be bundled into one 802.3ad bond. It
