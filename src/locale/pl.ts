@@ -631,6 +631,9 @@ const translations = {
       "Interfejs został zaktualizowany. Odśwież stronę, aby użyć nowej wersji.",
     reloadPage: "Odśwież",
     requestFailed: "Zmiana nie została zastosowana",
+    boardDidNotAnswer: "Płyta nie odpowiedziała",
+    changeMayHaveApplied:
+      "Zmiana mogła zostać zastosowana lub nie. Sprawdź aktualny stan, zanim spróbujesz ponownie.",
   },
 } satisfies OptionalTranslations;
 

@@ -638,6 +638,9 @@ const translations = {
       "Die Oberfläche wurde aktualisiert. Lade die Seite neu, um die neue Version zu verwenden.",
     reloadPage: "Neu laden",
     requestFailed: "Die Änderung wurde nicht übernommen",
+    boardDidNotAnswer: "Das Board hat nicht geantwortet",
+    changeMayHaveApplied:
+      "Die Änderung wurde möglicherweise übernommen, möglicherweise nicht. Prüfe den aktuellen Zustand, bevor du es erneut versuchst.",
   },
 } satisfies OptionalTranslations;
 

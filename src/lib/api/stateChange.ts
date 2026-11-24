@@ -16,8 +16,16 @@
  * interface's own catch-all and comes back 200 with `index.html`. A caller
  * that knows what a real answer looks like passes `accept`; an answer it
  * does not accept is treated like a 405, and the request is sent as GET.
+ *
+ * A state change waits `STATE_CHANGE_TIMEOUT_MS` unless the caller names its
+ * own limit. A change that timed out may still have reached the board, so a
+ * timeout is passed on as it is and never retried as a GET: the 405 fallback
+ * is for a board that answered, and a board that did not answer has told us
+ * nothing about the route.
  */
 import type { AxiosRequestConfig, AxiosResponse } from "axios";
+
+import { STATE_CHANGE_TIMEOUT_MS } from "./requestTimeout.ts";
 
 /** What this needs of an axios instance. */
 export interface Requester {
@@ -38,11 +46,26 @@ export async function sendStateChange<T = unknown>(
 ): Promise<AxiosResponse<T>> {
   let posted: AxiosResponse<T>;
   try {
-    posted = await api.request<T>({ ...config, url, method: "POST" });
+    posted = await api.request<T>({
+      timeout: STATE_CHANGE_TIMEOUT_MS,
+      ...config,
+      url,
+      method: "POST",
+    });
   } catch (error) {
     if (status(error) !== 405) throw error;
-    return api.request<T>({ ...config, url, method: "GET" });
+    return api.request<T>({
+      timeout: STATE_CHANGE_TIMEOUT_MS,
+      ...config,
+      url,
+      method: "GET",
+    });
   }
   if (!accept || (await accept(posted))) return posted;
-  return api.request<T>({ ...config, url, method: "GET" });
+  return api.request<T>({
+    timeout: STATE_CHANGE_TIMEOUT_MS,
+    ...config,
+    url,
+    method: "GET",
+  });
 }

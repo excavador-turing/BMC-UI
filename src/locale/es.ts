@@ -634,6 +634,9 @@ const translations = {
       "La interfaz se ha actualizado. Recarga la página para usar la nueva versión.",
     reloadPage: "Recargar",
     requestFailed: "El cambio no se aplicó",
+    boardDidNotAnswer: "La placa no respondió",
+    changeMayHaveApplied:
+      "Es posible que el cambio se haya aplicado o no. Comprueba el estado actual antes de volver a intentarlo.",
   },
 } satisfies OptionalTranslations;
 

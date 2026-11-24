@@ -8,6 +8,11 @@ import axios from "axios";
 import { useAxiosWithAuth } from "./_core";
 import { nodesOnReboot, type RebootNodes } from "./boardRevision";
 import { sdCardPresent } from "./firmwarePage";
+import {
+  POLL_TIMEOUT_MS,
+  SLOW_READ_TIMEOUT_MS,
+  TRANSFER_POLL_TIMEOUT_MS,
+} from "./requestTimeout.ts";
 import type { components } from "./schema";
 import { parseStorage } from "./storageView";
 
@@ -387,6 +392,7 @@ export function useFirmwareAvailableQuery() {
     queryFn: async () => {
       const response = await api.get<APIResponse<FirmwareCatalog>>("/bmc", {
         params: { opt: "get", type: "firmware_available" },
+        timeout: SLOW_READ_TIMEOUT_MS,
       });
       return response.data.response[0].result;
     },
@@ -409,6 +415,7 @@ export function useFirmwareAvailableQuery() {
   const checkNow = async () => {
     const response = await api.get<APIResponse<FirmwareCatalog>>("/bmc", {
       params: { opt: "get", type: "firmware_available", refresh: 1 },
+      timeout: SLOW_READ_TIMEOUT_MS,
     });
     queryClient.setQueryData(
       ["firmwareAvailable"],
@@ -427,6 +434,7 @@ export function useUpdateCheckQuery() {
     queryFn: async () => {
       const response = await api.get<APIResponse<UpdateCheckResponse>>("/bmc", {
         params: { opt: "get", type: "update_check" },
+        timeout: SLOW_READ_TIMEOUT_MS,
       });
       return response.data.response[0].result;
     },
@@ -533,6 +541,7 @@ export function useFlashStatusQuery(enabled: boolean) {
           opt: "get",
           type: "flash",
         },
+        timeout: TRANSFER_POLL_TIMEOUT_MS,
       });
       return response.data;
     },
@@ -553,6 +562,7 @@ export function useFirmwareStatusQuery(enabled: boolean) {
           opt: "get",
           type: "firmware",
         },
+        timeout: TRANSFER_POLL_TIMEOUT_MS,
       });
       return response.data;
     },
@@ -593,6 +603,7 @@ export function useFirmwareSlotsQuery() {
           opt: "get",
           type: "firmware_slots",
         },
+        timeout: POLL_TIMEOUT_MS,
       });
       const result = response.data.response[0].result;
       return {
@@ -667,6 +678,7 @@ export function useThermalQuery(intervalMs = 5000) {
           opt: "get",
           type: "thermal",
         },
+        timeout: POLL_TIMEOUT_MS,
       });
       const result = response.data.response[0].result;
       return {
@@ -717,6 +729,7 @@ export function useHealthQuery() {
           opt: "get",
           type: "health",
         },
+        timeout: POLL_TIMEOUT_MS,
       });
       const result = response.data.response[0].result;
       const clock = result.clock;
@@ -837,6 +850,7 @@ export function useSwitchPortsQuery() {
           opt: "get",
           type: "network",
         },
+        timeout: POLL_TIMEOUT_MS,
       });
       return response.data.response[0].result.ports;
     },
@@ -904,8 +918,11 @@ export function useSerialStatusQuery() {
   return useQuery({
     queryKey: ["serialStatus"],
     queryFn: async () => {
-      const response =
-        await api.post<SerialReaderState[]>("/bmc/serial/status");
+      const response = await api.post<SerialReaderState[]>(
+        "/bmc/serial/status",
+        undefined,
+        { timeout: POLL_TIMEOUT_MS }
+      );
       return Array.isArray(response.data) ? response.data : [];
     },
     // Stop polling once it has failed: an older daemon answers the same way
@@ -1000,6 +1017,7 @@ export function useNtpQuery() {
     queryFn: async () => {
       const response = await api.get<APIResponse<NtpResponse>>("/bmc", {
         params: { opt: "get", type: "ntp" },
+        timeout: POLL_TIMEOUT_MS,
       });
       return response.data.response[0].result;
     },
@@ -1263,7 +1281,9 @@ export function useSwitchQuery() {
   return useQuery({
     queryKey: ["switch"],
     queryFn: async () => {
-      const { data } = await api.get<unknown>("/bmc/network/switch");
+      const { data } = await api.get<unknown>("/bmc/network/switch", {
+        timeout: POLL_TIMEOUT_MS,
+      });
       if (!isSwitchState(data)) {
         throw new Error("this daemon has no /bmc/network/switch endpoint");
       }
@@ -1502,7 +1522,9 @@ export function useAddressQuery() {
   return useQuery({
     queryKey: ["address"],
     queryFn: async () => {
-      const { data } = await api.get<unknown>("/bmc/network/address");
+      const { data } = await api.get<unknown>("/bmc/network/address", {
+        timeout: POLL_TIMEOUT_MS,
+      });
       if (!isAddressState(data)) {
         throw new Error("this daemon has no /bmc/network/address endpoint");
       }

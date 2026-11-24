@@ -100,3 +100,57 @@ test("a thrown non-Error is still reported", () => {
   reportMutationError("timeout", undefined, reporter);
   assert.equal(shown[0].description, "timeout");
 });
+
+const unanswered = (message = "timeout of 15000ms exceeded") =>
+  Object.assign(new Error(message), {
+    isAxiosError: true,
+    code: "ECONNABORTED",
+  });
+
+test("a change the board did not answer says it may have been applied", () => {
+  const { shown, reporter } = recorder();
+  reportMutationError(
+    unanswered(),
+    { errorTitle: "nodes.powerFailed" },
+    reporter
+  );
+  assert.equal(shown.length, 1);
+  assert.equal(shown[0].title, "t(ui.boardDidNotAnswer)");
+  assert.equal(shown[0].description, "t(ui.changeMayHaveApplied)");
+  assert.equal(shown[0].variant, "destructive");
+});
+
+test("that report stays long enough to be read", () => {
+  const { shown, reporter } = recorder();
+  reportMutationError(unanswered("Network Error"), undefined, reporter);
+  assert.ok(shown[0].timeoutMs >= 15_000);
+});
+
+test("in a fleet that report names the board too", () => {
+  const { shown, reporter } = recorder("rack-2");
+  reportMutationError(unanswered(), undefined, reporter);
+  assert.equal(shown[0].title, "rack-2: t(ui.boardDidNotAnswer)");
+});
+
+test("a refusal is still the board's own words, not a silence", () => {
+  const { shown, reporter } = recorder();
+  const refused = Object.assign(
+    new Error("Request failed with status code 409"),
+    {
+      isAxiosError: true,
+      response: {
+        status: 409,
+        data: { response: [{ result: "node 2 is off" }] },
+      },
+    }
+  );
+  reportMutationError(refused, undefined, reporter);
+  assert.equal(shown[0].title, "t(ui.requestFailed)");
+  assert.equal(shown[0].description, "node 2 is off");
+});
+
+test("an unanswered change the page shows in place is not reported twice", () => {
+  const { shown, reporter } = recorder();
+  reportMutationError(unanswered(), { shownInPlace: () => true }, reporter);
+  assert.equal(shown.length, 0);
+});

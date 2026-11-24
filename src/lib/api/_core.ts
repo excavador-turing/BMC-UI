@@ -4,6 +4,8 @@ import { useMemo } from "react";
 import { useApiBase } from "@/hooks/useApiBase";
 import { useAuth } from "@/hooks/useAuth";
 
+import { limitFor, READ_TIMEOUT_MS } from "./requestTimeout.ts";
+
 /**
  * The one place a request learns where to go and what a 401 means.
  *
@@ -14,6 +16,11 @@ import { useAuth } from "@/hooks/useAuth";
  * fetch and its WebSocket URL -- which is precisely the thing that stops the
  * console working against anything but the board's own interface. Memoising
  * here is what let that workaround go.
+ *
+ * EVERY REQUEST HAS A LIMIT. The instance carries the one for a read; a call
+ * that is not a read says its own (see `requestTimeout.ts`), and an upload
+ * says none. Without a limit a board that dropped off the network was noticed
+ * after the browser gave up on the connection, 80 seconds in Safari.
  */
 export function useAxiosWithAuth() {
   const { token, clearSession } = useAuth();
@@ -22,9 +29,17 @@ export function useAxiosWithAuth() {
   return useMemo(() => {
     const api = axios.create({
       baseURL: base,
+      timeout: READ_TIMEOUT_MS,
       headers: {
         Authorization: token ? `Bearer ${token}` : "",
       },
+    });
+
+    // A write that did not name a limit gets the limit of a write; see
+    // `limitFor`.
+    api.interceptors.request.use((config) => {
+      config.timeout = limitFor(config.method, config.timeout);
+      return config;
     });
 
     api.interceptors.response.use(

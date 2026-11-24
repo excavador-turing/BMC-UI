@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useApiBase } from "@/hooks/useApiBase";
+import { isUnanswered, POLL_TIMEOUT_MS } from "@/lib/api/requestTimeout";
 
 /** How long a BMC reboot takes, measured: the upgrade guide's cost table. */
 export const EXPECTED_REBOOT_SECONDS = 48;
@@ -116,8 +117,11 @@ export function useBoardReconnect(): {
     return cache.subscribe(() => {
       if (startedAt.current !== null) return;
       const offline = cache.getAll().some((query) => {
-        const error = query.state.error as
-          { isAxiosError?: boolean; response?: unknown } | undefined | null;
+        // THE FIRST ATTEMPT THAT FAILED, not only the last. A query that is
+        // retried keeps `error` empty until its final attempt, which is how
+        // the banner took 80 seconds in Safari: three retries on top of a
+        // browser timeout. `fetchFailureReason` is set as each attempt fails.
+        const error = query.state.error ?? query.state.fetchFailureReason;
         if (!error) return false;
         // ONLY AN AXIOS ERROR WITH NO RESPONSE. Two things lack a `response`
         // and only one of them is a dead board. The other is a query that
@@ -133,8 +137,10 @@ export function useBoardReconnect(): {
         //
         // axios marks its own errors, and sets `response` whenever the board
         // answered at all. No response on an axios error means the request
-        // never arrived or never came back, and nothing else does.
-        return error.isAxiosError === true && error.response === undefined;
+        // never arrived or never came back, and nothing else does. A request
+        // that timed out is one of those: every request has a limit now, see
+        // `requestTimeout.ts`.
+        return isUnanswered(error);
       });
       if (offline) {
         startedAt.current = Date.now();
@@ -157,13 +163,24 @@ export function useBoardReconnect(): {
 
     const poll = window.setInterval(() => {
       void (async () => {
+        // With a limit of its own. A probe sent into a connection that is
+        // half open never fails, and one more of them would pile up every
+        // two seconds for as long as the board is gone.
+        const controller = new AbortController();
+        const giveUp = window.setTimeout(
+          () => controller.abort(),
+          POLL_TIMEOUT_MS
+        );
         let response: Response;
         try {
           response = await fetch(`${base}/bmc?opt=get&type=about`, {
             cache: "no-store",
+            signal: controller.signal,
           });
         } catch {
           return;
+        } finally {
+          window.clearTimeout(giveUp);
         }
         if (cancelled) return;
         // A 401 is a board that is up and wants a credential, which is

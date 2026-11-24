@@ -769,6 +769,9 @@ const translations = {
       "The interface was updated. Reload the page to use the new version.",
     reloadPage: "Reload",
     requestFailed: "The change was not applied",
+    boardDidNotAnswer: "The board did not answer",
+    changeMayHaveApplied:
+      "The change may or may not have been applied. Check the current state before you try again.",
   },
 };
 

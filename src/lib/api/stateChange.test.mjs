@@ -3,6 +3,10 @@ import { test } from "node:test";
 
 import { isBackupArchive } from "./backupArchive.ts";
 import { revokeAndClear } from "./logout.ts";
+import {
+  SLOW_CHANGE_TIMEOUT_MS,
+  STATE_CHANGE_TIMEOUT_MS,
+} from "./requestTimeout.ts";
 import { sendStateChange } from "./stateChange.ts";
 
 const failure = (status) =>
@@ -261,4 +265,38 @@ test("what counts as an archive: gzip bytes, not HTML, a 2xx status", async () =
     await isBackupArchive({ status: 200, headers: {}, data: undefined }),
     false
   );
+});
+
+test("a state change has a limit, and the fallback to GET keeps it", async () => {
+  const api = board(failure(405), "ok");
+  await sendStateChange(api, "/bmc", { params });
+  assert.deepEqual(
+    api.asked.map((c) => c.timeout),
+    [STATE_CHANGE_TIMEOUT_MS, STATE_CHANGE_TIMEOUT_MS]
+  );
+});
+
+test("a limit the caller names replaces the default, on both tries", async () => {
+  const api = board(failure(405), "ok");
+  await sendStateChange(api, "/bmc", {
+    params,
+    timeout: SLOW_CHANGE_TIMEOUT_MS,
+  });
+  assert.deepEqual(
+    api.asked.map((c) => c.timeout),
+    [SLOW_CHANGE_TIMEOUT_MS, SLOW_CHANGE_TIMEOUT_MS]
+  );
+});
+
+test("a change that timed out is not repeated as GET", async () => {
+  // It may have reached the board; a second request would be a second change.
+  const timedOut = Object.assign(new Error("timeout of 15000ms exceeded"), {
+    isAxiosError: true,
+    code: "ECONNABORTED",
+  });
+  const api = board(timedOut);
+  await assert.rejects(sendStateChange(api, "/bmc", { params }), {
+    code: "ECONNABORTED",
+  });
+  assert.equal(api.asked.length, 1);
 });

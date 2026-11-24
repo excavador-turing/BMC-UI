@@ -19,13 +19,16 @@ interface ToastOptions {
   description?: ReactNode;
   /** `destructive` is an error: it gets the error icon and colour. */
   variant?: "default" | "destructive";
+  /** How long it stays, in milliseconds. Left out, the toaster's own default. */
+  timeoutMs?: number;
 }
 
-function toast({ title, description, variant }: ToastOptions) {
+function toast({ title, description, variant, timeoutMs }: ToastOptions) {
   const id = manager.add({
     title,
     description,
     type: variant === "destructive" ? "error" : undefined,
+    ...(timeoutMs === undefined ? {} : { timeout: timeoutMs }),
   });
   return { id, dismiss: () => manager.close(id) };
 }
