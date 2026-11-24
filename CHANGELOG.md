@@ -10,6 +10,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [v4.8.1] — 2026-11-24
+
+### Fixed
+
+- **Console node selector: the selected node stays readable on hover**
+  ([#69](https://github.com/excavador-turing/BMC-UI/pull/69)). Hovering the
+  selected segment of the node picker turned its text to the page foreground
+  colour, dark on the dark selected background in the light theme and light on
+  light in the dark theme. The selected segment now keeps its own colours on
+  hover. The picker is shared, so the Console, Flash Node and USB pages are all
+  fixed.
+
 ## [v4.8.0] — 2026-11-24
 
 Thanks to Daniel Steinhauf ([@danste22](https://github.com/danste22)) for the
