@@ -4,7 +4,7 @@
 # and what presents the client certificate on the leg to each board. An image
 # that could reach a board on its own would be a credential store, and this is
 # the design that avoids having one.
-FROM node:24-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /src
 
 # Dependencies first, so a source-only change does not refetch them.

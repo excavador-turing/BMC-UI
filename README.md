@@ -107,7 +107,7 @@ which is what matters and is what `npm run build` checks.
 | **Fonts: 669 KB → 176 KB** | Fonts were 45 % of the bundle on a board with 128 MB of flash, and most of them could not be drawn on any screen this interface renders | See below |
 | **A release pipeline** | The firmware pins the UI tarball by sha256 and needs somewhere to fetch it from that is not a dormant upstream | Packaging dry-run against a real build: the tarball unpacks to `dist/`, `sha256sum -c SHA256SUMS` passes, two runs are byte-identical. Nothing has been tagged |
 | **`LICENSE` ships inside the tarball** | Upstream's asset omits it while our `.mk` declares `BMC_UI_LICENSE_FILES = LICENSE`, so Buildroot has been looking for a file that was never there. We redistribute a GPL-2.0 work on a device | Buildroot extracts with `--strip-components=1`, so `dist/LICENSE` is exactly where that variable resolves |
-| **The toolchain comes from the repo** | Upstream names it twice (`.nvmrc`, `packageManager`) and enforces it neither time. The output here is a hash-pinned artifact, so who builds it matters | `devbox.json` pins nodejs 24.12; `devbox run -- npm ci && npm run build` gives node v24.12.0 and a clean build |
+| **The toolchain comes from the repo** | Upstream names it twice (`.nvmrc`, `packageManager`) and enforces it neither time. The output here is a hash-pinned artifact, so who builds it matters | `devbox.json` pins nodejs 26.13.1; `devbox run -- node --version` gives v26.13.1, and `devbox run -- npm ci && npm run build` is the build |
 
 **Not changed: the "Buildroot release" row.** On the board it showed
 `Turing Pi v2.2.0` — the firmware name, not a Buildroot version. That is a
@@ -1372,7 +1372,7 @@ losing the rest. The rows below pair the two that could not move apart.
 
 | package | now | latest | why not |
 |---|---|---|---|
-| `@types/node` | 24.13.3 | 26.5.0 | **Policy, not risk.** The estate target is Node 24 and `devbox.json` pins `nodejs@24.12`. Types for a runtime we do not run would only hide errors. Unchanged from the first pass |
+| `@types/node` | 24.13.3 | 26.5.0 | **Policy, not risk.** The estate target is Node 26 and `devbox.json` pins `nodejs@26.13.1`. Types for a runtime we do not run would only hide errors. Unchanged from the first pass |
 | `typescript` | 6.0.3 | 7.0.2 | 6.0.3 *is* the estate standard, so this is not a hold so much as the target. It is also enforced: `typescript-eslint` 8.69.0 — the newest there is — declares `typescript >=4.8.4 <6.1.0`, so 7 will not install here until typescript-eslint ships support for it |
 
 Two undeclared imports were fixed along the way, both the same bug in
