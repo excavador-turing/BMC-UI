@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AxiosProgressEvent } from "axios";
 
 import { useAxiosWithAuth } from "./_core";
+import { isBackupArchive } from "./backupArchive.ts";
 import { handleParams } from "./flashParams.ts";
 import { sendStateChange } from "./stateChange.ts";
 
@@ -12,9 +13,16 @@ export function useBackupMutation() {
     meta: { errorTitle: "info.backupFailed" },
     mutationKey: ["backupMutation"],
     mutationFn: async () => {
-      const response = await sendStateChange(api, "/bmc/backup", {
-        responseType: "blob",
-      });
+      const response = await sendStateChange(
+        api,
+        "/bmc/backup",
+        { responseType: "blob" },
+        isBackupArchive
+      );
+      // Whatever answered, a page or an error body is not a backup.
+      if (!(await isBackupArchive(response))) {
+        throw new Error("The board did not send a backup archive.");
+      }
       const contentDisposition = response.headers[
         "content-disposition"
       ] as string;

@@ -10,6 +10,12 @@
  * Older daemons in a fleet route these on GET only and answer a POST with
  * 405. A 405 means nothing ran, so the identical request is sent once more
  * as GET. Any other failure is the board's answer and is passed on as it is.
+ *
+ * Not every old route says 405. A route registered on GET alone, like the
+ * backup, does not match a POST at all, so the request falls through to the
+ * interface's own catch-all and comes back 200 with `index.html`. A caller
+ * that knows what a real answer looks like passes `accept`; an answer it
+ * does not accept is treated like a 405, and the request is sent as GET.
  */
 import type { AxiosRequestConfig, AxiosResponse } from "axios";
 
@@ -27,12 +33,16 @@ function status(error: unknown): number | undefined {
 export async function sendStateChange<T = unknown>(
   api: Requester,
   url: string,
-  config: StateChangeConfig = {}
+  config: StateChangeConfig = {},
+  accept?: (response: AxiosResponse<T>) => boolean | Promise<boolean>
 ): Promise<AxiosResponse<T>> {
+  let posted: AxiosResponse<T>;
   try {
-    return await api.request<T>({ ...config, url, method: "POST" });
+    posted = await api.request<T>({ ...config, url, method: "POST" });
   } catch (error) {
     if (status(error) !== 405) throw error;
     return api.request<T>({ ...config, url, method: "GET" });
   }
+  if (!accept || (await accept(posted))) return posted;
+  return api.request<T>({ ...config, url, method: "GET" });
 }

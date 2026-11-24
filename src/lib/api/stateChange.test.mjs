@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
+import { isBackupArchive } from "./backupArchive.ts";
 import { revokeAndClear } from "./logout.ts";
 import { sendStateChange } from "./stateChange.ts";
 
@@ -130,4 +131,134 @@ test("logout with no token asks nothing of the board and still clears", async ()
   );
   assert.equal(posted, false);
   assert.equal(cleared, true);
+});
+
+// The backup: a board older than the one that refuses state changes on GET
+// does not route POST /api/bmc/backup (the route is GET-only, so it does not
+// match), and the interface's catch-all answers 200 with index.html.
+const answer = (status, type, body) => ({
+  status,
+  headers: { "content-type": type },
+  data: new Blob([body], { type }),
+});
+const html = () => answer(200, "text/html", "<!doctype html><html></html>");
+const archive = () =>
+  answer(
+    200,
+    "application/gzip",
+    new Uint8Array([0x1f, 0x8b, 0x08, 0x00, 0x01, 0x02])
+  );
+
+const boardAnswering = (...answers) => {
+  const asked = [];
+  return {
+    asked,
+    request: async (config) => {
+      asked.push(config);
+      const next = answers.shift();
+      if (next instanceof Error) throw next;
+      return next;
+    },
+  };
+};
+
+test("an old board answers a POST of the backup with its page: the GET is sent", async () => {
+  const api = boardAnswering(html(), archive());
+  const response = await sendStateChange(
+    api,
+    "/bmc/backup",
+    { responseType: "blob" },
+    isBackupArchive
+  );
+  assert.deepEqual(
+    api.asked.map((c) => c.method),
+    ["POST", "GET"]
+  );
+  assert.equal(await isBackupArchive(response), true);
+});
+
+test("a board that sends the archive on POST is asked once", async () => {
+  const api = boardAnswering(archive());
+  const response = await sendStateChange(
+    api,
+    "/bmc/backup",
+    { responseType: "blob" },
+    isBackupArchive
+  );
+  assert.equal(api.asked.length, 1);
+  assert.equal(api.asked[0].method, "POST");
+  assert.equal(await isBackupArchive(response), true);
+});
+
+test("a 405 on the backup still falls back to GET", async () => {
+  const api = boardAnswering(failure(405), archive());
+  const response = await sendStateChange(
+    api,
+    "/bmc/backup",
+    { responseType: "blob" },
+    isBackupArchive
+  );
+  assert.deepEqual(
+    api.asked.map((c) => c.method),
+    ["POST", "GET"]
+  );
+  assert.equal(await isBackupArchive(response), true);
+});
+
+test("a backup answer that is a page twice is returned, and is not an archive", async () => {
+  const api = boardAnswering(html(), html());
+  const response = await sendStateChange(
+    api,
+    "/bmc/backup",
+    { responseType: "blob" },
+    isBackupArchive
+  );
+  assert.equal(api.asked.length, 2);
+  assert.equal(await isBackupArchive(response), false);
+});
+
+test("an error from the board on the backup is not retried", async () => {
+  const api = boardAnswering(failure(500));
+  await assert.rejects(
+    sendStateChange(api, "/bmc/backup", {}, isBackupArchive),
+    (e) => e.response.status === 500
+  );
+  assert.equal(api.asked.length, 1);
+});
+
+test("what counts as an archive: gzip bytes, not HTML, a 2xx status", async () => {
+  assert.equal(await isBackupArchive(archive()), true);
+  assert.equal(await isBackupArchive(html()), false);
+  // An HTML content type is refused even if the bytes look right.
+  assert.equal(
+    await isBackupArchive({
+      status: 200,
+      headers: { "content-type": "text/html" },
+      data: new Blob([new Uint8Array([0x1f, 0x8b])]),
+    }),
+    false
+  );
+  // No content type at all, gzip bytes: the bytes decide.
+  assert.equal(
+    await isBackupArchive({
+      status: 200,
+      headers: {},
+      data: new Blob([new Uint8Array([0x1f, 0x8b, 0x08])]),
+    }),
+    true
+  );
+  // Not gzip bytes, not HTML type: octet-stream text is not an archive.
+  assert.equal(
+    await isBackupArchive({
+      status: 200,
+      headers: { "content-type": "application/octet-stream" },
+      data: new Blob(["not an archive"]),
+    }),
+    false
+  );
+  assert.equal(await isBackupArchive({ ...archive(), status: 404 }), false);
+  assert.equal(
+    await isBackupArchive({ status: 200, headers: {}, data: undefined }),
+    false
+  );
 });
