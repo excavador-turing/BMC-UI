@@ -72,7 +72,7 @@ export default function NodePicker({
                 }
               }}
               className={cn(
-                "inline-flex h-8 min-w-0 cursor-pointer items-center justify-center rounded-md px-1 text-sm font-medium whitespace-nowrap text-muted-foreground transition-colors outline-none select-none hover:text-foreground focus-visible:z-10 focus-visible:ring-3 focus-visible:ring-ring/60 data-checked:bg-primary data-checked:text-primary-foreground data-checked:shadow-sm data-disabled:cursor-not-allowed"
+                "inline-flex h-8 min-w-0 cursor-pointer items-center justify-center rounded-md px-1 text-sm font-medium whitespace-nowrap text-muted-foreground transition-colors outline-none select-none hover:text-foreground focus-visible:z-10 focus-visible:ring-3 focus-visible:ring-ring/60 data-checked:bg-primary data-checked:text-primary-foreground data-checked:shadow-sm data-checked:hover:bg-primary data-checked:hover:text-primary-foreground data-disabled:cursor-not-allowed"
               )}
             >
               <span className="truncate">
