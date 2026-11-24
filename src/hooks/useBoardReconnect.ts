@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useApiBase } from "@/hooks/useApiBase";
+import { longOperationRunning } from "@/lib/api/longOperation";
 import { isUnanswered, POLL_TIMEOUT_MS } from "@/lib/api/requestTimeout";
 
 /** How long a BMC reboot takes, measured: the upgrade guide's cost table. */
@@ -154,6 +155,22 @@ export function useBoardReconnect(): {
   useEffect(() => {
     if (state === "ok") return;
 
+    // A reload would end an upload, an install, a flash or a backup that is
+    // still running, and a poll that only answered late is enough to ask for
+    // one. While one runs the banner stays and the page does not reload; the
+    // operation reports its own result, and the reload comes once it is over.
+    const operationRunning = () =>
+      longOperationRunning(
+        queryClient
+          .getMutationCache()
+          .getAll()
+          .map((m) => ({ status: m.state.status, key: m.options.mutationKey })),
+        queryClient
+          .getQueryCache()
+          .findAll({ type: "active" })
+          .map((q) => q.queryKey)
+      );
+
     let cancelled = false;
 
     const tick = window.setInterval(() => {
@@ -187,7 +204,7 @@ export function useBoardReconnect(): {
         // exactly what "it is back" means here. Only a body that is not the
         // daemon's answer means it is not really back.
         if (response.status === 401 || response.status === 403) {
-          back();
+          if (!operationRunning()) back();
           return;
         }
         if (!response.ok) return;
@@ -204,7 +221,7 @@ export function useBoardReconnect(): {
         } catch {
           return;
         }
-        back();
+        if (!operationRunning()) back();
       })();
     }, POLL_MS);
 
@@ -232,7 +249,7 @@ export function useBoardReconnect(): {
       window.clearInterval(tick);
       window.clearInterval(poll);
     };
-  }, [state, base]);
+  }, [state, base, queryClient]);
 
   return { state, elapsed, cameBackIn, expectReboot };
 }
