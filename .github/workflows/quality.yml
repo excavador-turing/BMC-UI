@@ -197,6 +197,39 @@ jobs:
       - name: Drive the pickers
         run: npm run node-picker-test
 
+  # The console shows its last line, with the cursor, whole.
+  #
+  # In Safari the last row was cut off and could not be scrolled to
+  # (BMC-Firmware#125): the terminal was fitted to a parent whose border and
+  # padding it did not subtract. This opens the console in the demo build and
+  # checks that what the terminal drew fits inside the room its frame leaves
+  # it, at a desktop's width and a phone's.
+  console-fit:
+    name: The console fits its frame
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          pip install websockets
+
+      - name: Measure the terminal
+        run: npm run console-fit-test
+
   # The console speed is a node setting.
   #
   # Power Control's Edit offers each node's serial speed as a select, and the

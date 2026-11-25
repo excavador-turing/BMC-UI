@@ -585,12 +585,25 @@ export default function SerialConsole({ node }: { node: number }) {
           </p>
         ))}
 
-      <div
-        ref={containerRef}
-        role="region"
-        aria-label={t("console.ariaTerminal", { nodeId: node + 1 })}
-        className="h-96 w-full overflow-hidden rounded-lg border bg-card p-2"
-      />
+      {/* THE BOX AND THE TERMINAL'S PARENT ARE TWO ELEMENTS ON PURPOSE.
+          The fit addon sizes the terminal from its parent's computed height
+          and subtracts only the terminal element's own padding, never the
+          parent's padding or border. With the border and `p-2` on the parent
+          it counted 18 px that were not there, one row too many fitted, and
+          the last row -- the one with the cursor -- ran under the
+          `overflow-hidden` edge, so its text was cut off and the scroll area,
+          which is sized in whole rows, could not be scrolled far enough to
+          show it (excavador-turing/BMC-Firmware#125). The frame carries the
+          chrome; the element the terminal is opened in has none, so its
+          computed height is exactly the room there is. */}
+      <div className="h-96 w-full overflow-hidden rounded-lg border bg-card p-2">
+        <div
+          ref={containerRef}
+          role="region"
+          aria-label={t("console.ariaTerminal", { nodeId: node + 1 })}
+          className="h-full w-full overflow-hidden"
+        />
+      </div>
 
       <p className="mt-2 flex items-center gap-1 text-sm text-muted-foreground">
         {t("console.inputTerm")}
