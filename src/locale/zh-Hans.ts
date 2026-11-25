@@ -403,8 +403,7 @@ const translations = {
     wrongSpeed:
       "这看起来像是控制台速率不对。RK1 使用 1500000，CM4 和大多数其他模块使用 115200。",
     wrongSpeedNow: "此节点设置为 {{baud}} 波特。",
-    wrongSpeedHow:
-      "请在“电源控制”的“编辑”中设置节点 {{nodeId}} 的控制台速率。",
+    wrongSpeedHow: "请在“电源控制”的“编辑”中设置节点 {{nodeId}} 的控制台速率。",
     wrongSpeedAction: "打开电源控制",
     speedChange: "更改",
   },
