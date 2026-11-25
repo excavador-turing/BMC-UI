@@ -10,6 +10,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [v4.9.1] — 2026-11-25
+
+A notice when the console looks like the wrong speed, and the install dialog no
+longer lets a second install start. Both come from a report by DingoDogz
+(Discord). Thank you.
+
 ### Added
 
 - **The Console says when its output looks like the wrong speed, and shows each
