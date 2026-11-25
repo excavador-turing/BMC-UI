@@ -537,6 +537,10 @@ const translations = {
       "Installing {{version}}: the board downloads the image, checks its sum and writes it to the spare slot. About {{expected}} s; {{elapsed}} s so far. Nothing is armed until it says staged.",
     installingOverdue:
       "Still installing {{version}} after {{elapsed}} s. A slow link takes longer; the board says when it is done, and nothing is armed until then.",
+    keepPageOpen:
+      "Zostaw tę stronę otwartą, dopóki nie pojawi się informacja, że aktualizacja jest przygotowana. Przeładowanie lub zamknięcie karty kończy żądanie, które niesie odpowiedź.",
+    uploadCanClose:
+      "Możesz zamknąć to okno; postęp pozostaje widoczny na stronie. Zostaw stronę otwartą do końca przesyłania.",
     relationCurrent: "running now",
     relationNewer: "newer",
     relationOlder: "older",
