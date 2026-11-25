@@ -10,6 +10,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [v4.9.0] — 2026-11-25
+
+A button to cancel a staged firmware update, and two fixes. All three come from
+Daniel Steinhauf ([@danste22](https://github.com/danste22)): he asked for the
+cancel, and found and measured the other two on a board in Safari 26.6.2. Thank
+you, Daniel.
+
 ### Added
 
 - **"Cancel staged update" on the Firmware page**
@@ -32,6 +39,40 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - The upload dialog's text says what to do when an update is already staged:
   cancel it first. It used to say only that the board refuses.
+
+### Fixed
+
+- **Every request has a limit, so a lost board shows within seconds and a
+  change that got no answer says so**
+  ([#71](https://github.com/excavador-turing/BMC-UI/pull/71),
+  [BMC-Firmware#121](https://github.com/excavador-turing/BMC-Firmware/issues/121)).
+  No request had a timeout, so a board that dropped off the network was found
+  when the browser gave up on the connection, 80 seconds in Safari, and a
+  power change sent in that time stayed pending: it could still reach the board
+  later, or never, and the page could not say which. Reads now time out after
+  8 seconds, the reads a page repeats every few seconds after 5, state changes
+  after 15, firmware installs, configuration imports, storage repairs and the
+  backup after 2 minutes, and the update check after 30; uploads have no limit.
+  The "board stopped answering" banner looks at the first request that failed,
+  not the last of its retries, so it appears about ten seconds after the board
+  goes. A change that got no answer is reported as "The board did not answer.
+  The change may or may not have been applied", for 20 seconds, instead of as a
+  failure, and the toast is raised above dialogs: it used to come up behind the
+  blurred backdrop of the confirmation, where it could not be read. A refusal
+  from the board still shows the board's own words. While an upload, a firmware
+  install, a node flash or a backup is running, the page never reloads itself
+  when the board answers again after being flagged lost: the banner shows, and
+  the operation's own result decides.
+- **The serial console shows its last line**
+  ([#72](https://github.com/excavador-turing/BMC-UI/pull/72),
+  [BMC-Firmware#125](https://github.com/excavador-turing/BMC-Firmware/issues/125)).
+  The line with the cursor showed only its top part and the console could not
+  be scrolled further. The terminal's fit addon sizes it from its parent's
+  height and takes off only the terminal's own padding, and the parent carried
+  a border and padding, so one row too many was fitted and the last one ran
+  under the clipped edge. The frame now carries the border and padding and the
+  element the terminal is opened in has none. A browser check in CI measures it
+  at a desktop's width and a phone's.
 
 ## [v4.8.1] — 2026-11-24
 
