@@ -17,6 +17,12 @@ interface ConfirmationModalProps {
   onConfirm: () => void;
   title: string;
   message: string | React.ReactNode;
+  /** The red button's words. Defaults to "Continue". */
+  confirmLabel?: string;
+  /** The other button's words. Defaults to "Cancel". Worth setting when the
+   *  thing being confirmed is itself a cancellation, where "Cancel" would
+   *  answer neither question. */
+  dismissLabel?: string;
 }
 
 /**
@@ -33,6 +39,8 @@ export default function ConfirmationModal({
   onConfirm,
   title,
   message,
+  confirmLabel,
+  dismissLabel,
 }: ConfirmationModalProps) {
   const { t } = useTranslation();
 
@@ -50,13 +58,15 @@ export default function ConfirmationModal({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{t("ui.cancel")}</AlertDialogCancel>
+          <AlertDialogCancel>
+            {dismissLabel ?? t("ui.cancel")}
+          </AlertDialogCancel>
           {/* Red at the point of commitment, like the reboot modal's. Every
               caller of this modal is confirming something consequential --
               flashing a module, resetting the network, restoring a config,
               renaming the board -- which is why they ask at all. */}
           <AlertDialogAction variant="destructive" onClick={onConfirm}>
-            {t("ui.continue")}
+            {confirmLabel ?? t("ui.continue")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

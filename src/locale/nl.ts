@@ -476,6 +476,18 @@ const translations = {
     successStagedMessage:
       "Er verandert niets totdat u herstart; de knop om te herstarten staat in het paneel hierboven.",
     rebootToApply: "Herstarten om toe te passen",
+    unstageButton: "Cancel staged update",
+    unstageModalTitle: "Cancel the staged update?",
+    unstageModalDescription:
+      "The next reboot will keep the firmware that is running now. The image already written to the spare slot stays there until the next install replaces it.",
+    unstageModalDescriptionNamed:
+      "{{version}} will not be started by the next reboot: the board keeps the firmware that is running now. The image already written to the spare slot stays there until the next install replaces it.",
+    unstageConfirm: "Cancel update",
+    unstageKeep: "Keep it staged",
+    unstageFailed: "The staged update was not cancelled",
+    unstageSuccess: "Staged update cancelled",
+    unstageSuccessMessage:
+      "The next reboot keeps the firmware that is running.",
     firmwareSlots: "Firmwareslots",
     promotionPassed: "Geslaagd",
     promotionRolledBack: "Teruggezet",
