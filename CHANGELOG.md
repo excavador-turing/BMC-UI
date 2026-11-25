@@ -24,6 +24,27 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   change it. Translated in every locale. Thanks to DingoDogz (Discord) for the
   report.
 
+### Fixed
+
+- **A second press of "Continue" no longer starts a second install, and the
+  install dialog closes when it is answered.** The install confirmation stayed
+  open until the board answered, its progress was behind the backdrop, and its
+  "Continue" stayed enabled, so pressing it again was the natural thing to do.
+  The second press sent a second `firmware_install` while the first was still
+  writing the spare slot; a daemon without the staging lock (before bmcd 2.51.0)
+  lets it in, and two updaters on one volume leave nothing staged. A
+  single-flight gate now refuses the second install, the dialog closes at once,
+  and the page shows the progress (with a bar), a failure that stays until
+  dismissed, and the "Staged" notice with "Reboot to apply" in the panel above.
+  The buttons read "Install" and "Do not install". Cancelling a staged update
+  stays its own button with its own confirmation.
+- **The upload dialog can be closed while the image uploads and is written.**
+  The upload runs in the page-wide flash state, so closing the dialog touches
+  nothing; the same progress, or the failure, is shown beside the list. Keep the
+  page open until it is done: reloading or closing the tab ends the upload. The
+  install likewise needs the page open for its answer. Thanks to DingoDogz
+  (Discord) for the report.
+
 ## [v4.9.0] — 2026-11-25
 
 A button to cancel a staged firmware update, and two fixes. All three come from
