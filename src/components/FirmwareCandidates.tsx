@@ -409,10 +409,12 @@ export default function FirmwareCandidates({
   // observer does. The confirmation closes the moment it is answered and the
   // reader may move to another tab while the board works; the cache is what
   // still knows about the install when this page is mounted again.
-  const installState = useMutationState({
+  const installStates = useMutationState({
     filters: { mutationKey: ["installFirmware"] },
     select: (mutation) => mutation.state,
-  }).at(-1);
+  });
+  const installState: (typeof installStates)[number] | undefined =
+    installStates[installStates.length - 1];
   const installing = installState?.status === "pending";
   const installVars = installState?.variables as InstallVariables | undefined;
   // The install whose failure was dismissed, by when it was submitted.
@@ -677,7 +679,7 @@ export default function FirmwareCandidates({
             installState?.status === "error" &&
             installState.submittedAt !== dismissedAt &&
             installState.error
-              ? bmcdMessage(installState.error as Error)
+              ? bmcdMessage(installState.error)
               : null
           }
           onDismiss={() => setDismissedAt(installState?.submittedAt ?? null)}
