@@ -421,6 +421,13 @@ const translations = {
       "Auf dem BMC selbst ist /dev/ttyNodeN die gemeinsame Konsole des Knotens, N ist die Knotennummer (1 bis 4). Sie zeigt genau, was diese Seite zeigt, und ein lokales Werkzeug kann hineintippen:",
     localSpeed:
       "Die Geschwindigkeit wird in den Einstellungen des Knotens (Leistungssteuerung, Bearbeiten) festgelegt, nicht vom Werkzeug.",
+    wrongSpeed:
+      "Das sieht nach der falschen Konsolengeschwindigkeit aus. RK1 nutzt 1500000, CM4 und die meisten anderen 115200.",
+    wrongSpeedNow: "Dieser Knoten ist auf {{baud}} Baud eingestellt.",
+    wrongSpeedHow:
+      "Stellen Sie die Konsolengeschwindigkeit für Knoten {{nodeId}} unter Leistungssteuerung, Bearbeiten ein.",
+    wrongSpeedAction: "Leistungssteuerung öffnen",
+    speedChange: "ändern",
   },
   usb: {
     header: "USB-Route",

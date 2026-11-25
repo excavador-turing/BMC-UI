@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import InfoNote from "@/components/InfoNote";
+import NavLink from "@/components/NavLink";
 import NodePicker from "@/components/NodePicker";
 import SerialConsole from "@/components/SerialConsole";
 import TabView from "@/components/TabView";
@@ -13,7 +14,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { type SerialReaderState, useSerialStatusQuery } from "@/lib/api/get";
+import {
+  type SerialReaderState,
+  useNodeInfoQuery,
+  useSerialStatusQuery,
+} from "@/lib/api/get";
+import { effectiveBaud } from "@/lib/consoleSpeed";
 
 export const Route = createLazyFileRoute("/_tabLayout/console")({
   component: SerialConsoleRoute,
@@ -80,9 +86,15 @@ export function SerialConsoleTab({ preselected }: { preselected?: number }) {
     fromLink ? String(fromLink - 1) : "0"
   );
   const { data: readerStates, isError } = useSerialStatusQuery();
+  const { data: nodeInfo } = useNodeInfoQuery();
 
   const node = Number.parseInt(selectedNode);
   const readerState = readerStates?.[node];
+  // What this node's port runs at. Unknown until the board has answered, and
+  // then shown rather than guessed: a node with nothing stored runs at the
+  // default, which is the wrong speed for an RK1.
+  const info = nodeInfo?.[node];
+  const baud = info === undefined ? undefined : effectiveBaud(info.uart_baud);
 
   return (
     <TabView>
@@ -121,8 +133,31 @@ export function SerialConsoleTab({ preselected }: { preselected?: number }) {
               ) : (
                 <ReaderState state={readerState} />
               )}
+              {baud !== undefined && (
+                <>
+                  <span aria-hidden className="text-muted-foreground">
+                    |
+                  </span>
+                  <span className="text-muted-foreground">
+                    {t("nodes.consoleSpeed")}
+                  </span>
+                  <span className="font-medium" data-testid="console-baud">
+                    {t("nodes.baudValue", { baud })}
+                    {info?.uart_baud == null
+                      ? ` (${t("nodes.baudDefault")})`
+                      : ""}
+                  </span>
+                  <NavLink
+                    destination="power-control"
+                    node={node + 1}
+                    className="text-primary underline underline-offset-4"
+                  >
+                    {t("console.speedChange")}
+                  </NavLink>
+                </>
+              )}
             </div>
-            <SerialConsole key={node} node={node} />
+            <SerialConsole key={node} node={node} baud={baud} />
           </div>
         </CardContent>
       </Card>

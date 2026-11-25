@@ -400,6 +400,12 @@ const translations = {
     localIntro:
       "在 BMC 本机上，/dev/ttyNodeN 是该节点的共享控制台，N 为节点编号（1 到 4）。它显示的内容与本页完全相同，本地工具也可以向其中输入：",
     localSpeed: "速率在节点的设置中指定（电源控制，编辑），而不是由工具指定。",
+    wrongSpeed:
+      "这看起来像是控制台速率不对。RK1 使用 1500000，CM4 和大多数其他模块使用 115200。",
+    wrongSpeedNow: "此节点设置为 {{baud}} 波特。",
+    wrongSpeedHow: "请在“电源控制”的“编辑”中设置节点 {{nodeId}} 的控制台速率。",
+    wrongSpeedAction: "打开电源控制",
+    speedChange: "更改",
   },
   usb: {
     header: "USB 路由",

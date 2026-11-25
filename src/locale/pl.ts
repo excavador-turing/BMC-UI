@@ -418,6 +418,13 @@ const translations = {
       "Na samym BMC /dev/ttyNodeN to wspólna konsola węzła, gdzie N to numer węzła (od 1 do 4). Pokazuje dokładnie to, co ta strona, a lokalne narzędzie może do niej pisać:",
     localSpeed:
       "Szybkość ustawia się w ustawieniach węzła (Sterowanie zasilaniem, Edytuj), a nie w narzędziu.",
+    wrongSpeed:
+      "To wygląda na złą szybkość konsoli. RK1 używa 1500000, CM4 i większość pozostałych 115200.",
+    wrongSpeedNow: "Ten węzeł jest ustawiony na {{baud}} baud.",
+    wrongSpeedHow:
+      "Ustaw szybkość konsoli węzła {{nodeId}} w sekcji Sterowanie zasilaniem, Edytuj.",
+    wrongSpeedAction: "Otwórz Sterowanie zasilaniem",
+    speedChange: "zmień",
   },
   usb: {
     header: "Trasa USB",

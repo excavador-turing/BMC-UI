@@ -2,15 +2,19 @@ import "@xterm/xterm/css/xterm.css";
 
 import { FitAddon } from "@xterm/addon-fit";
 import { Terminal } from "@xterm/xterm";
+import { AlertTriangle } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import InfoNote from "@/components/InfoNote";
-import { Button } from "@/components/ui/button";
+import NavLink from "@/components/NavLink";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useApiBase } from "@/hooks/useApiBase";
 import { useAuth } from "@/hooks/useAuth";
 import { rememberShown, unseenTail } from "@/lib/console-replay";
+import { looksLikeWrongSpeed } from "@/lib/consoleSpeed";
 import { cn } from "@/lib/utils";
 
 /**
@@ -136,7 +140,14 @@ interface CloseInfo {
  * module unmounts this one: the terminal is disposed and the socket closed
  * together, and nothing from the old node can land in the new node's buffer.
  */
-export default function SerialConsole({ node }: { node: number }) {
+export default function SerialConsole({
+  node,
+  baud,
+}: {
+  node: number;
+  /** The speed this node's port runs at, when it is known. */
+  baud?: number;
+}) {
   const { t } = useTranslation();
   const { token } = useAuth();
   // Where this board's API lives. `/api` on the board's own interface;
@@ -160,6 +171,15 @@ export default function SerialConsole({ node }: { node: number }) {
   // across two of them. The terminal has its own decoder; this is the shadow
   // copy's, and it has to be a streaming one for the same reason.
   const decoderRef = useRef<TextDecoder | null>(null);
+
+  // Whether what is on screen looks like a console read at the wrong speed.
+  // Judged on the same shadow copy the replay compares against, after every
+  // write and every clear, and kept as a flag so a frame costs a render only
+  // when the verdict changes.
+  const [wrongSpeed, setWrongSpeed] = useState(false);
+  const judge = useCallback(() => {
+    setWrongSpeed(looksLikeWrongSpeed(shownRef.current));
+  }, []);
 
   const [state, setState] = useState<ConnectionState>("connecting");
   const [closeInfo, setCloseInfo] = useState<CloseInfo | null>(null);
@@ -243,11 +263,12 @@ export default function SerialConsole({ node }: { node: number }) {
       if (fresh !== "") {
         terminalRef.current?.write(fresh);
         shownRef.current = rememberShown(shownRef.current, fresh);
+        judge();
       }
     } catch {
       // Nothing to show is not an error worth surfacing.
     }
-  }, [base, bearer, node, usable]);
+  }, [base, bearer, judge, node, usable]);
 
   /**
    * One request to the same origin, to find out what the socket could not say.
@@ -404,9 +425,11 @@ export default function SerialConsole({ node }: { node: number }) {
             shownRef.current,
             decoderRef.current.decode(bytes, { stream: true })
           );
+          judge();
         } else if (typeof event.data === "string") {
           target.write(event.data);
           shownRef.current = rememberShown(shownRef.current, event.data);
+          judge();
         }
       };
 
@@ -474,7 +497,7 @@ export default function SerialConsole({ node }: { node: number }) {
     // `diagnose` is memoised on [base, bearer, node], a strict subset of this
     // list, so naming it here cannot make the socket rebuild any more often
     // than it already does.
-  }, [base, bearer, node, usable, generation, replay, diagnose]);
+  }, [base, bearer, node, usable, generation, replay, diagnose, judge]);
 
   const stateLabel: Record<ConnectionState, string> = {
     connecting: t("console.stateConnecting"),
@@ -525,6 +548,7 @@ export default function SerialConsole({ node }: { node: number }) {
               // Nothing is on screen now, so nothing counts as shown. A later
               // replay repopulates instead of deciding it has nothing to add.
               shownRef.current = "";
+              judge();
             }}
           >
             {t("console.clearButton")}
@@ -540,6 +564,7 @@ export default function SerialConsole({ node }: { node: number }) {
               // the daemon's 16 KiB, which is the trade a redraw is.
               terminalRef.current?.clear();
               shownRef.current = "";
+              judge();
               void replay();
             }}
           >
@@ -584,6 +609,30 @@ export default function SerialConsole({ node }: { node: number }) {
             {t(`console.failed.${diagnosis}`)}
           </p>
         ))}
+
+      {/* Said plainly, and only on a guess the output supports: a speed that
+          does not match shows as replacement characters and control bytes, and
+          nothing on the page used to say that is what it was. The way to the
+          setting is here, because it lives on another page, under Edit. */}
+      {wrongSpeed && (
+        <Alert variant="warning" className="mb-4" data-testid="console-speed">
+          <AlertTriangle />
+          <AlertTitle>{t("console.wrongSpeed")}</AlertTitle>
+          <AlertDescription className="flex flex-col items-start gap-2">
+            {baud !== undefined && (
+              <p>{t("console.wrongSpeedNow", { baud, nodeId: node + 1 })}</p>
+            )}
+            <p>{t("console.wrongSpeedHow", { nodeId: node + 1 })}</p>
+            <NavLink
+              destination="power-control"
+              node={node + 1}
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              {t("console.wrongSpeedAction")}
+            </NavLink>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* THE BOX AND THE TERMINAL'S PARENT ARE TWO ELEMENTS ON PURPOSE.
           The fit addon sizes the terminal from its parent's computed height
