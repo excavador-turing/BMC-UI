@@ -785,6 +785,12 @@ export default function FirmwareCandidates({
           isOpen={confirming !== null}
           onClose={closeConfirm}
           onConfirm={() => void doInstall()}
+          // Named for what they do. "Continue" and "Cancel" leave open what is
+          // being continued or cancelled, in a dialog that sits over a page
+          // with an update that may be staged; cancelling a staged update is
+          // its own button, with its own confirmation, in the slots panel.
+          confirmLabel={t("firmwareUpgrade.installConfirm")}
+          dismissLabel={t("firmwareUpgrade.installDismiss")}
           title={
             confirming
               ? t("firmwareUpgrade.confirmTitle", {

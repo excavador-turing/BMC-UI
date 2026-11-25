@@ -542,6 +542,8 @@ const translations = {
       "Laat deze pagina open staan tot er staat dat de update klaarstaat. Opnieuw laden of het tabblad sluiten beëindigt het verzoek dat het antwoord brengt.",
     uploadCanClose:
       "U kunt dit venster sluiten; de voortgang blijft op de pagina zichtbaar. Laat de pagina open staan tot de upload klaar is.",
+    installConfirm: "Installeren",
+    installDismiss: "Niet installeren",
     relationCurrent: "running now",
     relationNewer: "newer",
     relationOlder: "older",

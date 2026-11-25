@@ -612,6 +612,8 @@ const translations = {
       "Keep this page open until it says staged. Reloading or closing the tab ends the request that carries the answer.",
     uploadCanClose:
       "You can close this window; the progress stays on the page. Keep the page open until the upload is done.",
+    installConfirm: "Install",
+    installDismiss: "Do not install",
     relationCurrent: "running now",
     relationNewer: "newer",
     relationOlder: "older",

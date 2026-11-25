@@ -541,6 +541,8 @@ const translations = {
       "Zostaw tę stronę otwartą, dopóki nie pojawi się informacja, że aktualizacja jest przygotowana. Przeładowanie lub zamknięcie karty kończy żądanie, które niesie odpowiedź.",
     uploadCanClose:
       "Możesz zamknąć to okno; postęp pozostaje widoczny na stronie. Zostaw stronę otwartą do końca przesyłania.",
+    installConfirm: "Zainstaluj",
+    installDismiss: "Nie instaluj",
     relationCurrent: "running now",
     relationNewer: "newer",
     relationOlder: "older",

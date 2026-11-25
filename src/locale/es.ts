@@ -543,6 +543,8 @@ const translations = {
       "Mantenga esta página abierta hasta que indique que está preparada. Recargar o cerrar la pestaña termina la solicitud que trae la respuesta.",
     uploadCanClose:
       "Puede cerrar esta ventana; el progreso sigue visible en la página. Mantenga la página abierta hasta que termine la subida.",
+    installConfirm: "Instalar",
+    installDismiss: "No instalar",
     relationCurrent: "running now",
     relationNewer: "newer",
     relationOlder: "older",

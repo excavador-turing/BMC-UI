@@ -518,6 +518,8 @@ const translations = {
       "在显示“已暂存”之前请保持此页面打开。刷新或关闭标签页会中断携带结果的请求。",
     uploadCanClose:
       "您可以关闭此窗口，进度会保留在页面上。上传完成前请保持页面打开。",
+    installConfirm: "安装",
+    installDismiss: "不安装",
     relationCurrent: "running now",
     relationNewer: "newer",
     relationOlder: "older",

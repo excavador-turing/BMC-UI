@@ -546,6 +546,8 @@ const translations = {
       "Lassen Sie diese Seite offen, bis \u201egestaged\u201c erscheint. Neu laden oder den Tab schließen beendet die Anfrage, die die Antwort liefert.",
     uploadCanClose:
       "Sie können dieses Fenster schließen; der Fortschritt bleibt auf der Seite sichtbar. Lassen Sie die Seite offen, bis der Upload abgeschlossen ist.",
+    installConfirm: "Installieren",
+    installDismiss: "Nicht installieren",
     relationCurrent: "running now",
     relationNewer: "newer",
     relationOlder: "older",
