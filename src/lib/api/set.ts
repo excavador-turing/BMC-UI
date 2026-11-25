@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useAxiosWithAuth } from "./_core";
 import type { FirmwareSources, SwitchDocument } from "./get";
+import { SLOW_CHANGE_TIMEOUT_MS } from "./requestTimeout.ts";
 import { sendStateChange } from "./stateChange.ts";
 import { REPAIR_HEADERS, repairBody } from "./storageView";
 import { classifyApply } from "./switchApply.ts";
@@ -178,6 +179,7 @@ export function useRepairStorageMutation() {
     mutationFn: async () => {
       await api.post("/bmc/storage/repair", repairBody(), {
         headers: REPAIR_HEADERS,
+        timeout: SLOW_CHANGE_TIMEOUT_MS,
       });
     },
   });
@@ -355,10 +357,11 @@ export function useInstallFirmwareMutation() {
             version: variables.version,
             ...(variables.allowDowngrade ? { allow_downgrade: 1 } : {}),
           };
+      // The board fetches and stages the image before it answers.
       const response = await sendStateChange<APIResponse<unknown>>(
         api,
         "/bmc",
-        { params }
+        { params, timeout: SLOW_CHANGE_TIMEOUT_MS }
       );
       return response.data.response[0].result;
     },
@@ -445,6 +448,7 @@ export function useImportConfigMutation() {
         "/bmc",
         {
           params: { opt: "set", type: "config", config: document },
+          timeout: SLOW_CHANGE_TIMEOUT_MS,
         }
       );
       return response.data.response[0].result;

@@ -633,6 +633,9 @@ const translations = {
       "De interface is bijgewerkt. Laad de pagina opnieuw om de nieuwe versie te gebruiken.",
     reloadPage: "Opnieuw laden",
     requestFailed: "De wijziging is niet toegepast",
+    boardDidNotAnswer: "Het bord antwoordde niet",
+    changeMayHaveApplied:
+      "De wijziging is mogelijk wel of niet toegepast. Controleer de huidige status voordat je het opnieuw probeert.",
   },
 } satisfies OptionalTranslations;
 

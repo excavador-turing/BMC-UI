@@ -4,6 +4,7 @@ import type { AxiosProgressEvent } from "axios";
 import { useAxiosWithAuth } from "./_core";
 import { isBackupArchive } from "./backupArchive.ts";
 import { handleParams } from "./flashParams.ts";
+import { NO_TIMEOUT, SLOW_CHANGE_TIMEOUT_MS } from "./requestTimeout.ts";
 import { sendStateChange } from "./stateChange.ts";
 
 export function useBackupMutation() {
@@ -16,7 +17,7 @@ export function useBackupMutation() {
       const response = await sendStateChange(
         api,
         "/bmc/backup",
-        { responseType: "blob" },
+        { responseType: "blob", timeout: SLOW_CHANGE_TIMEOUT_MS },
         isBackupArchive
       );
       // Whatever answered, a page or an error body is not a backup.
@@ -69,7 +70,10 @@ export function useFirmwareUpdateMutation(
       if (variables.file) {
         const formData = new FormData();
         if (variables.file) formData.append("file", variables.file);
+        // No limit: the upload lasts as long as the file does, and the
+        // browser reports a connection that breaks under it.
         await api.post(`/bmc/upload/${handle}`, formData, {
+          timeout: NO_TIMEOUT,
           onUploadProgress: (progressEvent) => {
             if (progressCallBack) progressCallBack(progressEvent);
           },
@@ -123,7 +127,10 @@ export function useNodeUpdateMutation(
       if (variables.file) {
         const formData = new FormData();
         if (variables.file) formData.append("file", variables.file);
+        // No limit: the upload lasts as long as the file does, and the
+        // browser reports a connection that breaks under it.
         await api.post(`/bmc/upload/${handle}`, formData, {
+          timeout: NO_TIMEOUT,
           onUploadProgress: (progressEvent) => {
             if (progressCallBack) progressCallBack(progressEvent);
           },

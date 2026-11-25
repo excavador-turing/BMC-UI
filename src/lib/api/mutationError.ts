@@ -12,13 +12,24 @@
  * - `shownInPlace(error)`: true for an error the page already shows where it
  *   happened (the sign-in form, the switch card's question), so it is not
  *   reported a second time.
+ *
+ * A change the board did not answer (it timed out, or the connection broke)
+ * is reported as exactly that, whatever its title: it is neither "failed" nor
+ * "done", because the request may still have reached the board. The report
+ * says so, and stays longer than the usual few seconds so it can be read.
  */
+
+/** How long the report of an unanswered change stays on screen. */
+export const UNANSWERED_TOAST_MS = 20_000;
 import { bmcdMessage } from "./bmcdMessage.ts";
+import { isUnanswered } from "./requestTimeout.ts";
 
 export interface ErrorToast {
   title: string;
   description: string;
   variant: "destructive";
+  /** How long it stays, in milliseconds. Left out, the usual few seconds. */
+  timeoutMs?: number;
 }
 
 export interface ErrorReporter {
@@ -38,6 +49,18 @@ export function reportMutationError(
   const shownInPlace = meta?.shownInPlace as
     ((error: unknown) => boolean) | undefined;
   if (typeof shownInPlace === "function" && shownInPlace(error)) return;
+  if (isUnanswered(error)) {
+    toast({
+      title:
+        scope === null
+          ? t("ui.boardDidNotAnswer")
+          : `${scope}: ${t("ui.boardDidNotAnswer")}`,
+      description: t("ui.changeMayHaveApplied"),
+      variant: "destructive",
+      timeoutMs: UNANSWERED_TOAST_MS,
+    });
+    return;
+  }
   const key =
     typeof meta?.errorTitle === "string" && meta.errorTitle !== ""
       ? meta.errorTitle

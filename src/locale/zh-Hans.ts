@@ -606,6 +606,9 @@ const translations = {
     staleBundle: "界面已更新。请重新加载页面以使用新版本。",
     reloadPage: "重新加载",
     requestFailed: "更改未应用",
+    boardDidNotAnswer: "主板没有响应",
+    changeMayHaveApplied:
+      "更改可能已应用，也可能没有。请先检查当前状态，再重试。",
   },
 } satisfies OptionalTranslations;
 
