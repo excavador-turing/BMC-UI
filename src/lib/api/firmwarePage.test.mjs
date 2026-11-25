@@ -8,6 +8,7 @@ import {
   refreshPollDelayMs,
   resolveInstallTarget,
   sdCardPresent,
+  singleFlight,
   snapshotFromBadge,
   snapshotFromRow,
   visibleStorage,
@@ -274,4 +275,26 @@ test("an SD card that is not mounted is not drawn; every other volume is", () =>
   const there = { ...sd, mounted: true };
   assert.deepEqual(visibleStorage([bmc, there]), [bmc, there]);
   assert.deepEqual(visibleStorage([bmc, sd]), [bmc, sd]);
+});
+
+test("a second press of Continue does not start a second install", () => {
+  // The install confirmation used to stay open with Continue enabled, and a
+  // second press sent a second firmware_install over the one still writing.
+  const gate = singleFlight();
+  let sent = 0;
+  const pressContinue = () => {
+    if (gate.begin()) sent++;
+  };
+  pressContinue();
+  pressContinue();
+  pressContinue();
+  assert.equal(sent, 1);
+});
+
+test("the next install may start once the last one is over, whatever it did", () => {
+  const gate = singleFlight();
+  assert.equal(gate.begin(), true);
+  assert.equal(gate.begin(), false);
+  gate.end();
+  assert.equal(gate.begin(), true);
 });

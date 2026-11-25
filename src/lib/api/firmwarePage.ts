@@ -277,3 +277,37 @@ export function isNoCardRefusal(message: string | null | undefined): boolean {
     (/not mounted/i.test(text) && /sdcard|\bcard\b/i.test(text))
   );
 }
+
+/**
+ * Lets one install run at a time, however many times it is asked for.
+ *
+ * THE BUG THIS EXISTS FOR. The install confirmation stayed open until the
+ * board answered, and its "Continue" stayed enabled. Nothing on the page said
+ * the install had started -- its progress was behind the dialog's backdrop --
+ * so a second press of "Continue" was the natural thing to do, and it sent a
+ * second `firmware_install` while the first was still writing the spare slot.
+ * A daemon without the staging lock (everything before bmcd#92) lets the
+ * second one in, because nothing is armed yet for its "already staged" check
+ * to see, and two updaters writing the same volume destroy the image being
+ * staged: the install ends with nothing staged, and "Continue" is what did it.
+ * With the lock the second request is a 409 that reads like a failure of the
+ * first.
+ *
+ * `begin` answers true for the caller that may go ahead and false for every
+ * caller that arrives before `end`. It is synchronous on purpose: a React
+ * state flag is only visible after the next render, and two presses can land
+ * before it.
+ */
+export function singleFlight(): { begin(): boolean; end(): void } {
+  let running = false;
+  return {
+    begin() {
+      if (running) return false;
+      running = true;
+      return true;
+    },
+    end() {
+      running = false;
+    },
+  };
+}

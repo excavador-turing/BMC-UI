@@ -1,3 +1,4 @@
+import { useMutationState } from "@tanstack/react-query";
 import {
   AlertTriangle,
   ExternalLink,
@@ -7,7 +8,7 @@ import {
   ShieldQuestion,
   Upload,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import ConfirmationModal from "@/components/ConfirmationModal";
@@ -32,10 +33,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import UsageBar from "@/components/UsageBar";
+import { useFlash } from "@/hooks/use-flash";
+import { bmcdMessage } from "@/lib/api/bmcdMessage";
 import {
   type BadgeRequest,
   type InstallSnapshot,
   refreshPollDelayMs,
+  singleFlight,
   snapshotFromBadge,
   snapshotFromRow,
 } from "@/lib/api/firmwarePage";
@@ -224,6 +229,151 @@ function CandidateRow({
   );
 }
 
+/** What `useInstallFirmwareMutation` is called with, for reading it back. */
+interface InstallVariables {
+  source: string;
+  version: string;
+}
+
+/**
+ * Where an install stands, on the page.
+ *
+ * It used to sit in the card's foot under a confirmation dialog that stayed
+ * open until the board answered, so the progress was behind the backdrop and
+ * the dialog was the only thing that could be looked at for the best part of
+ * half a minute. Closing the dialog loses nothing: the install is one request
+ * that the page keeps in flight, and the board finishes it whether or not a
+ * dialog is showing. What it does depend on is this page staying open --
+ * reloading or closing the tab ends the request that carries the answer -- so
+ * that is what the text says.
+ *
+ * A failure stays until it is dismissed: it used to be a toast, gone in
+ * seconds, and the dialog that held the reason was already closed.
+ */
+function InstallStatus({
+  installing,
+  succeeded,
+  version,
+  elapsed,
+  error,
+  onDismiss,
+}: {
+  installing: boolean;
+  succeeded: boolean;
+  version: string | undefined;
+  elapsed: number;
+  error: string | null;
+  onDismiss: () => void;
+}) {
+  const { t } = useTranslation();
+
+  if (installing) {
+    return (
+      <div role="status" aria-live="polite" className="flex flex-col gap-2">
+        <p className="text-sm text-warning">
+          {elapsed > EXPECTED_INSTALL_SECONDS
+            ? t("firmwareUpgrade.installingOverdue", { version, elapsed })
+            : t("firmwareUpgrade.installingNow", {
+                version,
+                expected: EXPECTED_INSTALL_SECONDS,
+                elapsed,
+              })}
+        </p>
+        <UsageBar
+          aria-label={t("firmwareUpgrade.ariaProgress")}
+          value={100}
+          pulsing
+        />
+        <p className="text-sm text-muted-foreground">
+          {t("firmwareUpgrade.keepPageOpen")}
+        </p>
+      </div>
+    );
+  }
+
+  if (error !== null) {
+    return (
+      <Alert variant="destructive">
+        <AlertTriangle />
+        <AlertTitle>{t("firmwareUpgrade.installFailed")}</AlertTitle>
+        <AlertDescription className="flex flex-col items-start gap-2">
+          <p>{error}</p>
+          <Button type="button" variant="ghost" size="sm" onClick={onDismiss}>
+            {t("firmwareUpgrade.dismiss")}
+          </Button>
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (succeeded) {
+    return (
+      <p className="text-sm text-warning">
+        {t("firmwareUpgrade.installStaged")}
+      </p>
+    );
+  }
+
+  return null;
+}
+
+/**
+ * The upload's progress, beside the list, while its dialog is closed.
+ *
+ * The upload and the write that follows run in the page-wide flash state, not
+ * in the dialog, so closing the dialog does not touch them; this is the only
+ * sign of them left on screen.
+ */
+function UploadStatus({
+  busy,
+  message,
+  progress,
+  error,
+  onDismiss,
+}: {
+  busy: boolean;
+  message: string;
+  progress?: { transferred: string; total: string | null; pct: number };
+  error: string | null;
+  onDismiss: () => void;
+}) {
+  const { t } = useTranslation();
+
+  if (!busy && error) {
+    return (
+      <Alert variant="destructive">
+        <AlertTriangle />
+        <AlertTitle>{t("firmwareUpgrade.uploadFailed")}</AlertTitle>
+        <AlertDescription className="flex flex-col items-start gap-2">
+          <p>{error}</p>
+          <Button type="button" variant="ghost" size="sm" onClick={onDismiss}>
+            {t("firmwareUpgrade.dismiss")}
+          </Button>
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  return (
+    <div role="status" aria-live="polite" className="flex flex-col gap-2">
+      <p className="text-sm text-warning">{message}</p>
+      {progress && (
+        <UsageBar
+          aria-label={t("firmwareUpgrade.ariaProgress")}
+          value={progress.pct}
+          label={`${progress.transferred}${
+            progress.total ? ` / ${progress.total}` : ""
+          }`}
+          pulsing={busy}
+        />
+      )}
+      <p className="text-sm text-muted-foreground">
+        {t("firmwareUpgrade.keepPageOpen")}
+      </p>
+    </div>
+  );
+}
+
 /** How many of a source's newest candidates are shown before "show all". */
 const VISIBLE_PER_SOURCE = 1;
 
@@ -255,6 +405,34 @@ export default function FirmwareCandidates({
 
   const catalog = useFirmwareAvailableQuery();
   const install = useInstallFirmwareMutation();
+  // The install as the mutation cache sees it, not as this component's own
+  // observer does. The confirmation closes the moment it is answered and the
+  // reader may move to another tab while the board works; the cache is what
+  // still knows about the install when this page is mounted again.
+  const installStates = useMutationState({
+    filters: { mutationKey: ["installFirmware"] },
+    select: (mutation) => mutation.state,
+  });
+  const installState: (typeof installStates)[number] | undefined =
+    installStates[installStates.length - 1];
+  const installing = installState?.status === "pending";
+  const installVars = installState?.variables as InstallVariables | undefined;
+  // The install whose failure was dismissed, by when it was submitted.
+  const [dismissedAt, setDismissedAt] = useState<number | null>(null);
+  // The upload as the page-wide flash state sees it: its dialog can be closed
+  // while the board works, so the progress has to be on the page too.
+  const {
+    flashType,
+    isFlashing,
+    statusMessage,
+    firmwareUpdateMutation,
+    uploadProgress,
+    firmwareError,
+    clearFirmwareError,
+  } = useFlash();
+  const uploading =
+    flashType === "firmware" &&
+    (firmwareUpdateMutation.isPending || isFlashing);
   const [checking, setChecking] = useState(false);
 
   /**
@@ -269,13 +447,14 @@ export default function FirmwareCandidates({
   // effect sets no state itself: the interval only moves the clock.
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
-    if (!install.isPending) return;
+    if (!installing) return;
     const tick = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(tick);
-  }, [install.isPending]);
-  const installElapsed = install.isPending
-    ? Math.max(0, Math.floor((now - install.submittedAt) / 1000))
-    : 0;
+  }, [installing]);
+  const installElapsed =
+    installing && installState
+      ? Math.max(0, Math.floor((now - installState.submittedAt) / 1000))
+      : 0;
 
   /**
    * The daemon answers a `refresh` at once and re-polls the sources behind
@@ -367,10 +546,21 @@ export default function FirmwareCandidates({
     onInstallRequestHandled?.();
   };
 
+  // One install at a time, however often "Continue" is pressed; see
+  // `singleFlight`. A second press used to start a second updater over the
+  // first.
+  const installGate = useRef(singleFlight());
+
   const doInstall = async () => {
     if (!confirming) return;
+    if (installing || !installGate.current.begin()) return;
     // Exactly what the dialog showed, and nothing re-read since.
     const snapshot = confirming;
+    // The dialog closes when it is answered, not when the board has: the
+    // board's progress and its answer are on the page, below the card's
+    // header, and a dialog held open over them hid both. See
+    // `InstallStatus`.
+    closeConfirm();
     try {
       await install.mutateAsync({
         source: snapshot.sourceId,
@@ -381,12 +571,14 @@ export default function FirmwareCandidates({
         localFile: snapshot.localFile,
       });
     } catch {
-      // The dialog stays open. The query client toasts the refusal with the
-      // daemon's reason ("already staged" and "no source called" need
-      // different next steps), under firmwareUpgrade.installFailed.
+      // The query client toasts the refusal with the daemon's reason
+      // ("already staged" and "no source called" need different next steps),
+      // under firmwareUpgrade.installFailed, and the status block on the page
+      // keeps it until it is dismissed.
       return;
+    } finally {
+      installGate.current.end();
     }
-    closeConfirm();
     await catalog.refetch();
   };
 
@@ -478,6 +670,32 @@ export default function FirmwareCandidates({
           </p>
         )}
 
+        <InstallStatus
+          installing={installing}
+          succeeded={installState?.status === "success"}
+          version={installVars?.version}
+          elapsed={installElapsed}
+          error={
+            installState?.status === "error" &&
+            installState.submittedAt !== dismissedAt &&
+            installState.error
+              ? bmcdMessage(installState.error)
+              : null
+          }
+          onDismiss={() => setDismissedAt(installState?.submittedAt ?? null)}
+        />
+        {/* The upload, for as long as its dialog is closed: the dialog shows
+          the same thing while it is open. */}
+        {!uploadOpen && (uploading || firmwareError) && (
+          <UploadStatus
+            busy={uploading}
+            message={statusMessage}
+            progress={uploadProgress}
+            error={firmwareError}
+            onDismiss={clearFirmwareError}
+          />
+        )}
+
         {/* An error is never rendered as "nothing new": a source that could
           not be read says so above the table, by name, rather than simply
           contributing no rows. */}
@@ -519,11 +737,11 @@ export default function FirmwareCandidates({
                   key={`${source.id}-${candidate.version}`}
                   source={source}
                   candidate={candidate}
-                  busy={install.isPending}
+                  busy={installing || uploading}
                   installing={
-                    install.isPending &&
-                    install.variables?.source === source.id &&
-                    install.variables?.version === candidate.version
+                    installing &&
+                    installVars?.source === source.id &&
+                    installVars?.version === candidate.version
                   }
                   onInstall={(c) => setPicked(snapshotFromRow(source, c))}
                 />
@@ -569,6 +787,12 @@ export default function FirmwareCandidates({
           isOpen={confirming !== null}
           onClose={closeConfirm}
           onConfirm={() => void doInstall()}
+          // Named for what they do. "Continue" and "Cancel" leave open what is
+          // being continued or cancelled, in a dialog that sits over a page
+          // with an update that may be staged; cancelling a staged update is
+          // its own button, with its own confirmation, in the slots panel.
+          confirmLabel={t("firmwareUpgrade.installConfirm")}
+          dismissLabel={t("firmwareUpgrade.installDismiss")}
           title={
             confirming
               ? t("firmwareUpgrade.confirmTitle", {
@@ -612,25 +836,6 @@ export default function FirmwareCandidates({
           }
         />
 
-        {install.isPending && (
-          <p role="status" aria-live="polite" className="text-sm text-warning">
-            {installElapsed > EXPECTED_INSTALL_SECONDS
-              ? t("firmwareUpgrade.installingOverdue", {
-                  version: install.variables?.version,
-                  elapsed: installElapsed,
-                })
-              : t("firmwareUpgrade.installingNow", {
-                  version: install.variables?.version,
-                  expected: EXPECTED_INSTALL_SECONDS,
-                  elapsed: installElapsed,
-                })}
-          </p>
-        )}
-        {install.isSuccess && (
-          <p className="text-sm text-warning">
-            {t("firmwareUpgrade.installStaged")}
-          </p>
-        )}
         <FirmwareSources open={sourcesOpen} onOpenChange={setSourcesOpen} />
         <FirmwareUploadDialog open={uploadOpen} onOpenChange={setUploadOpen} />
       </CardContent>

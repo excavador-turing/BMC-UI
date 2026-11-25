@@ -42,9 +42,12 @@ import { useSdCardPresenceQuery } from "@/lib/api/get";
  * refusal comes back as an error that stays in the dialog with an "Install
  * directly instead" beside it.
  *
- * The dialog does not close while the image is uploading or being written:
- * the progress lives here, and closing it would hide the only sign that the
- * board is busy.
+ * The dialog CAN be closed while the image is uploading or being written. The
+ * upload and the write that follows run in the page-wide flash state, not in
+ * this dialog, so closing it touches neither; the Firmware page shows the same
+ * progress beside the list while the dialog is shut. What both depend on is
+ * the page staying open: the upload is a request this tab is sending, and
+ * reloading or closing the tab ends it.
  */
 export default function FirmwareUploadDialog({
   open,
@@ -109,8 +112,10 @@ export default function FirmwareUploadDialog({
   };
 
   const close = (next: boolean) => {
-    if (!next) {
-      if (busy) return;
+    // While the board is busy, closing only hides this view: the page shows
+    // the progress, and an error that arrives later is shown there too, so
+    // neither is cleared here.
+    if (!next && !busy) {
       // Closing is dismissing: the error was about an attempt nobody is
       // looking at any more.
       clearFirmwareError();
@@ -128,7 +133,7 @@ export default function FirmwareUploadDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={close}>
-        <DialogContent className="sm:max-w-md" showCloseButton={!busy}>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
               {park
@@ -212,6 +217,13 @@ export default function FirmwareUploadDialog({
               )}
               {flashType === "firmware" && statusMessage && !firmwareError && (
                 <div className="text-sm">{statusMessage}</div>
+              )}
+              {/* What closing this window does and does not do, said where
+                the reader is deciding. */}
+              {busy && (
+                <p className="text-sm text-muted-foreground">
+                  {t("firmwareUpgrade.uploadCanClose")}
+                </p>
               )}
             </FieldGroup>
           </form>
