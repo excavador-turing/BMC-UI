@@ -489,6 +489,13 @@ const translations = {
       "On the BMC itself, /dev/ttyNodeN is the node's shared console, where N is the node number (1 to 4). It shows exactly what this page shows, and a local tool can type into it:",
     localSpeed:
       "The speed is set in the node's settings (Power Control, Edit), not by the tool.",
+    wrongSpeed:
+      "This looks like the wrong console speed. RK1 uses 1500000, CM4 and most others 115200.",
+    wrongSpeedNow: "This node is set to {{baud}} baud.",
+    wrongSpeedHow:
+      "Set the console speed for node {{nodeId}} under Power Control, Edit.",
+    wrongSpeedAction: "Open Power Control",
+    speedChange: "change",
   },
   usb: {
     header: "USB route",

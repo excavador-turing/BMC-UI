@@ -419,6 +419,13 @@ const translations = {
       "Op de BMC zelf is /dev/ttyNodeN de gedeelde console van de node, waarbij N het nodenummer is (1 tot 4). Hij toont precies wat deze pagina toont, en een lokaal hulpmiddel kan erin typen:",
     localSpeed:
       "De snelheid wordt ingesteld in de instellingen van de node (Stroomregeling, Bewerken), niet door het hulpmiddel.",
+    wrongSpeed:
+      "Dit lijkt de verkeerde consolesnelheid. RK1 gebruikt 1500000, CM4 en de meeste andere 115200.",
+    wrongSpeedNow: "Deze node staat ingesteld op {{baud}} baud.",
+    wrongSpeedHow:
+      "Stel de consolesnelheid van node {{nodeId}} in onder Stroomregeling, Bewerken.",
+    wrongSpeedAction: "Stroomregeling openen",
+    speedChange: "wijzigen",
   },
   usb: {
     header: "USB-route",

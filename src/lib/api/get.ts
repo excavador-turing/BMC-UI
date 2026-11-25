@@ -512,20 +512,37 @@ export function useSdCardPresenceQuery(enabled = true) {
   });
 }
 
+async function fetchNodeInfo(api: ReturnType<typeof useAxiosWithAuth>) {
+  const response = await api.get<APIResponse<NodeInfoResponse[]>>("/bmc", {
+    params: {
+      opt: "get",
+      type: "node_info",
+    },
+  });
+  return response.data.response[0].result;
+}
+
 export function useNodesTabData() {
   const api = useAxiosWithAuth();
 
   return useSuspenseQuery({
     queryKey: ["nodesTabData"],
-    queryFn: async () => {
-      const response = await api.get<APIResponse<NodeInfoResponse[]>>("/bmc", {
-        params: {
-          opt: "get",
-          type: "node_info",
-        },
-      });
-      return response.data.response[0].result;
-    },
+    queryFn: () => fetchNodeInfo(api),
+  });
+}
+
+/**
+ * The same node information for a page that can do without it: the Console
+ * shows each node's speed beside its picker, and a board that does not answer
+ * this must not take the terminal down with it.
+ */
+export function useNodeInfoQuery() {
+  const api = useAxiosWithAuth();
+
+  return useQuery({
+    queryKey: ["nodesTabData"],
+    queryFn: () => fetchNodeInfo(api),
+    retry: false,
   });
 }
 
