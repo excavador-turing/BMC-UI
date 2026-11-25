@@ -10,6 +10,20 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **The Console says when its output looks like the wrong speed, and shows each
+  node's speed.** A module whose console runs faster than the node's stored
+  speed shows replacement characters and control bytes, and nothing on the page
+  said why. The speed is a node setting under Power Control, Edit; a node with
+  none stored runs at 115200, which is wrong for an RK1 (1500000). When a high
+  share of the last 4 KiB of output is unreadable, a notice above the terminal
+  says "This looks like the wrong console speed. RK1 uses 1500000, CM4 and most
+  others 115200.", names the speed this node is set to, and links to Power
+  Control. The speed is also shown beside the reader state, with a link to
+  change it. Translated in every locale. Thanks to DingoDogz (Discord) for the
+  report.
+
 ## [v4.9.0] — 2026-11-25
 
 A button to cancel a staged firmware update, and two fixes. All three come from
